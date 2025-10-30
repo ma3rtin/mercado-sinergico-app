@@ -1,0 +1,103 @@
+<section class="max-w-7xl mx-auto px-4 py-12">
+
+    <div class="flex flex-col md:flex-row items-center justify-between gap-10 mb-20">
+        <div class="max-w-xl">
+            <h1 class="font-display text-3xl md:text-4xl font-bold mb-4">
+                Cambiemos el <span class="text-primary">"yo"</span> por el <span class="text-primary">"nosotros"</span>
+            </h1>
+            <p class="font-body text-gray-600 mb-6">
+                Unite a nuestra comunidad de compras en conjunto. Juntos compramos, juntos ahorramos.
+            </p>
+            <button [routerLink]="'/registrarse'" class="bg-accent shadow-md text-black font-semibold px-6 py-2 rounded-full border-black border
+                    hover:bg-accent-dark hover:scale-105 cursor-pointer">
+                ¡Quiero sumarme!
+            </button>
+        </div>
+        <div class="w-full md:w-1/2 h-64 bg-gray-200 flex items-center justify-center rounded-xl">
+            <span class="text-gray-500">[Imagen]</span>
+        </div>
+    </div>
+
+    <!-- ¿Cómo funciona? -->
+    <div class="text-center mb-16">
+        <h2 class="font-display text-2xl font-bold mb-6">¿Cómo funciona?</h2>
+        <p class="font-body text-gray-600 max-w-2xl mx-auto mb-8">
+            Te explicamos brevemente como funciona nuestro sistema.
+        </p>
+
+        <div class="flex flex-col md:flex-row items-stretch justify-center gap-12 md:gap-0">
+            <!-- Card 1 -->
+            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
+                font-bold flex items-center justify-center shadow-sm">1</div>
+                <h3 class="mt-8 font-body font-bold text-primary">
+                    Buscá tu paquete preferido cerca de tu zona.
+                </h3>
+                <p class="font-body text-sm text-gray-600 mt-3">
+                    Es fácil y rápido unirte a un paquete en tu zona.
+                </p>
+            </div>
+
+            <!-- Conector 1→2 -->
+            <span class="hidden md:block my-auto h-px w-24 bg-blue-300"></span>
+
+            <!-- Card 2 -->
+            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
+                font-bold flex items-center justify-center shadow-sm">2</div>
+                <h3 class="mt-8 font-body font-bold text-primary">
+                    Uní fuerzas con otros y completá tu paquete.
+                </h3>
+                <p class="font-body text-sm text-gray-600 mt-3">
+                    Colaborar es la clave para obtener mejores precios.
+                </p>
+            </div>
+
+            <!-- Conector 2→3 -->
+            <span class="hidden md:block my-auto h-px w-24 bg-blue-300"></span>
+
+            <!-- Card 3 -->
+            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
+                font-bold flex items-center justify-center shadow-sm">3</div>
+                <h3 class="mt-8 font-body font-bold text-primary">
+                    Una vez que se complete, disfrutá de tu compra.
+                </h3>
+                <p class="font-body text-sm text-gray-600 mt-3">
+                    Esperar es parte del proceso, ¡no te preocupes!
+                </p>
+            </div>
+        </div>
+
+        <button
+            class="mt-8 bg-primary shadow-md text-white px-6 py-2 rounded-full hover:bg-secondary hover:scale-105 cursor-pointer">
+            Conocer más
+        </button>
+    </div>
+
+    <!-- Paquetes por cerrarse -->
+    <app-carrusel [items]="paquetesPorCerrarse" tipo="paquete"></app-carrusel>
+
+    <!-- Preguntas frecuentes -->
+    <div class="bg-gray-100 rounded-xl p-6">
+        <h2 class="font-display text-2xl mb-4">Preguntas frecuentes</h2>
+        <div class="divide-y divide-gray-300">
+            <details class="py-4">
+                <summary class="font-semibold cursor-pointer">¿Cuándo pago?</summary>
+                <p class="text-sm text-gray-600 mt-2">Pagás una vez que el paquete alcanza la cantidad mínima.</p>
+            </details>
+            <details class="py-4">
+                <summary class="font-semibold cursor-pointer">¿Qué pasa si no se completa un paquete?</summary>
+                <p class="text-sm text-gray-600 mt-2">Se cancela sin compromiso y sin cobro.</p>
+            </details>
+            <details class="py-4">
+                <summary class="font-semibold cursor-pointer">¿Puedo comprar más de una unidad?</summary>
+                <p class="text-sm text-gray-600 mt-2">Sí, podés reservar varias unidades del mismo paquete.</p>
+            </details>
+            <details class="py-4">
+                <summary class="font-semibold cursor-pointer">¿Qué zonas hay?</summary>
+                <p class="text-sm text-gray-600 mt-2">Podés buscar por código postal o ciudad.</p>
+            </details>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,16 @@
+<button
+    [type]="type"
+    [class]="buttonClasses"  
+    [disabled]="disabled"
+    (click)="handleClick()"
+>
+    @if (!loading) {
+        @if (label) {
+            {{ label }}
+        } @else {
+            <ng-content></ng-content>
+        }
+    } @else {
+        <span class="animate-spin">⏳</span>
+    }
+</button>

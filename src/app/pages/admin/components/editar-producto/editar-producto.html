@@ -1,0 +1,341 @@
+<!-- editar-producto.html -->
+<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
+    <div class="max-w-6xl mx-auto">
+        <!-- Loading State -->
+        @if (isLoading && !productoOriginal) {
+        <div class="flex justify-center items-center py-12">
+            <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+            <span class="ml-3 text-gray-600">Cargando producto...</span>
+        </div>
+        }
+
+        @if (!isLoading || productoOriginal) {
+        <h1 class="text-2xl text-gray-900 mb-2 font-display">Editar producto</h1>
+
+        <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+            <!-- Información básica -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Nombre <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" formControlName="nombre" placeholder="Casco reversible con vidrio templado"
+                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary placeholder-gray-500 ' + 
+                                (isFieldInvalid('nombre') ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500')" />
+                        @if (isFieldInvalid('nombre')) {
+                        <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('nombre') }}</p>
+                        }
+                    </div>
+
+                    <!-- Marca -->
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Marca <span class="text-red-500">*</span>
+                        </label>
+                        <select formControlName="marca_id"
+                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
+                                (isFieldInvalid('marca_id') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
+                            <option value="">Elegí una marca</option>
+                            @for (marca of marcas; track marca.id_marca) {
+                            <option [value]="marca.id_marca">{{ marca.nombre }}</option>
+                            }
+                        </select>
+                        @if (isFieldInvalid('marca_id')) {
+                        <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('marca_id') }}</p>
+                        }
+                    </div>
+
+                    <!-- Categoría -->
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Categoría <span class="text-red-500">*</span>
+                        </label>
+                        <select formControlName="categoria_id"
+                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
+                                (isFieldInvalid('categoria_id') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
+                            <option value="">Elegí una categoría</option>
+                            @for (categoria of categorias; track categoria.id_categoria) {
+                            <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option>
+                            }
+                        </select>
+                        @if (isFieldInvalid('categoria_id')) {
+                        <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('categoria_id') }}</p>
+                        }
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="lg:col-span-2">
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Descripción
+                        </label>
+                        <textarea formControlName="descripcion" placeholder="Descripción de tu producto..." rows="4"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical placeholder-gray-500"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imágenes con Drag & Drop -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        Imágenes <span class="text-red-500">*</span>
+                    </h3>
+                    <p class="text-sm text-gray-600">
+                        Insertá las imágenes de tu producto. Podés arrastrarlas para reordenarlas.
+                    </p>
+                    @if (formSubmitted && !hasMainImage()) {
+                    <p class="mt-2 text-sm text-red-600 font-medium">
+                        ⚠️ La imagen principal es obligatoria
+                    </p>
+                    }
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                    @for (slot of imageSlots; track $index) {
+                    <div draggable="true" (dragstart)="onDragStart($index, $event)" (dragover)="onDragOver($event)"
+                        (drop)="onDrop($index, $event)" (dragend)="onDragEnd()"
+                        class="aspect-square rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden transition-all"
+                        [ngClass]="{
+                            'border-solid border-3 border-secondary-dark hover:shadow-md hover:shadow-secondary-dark hover:bg-yellow-100 bg-yellow-50': $index === 0 && !slot.preview,
+                            'bg-gray-100 border-2 border-dashed border-gray-300 hover:bg-gray-50': !slot.preview && $index !== 0,
+                            'border-2 border-blue-400 shadow-lg scale-105': draggedIndex === $index,
+                            'ring-2 ring-red-500': formSubmitted && $index === 0 && !slot.preview
+                        }">
+
+                        <!-- Imagen cargada -->
+                        @if (slot.preview) {
+                        <img [src]="slot.preview" alt="Imagen {{ $index + 1 }}"
+                            class="w-full h-full object-cover rounded-lg">
+
+                        <!-- Botón eliminar -->
+                        <button type="button" (click)="removeImage($index, $event)"
+                            class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-10 transition-colors pointer-events-auto">
+                            ×
+                        </button>
+
+                        <!-- Badge de imagen principal -->
+                        @if ($index === 0) {
+                        <span
+                            class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
+                            Principal
+                        </span>
+                        }
+
+                        <!-- Badge de imagen existente -->
+                        @if (slot.isExisting && !slot.file) {
+                        <span
+                            class="absolute bottom-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
+                            Guardada
+                        </span>
+                        }
+
+                        <!-- Indicador de arrastre -->
+                        <div
+                            class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-50 text-white text-xs px-2 py-1 rounded z-10">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                            </svg>
+                        </div>
+                        } @else {
+                        <!-- Placeholder -->
+                        <div class="text-center pointer-events-none">
+                            <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ $index === 0 ? 'Imagen principal' : 'Imagen adicional' }}
+                            </p>
+                        </div>
+                        }
+
+                        <!-- Input file -->
+                        <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                            (change)="onFileSelected($event, $index)"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0">
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Precio y Stock -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Precio -->
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Precio base del producto <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                            <input type="number" formControlName="precio" placeholder="4000"
+                                [class]="'w-full pl-8 pr-4 py-3 border rounded-lg focus:ring-2 placeholder-gray-500 ' +
+                                    (isFieldInvalid('precio') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
+                        </div>
+                        @if (isFieldInvalid('precio')) {
+                        <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('precio') }}</p>
+                        }
+                    </div>
+
+                    <!-- Stock -->
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">
+                            Stock
+                        </label>
+                        <input type="number" formControlName="stock" placeholder="Cantidad disponible"
+                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 placeholder-gray-500 ' +
+                                (isFieldInvalid('stock') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
+                        <p class="mt-1 text-sm text-gray-500">
+                            Si dejás el campo vacío se considera como stock ilimitado
+                        </p>
+                        @if (isFieldInvalid('stock')) {
+                        <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('stock') }}</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dimensiones y peso -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Dimensiones y peso</h3>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">Ancho</label>
+                        <div class="relative">
+                            <input type="number" formControlName="ancho" placeholder="10"
+                                class="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500">
+                            <span
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">CM</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">Alto</label>
+                        <div class="relative">
+                            <input type="number" formControlName="altura" placeholder="10"
+                                class="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500">
+                            <span
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">CM</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">Profundidad</label>
+                        <div class="relative">
+                            <input type="number" formControlName="profundidad" placeholder="12"
+                                class="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500">
+                            <span
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">CM</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-lg font-medium text-black mb-2">Peso</label>
+                        <div class="relative">
+                            <input type="number" formControlName="peso" placeholder="5"
+                                class="w-full pr-12 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500">
+                            <span
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">KG</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plantillas -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Plantillas</h3>
+                        <p class="text-sm text-gray-600">Plantillas para tus productos</p>
+                    </div>
+                    <app-button type="button" variant="primary" size="sm" (click)="openCreateModal()"
+                        class="mt-4 sm:mt-0">
+                        + Crear plantilla
+                    </app-button>
+                </div>
+
+                <!-- Lista de plantillas -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    @for (template of plantillas; track template.id) {
+                    <app-button type="button" variant="tertiary" [selected]="selectedTemplate?.id === template.id"
+                        (click)="selectTemplate(template)">
+                        {{ template.nombre }}
+                    </app-button>
+                    }
+                </div>
+
+                <!-- Atributos de la plantilla seleccionada -->
+                @if (selectedTemplate) {
+                <div class="space-y-6">
+                    <p class="text-sm text-gray-600 mb-4">Esta plantilla contiene los siguientes atributos:</p>
+
+                    @for (caracteristica of selectedTemplate.caracteristicas; track caracteristica.id) {
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900 mb-3 capitalize">
+                            {{ caracteristica.nombre }}
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            @for (opcion of caracteristica.opciones; track opcion.id) {
+                            <label class="inline-flex items-center">
+                                <input type="checkbox"
+                                    [checked]="isAttributeSelected(caracteristica.nombre, opcion.nombre)"
+                                    (change)="onAttributeChange(caracteristica.nombre, opcion.nombre, $any($event.target).checked)"
+                                    class="sr-only">
+                                <span
+                                    [class]="'px-3 py-1.5 text-sm rounded-full cursor-pointer transition-colors ' + 
+                                                (isAttributeSelected(caracteristica.nombre, opcion.nombre) ? 
+                                                    'bg-yellow-100 text-secondary-dark border-2 border-secondary-dark' : 
+                                                    'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200')">
+                                    {{ opcion.nombre }}
+                                </span>
+                            </label>
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-end">
+                <app-button type="button" variant="tertiary" size="lg" class="w-full sm:w-auto" (click)="cancelEdit()">
+                    Cancelar
+                </app-button>
+
+                <app-button type="submit" variant="primary" size="lg" [disabled]="isLoading" class="w-full sm:w-auto">
+                    @if (isLoading) {
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    Actualizando...
+                    } @else {
+                    Actualizar producto
+                    }
+                </app-button>
+            </div>
+        </form>
+
+        <!-- Modal para crear plantilla -->
+        <app-crear-plantilla-modal [isOpen]="isCreateModalOpen" [plantillaToEdit]="plantillaToEdit"
+            (close)="closeCreateModal()" (plantillaCreated)="onPlantillaCreated($event)">
+        </app-crear-plantilla-modal>
+        }
+    </div>
+</div>

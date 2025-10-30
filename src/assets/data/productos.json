@@ -1,0 +1,195 @@
+[
+    {
+        "id": 1,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco2.jpeg",
+            "assets/images/casco3.jpeg",
+            "assets/images/casco4.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 2,
+        "nombre": "Smartphone X1",
+        "categoria": "Celulares",
+        "imagenes": [
+            "assets/images/celular-2.avif",
+            "assets/images/celular-2.avif",
+            "assets/images/celular-2.avif",
+            "assets/images/celular-2.avif"
+        ],
+        "descripcion": "Smartphone gama media con cámara de alta resolución",
+        "precioBase": 120000,
+        "atributos": {
+            "pantalla": "6.5 pulgadas AMOLED",
+            "bateria": "5000 mAh",
+            "ram": "8 GB",
+            "almacenamiento": [
+                "128 GB",
+                "256 GB"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 3,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco1.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 5,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco1.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 6,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco1.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 7,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco1.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    },
+    {
+        "id": 8,
+        "nombre": "Casco Deportivo LS2",
+        "categoria": "Cascos",
+        "imagenes": [
+            "assets/images/casco1.jpeg",
+            "assets/images/casco1.jpeg"
+        ],
+        "descripcion": "Casco liviano y resistente para ciclismo",
+        "precioBase": 15000,
+        "atributos": {
+            "talle": [
+                "S",
+                "M",
+                "L"
+            ],
+            "color": [
+                "Rojo",
+                "Negro",
+                "Blanco"
+            ],
+            "material": [
+                "Fibra de carbono",
+                "Policarbonato"
+            ]
+        },
+        "atributosPersonalizados": []
+    }
+]

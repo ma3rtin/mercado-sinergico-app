@@ -1,0 +1,25 @@
+<nav class="hidden md:block bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 md:px-6">
+        <ul class="flex items-center justify-center gap-12 py-3 text-black">
+            <li>
+                <a routerLink="/paquetes" class="hover:text-secondary transition-colors duration-200">Paquetes</a>
+            </li>
+            <li>
+                <a routerLink="/faq" class="hover:text-secondary transition-colors duration-200">Preguntas
+                    frecuentes</a>
+            </li>
+            <li>
+                <a routerLink="/contacto" class="hover:text-secondary transition-colors duration-200">Contacto</a>
+            </li>
+
+            @if (isLoggedIn) {
+            <li>
+                <button (click)="signOut()"
+                    class="text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
+                    Cerrar sesión
+                </button>
+            </li>
+            }
+        </ul>
+    </div>
+</nav>

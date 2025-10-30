@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+/* 🔹 Flechas — posicionadas absolutamente dentro del contenedor */
+app-flecha-carrusel {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+}
+
+/* 👈 Cambiamos el offset negativo por un pequeño valor interno */
+app-flecha-carrusel[direction='left'] {
+  left: 0.5rem;
+}
+
+app-flecha-carrusel[direction='right'] {
+  right: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  app-flecha-carrusel[direction='left'] {
+    left: -1.5rem;
+  }
+  app-flecha-carrusel[direction='right'] {
+    right: -1.5rem;
+  }
+}
+
+
+/* 🔹 Evita que el hover se corte, sin crear scroll horizontal */
+section {
+  overflow-x: clip; /* 🔥 clave para eliminar el borde blanco */
+}
+
+/* 🔹 Scrollbar invisible (por si tenés desplazamiento interno) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,33 @@
+<div class="w-64 sm:w-72 md:w-80 bg-white border border-gray-100 rounded-xl 
+         shadow-[0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.15)]
+         transition-all duration-300 cursor-pointer overflow-hidden transform hover:-translate-y-1 hover:scale-[1.01]">
+
+    <!-- Imagen principal -->
+    <div class="w-full h-44 sm:h-56 overflow-hidden">
+        <img [src]="imagen" [alt]="nombre"
+            class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+    </div>
+
+    <!-- Contenido -->
+    <div class="p-4 text-center">
+        <!-- Nombre -->
+        <p class="font-semibold text-sm sm:text-base text-gray-800 mb-2">
+            {{ nombre }}
+        </p>
+
+        <!-- Estado -->
+        <p class="text-xs sm:text-sm font-medium mb-2" [ngClass]="{
+        'text-green-600': estado === 'Abierto',
+        'text-red-500': estado === 'Cerrado',
+        'text-yellow-500': estado === 'Pendiente'
+      }">
+            {{ estado }}
+        </p>
+
+        <!-- Info de unidades -->
+        <div class="flex items-center justify-center gap-1 text-gray-700 text-xs sm:text-sm">
+            <i class="fa-solid fa-boxes-stacked text-gray-500 text-[13px]"></i>
+            <span>{{ cantidadActual }}/{{ cantidadMaxima }}</span>
+        </div>
+    </div>
+</div>

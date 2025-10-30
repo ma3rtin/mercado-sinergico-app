@@ -1,0 +1,88 @@
+<!-- Contenedor general -->
+<div class="min-h-[80vh] flex justify-center pt-6 pb-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div class="w-full max-w-3xl bg-white p-6 sm:p-8 rounded-2xl shadow-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-900 font-display">
+            Publicar paquete
+        </h1>
+        <hr class="border-gray-300 mb-6" />
+
+        <!-- Buscador de paquete base -->
+        <div class="mb-6 relative" #scrollContainer>
+            <label class="block text-gray-700 font-body mb-1">Paquete base</label>
+
+            <input #inputBusqueda type="text" [(ngModel)]="busqueda" (input)="buscarPaquetes()" (focus)="abrirLista()"
+                placeholder="Buscar paquete base..."
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600" />
+
+            <!-- Lista desplegable -->
+            @if (mostrandoResultados && resultadosBusqueda.length > 0) {
+            <ul
+                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
+                @for (paquete of resultadosBusqueda; track paquete.id_paquete) {
+                <li (click)="seleccionarPaquete(paquete)" class="p-2.5 hover:bg-gray-100 cursor-pointer">
+                    {{ paquete.nombre }}
+                </li>
+                }
+            </ul>
+            }
+
+            <!-- Sin resultados -->
+            @if (mostrandoResultados && resultadosBusqueda.length === 0) {
+            <div
+                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
+                No se encontraron resultados.
+            </div>
+            }
+        </div>
+
+        <!-- Estado -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-body mb-1">Estado</label>
+            <select title="Elegí un estado" [(ngModel)]="estadoSeleccionado"
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+                <option value="" disabled selected hidden>Elegí un estado</option>
+                @for (estado of estados; track estado.id_estado) {
+                <option [value]="estado.id_estado">{{ estado.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <!-- Zona -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-body mb-1">Zona</label>
+            <select title="Elegí una zona" [(ngModel)]="zonaSeleccionada"
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+                <option value="" disabled selected hidden>Elegí una zona</option>
+                @for (zona of zonas; track zona.id_zona) {
+                <option [value]="zona.id_zona">{{ zona.nombre }}</option>
+                }
+            </select>
+        </div>
+
+        <!-- Fechas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div>
+                <label class="block text-gray-700 font-body mb-1">Fecha de inicio</label>
+                <input title="Fecha de inicio" [(ngModel)]="fechaInicio" type="date"
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+            </div>
+            <div>
+                <label class="block text-gray-700 font-body mb-1">Fecha de fin</label>
+                <input title="Fecha de fin" [(ngModel)]="fechaFin" type="date"
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+            </div>
+        </div>
+
+        <!-- Cantidad de productos -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-body mb-1">Cantidad total de productos</label>
+            <input [(ngModel)]="cantProductos" type="number" min="1" placeholder="Ejemplo: 30"
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
+        </div>
+
+        <!-- Botón -->
+        <div class="flex justify-center">
+            <app-button variant="primary" label="Publicar paquete" (buttonClick)="publicarPaquete()"></app-button>
+        </div>
+    </div>
+</div>

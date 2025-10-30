@@ -1,0 +1,227 @@
+<div class="container mx-auto px-4 py-8 font-body">
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="flex flex-col items-center justify-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4"></div>
+        <p class="text-gray-600 text-lg">Cargando producto...</p>
+    </div>
+    }
+
+    <!-- Contenido del producto -->
+    @else if (producto) {
+    <!-- HEADER del producto con galería -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
+
+        <!-- Visor de imágenes (lado izquierdo) -->
+        <div class="order-2 lg:order-1">
+            <app-visor-imagenes [producto]="producto" [altText]="producto.nombre">
+            </app-visor-imagenes>
+        </div>
+
+        <!-- Info principal (lado derecho) -->
+        <div class="order-1 lg:order-2">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <!-- Título -->
+                <h1 class="text-3xl md:text-4xl text-gray-800 mb-4 font-display">
+                    {{ producto.nombre }}
+                </h1>
+
+                <!-- Marca y Categoría -->
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                    @if (producto.marca) {
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                        {{ producto.marca.nombre }}
+                    </span>
+                    }
+                    @if (producto.categoria) {
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                        {{ producto.categoria.nombre }}
+                    </span>
+                    }
+                </div>
+
+                <!-- Precio y descuento -->
+                <div class="mb-6">
+                    <div class="flex items-baseline gap-3 mb-3">
+                        <span class="text-4xl font-bold text-gray-900">
+                            {{ formatPrice(producto.precio) }}
+                        </span>
+                    </div>
+
+                    <!-- Badges informativos -->
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm text-green-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Envío gratis a todo el país</span>
+                        </div>
+
+                        <div class="inline-flex items-center gap-2 bg-primary text-white text-sm px-4 py-2 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            <span>El precio se descuenta en base al paquete</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                @if (producto.descripcion) {
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-900 mb-2 text-lg">Descripción:</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        {{ producto.descripcion }}
+                    </p>
+                </div>
+                }
+
+                <!-- Características del producto -->
+                @if (getCaracteristicas().length > 0) {
+                <div class="mb-6">
+                    <h3 class="font-semibold text-gray-900 mb-3 text-lg">Características:</h3>
+                    <ul class="space-y-2">
+                        @for (caracteristica of getCaracteristicas(); track $index) {
+                        <li class="flex items-start gap-3 text-gray-700">
+                            <span class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                            <div>
+                                <span class="font-medium">{{ caracteristica.label }}:</span>
+                                <span class="ml-1">{{ caracteristica.value }}</span>
+                            </div>
+                        </li>
+                        }
+                    </ul>
+                </div>
+                }
+
+                <!-- Stock Badge -->
+                @if (producto.stock !== undefined) {
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    @if (producto.stock > 0) {
+                    <div class="flex items-center gap-2 text-green-600">
+                        <!--<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                            </path>
+                        </svg>
+                        <span class="font-semibold">Disponible en stock ({{ producto.stock }} unidades)</span>-->
+                    </div>
+                    } @else {
+                    <div class="flex items-center gap-2 text-red-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        <span class="font-semibold">Sin stock disponible</span>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Título paquetes -->
+    <div class="mt-16 mb-8">
+        <h2 class="text-center font-bold text-3xl md:text-4xl text-gray-800">
+            Elegí a qué paquete sumarte
+        </h2>
+        <p class="text-center text-gray-600 mt-2">
+            Comprá en grupo y ahorrá más
+        </p>
+    </div>
+
+    <!-- Grid de paquetes -->
+    @if (paquetes.length > 0) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @for (paquete of paquetes; track paquete.id_paquete_publicado) {
+        <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+            (click)="seleccionarPaquete(paquete.id_paquete_publicado ?? 0)">
+
+            <!-- Imagen del paquete -->
+            <div class="relative h-48 bg-gray-100">
+                @if (paquete.paqueteBase?.imagen_url) {
+                <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre || 'Paquete sin imagen'"
+                    class="w-full h-full object-contain p-4" (error)="onPaqueteImageError($event)">
+                } @else {
+                <div class="w-full h-full flex items-center justify-center">
+                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                }
+
+                <!-- Badge de estado -->
+                <span
+                    [class]="'absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg ' + getPaqueteStatusClass(paquete.estado?.nombre || 'Pendiente')">
+                    {{ paquete.estado?.nombre || 'Pendiente' }}
+                </span>
+            </div>
+
+            <!-- Info del paquete -->
+            <div class="p-4">
+                <h4 class="font-bold text-gray-800 mb-2 text-lg line-clamp-2">
+                    {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+                </h4>
+
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {{ paquete.paqueteBase?.descripcion || 'Sin descripción' }}
+                </p>
+
+                <!-- Información adicional -->
+                <div class="flex flex-col gap-2 text-sm text-gray-600 border-t pt-3">
+                    @if (paquete.cant_productos) {
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                        <span>{{ paquete.cant_productos }} participantes</span>
+                    </div>
+                    }
+
+                    @if (paquete.zona?.nombre) {
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span class="truncate">{{ paquete.zona?.nombre }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    } @else {
+    <div class="text-center py-12 bg-white rounded-xl shadow-md">
+        <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+            </path>
+        </svg>
+        <p class="text-gray-600 text-lg">No hay paquetes disponibles en este momento</p>
+    </div>
+    }
+    }
+
+    <!-- Error State -->
+    @else {
+    <div class="text-center py-12 bg-white rounded-xl shadow-md">
+        <svg class="w-20 h-20 mx-auto text-red-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-gray-600 text-lg">No se pudo cargar el producto</p>
+    </div>
+    }
+</div>

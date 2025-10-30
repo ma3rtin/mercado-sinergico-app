@@ -1,0 +1,13 @@
+<button (click)="arrowClick.emit()"
+    class="absolute z-10 flex items-center justify-center rounded-full transition transform hover:scale-110" [ngClass]="[
+    positionClasses,
+    disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'
+  ]" [disabled]="disabled">
+    <div
+        class="flex items-center justify-center w-12 h-12 bg-yellow-400 shadow-lg hover:bg-yellow-300 active:bg-yellow-500 rounded-full">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="black"
+            class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" [attr.d]="iconPath" />
+        </svg>
+    </div>
+</button>

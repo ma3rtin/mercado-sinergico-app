@@ -1,0 +1,38 @@
+<aside class="fixed left-0 top-0 z-50 h-dvh w-72 bg-white shadow-xl">
+    <div class="flex items-center justify-between px-4 py-3 border-b">
+        <span class="font-semibold">Menú</span>
+        <button (click)="closeDrawer.emit()" aria-label="Cerrar menú">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <nav class="px-2 py-2">
+        <ul class="flex flex-col">
+            <li>
+                <button type="button" class="w-full text-left block px-3 py-3 rounded-md hover:bg-gray-100"
+                    (click)="openSearch.emit()">
+                    Buscar
+                </button>
+            </li>
+
+            <li><a routerLink="/paquetes" class="block px-3 py-3 rounded-md hover:bg-gray-100">Paquetes</a></li>
+            <li><a routerLink="/faq" class="block px-3 py-3 rounded-md hover:bg-gray-100">Preguntas frecuentes</a></li>
+            <li><a routerLink="/contacto" class="block px-3 py-3 rounded-md hover:bg-gray-100">Contacto</a></li>
+
+            <li>
+                <hr class="my-2 border-t border-gray-300" />
+            </li>
+
+            @if (isLoggedIn) {
+            <li>
+                <button (click)="signOut.emit()"
+                    class="w-full text-left block px-3 py-3 rounded-md hover:bg-gray-100 text-red-600 font-semibold cursor-pointer">
+                    Cerrar sesión
+                </button>
+            </li>
+            }
+        </ul>
+    </nav>
+</aside>

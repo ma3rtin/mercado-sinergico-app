@@ -1,0 +1,93 @@
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+@import "tailwindcss";
+@import 'ngx-toastr/toastr';
+
+@font-face {
+    font-family: 'Righteous';
+    src: url('/assets/fonts/Righteous.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('/assets/fonts/Poppins.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@theme {
+    /*celeste*/
+    --color-primary: #71A8D9;
+
+    /*azul*/
+    --color-secondary: #2E608C;
+
+    /*azul oscuro*/
+    --color-primary-dark: #4b87bd;
+
+    /*naranja*/
+    --color-secondary-dark: #D28509;
+
+    /*celeste claro*/
+    --color-primary-light: #D9E9F6;
+
+    /*azul claro*/
+    --color-secondary-light: #E6F0F8;
+
+
+    --color-accent: #FFD562;
+    --color-accent-dark: #FFB800;
+
+    --font-display: "Righteous", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+p {
+    font-family: var(--font-body);
+}
+
+:root {
+    --color-tag: linear-gradient(to right, #71A8D9, #D9D9D9);
+}
+
+.colors-d28509 {
+    --color-d28509: #D28509;
+}
+
+/* ✅ Toast de éxito */
+.toast-success {
+    background-color: #4CAF50 !important;
+    /* verde esmeralda */
+    color: white !important;
+    border: 1px solid #2E7D32 !important;
+    /* verde más oscuro para contraste */
+}
+
+/* ✅ Toast de error */
+.toast-error {
+    font-size: 1.2rem !important;
+    background-color: #B92905 !important;
+    background-image: none !important;
+    color: black !important;
+    border: 1px solid black !important;
+}
+
+/* ✅ Toast de warning */
+.toast-warning {
+    background-color: #D28509 !important;
+    background-image: none !important;
+    color: black !important;
+    border: 1px solid #A66A07 !important;
+}
+
+/* ✅ Toast de info */
+.toast-info {
+    background-color: #2E608C !important;
+    background-image: none !important;
+    color: white !important;
+    border: 1px solid #1B3A58 !important;
+}
+

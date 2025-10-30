@@ -1,0 +1,117 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-50 flex items-center justify-center font-body">
+
+    <!-- Fondo oscuro -->
+    <div class="fixed inset-0 bg-black/60" (click)="closeModal()"></div>
+
+    <!-- Modal -->
+    <div
+        class="inline-block align-bottom bg-white rounded-lg px-6 py-6 my-8 text-left shadow-xl transform transition-all w-full max-w-2xl z-50 sm:my-8">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-display text-gray-900" id="modal-title">
+                {{isEditMode ? 'Editar Plantilla' : 'Crear Plantilla'}}
+            </h3>
+            <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Contenido scrollable -->
+        <div class="max-h-[70vh] overflow-y-auto pr-2">
+
+            <!-- Nombre de la plantilla -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                    Nombre de la plantilla
+                </label>
+                <input type="text" [(ngModel)]="plantilla.nombre" placeholder="Ingresá el nombre de tu plantilla..."
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+            </div>
+
+            <!-- Características -->
+            <div class="space-y-6">
+                @for (caracteristica of plantilla.caracteristicas; track caracteristica; let caracIndex = $index) {
+                <div class="p-4 border-2 border-dashed border-gray-200 rounded-lg">
+
+                    <!-- Nombre característica -->
+                    <div class="flex items-center justify-between mb-4">
+                        <input type="text" [(ngModel)]="plantilla.caracteristicas[caracIndex].nombre"
+                            placeholder="Ingresá el nombre de la característica..."
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                        <button (click)="removeCaracteristica(caracIndex)"
+                            class="ml-3 text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Opciones -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        @for (opcion of caracteristica.opciones; track opcion; let opcionIndex = $index) {
+                        <div class="relative">
+                            <input type="text"
+                                [(ngModel)]="plantilla.caracteristicas[caracIndex].opciones[opcionIndex].nombre"
+                                placeholder="Opción {{ opcionIndex + 1 }}"
+                                class="block w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                            <button (click)="removeOption(caracIndex, opcionIndex)"
+                                class="absolute right-2 top-2 text-gray-400 hover:text-red-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Botón agregar opción -->
+                    <div class="flex justify-end">
+                        <app-button variant="secondary" (click)="addOption(caracIndex)"
+                            >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Agregar opción
+                        </app-button>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Botón agregar característica -->
+            @if (canAddMoreCaracteristicas()) {
+            <div class="mt-6">
+                <app-button variant="tertiary" (click)="addCaracteristica()"
+                    >
+                    + Agregar característica
+                </app-button>
+            </div>
+            }
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+            <button (click)="closeModal()"
+                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                Cancelar
+            </button>
+            <h2 class="text-xl font-semibold">
+                {{ isEditMode ? '' : ''}}
+            </h2>
+
+            <app-button variant="primary" (buttonClick)="guardarPlantilla()">
+                {{ isEditMode ? 'Guardar Cambios' : 'Crear Plantilla' }}
+            </app-button>
+
+        </div>
+    </div>
+</div>
+}

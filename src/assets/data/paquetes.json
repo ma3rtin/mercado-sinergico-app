@@ -1,0 +1,88 @@
+[
+    {
+        "id": 1,
+        "nombre": "Paquete cascos HJC",
+        "descripcion": "Cascos de motocicleta HJC de alta calidad con certificación internacional",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Pendiente",
+        "productos": 10,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 12,
+        "precioPromedio": 45000
+    },
+    {
+        "id": 2,
+        "nombre": "Paquete cascos HJC",
+        "descripcion": "Segunda opcion de cascos HJC para diferentes modelos",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Cerrado",
+        "productos": 155,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 15,
+        "precioPromedio": 42000
+    },
+    {
+        "id": 3,
+        "nombre": "Paquete cascos HJC",
+        "descripcion": "Tercera opcion de cascos HJC para diferentes modelos",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Pendiente",
+        "productos": 155,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 15,
+        "precioPromedio": 42000
+    },
+    {
+        "id": 4,
+        "nombre": "Paquete cascos LS2",
+        "descripcion": "Cuarta opcion de cascos HJC para diferentes modelos",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Pendiente",
+        "productos": 60,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 15,
+        "precioPromedio": 42000
+    },
+    {
+        "id": 5,
+        "nombre": "Paquete cascos LS2",
+        "descripcion": "Quinta opcion de cascos LS2 para diferentes modelos",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Abierto",
+        "productos": 80,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 15,
+        "precioPromedio": 42000
+    },
+    {
+        "id": 6,
+        "nombre": "Paquete ruedas LS2",
+        "descripcion": "Opcion de ruedas LS2 para diferentes modelos",
+        "categoria": "Automotriz",
+        "imagen": "/assets/images/placeholder-product.png",
+        "estado": "Abierto",
+        "productos": 60,
+        "maxProductos": 155,
+        "zona": "Zona Norte",
+        "fechaCreacion": "2023-01-01",
+        "participantes": 15,
+        "precioPromedio": 42000
+    }
+
+
+]

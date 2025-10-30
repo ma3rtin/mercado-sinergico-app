@@ -1,0 +1,148 @@
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-md mt-6 font-[Poppins]">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-900">Crear paquete base</h1>
+    <hr class="border-gray-300 mb-6" />
+
+    <!-- Tipo de paquete -->
+    <div class="flex justify-center gap-6 mb-6">
+        <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-md border-2 border-[#0C1C56] text-[#0C1C56] hover:bg-[#0C1C56]/5 font-medium transition shadow-sm">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Paquete energético</span>
+        </button>
+        <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-md border-2 border-[#E6A200] text-[#E6A200] font-medium transition shadow-[0_0_5px_#E6A20050] bg-[#FFF8E5] hover:bg-[#FFE9A6]">
+            <i class="fa-solid fa-handshake text-black"></i>
+            <span class="text-black">Paquete sinérgico</span>
+        </button>
+    </div>
+
+    <!-- Nombre -->
+    <div class="mb-5">
+        <label class="block text-gray-700 font-medium mb-1">Nombre</label>
+        <input [(ngModel)]="nombre" type="text" placeholder="Ingresá el nombre del paquete"
+            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
+    </div>
+
+    <!-- Descripción -->
+    <div class="mb-5">
+        <label class="block text-gray-700 font-medium mb-1">Descripción</label>
+        <textarea [(ngModel)]="descripcion" rows="3" placeholder="Ingresá una breve descripción"
+            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400"></textarea>
+    </div>
+
+    <!-- Marca -->
+    <div class="mb-6">
+        <label class="block text-gray-700 font-medium mb-1">Marca</label>
+        <select [(ngModel)]="marcaSeleccionada"
+            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+            <option value="" disabled selected hidden>Elegí una marca</option>
+            @for (marca of marcas; track marca.id_marca) {
+            <option [value]="marca.id_marca">{{ marca.nombre }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- Categoría -->
+    <div class="mb-6">
+        <label class="block text-gray-700 font-medium mb-1">Categoría</label>
+        <select [(ngModel)]="categoriaSeleccionada"
+            class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+            <option value="" disabled selected hidden>Elegí una categoría</option>
+            @for (categoria of categorias; track categoria.id_categoria) {
+            <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option>
+            }
+        </select>
+    </div>
+
+    <!-- Imagen -->
+    <div class="mb-6">
+        <label class="block text-gray-700 font-medium mb-1">Imagen de portada</label>
+        <p class="text-sm text-gray-500 mb-2">Subí una imagen (máx. 200 KB)</p>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)"
+            class="w-full border border-dashed border-gray-400 rounded-lg p-3 hover:border-blue-400 cursor-pointer" />
+        @if (imagenError) {
+        <p class="text-red-500 text-sm mt-1">{{ imagenError }}</p>
+        }
+    </div>
+
+    <!-- Productos -->
+    <div class="mb-6" #buscadorContainer>
+        <h2 class="font-semibold text-gray-800 mb-3">Agregar productos al paquete</h2>
+
+        <!-- Buscador -->
+        <div class="relative mb-4">
+            <input #inputBusqueda [(ngModel)]="busquedaProducto" (input)="buscarProductos()" (focus)="reabrirBusqueda()"
+                type="text" placeholder="Buscar productos..."
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
+            <i class="fa-solid fa-magnifying-glass absolute right-4 top-3.5 text-gray-400"></i>
+
+            <!-- Resultados del buscador -->
+            @if (resultadosBusqueda.length > 0) {
+            <ul #scrollContainer
+                class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-60 overflow-y-auto shadow-md transition-opacity duration-300 ease-in-out opacity-100">
+                @for (producto of resultadosBusqueda; track producto.id_producto) {
+                <li (click)="agregarProducto(producto)"
+                    class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 hover:opacity-80">
+                    {{ producto.nombre }} - ${{ producto.precio }}
+                </li>
+                }
+
+                <!-- Sentinel -->
+                <div #sentinel id="sentinel" class="h-6 bg-transparent"></div>
+
+                <!-- Loading visual -->
+                @if (cargando && resultadosBusqueda.length === 0) {
+                <p
+                    class="absolute z-10 bg-white border border-gray-200 rounded-lg mt-1 w-full p-3 text-center text-gray-500">
+                    Cargando productos...
+                </p>
+                }
+
+            </ul>
+            }
+
+            <!-- 🔹 Mensaje si no hay resultados -->
+            @if (sinResultados && !cargando) {
+            <p
+                class="absolute z-10 bg-white border border-gray-200 rounded-lg mt-1 w-full p-3 text-center text-gray-500">
+                No se encontraron resultados.
+            </p>
+            }
+        </div>
+
+        <!-- Lista de productos seleccionados -->
+        <div class="border rounded-lg p-4">
+            @if (productosSeleccionados.length > 0) {
+            @for (p of productosSeleccionados; track p.id_producto; let i = $index) {
+            <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-none">
+                <div class="flex items-center gap-3">
+                    <img [src]="p.imagen_url || '/assets/imgs/default-product.jpg'" alt="producto"
+                        class="w-10 h-10 object-cover rounded-md" />
+                    <span class="text-gray-700">{{ p.nombre }}</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="font-semibold text-gray-800">${{ p.precio }}</span>
+                    <button (click)="eliminarProducto(i)" class="text-red-500 hover:text-red-700 transition"
+                        title="Eliminar producto">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            }
+            } @else {
+            <p class="text-gray-500 text-sm text-center py-4">
+                No hay productos agregados.
+            </p>
+            }
+        </div>
+    </div>
+
+    <!-- Botón -->
+    <div class="flex justify-center">
+        <button (click)="crearPaquete()"
+            class="bg-amber-400 hover:bg-amber-500 text-gray-800 px-6 py-2 rounded-md font-semibold transition">
+            Crear paquete base
+        </button>
+    </div>
+</div>

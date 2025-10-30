@@ -1,0 +1,202 @@
+<div class="min-h-screen flex">
+    <!-- Columna izquierda - Formulario -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white shadow-md">
+        <div class="w-full max-w-2xl">
+            
+            <!-- Título -->
+            <h1 class="font-display text-4xl lg:text-4xl text-gray-900 mb-2">
+                Registrarse
+            </h1>
+            <p class="text-gray-600 font-body mb-8">Creá tu cuenta para comenzar</p>
+
+            <!-- Formulario -->
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+                <!-- Grid de 2 columnas para campos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+                    <!-- Nombre -->
+                    <div>
+                        <label for="nombre" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Nombre <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="nombre" 
+                            type="text" 
+                            formControlName="nombre" 
+                            placeholder="Ingresá tu nombre"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                        @if (submitted && f['nombre'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">El nombre es obligatorio</p>
+                        }
+                        @if (submitted && f['nombre'].errors?.['minlength']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Mínimo 2 caracteres</p>
+                        }
+                        @if (submitted && f['nombre'].errors?.['pattern']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Solo letras y espacios</p>
+                        }
+                    </div>
+
+                    <!-- Apellido -->
+                    <div>
+                        <label for="apellido" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Apellido <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="apellido" 
+                            type="text" 
+                            formControlName="apellido" 
+                            placeholder="Ingresá tu apellido"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                        @if (submitted && f['apellido'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">El apellido es obligatorio</p>
+                        }
+                        @if (submitted && f['apellido'].errors?.['minlength']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Mínimo 2 caracteres</p>
+                        }
+                        @if (submitted && f['apellido'].errors?.['pattern']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Solo letras y espacios</p>
+                        }
+                    </div>
+
+                    <!-- Email -->
+                    <div class="md:col-span-2">
+                        <label for="email" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Mail <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="email" 
+                            type="email"
+                            formControlName="email" 
+                            placeholder="Ej: ejemplo@gmail.com"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                        @if (submitted && f['email'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">El mail es obligatorio</p>
+                        }
+                        @if (submitted && f['email'].errors?.['email']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Formato de email inválido</p>
+                        }
+                    </div>
+
+                    <!-- Fecha de nacimiento -->
+                    <div>
+                        <label for="fecha_nac" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Fecha de nacimiento <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="fecha_nac" 
+                            type="date" 
+                            formControlName="fecha_nac"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all"
+                        />
+                        @if (submitted && f['fecha_nac'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">La fecha de nacimiento es obligatoria</p>
+                        }
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div>
+                        <label for="telefono" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Teléfono
+                        </label>
+                        <input 
+                            id="telefono" 
+                            type="tel" 
+                            formControlName="telefono" 
+                            placeholder="Ingresá tu número celular"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div>
+                        <label for="contrasena" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Contraseña <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="contrasena" 
+                            type="password" 
+                            formControlName="password" 
+                            placeholder="**********"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                        @if (submitted && f['password'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">La contraseña es obligatoria</p>
+                        }
+                        @if (submitted && f['password'].errors?.['minlength']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Mínimo 8 caracteres</p>
+                        }
+                        @if (submitted && f['password'].errors?.['pattern']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Debe contener mayúscula, minúscula, número y carácter especial</p>
+                        }
+                    </div>
+
+                    <!-- Confirmar contraseña -->
+                    <div>
+                        <label for="c_contrasena" class="block text-base font-medium text-gray-700 mb-2 font-body">
+                            Confirmar contraseña <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            id="c_contrasena" 
+                            type="password" 
+                            formControlName="confirmPassword" 
+                            placeholder="**********"
+                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400"
+                        />
+                        @if (submitted && f['confirmPassword'].errors?.['required']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Debes confirmar la contraseña</p>
+                        }
+                        @if (submitted && form.errors?.['mismatch']) {
+                            <p class="text-red-500 text-sm mt-1 font-body">Las contraseñas no coinciden</p>
+                        }
+                    </div>
+
+                    <!-- ReCaptcha (full width) -->
+                    <div class="md:col-span-2 mt-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div class="g-recaptcha" data-sitekey="6LcJ6LQrAAAAAOrOc0ogD0_NiG3ULLHfeiun-Uf5" data-callback="onRecaptchaSuccess"></div>
+                            @if (submitted && f['recaptcha'].errors?.['required']) {
+                                <p class="text-red-500 text-sm font-body">Completá el reCAPTCHA</p>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Botón de envío -->
+                <div class="mt-8">
+                    <app-button
+                        type="submit"
+                        variant="primary"
+                        label="Registrarse"
+                        class="w-full font-body"
+                    ></app-button>
+                </div>
+
+                <!-- Link a login -->
+                <p class="text-center text-base mt-6 font-body text-gray-700">
+                    ¿Ya tenés cuenta?
+                    <a 
+                        [routerLink]="'/login'" 
+                        class="text-secondary font-semibold hover:text-secondary-dark hover:underline transition-colors ml-1"
+                    >
+                        Iniciá Sesión
+                    </a>
+                </p>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Columna derecha - Imagen (oculta en móvil) -->
+    <div class="hidden lg:block lg:w-1/2 relative overflow-hidden shadow-md">
+        <img 
+            src="/assets/images/registrarse.png" 
+            alt="Registro" 
+            class="absolute inset-0 w-full h-full object-cover"
+        />
+    </div>
+</div>

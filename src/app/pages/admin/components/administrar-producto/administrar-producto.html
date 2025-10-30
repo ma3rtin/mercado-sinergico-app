@@ -1,0 +1,203 @@
+<div class="min-h-screen bg-[#F5F5F5] px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header con título y botón crear -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <h1 class="text-3xl md:text-4xl lg:text-4xl font-display">
+                Administrar productos
+            </h1>
+            <app-button variant="primary" (click)="navigateToCreate()">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                    </path>
+                </svg>
+                Crear producto
+            </app-button>
+        </div>
+
+        <!-- Barra de búsqueda y ordenamiento -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8">
+
+            <!-- Buscador -->
+            <div class="flex-1">
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
+                        placeholder="Buscar productos por nombre"
+                        class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#71A8D9] transition-colors">
+                </div>
+            </div>
+
+            <!-- Selector de ordenamiento -->
+            <div class="w-full md:w-80">
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                    </svg>
+                    <select title="Orden" [(ngModel)]="sortOrder" (change)="onSortChange()"
+                        class="w-full pl-12 pr-10 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 appearance-none focus:outline-none focus:border-[#71A8D9] transition-colors cursor-pointer">
+                        <option value="nombre-asc">Ordenar: Nombre A-Z</option>
+                        <option value="nombre-desc">Ordenar: Nombre Z-A</option>
+                        <option value="precio-asc">Ordenar: Precio menor a mayor</option>
+                        <option value="precio-desc">Ordenar: Precio mayor a menor</option>
+                        <option value="marca-asc">Ordenar: Marca A-Z</option>
+                        <option value="marca-desc">Ordenar: Marca Z-A</option>
+                        <option value="stock-asc">Ordenar: Stock menor a mayor</option>
+                        <option value="stock-desc">Ordenar: Stock mayor a menor</option>
+                    </select>
+                    <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoading) {
+        <div class="flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#71A8D9] mb-4"></div>
+            <p class="text-gray-600 text-lg">Cargando productos...</p>
+        </div>
+        }
+
+        <!-- Empty State -->
+        @else if (filteredProductos.length === 0 && !isLoading) {
+        <div class="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center">
+            <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">
+                @if (searchTerm) {
+                No se encontraron productos
+                } @else {
+                No hay productos registrados
+                }
+            </h3>
+            <p class="text-gray-500 mb-6">
+                @if (searchTerm) {
+                Intentá con otros términos de búsqueda
+                } @else {
+                Comenzá creando tu primer producto
+                }
+            </p>
+            @if (!searchTerm) {
+            <app-button variant="primary" (click)="navigateToCreate()">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                    </path>
+                </svg>
+                Crear primer producto
+            </app-button>
+            }
+        </div>
+        }
+
+        <!-- Lista de Productos (siguiendo diseño Figma) -->
+        @else {
+        <div class="space-y-4">
+            @for (producto of filteredProductos; track producto.id_producto) {
+            <div
+                class="bg-white rounded-2xl border-2 border-gray-200 hover:border-[#71A8D9] transition-all duration-300 overflow-hidden">
+                <div class="flex items-center p-4 md:p-6 gap-4 md:gap-6">
+
+                    <!-- Imagen del Producto (cuadrado como en Figma) -->
+                    <div
+                        class="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden">
+                        @if (producto.imagen_url) {
+                        <img title="{{ producto.nombre }}" [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-cover"
+                            (error)="$event.target.src='/assets/placeholder.png'">
+                        } @else {
+                        <div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-10 h-10 md:w-12 md:h-12 text-gray-300" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Información del Producto -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <!-- Nombre -->
+                            <h3 class="text-lg md:text-xl lg:text-xl font-display text-[#2D2D2D] truncate border-1 rounded-lg p-2">
+                                {{ producto.nombre }}
+                            </h3>
+
+                            <!-- Precio -->
+                            <span class="text-xl md:text-xl font-bold text-[#2D2D2D] flex-shrink-0 border-1 rounded-lg p-2" >
+                                {{ formatPrice(producto.precio) }}
+                            </span>
+
+                            <!-- Marca -->
+                            <span class="text-base md:text-lg text-gray-600 flex-shrink-0 border-1 rounded-lg p-2">
+                                {{ producto?.marca?.nombre || 'Sin marca' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción (iconos como en Figma) -->
+                    <div class="flex items-center gap-2 flex-shrink-0 sm:flex-col sm:gap-2 md:gap-4 md:flex-row">
+                        <!--Duplicar producto-->
+                        <button (click)="duplicateProducto(producto)"
+                            class="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Duplicar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                    d="M15.24 2h-3.894c-1.764 0-3.162 0-4.255.148c-1.126.152-2.037.472-2.755 1.193c-.719.721-1.038 1.636-1.189 2.766C3 7.205 3 8.608 3 10.379v5.838c0 1.508.92 2.8 2.227 3.342c-.067-.91-.067-2.185-.067-3.247v-5.01c0-1.281 0-2.386.118-3.27c.127-.948.413-1.856 1.147-2.593s1.639-1.024 2.583-1.152c.88-.118 1.98-.118 3.257-.118h3.07c1.276 0 2.374 0 3.255.118A3.6 3.6 0 0 0 15.24 2" />
+                                <path fill="currentColor"
+                                    d="M6.6 11.397c0-2.726 0-4.089.844-4.936c.843-.847 2.2-.847 4.916-.847h2.88c2.715 0 4.073 0 4.917.847S21 8.671 21 11.397v4.82c0 2.726 0 4.089-.843 4.936c-.844.847-2.202.847-4.917.847h-2.88c-2.715 0-4.073 0-4.916-.847c-.844-.847-.844-2.21-.844-4.936z" />
+                            </svg>
+                        </button>
+                        <!-- Ver detalles (icono cuadrado negro) -->
+                        <button (click)="viewProducto(producto)"
+                            class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-yellow-100 rounded-lg transition-colors"
+                            title="Ver detalles">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                    d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5" />
+                            </svg>
+                        </button>
+
+                        <!-- Editar (icono lápiz) -->
+                        <button (click)="editProducto(producto)"
+                            class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-yellow-100 rounded-lg transition-colors"
+                            title="Editar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+                                    <path
+                                        d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352z" />
+                                    <path
+                                        d="M19.846 4.318a2.2 2.2 0 0 0-.437-.692a2 2 0 0 0-.654-.463a1.92 1.92 0 0 0-1.544 0a2 2 0 0 0-.654.463l-.546.578l2.852 3.02l.546-.579a2.1 2.1 0 0 0 .437-.692a2.24 2.24 0 0 0 0-1.635M17.45 8.721L14.597 5.7L9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.5.5 0 0 0 .255-.145l4.778-5.06Z" />
+                                </g>
+                            </svg>
+                        </button>
+
+                        <!-- Eliminar (icono basura) -->
+                        <button (click)="deleteProducto(producto)"
+                            class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                    d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zm3-4q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>
