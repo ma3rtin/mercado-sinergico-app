@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { Plantilla } from "@app/models/PlantillaInterfaces/Plantilla";
-import { Observable } from "rxjs";
-import { ApiService } from "@app/services/api.service";
+import { Injectable } from '@angular/core';
+import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
+import { Observable } from 'rxjs';
+import { ApiService } from '@app/services/api.service';
 @Injectable({ providedIn: 'root' })
 export class PlantillaService extends ApiService {
 

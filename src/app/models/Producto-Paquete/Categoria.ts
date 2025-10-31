@@ -1,4 +1,4 @@
-import { PaqueteBase } from "@app/models/PaquetesInterfaces/PaqueteBase";
+import { PaqueteBase } from '@app/models/PaquetesInterfaces/PaqueteBase';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 export interface Categoria {

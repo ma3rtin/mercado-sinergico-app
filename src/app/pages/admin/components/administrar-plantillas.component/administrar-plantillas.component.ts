@@ -1,11 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
-import { CrearPlantillaModalComponent } from "@app/components/crear-plantilla-modal.component/crear-plantilla";
+import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { FormsModule } from '@angular/forms';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import Swal from 'sweetalert2';
 import { ToastrService } from 'ngx-toastr';
-import { ButtonComponent } from "@app/shared/botones-component/buttonComponent";
+import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
@@ -26,7 +26,7 @@ export class AdministrarPlantillasComponent implements OnInit {
     this.plantillaService.getPlantillas().subscribe(plantillas => {
       this.plantillas = plantillas;
       this.filteredPlantillas = [...this.plantillas];
-    })
+    });
   }
 
   onSearch(): void {
@@ -86,7 +86,7 @@ onPlantillaCreated(plantilla: Plantilla): void {
     this.plantillaService.crearPlantilla(plantilla).subscribe(createdPlantilla => {
       this.plantillas.push(createdPlantilla);
       this.filteredPlantillas.push(createdPlantilla);
-    })
+    });
   }
 
   deletePlantilla(plantilla: Plantilla): void {

@@ -1,4 +1,4 @@
-import { Opcion } from "@app/models/PlantillaInterfaces/Opcion";
+import { Opcion } from '@app/models/PlantillaInterfaces/Opcion';
 
 export interface Caracteristica {
     id?: number;

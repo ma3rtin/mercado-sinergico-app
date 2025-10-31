@@ -6,7 +6,6 @@ import { CurrencyPipe } from '@angular/common';
 import { Router } from '@angular/router';
 //import { VisorImagenesComponent } from '../../shared/visor-imagenes-component/visor-imagenes-component';
 import { Producto } from '@models/ProductosInterfaces/Producto';
-import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 
 
 @Component({
@@ -21,10 +20,10 @@ export class DetalleProductoSumarse {
   router = inject(Router);
   producto: Producto = {
     id_producto: 1,
-    nombre: "Casco",
-    descripcion: "Descripción del casco",
+    nombre: 'Casco',
+    descripcion: 'Descripción del casco',
     precio: 1000,
-    imagen_url: "/api/placeholder/300/200",
+    imagen_url: '/api/placeholder/300/200',
     marca_id: 1,
     altura: 100,
     ancho: 100,
@@ -33,9 +32,9 @@ export class DetalleProductoSumarse {
     stock: 100,
     plantillaId: 1,
     categoria_id: 1,
-    marca: { id_marca: 1, nombre: "Marca 1", productos: [], paquetes: [] },
-    categoria: { id_categoria: 1, nombre: "Categoria 1", productos: [], paquetes: [] },
-    plantilla: { id: 1, nombre: "Plantilla 1", caracteristicas: [] },
+    marca: { id_marca: 1, nombre: 'Marca 1', productos: [], paquetes: [] },
+    categoria: { id_categoria: 1, nombre: 'Categoria 1', productos: [], paquetes: [] },
+    plantilla: { id: 1, nombre: 'Plantilla 1', caracteristicas: [] },
     paquetes: [],
     imagenes: []
   };
@@ -44,61 +43,61 @@ export class DetalleProductoSumarse {
   // Paquete seleccionado
   paqueteSeleccionado: PaqueteRelacionado = {
     id: 1,
-    nombre: "Paquete cascos HJC",
-    estado: "Abierto",
+    nombre: 'Paquete cascos HJC',
+    estado: 'Abierto',
     participantes: 10,
     maxParticipantes: 50,
     faltanParaCerrar: 40,
-    fechaCierre: "20.12.32",
+    fechaCierre: '20.12.32',
     compradoresInvolucrados: 7,
-    zona: "Zona Norte",
-    imagen: "/api/placeholder/300/200"
+    zona: 'Zona Norte',
+    imagen: '/api/placeholder/300/200'
   };
 
   // Paquetes relacionados
   paquetesRelacionados: PaqueteRelacionado[] = [
     {
       id: 1,
-      nombre: "Paquete cascos HJC",
-      estado: "Abierto",
+      nombre: 'Paquete cascos HJC',
+      estado: 'Abierto',
       participantes: 60,
       maxParticipantes: 155,
-      zona: "Zona Norte",
-      imagen: "/api/placeholder/300/200"
+      zona: 'Zona Norte',
+      imagen: '/api/placeholder/300/200'
     },
     {
       id: 2,
-      nombre: "Paquete cascos HJC",
-      estado: "Abierto",
+      nombre: 'Paquete cascos HJC',
+      estado: 'Abierto',
       participantes: 60,
       maxParticipantes: 155,
-      zona: "Zona Norte",
-      imagen: "/api/placeholder/300/200"
+      zona: 'Zona Norte',
+      imagen: '/api/placeholder/300/200'
     },
     {
       id: 3,
-      nombre: "Paquete cascos HJC",
-      estado: "Abierto",
+      nombre: 'Paquete cascos HJC',
+      estado: 'Abierto',
       participantes: 60,
       maxParticipantes: 155,
-      zona: "Zona Norte",
-      imagen: "/api/placeholder/300/200"
+      zona: 'Zona Norte',
+      imagen: '/api/placeholder/300/200'
     },
     {
       id: 4,
-      nombre: "Paquete cascos HJC",
-      estado: "Abierto",
+      nombre: 'Paquete cascos HJC',
+      estado: 'Abierto',
       participantes: 60,
       maxParticipantes: 155,
-      zona: "Zona Norte",
-      imagen: "/api/placeholder/300/200"
+      zona: 'Zona Norte',
+      imagen: '/api/placeholder/300/200'
     }
   ];
 
   // Estado del componente
   currentImageIndex: number = 0;
-  selectedSize: string = "S";
-  selectedColor: string = "Rojo";
+  selectedSize: string = 'S';
+  selectedColor: string = 'Rojo';
   quantity: number = 1;
   showFullDescription: boolean = false;
 

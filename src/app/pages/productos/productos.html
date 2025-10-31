@@ -101,7 +101,7 @@
 
             <!-- Grid de productos -->
             <div class="flex-1 min-w-0 my-3">
-                
+
                 <!-- Loading State -->
                 @if (isLoading) {
                     <div class="flex flex-col items-center justify-center py-20">
@@ -109,34 +109,34 @@
                         <p class="text-gray-600 text-lg">Cargando productos...</p>
                     </div>
                 }
-                
+
                 <!-- Error State -->
                 @else if (errorMessage) {
                     <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
                         <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">Error al cargar productos</h3>
                         <p class="text-gray-600 mb-6 text-center max-w-md">{{ errorMessage }}</p>
-                        <button 
+                        <button
                             (click)="recargarProductos()"
                             class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                             Intentar de nuevo
                         </button>
                     </div>
                 }
-                
+
                 <!-- Grid de productos -->
                 @else {
-                    <div class="grid grid-cols-1 
-                            sm:grid-cols-2 
+                    <div class="grid grid-cols-1
+                            sm:grid-cols-2
                             md:grid-cols-2
                             lg:grid-cols-2
                             xl:grid-cols-3
                             2xl:grid-cols-4
                             gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-8">
-                        
+
                         @for (p of productos; track p.id_producto) {
                             <!-- Tarjeta de producto -->
                             <div (click)="navegarAProducto(p.id_producto ?? 0)"
@@ -145,20 +145,20 @@
                                 <!-- Imagen -->
                                 <div class="relative w-full h-40 sm:h-44 md:h-48 lg:h-52 xl:h-56 bg-gray-100 overflow-hidden">
                                     @if (p.imagen_url) {
-                                        <img 
-                                            [src]="p.imagen_url" 
+                                        <img
+                                            [src]="p.imagen_url"
                                             [alt]="p.nombre"
                                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                                            (error)="onImageError($event, p)" 
+                                            (error)="onImageError($event)"
                                             loading="lazy">
                                     } @else {
                                         <div class="w-full h-full flex items-center justify-center">
                                             <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                       d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                             </svg>
                                         </div>
-                                        
+
                                     }
 
                                     <!-- Tag categoría -->
@@ -175,7 +175,7 @@
                                     <h3 class="font-display text-sm sm:text-base md:text-lg text-gray-900 line-clamp-2 mb-2">
                                         {{ p.nombre }}
                                     </h3>
-                                    
+
                                     @if (p.descripcion) {
                                         <p class="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-3">
                                             {{ p.descripcion }}

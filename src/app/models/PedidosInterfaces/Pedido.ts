@@ -1,6 +1,6 @@
-import { Usuario } from "@app/models/UsuarioInterfaces/Usuario";
-import { PaquetePublicado } from "@app/models/PaquetesInterfaces/PaquetePublicado";
-import { EstadoPedido } from "@app/models/PedidosInterfaces/EstadoPedidos";
+import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
+import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { EstadoPedido } from '@app/models/PedidosInterfaces/EstadoPedidos';
 
 export interface Pedido {
   id_pedido?: number; // opcional para creación

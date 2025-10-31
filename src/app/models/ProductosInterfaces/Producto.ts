@@ -1,8 +1,8 @@
-import { Marca } from "@app/models/Producto-Paquete/Marca";
-import { Categoria } from "@app/models/Producto-Paquete/Categoria";
-import { PaqueteBaseProducto } from "@app/models/PaquetesInterfaces/PaqueteBaseProducto";
-import { Plantilla } from "@app/models/PlantillaInterfaces/Plantilla";
-import { Imagen } from "@app/models/ProductosInterfaces/Imagenes_producto";
+import { Marca } from '@app/models/Producto-Paquete/Marca';
+import { Categoria } from '@app/models/Producto-Paquete/Categoria';
+import { PaqueteBaseProducto } from '@app/models/PaquetesInterfaces/PaqueteBaseProducto';
+import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
+import { Imagen } from '@app/models/ProductosInterfaces/Imagenes_producto';
 export interface Producto {
     id_producto?: number; // opcional para creación
     nombre: string;

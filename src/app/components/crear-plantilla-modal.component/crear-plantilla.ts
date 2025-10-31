@@ -5,7 +5,7 @@ import { Caracteristica } from '@app/models/PlantillaInterfaces/Caracteristica';
 import { Opcion } from '@app/models/PlantillaInterfaces/Opcion';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { ToastrService } from 'ngx-toastr';
-import { ButtonComponent } from "@app/shared/botones-component/buttonComponent";
+import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 

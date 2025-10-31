@@ -1,5 +1,5 @@
-import { Localidad } from "@app/models/ZonasInterfaces/Localidad";
-import { Usuario } from "@app/models/UsuarioInterfaces/Usuario";
+import { Localidad } from '@app/models/ZonasInterfaces/Localidad';
+import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 export interface Direccion {
     id?: number;
     usuarioId: number;

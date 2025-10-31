@@ -1,5 +1,4 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CrearProductoComponent } from '@app/pages/admin/components/crear-producto/crear-producto';
 
 @Component({
     selector: 'app-button',

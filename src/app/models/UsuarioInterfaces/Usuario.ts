@@ -1,6 +1,6 @@
-import { Direccion } from "@app/models/ZonasInterfaces/Direccion";
-import { Pedido } from "@app/models/PedidosInterfaces/Pedido";
-import { Rol } from "@app/models/UsuarioInterfaces/Rol";
+import { Direccion } from '@app/models/ZonasInterfaces/Direccion';
+import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
+import { Rol } from '@app/models/UsuarioInterfaces/Rol';
 export interface Usuario {
   id?: number; // opcional para creación
   email: string;

@@ -46,7 +46,7 @@ export class ProductosComponent implements OnInit {
       error: (error) => {
         console.error('❌ Error cargando productos:', error);
         this.isLoading = false;
-        
+
         if (error.name === 'TimeoutError') {
           this.errorMessage = 'El servidor no respondió a tiempo. Por favor, intentá de nuevo.';
         } else if (error.status === 0) {
@@ -54,7 +54,7 @@ export class ProductosComponent implements OnInit {
         } else {
           this.errorMessage = 'Error al cargar los productos. Por favor, intentá de nuevo.';
         }
-        
+
         this.productos = [];
       }
     });
@@ -72,7 +72,7 @@ export class ProductosComponent implements OnInit {
     this.router.navigate(['/detalleSeleccionProducto', id]);
   }
 
-  onImageError(event: any, producto: Producto): void {
+  onImageError(event: any): void {
     const target = event.target as HTMLImageElement;
     if (target.src.includes('placeholder')) return;
     target.src = '/assets/images/placeholder-product.png';

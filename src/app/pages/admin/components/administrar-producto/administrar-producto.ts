@@ -111,8 +111,8 @@ export class AdministrarProductosComponent implements OnInit {
       title: producto.nombre,
       html: `
         <div class="text-left space-y-2">
-          <img src="${producto.imagen_url || '/assets/placeholder.png'}" 
-          alt="${producto.nombre}" 
+          <img src="${producto.imagen_url || '/assets/placeholder.png'}"
+          alt="${producto.nombre}"
           class="w-full h-48 object-cover rounded-lg mb-4">
           <p><strong>Descripción:</strong> ${producto.descripcion || 'Sin descripción'}</p>
           <p><strong>Precio:</strong> $${producto.precio.toFixed(2)}</p>
@@ -142,12 +142,12 @@ export class AdministrarProductosComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // Crear copia del producto sin el ID
-        const productoNuevo = {
-          ...producto,
-          id: undefined,
-          nombre: `${producto.nombre} (Copia)`,
-          imagenes: []
-        };
+        // const productoNuevo = {
+        //   ...producto,
+        //   id: undefined,
+        //   nombre: `${producto.nombre} (Copia)`,
+        //   imagenes: []
+        // };
 
         this.productosService.duplicateProduct(producto.id_producto!).subscribe({
           next: () => {
