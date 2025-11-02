@@ -1,10 +1,10 @@
 ## 🧠 Descripción
 
-<!-- Explica brevemente qué hace este PR y por qué -->
+<!-- Explicá brevemente qué hace este PR y por qué -->
 
 ## 🧩 Cambios principales
 
-<!-- Lista los cambios realizados -->
+<!-- Listá los cambios realizados -->
 - 
 - 
 - 
@@ -12,9 +12,9 @@
 ## 🧪 Cómo probarlo
 
 <!-- Instrucciones para testear este PR -->
-1. 
-2. 
-3. 
+- 
+- 
+- 
 
 ## 📸 Capturas (opcional)
 
@@ -22,7 +22,7 @@
 
 ## ✅ Checklist
 
-- [ ] Código formateado y lint sin errores
-- [ ] Tests pasaron correctamente
+- [ ] Código formateado y lint sin errores (npm run lint)
+- [ ] Tests pasaron correctamente (ng test)
 - [ ] Verifiqué los cambios manualmente
 - [ ] No se subieron credenciales ni claves privadas
