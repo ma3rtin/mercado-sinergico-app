@@ -2,19 +2,20 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
   // Rutas estáticas
-  { path: '', renderMode: RenderMode.Server },
-  { path: 'login', renderMode: RenderMode.Server },
-  { path: 'registrarse', renderMode: RenderMode.Server },
-  { path: 'productos', renderMode: RenderMode.Server },
-  { path: 'detalleSeleccionProducto', renderMode: RenderMode.Server },
-  { path: 'perfil-admin', renderMode: RenderMode.Server },
-  { path: 'crear-producto', renderMode: RenderMode.Server },
-  { path: 'crear-paquete', renderMode: RenderMode.Server },
-  { path: 'publicar-paquete', renderMode: RenderMode.Server },
-  { path: 'perfil', renderMode: RenderMode.Server },
-  { path: 'administrar-plantillas', renderMode: RenderMode.Server },
-  { path: 'administrar-productos', renderMode: RenderMode.Server },
-  { path: '**', renderMode: RenderMode.Server },
+  { path: '', renderMode: RenderMode.Prerender },
+  { path: 'login', renderMode: RenderMode.Prerender },
+  { path: 'registrarse', renderMode: RenderMode.Prerender },
+  { path: 'productos', renderMode: RenderMode.Prerender },
+  { path: 'detalleSeleccionProducto', renderMode: RenderMode.Prerender },
+  { path: 'perfil-admin', renderMode: RenderMode.Prerender },
+  { path: 'crear-producto', renderMode: RenderMode.Prerender },
+  { path: 'crear-paquete', renderMode: RenderMode.Prerender },
+  { path: 'publicar-paquete', renderMode: RenderMode.Prerender },
+  { path: 'perfil', renderMode: RenderMode.Prerender },
+  { path: 'administrar-plantillas', renderMode: RenderMode.Prerender },
+  { path: 'administrar-productos', renderMode: RenderMode.Prerender },
+  { path: 'paquetes-publicados', renderMode: RenderMode.Prerender },
+  { path: '**', renderMode: RenderMode.Prerender },
 
   // Rutas dinámicas
   { path: 'producto/:id', renderMode: RenderMode.Server },
