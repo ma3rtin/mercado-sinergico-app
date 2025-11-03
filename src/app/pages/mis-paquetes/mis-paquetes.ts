@@ -7,10 +7,10 @@ import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { TipoPaquete } from '@app/models/Enums';
-
+import { Imagen } from '@app/models/ProductosInterfaces/Imagenes_producto';
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import { PaqueteBase } from '@app/models/PaquetesInterfaces/PaqueteBase';
-
+import { InfoPaqueteComponent } from '@app/shared/info-paquete/info-paquete';
 //src\app\models\Producto-Paquete\Marca.ts
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';

@@ -191,6 +191,28 @@
                                 </div>
                                 }
 
+<div class="pb-4 border-b border-gray-200">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Subtotal</span>
+                                                <span class="font-semibold text-gray-900">
+                                                    ${{ paquete.precioTotal | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Descuento
+                                                    ({{paquete.descuento}}%)</span>
+                                                <span class="font-semibold text-green-600">
+                                                    -${{ (paquete.precioTotal - paquete.precioFinal) | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                            <div
+                                                class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                                <span class="text-base font-bold text-gray-900">Total</span>
+                                                <span class="text-xl font-bold text-primary">
+                                                    ${{ paquete.precioFinal | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                        </div>
                                 <!-- Botones de acción -->
                                 <div class="flex flex-wrap gap-3 pt-4">
                                     <app-button [variant]="'primary'" [label]="'Actualizar pedido'"
@@ -216,28 +238,7 @@
 
                                     <div class="space-y-4">
                                         <!-- Resumen de precios -->
-                                        <div class="pb-4 border-b border-gray-200">
-                                            <div class="flex justify-between items-center mb-2">
-                                                <span class="text-sm text-gray-600">Subtotal</span>
-                                                <span class="font-semibold text-gray-900">
-                                                    ${{ paquete.precioTotal | number:'1.0-0' }}
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center mb-2">
-                                                <span class="text-sm text-gray-600">Descuento
-                                                    ({{paquete.descuento}}%)</span>
-                                                <span class="font-semibold text-green-600">
-                                                    -${{ (paquete.precioTotal - paquete.precioFinal) | number:'1.0-0' }}
-                                                </span>
-                                            </div>
-                                            <div
-                                                class="flex justify-between items-center pt-2 border-t border-gray-200">
-                                                <span class="text-base font-bold text-gray-900">Total</span>
-                                                <span class="text-xl font-bold text-primary">
-                                                    ${{ paquete.precioFinal | number:'1.0-0' }}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        
 
                                         <!-- Estado -->
                                         <div class="flex items-start gap-2">
@@ -279,6 +280,7 @@
                                                 <path
                                                     d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                                             </svg>
+
                                             <div class="flex-1">
                                                 <p class="text-sm font-medium text-gray-700 mb-1">Productos ya comprados
                                                 </p>
