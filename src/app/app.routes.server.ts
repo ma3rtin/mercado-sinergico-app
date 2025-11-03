@@ -15,6 +15,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'administrar-plantillas', renderMode: RenderMode.Prerender },
   { path: 'administrar-productos', renderMode: RenderMode.Prerender },
   { path: 'paquetes-publicados', renderMode: RenderMode.Prerender },
+  { path: 'mis-paquetes', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Prerender },
 
   // Rutas dinámicas
