@@ -21,7 +21,7 @@ export interface PaquetePublicado {
 
   // Relaciones
   paqueteBase?: PaqueteBase;
-  estado?: EstadoPaquetePublicado;
+  estado: EstadoPaquetePublicado;
   zona?: Zona;
   pedidos?: Pedido[];
 }

@@ -1,9 +1,10 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-//import { StatusColorPipe } from '../../../../shared/status-color/status-color-pipe';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import {PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
+
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
@@ -15,68 +16,61 @@ export class PerfilAdmin implements OnInit {
   private paquetePublicadoService = inject(PaquetePublicadoService);
   private router = inject(Router);
 
-  paquetes: PaquetePublicado[] = [];
+  paquetes = signal<PaquetePublicado[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  //export interface EstadoPaquetePublicado {
+  //id_estado: number;
+  //nombre: string;
 
+  // Relaciones
+  //paquetes?: PaquetePublicado[];
+  estado = signal<EstadoPaquetePublicado[]>([
+    { id_estado: 1, nombre: 'Pendiente' },
+    { id_estado: 2, nombre: 'Abierto' },
+    { id_estado: 3, nombre: 'Cerrado' },
+    { id_estado: 4, nombre: 'Completo' }
+  ]);
 
   ngOnInit() {
     this.loadPaquetes();
   }
 
   loadPaquetes() {
+    this.loading.set(true);
+    this.error.set(null);
+
     this.paquetePublicadoService.getPaquetes().subscribe({
       next: (paquetes) => {
-        this.paquetes = paquetes;
+        this.paquetes.set(paquetes);
+        this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading packages:', error);
+      error: (err) => {
+        console.error('Error loading packages:', err);
+        this.error.set('Ocurrió un error al cargar los paquetes.');
+        this.loading.set(false);
       }
     });
   }
 
-  getStatusColor(estado: string): string {
-    switch (estado) {
-      case 'Abierto':
-        return 'text-blue-600';
-      case 'Pendiente':
-        return 'text-yellow-600';
-      case 'Cerrado':
-        return 'text-red-600';
-      case 'Completo':
-        return 'text-green-600';
-      default:
-        return 'text-gray-600';
-    }
+  getStatusColor(estado: EstadoPaquetePublicado): string {
+    if (estado.nombre === 'Pendiente') return 'text-yellow-600';
+    if (estado.nombre === 'Abierto') return 'text-green-600';
+    if (estado.nombre === 'Cerrado') return 'text-blue-600';
+    if (estado.nombre === 'Completo') return 'text-gray-600';
+    return 'text-gray-600';
   }
 
-  // Navigation methods
-  navigateToAdminProducts() {
-    this.router.navigate(['/administrar-productos']);
-  }
-
-  navigateToAdminUsers() {
-    // this.router.navigate(['/admin/usuarios']);
-    console.log('Navigate to admin users - not implemented yet');
-  }
-
-  navigateToMetrics() {
-    // this.router.navigate(['/admin/metricas']);
-    console.log('Navigate to metrics - not implemented yet');
-  }
-
-  navigateToAdminPackages() {
-    this.router.navigate(['/admin/paquetes']);
-  }
+  // Navegaciones
+  navigateToAdminProducts() { this.router.navigate(['/administrar-productos']); }
+  navigateToAdminUsers() { console.log('Navigate to admin users - not implemented yet'); }
+  navigateToMetrics() { console.log('Navigate to metrics - not implemented yet'); }
+  navigateToAdminPackages() { this.router.navigate(['/admin/paquetes']); }
 
   editPackage(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
   }
 
-  // Create methods (for the yellow buttons)
-  crearProducto() {
-    this.router.navigate(['/crear-producto']);
-  }
-
-  crearPaquete() {
-    this.router.navigate(['/crear-paquete']);
-  }
+  crearProducto() { this.router.navigate(['/crear-producto']); }
+  crearPaquete() { this.router.navigate(['/crear-paquete']); }
 }
