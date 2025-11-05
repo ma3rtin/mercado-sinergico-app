@@ -1,6 +1,5 @@
 import { Router } from '@angular/router';
-// crear-producto.component.ts
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -19,9 +18,10 @@ import { ProductosService } from '@app/services/producto/producto.service';
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
+
 // SweetAlert2
 import Swal from 'sweetalert2';
-//
+
 interface ImageSlot {
   file: File | null;
   preview: string | null;
@@ -43,29 +43,30 @@ export class CrearProductoComponent implements OnInit {
   productForm!: FormGroup;
   private toastr = inject(ToastrService);
   private router = inject(Router);
-  
-  // Datos para select
-  plantillas: Plantilla[] = [];
-  marcas: Marca[] = [];
-  categorias: Categoria[] = [];
 
-  // Estado del componente
-  selectedTemplate: Plantilla | null = null;
-  selectedAttributes: { [key: string]: string[] } = {};
-  selectedAttributesTouched: { [key: string]: boolean } = {};
-  
-  // NUEVO: Sistema de slots de imágenes
-  imageSlots: ImageSlot[] = Array(8).fill(null).map(() => ({ file: null, preview: null }));
-  
-  isLoading = false;
+  // ✅ SIGNALS - Datos para select
+  plantillas = signal<Plantilla[]>([]);
+  marcas = signal<Marca[]>([]);
+  categorias = signal<Categoria[]>([]);
+
+  // ✅ SIGNALS - Estado del componente
+  selectedTemplate = signal<Plantilla | null>(null);
+  selectedAttributes = signal<{ [key: string]: string[] }>({});
+  selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
+
+  // ✅ SIGNALS - Sistema de slots de imágenes
+  imageSlots = signal<ImageSlot[]>(
+    Array(8).fill(null).map(() => ({ file: null, preview: null }))
+  );
+
+  // ✅ SIGNALS - Flags de estado
+  isLoading = signal<boolean>(false);
+  formSubmitted = signal<boolean>(false);
+  isCreateModalOpen = signal<boolean>(false);
+
+  // Variables normales (no necesitan ser signals)
   shouldCreateTemplate = 'false';
-  formSubmitted = false; // NUEVO: para mostrar errores solo después del submit
-
-  // Drag & Drop
   draggedIndex: number | null = null;
-
-  // Modal
-  isCreateModalOpen = false;
   plantillaToEdit?: Plantilla;
 
   constructor(
@@ -74,7 +75,6 @@ export class CrearProductoComponent implements OnInit {
     private marcaService: MarcaService,
     private categoriaService: CategoriaService,
     private productoService: ProductosService
-    
   ) { }
 
   ngOnInit(): void {
@@ -99,25 +99,46 @@ export class CrearProductoComponent implements OnInit {
   }
 
   loadInitialData(): void {
-    this.plantillaService.getPlantillas().subscribe((plantillas) => {
-      this.plantillas = plantillas;
+    this.plantillaService.getPlantillas().subscribe({
+      next: (plantillas) => {
+        this.plantillas.set(plantillas);
+        console.log('✅ Plantillas cargadas:', plantillas);
+      },
+      error: (err) => {
+        console.error('❌ Error plantillas:', err);
+        this.toastr.error('Error cargando plantillas');
+      }
     });
 
-    this.marcaService.getMarcas().subscribe((marcas) => {
-      this.marcas = marcas;
+    this.marcaService.getMarcas().subscribe({
+      next: (marcas) => {
+        this.marcas.set(marcas);
+        console.log('✅ Marcas cargadas:', marcas);
+      },
+      error: (err) => {
+        console.error('❌ Error marcas:', err);
+        this.toastr.error('Error cargando marcas');
+      }
     });
 
-    this.categoriaService.getCategorias().subscribe((categorias) => {
-      this.categorias = categorias;
+    this.categoriaService.getCategorias().subscribe({
+      next: (categorias) => {
+        this.categorias.set(categorias);
+        console.log('✅ Categorías cargadas:', categorias);
+      },
+      error: (err) => {
+        console.error('❌ Error categorías:', err);
+        this.toastr.error('Error cargando categorías');
+      }
     });
   }
 
   // 🎨 Selección de plantilla
   selectTemplate(template: Plantilla): void {
-    if (this.selectedTemplate?.id !== template.id) {
-      this.selectedTemplate = template;
-      this.selectedAttributes = {};
-      this.selectedAttributesTouched = {};
+    if (this.selectedTemplate()?.id !== template.id) {
+      this.selectedTemplate.set(template);
+      this.selectedAttributes.set({});
+      this.selectedAttributesTouched.set({});
     }
     this.productForm.patchValue({
       plantillaId: template.id
@@ -126,35 +147,45 @@ export class CrearProductoComponent implements OnInit {
 
   // 🏷️ Manejo de atributos
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
-    this.selectedAttributesTouched[attributeName] = true;
+    // Marcar como touched
+    this.selectedAttributesTouched.update(current => ({
+      ...current,
+      [attributeName]: true
+    }));
 
-    if (!this.selectedAttributes[attributeName]) {
-      this.selectedAttributes[attributeName] = [];
-    }
+    // Actualizar atributos seleccionados
+    this.selectedAttributes.update(current => {
+      const updated = { ...current };
 
-    if (checked) {
-      if (!this.selectedAttributes[attributeName].includes(value)) {
-        this.selectedAttributes[attributeName].push(value);
+      if (!updated[attributeName]) {
+        updated[attributeName] = [];
       }
-    } else {
-      this.selectedAttributes[attributeName] =
-        this.selectedAttributes[attributeName].filter(v => v !== value);
-    }
+
+      if (checked) {
+        if (!updated[attributeName].includes(value)) {
+          updated[attributeName] = [...updated[attributeName], value];
+        }
+      } else {
+        updated[attributeName] = updated[attributeName].filter(v => v !== value);
+      }
+
+      return updated;
+    });
   }
 
   isAttributeSelected(attributeName: string, value: string): boolean {
-    if (!this.selectedAttributesTouched[attributeName]) {
+    if (!this.selectedAttributesTouched()[attributeName]) {
       return true;
     }
-    return this.selectedAttributes[attributeName]?.includes(value) ?? false;
+    return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
-  // 📸 NUEVO: Sistema mejorado de manejo de imágenes
+  // 📸 Sistema mejorado de manejo de imágenes
   onFileSelected(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
+
       // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
         this.toastr.error('Solo se permiten archivos de imagen');
@@ -167,17 +198,26 @@ export class CrearProductoComponent implements OnInit {
         return;
       }
 
-      // Guardar el archivo y generar preview
-      this.imageSlots[index].file = file;
-      
+      // Actualizar el slot con el archivo
+      this.imageSlots.update(slots => {
+        const newSlots = [...slots];
+        newSlots[index] = { ...newSlots[index], file };
+        return newSlots;
+      });
+
+      // Generar preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.imageSlots[index].preview = e.target.result;
+        this.imageSlots.update(slots => {
+          const newSlots = [...slots];
+          newSlots[index] = { ...newSlots[index], preview: e.target.result };
+          return newSlots;
+        });
       };
       reader.readAsDataURL(file);
     }
-    
-    // Resetear el input para permitir seleccionar el mismo archivo
+
+    // Resetear el input
     input.value = '';
   }
 
@@ -185,18 +225,22 @@ export class CrearProductoComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
-    this.imageSlots[index] = { file: null, preview: null };
+    this.imageSlots.update(slots => {
+      const newSlots = [...slots];
+      newSlots[index] = { file: null, preview: null };
+      return newSlots;
+    });
   }
 
   hasImages(): boolean {
-    return this.imageSlots.some(slot => slot.file !== null);
+    return this.imageSlots().some(slot => slot.file !== null);
   }
 
   hasMainImage(): boolean {
-    return this.imageSlots[0].file !== null;
+    return this.imageSlots()[0].file !== null;
   }
 
-  // 🎯 NUEVO: Drag & Drop para reordenar
+  // 🎯 Drag & Drop para reordenar
   onDragStart(index: number, event: DragEvent) {
     this.draggedIndex = index;
     if (event.dataTransfer) {
@@ -213,17 +257,21 @@ export class CrearProductoComponent implements OnInit {
 
   onDrop(targetIndex: number, event: DragEvent) {
     event.preventDefault();
-    
+
     if (this.draggedIndex === null || this.draggedIndex === targetIndex) {
       this.draggedIndex = null;
       return;
     }
 
     // Intercambiar los slots
-    const temp = this.imageSlots[this.draggedIndex];
-    this.imageSlots[this.draggedIndex] = this.imageSlots[targetIndex];
-    this.imageSlots[targetIndex] = temp;
-    
+    this.imageSlots.update(slots => {
+      const newSlots = [...slots];
+      const temp = newSlots[this.draggedIndex!];
+      newSlots[this.draggedIndex!] = newSlots[targetIndex];
+      newSlots[targetIndex] = temp;
+      return newSlots;
+    });
+
     this.draggedIndex = null;
   }
 
@@ -233,7 +281,7 @@ export class CrearProductoComponent implements OnInit {
 
   // 🚀 Envío del formulario
   onSubmit() {
-    this.formSubmitted = true;
+    this.formSubmitted.set(true);
 
     // Validar campos requeridos
     if (this.productForm.invalid) {
@@ -248,7 +296,7 @@ export class CrearProductoComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
 
     const formData = new FormData();
 
@@ -260,25 +308,26 @@ export class CrearProductoComponent implements OnInit {
     });
 
     // Agregar imagen principal (icono)
-    if (this.imageSlots[0].file) {
-      formData.append('icono', this.imageSlots[0].file);
+    const slots = this.imageSlots();
+    if (slots[0].file) {
+      formData.append('icono', slots[0].file);
     }
 
     // Agregar imágenes adicionales
-    for (let i = 1; i < this.imageSlots.length; i++) {
-      if (this.imageSlots[i].file) {//Le agregué as Blob
-        formData.append('imagenes', this.imageSlots[i].file as Blob);
+    for (let i = 1; i < slots.length; i++) {
+      if (slots[i].file) {
+        formData.append('imagenes', slots[i].file as Blob);
       }
     }
 
     this.productoService.createProduct(formData).subscribe({
       next: () => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.toastr.success('Producto creado exitosamente 🚀');
         this.resetForm();
       },
       error: (err) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         console.error('Error creando producto', err);
         this.toastr.error(err.error?.message || 'Error creando producto');
       }
@@ -288,28 +337,28 @@ export class CrearProductoComponent implements OnInit {
   // 🧹 Resetear formulario
   public resetForm(): void {
     this.productForm.reset();
-    this.selectedTemplate = null;
-    this.selectedAttributes = {};
-    this.selectedAttributesTouched = {};
-    this.imageSlots = Array(8).fill(null).map(() => ({ file: null, preview: null }));
+    this.selectedTemplate.set(null);
+    this.selectedAttributes.set({});
+    this.selectedAttributesTouched.set({});
+    this.imageSlots.set(Array(8).fill(null).map(() => ({ file: null, preview: null })));
     this.shouldCreateTemplate = 'false';
-    this.formSubmitted = false;
-          this.router.navigate(['/administrar-productos']);
+    this.formSubmitted.set(false);
+    this.router.navigate(['/administrar-productos']);
   }
 
   // 🎯 Modal
   openCreateModal(): void {
-    this.isCreateModalOpen = true;
+    this.isCreateModalOpen.set(true);
     this.plantillaToEdit = undefined;
   }
 
   closeCreateModal(): void {
-    this.isCreateModalOpen = false;
+    this.isCreateModalOpen.set(false);
     this.plantillaToEdit = undefined;
   }
 
   onPlantillaCreated(plantilla: Plantilla): void {
-    this.plantillas.push(plantilla);
+    this.plantillas.update(current => [...current, plantilla]);
     this.selectTemplate(plantilla);
     this.closeCreateModal();
   }
@@ -317,7 +366,7 @@ export class CrearProductoComponent implements OnInit {
   // 🎮 Helpers para validación
   isFieldInvalid(fieldName: string): boolean {
     const control = this.productForm.get(fieldName);
-    return !!(control && control.invalid && (control.touched || this.formSubmitted));
+    return !!(control && control.invalid && (control.touched || this.formSubmitted()));
   }
 
   getErrorMessage(fieldName: string): string {
@@ -373,9 +422,9 @@ export class CrearProductoComponent implements OnInit {
     console.log('Form Status:', this.productForm.status);
     console.log('Form Values:', this.productForm.value);
     console.log('Form Errors:', this.getFormErrors());
-    console.log('Selected Template:', this.selectedTemplate);
-    console.log('Selected Attributes:', this.selectedAttributes);
-    console.log('Image Slots:', this.imageSlots);
+    console.log('Selected Template:', this.selectedTemplate());
+    console.log('Selected Attributes:', this.selectedAttributes());
+    console.log('Image Slots:', this.imageSlots());
   }
 
   private getFormErrors(): any {
@@ -401,25 +450,25 @@ export class CrearProductoComponent implements OnInit {
       peso: 1.5
     });
   }
-  // Agregar este método:
-deseleccionarPlantilla(): void {
-  Swal.fire({
-    title: '¿Deseleccionar plantilla?',
-    text: 'El producto quedará sin plantilla asociada',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#71A8D9',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, deseleccionar',
-    cancelButtonText: 'Cancelar'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.selectedTemplate = null;
-      this.selectedAttributes = {};
-      this.selectedAttributesTouched = {};
-      this.productForm.patchValue({ plantillaId: null });
-      this.toastr.info('Plantilla deseleccionada');
-    }
-  });
-}
+
+  deseleccionarPlantilla(): void {
+    Swal.fire({
+      title: '¿Deseleccionar plantilla?',
+      text: 'El producto quedará sin plantilla asociada',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#71A8D9',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, deseleccionar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.selectedTemplate.set(null);
+        this.selectedAttributes.set({});
+        this.selectedAttributesTouched.set({});
+        this.productForm.patchValue({ plantillaId: null });
+        this.toastr.info('Plantilla deseleccionada');
+      }
+    });
+  }
 }

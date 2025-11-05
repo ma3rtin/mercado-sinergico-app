@@ -18,7 +18,7 @@ import { PublicarPaqueteComponent } from './pages/admin/components/publicar-paqu
 import { RenderMode } from '@angular/ssr';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, data: { renderMode: RenderMode.Client } },
   { path: 'login', component: LoginComponent },
   { path: 'registrarse', component: RegistrarseComponent },
   { path: 'productos', component: ProductosComponent },

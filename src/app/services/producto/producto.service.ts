@@ -11,6 +11,8 @@ export class ProductosService extends ApiService {
   getProductos(): Observable<Producto[]> {
     if (this.productosCache$) return this.productosCache$;
 
+    console.log('🛡️ ProductosService - GET', );
+
     this.productosCache$ = this.get<Producto[]>('productos').pipe(
       timeout(30000),
       retry(2),
