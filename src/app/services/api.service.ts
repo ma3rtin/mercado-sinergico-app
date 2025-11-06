@@ -15,8 +15,7 @@ export class ApiService {
     }
 
     get<T>(path: string): Observable<T> {
-
-        console.log("HICE GET A ", this.buildUrl(path));
+        console.log('HICE GET A ', this.buildUrl(path));
         return this.http.get<T>(this.buildUrl(path));
     }
 

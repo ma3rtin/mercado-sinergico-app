@@ -4,23 +4,23 @@ import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class PaquetePublicadoService extends ApiService {
-    private apiUrl = "paquetes-publicados";
+    private apiUrl = 'paquetes-publicados';
     constructor() {
     super();
     }
     getPaquetes(): Observable<PaquetePublicado[]> {
-        return this.http.get<PaquetePublicado[]>(this.apiUrl);
+        return this.get<PaquetePublicado[]>(this.apiUrl);
     }
     createPaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
-        return this.http.post<PaquetePublicado>(this.apiUrl, paquete);
+        return this.post<PaquetePublicado>(this.apiUrl, paquete);
     }
     updatePaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
-        return this.http.put<PaquetePublicado>(`${this.apiUrl}/${paquete.id_paquete_publicado}`, paquete);
+        return this.put<PaquetePublicado>(`${this.apiUrl}/${paquete.id_paquete_publicado}`, paquete);
     }
     deletePaquete(id: number): Observable<PaquetePublicado> {
-        return this.http.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
+        return this.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
     getPaquetesPorCerrarse(): Observable<PaquetePublicado[]> {
-        return this.http.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
     }
 }

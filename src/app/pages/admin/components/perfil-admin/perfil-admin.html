@@ -18,17 +18,17 @@
 
             <!-- Botones Crear -->
             <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
-                <button (click)="crearProducto()" class="btn-yellow">Crear producto</button>
-                <button (click)="crearPaquete()" class="btn-yellow">Crear paquete</button>
+                <app-button (click)="crearProducto()" class="btn-yellow">Crear producto</app-button>
+                <app-button (click)="crearPaquete()" class="btn-yellow">Crear paquete</app-button>
             </div>
         </div>
 
         <!-- 🔧 Paneles de administración -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-            <button (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</button>
-            <button (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</button>
-            <button (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</button>
-            <button (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</button>
+            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</app-button>
+            <app-button variant="tertiary" (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</app-button>
         </div>
 
         <!-- 📦 Paquetes -->
@@ -72,14 +72,14 @@
                                 </div>
                             </div>
                         </div>
-                        <button (click)="editPackage(paquete)"
+                        <app-button variant="primary" (click)="editPackage(paquete)"
                             class="text-gray-400 hover:text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                             title="Editar paquete">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
                                 <path fill="currentColor"
                                     d="M21.808 5.456a1.9 1.9 0 0 0-.46-.68l-2.15-2.15a1.9 1.9 0 0 0-.68-.46a2.1 2.1 0 0 0-2.31.46l-1.71 1.71v.05l-7.74 7.73a2.1 2.1 0 0 0-.61 1.48v2.17a2.12 2.12 0 0 0 2.11 2.11h2.17a2.07 2.07 0 0 0 1.48-.62l7.74-7.74l1.72-1.72c.202-.19.36-.422.46-.68a2 2 0 0 0 0-1.63z" />
                             </svg>
-                        </button>
+                        </app-button>
                     </div>
                 </div>
                 }

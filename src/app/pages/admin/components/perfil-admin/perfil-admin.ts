@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
+import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './perfil-admin.html',
   styleUrl: './perfil-admin.css'
 })

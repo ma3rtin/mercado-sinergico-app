@@ -5,7 +5,6 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   input,
-  Signal,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';

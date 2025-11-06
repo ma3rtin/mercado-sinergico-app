@@ -1,5 +1,3 @@
-import { Producto } from '@app/models/ProductosInterfaces/Producto';
-import { ProductosService } from '@app/services/producto/producto.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,13 +5,8 @@ import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { TipoPaquete } from '@app/models/Enums';
-import { Imagen } from '@app/models/ProductosInterfaces/Imagenes_producto';
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-import { PaqueteBase } from '@app/models/PaquetesInterfaces/PaqueteBase';
-import { InfoPaqueteComponent } from '@app/shared/info-paquete/info-paquete';
-//src\app\models\Producto-Paquete\Marca.ts
-import { Marca } from '@app/models/Producto-Paquete/Marca';
-import { Categoria } from '@app/models/Producto-Paquete/Categoria';
+
 interface ProductoSeleccionado {
   id_producto: number;
   nombre: string;
@@ -73,7 +66,6 @@ export class MisPaquetesComponent implements OnInit {
     });
   }
 
-  // Mock temporal - reemplazar con datos reales
   private generarProductosMock(paquete: PaquetePublicado): ProductoSeleccionado[] {
     return [
       {
@@ -128,12 +120,10 @@ export class MisPaquetesComponent implements OnInit {
 
   actualizarPedido(paquete: PaqueteUsuario): void {
     console.log('Actualizando pedido:', paquete);
-    // Aquí iría la lógica para actualizar el pedido en el backend
   }
 
   salirDelPaquete(paquete: PaqueteUsuario): void {
     console.log('Saliendo del paquete:', paquete);
-    // Aquí iría la lógica para eliminar al usuario del paquete
   }
 
   irAlPaquete(paquete: PaqueteUsuario): void {
@@ -174,11 +164,11 @@ export class MisPaquetesComponent implements OnInit {
     return TipoPaquete.POR_DEFINIR;
   }
 
-  getMarcaNombre(paquete: PaqueteUsuario): string {
+  getMarcaNombre(): string {
     return 'Marca 1';
   }
 
-  getCategoriaNombre(paquete: PaqueteUsuario): string {
-    return 'Nombre 1'
+  getCategoriaNombre(): string {
+    return 'Nombre 1';
   }
 }

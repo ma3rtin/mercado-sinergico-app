@@ -3,24 +3,15 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import Swal from 'sweetalert2';
-
-// Interfaces
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
-
-// Services
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
-
-// Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
-
-// SweetAlert2
 import Swal from 'sweetalert2';
 
 interface ImageSlot {
@@ -40,32 +31,28 @@ interface ImageSlot {
   ],
   standalone: true
 })
+
 export class CrearProductoComponent implements OnInit {
   productForm!: FormGroup;
   private toastr = inject(ToastrService);
   private router = inject(Router);
 
-  // ✅ SIGNALS - Datos para select
   plantillas = signal<Plantilla[]>([]);
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
 
-  // ✅ SIGNALS - Estado del componente
   selectedTemplate = signal<Plantilla | null>(null);
   selectedAttributes = signal<{ [key: string]: string[] }>({});
   selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
 
-  // ✅ SIGNALS - Sistema de slots de imágenes
   imageSlots = signal<ImageSlot[]>(
     Array(8).fill(null).map(() => ({ file: null, preview: null }))
   );
 
-  // ✅ SIGNALS - Flags de estado
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
 
-  // Variables normales (no necesitan ser signals)
   shouldCreateTemplate = 'false';
   draggedIndex: number | null = null;
   plantillaToEdit?: Plantilla;
@@ -146,15 +133,12 @@ export class CrearProductoComponent implements OnInit {
     });
   }
 
-  // 🏷️ Manejo de atributos
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
-    // Marcar como touched
     this.selectedAttributesTouched.update(current => ({
       ...current,
       [attributeName]: true
     }));
 
-    // Actualizar atributos seleccionados
     this.selectedAttributes.update(current => {
       const updated = { ...current };
 
@@ -181,13 +165,11 @@ export class CrearProductoComponent implements OnInit {
     return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
-  // 📸 Sistema mejorado de manejo de imágenes
   onFileSelected(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
 
-      // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
         this.toastr.error('Solo se permiten archivos de imagen');
         return;
@@ -198,14 +180,12 @@ export class CrearProductoComponent implements OnInit {
         return;
       }
 
-      // Actualizar el slot con el archivo
       this.imageSlots.update(slots => {
         const newSlots = [...slots];
         newSlots[index] = { ...newSlots[index], file };
         return newSlots;
       });
 
-      // Generar preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imageSlots.update(slots => {
@@ -240,9 +220,8 @@ export class CrearProductoComponent implements OnInit {
     return this.imageSlots()[0].file !== null;
   }
 
-  // 🎯 Drag & Drop para reordenar
   onDragStart(index: number, event: DragEvent) {
-    this.draggedIndex.set(index);
+    this.draggedIndex = index;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
     }
@@ -276,10 +255,9 @@ export class CrearProductoComponent implements OnInit {
   }
 
   onDragEnd() {
-    this.draggedIndex.set(null);
+    this.draggedIndex = null;
   }
 
-  // 🚀 Submit
   onSubmit() {
     this.formSubmitted.set(true);
 
@@ -331,7 +309,6 @@ export class CrearProductoComponent implements OnInit {
     });
   }
 
-  // 🧹 Reset
   public resetForm(): void {
     this.productForm.reset();
     this.selectedTemplate.set(null);
@@ -360,7 +337,6 @@ export class CrearProductoComponent implements OnInit {
     this.closeCreateModal();
   }
 
-  // 🎮 Validación
   isFieldInvalid(fieldName: string): boolean {
     const control = this.productForm.get(fieldName);
     return !!(control && control.invalid && (control.touched || this.formSubmitted()));
@@ -376,7 +352,7 @@ export class CrearProductoComponent implements OnInit {
     if (errors['required']) return `${fieldLabel} es requerido`;
     if (errors['minlength']) return `${fieldLabel} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
     if (errors['min']) return `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
-    
+
     return '';
   }
 
@@ -404,7 +380,6 @@ export class CrearProductoComponent implements OnInit {
     }, 100);
   }
 
-  // 📋 Debug
   logFormStatus(): void {
     console.log('Form Status:', this.productForm.status);
     console.log('Form Values:', this.productForm.value);

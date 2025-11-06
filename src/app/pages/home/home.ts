@@ -2,7 +2,6 @@ import {
   Component,
   OnInit,
   signal,
-  effect,
   DestroyRef,
   inject,
 } from '@angular/core';
@@ -11,8 +10,6 @@ import { CommonModule } from '@angular/common';
 import { Carrusel } from '@app/components/carrusel/carrusel';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PaqueteCardView } from '@app/models/PaquetesInterfaces/PaqueteCardView';
-import { catchError, map, of } from 'rxjs';
-import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 @Component({
   selector: 'app-home',
