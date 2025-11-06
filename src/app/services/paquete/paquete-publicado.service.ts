@@ -4,7 +4,7 @@ import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class PaquetePublicadoService extends ApiService {
-    private apiUrl = 'http://localhost:3000/api/paquetes-publicados';
+    private apiUrl = "paquetes-publicados";
     constructor() {
     super();
     }

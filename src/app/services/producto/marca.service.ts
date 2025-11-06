@@ -5,9 +5,7 @@ import { ApiService } from '@app/services/api.service';
 @Injectable({ providedIn: 'root' })
 export class MarcaService extends ApiService {
     private apiUrl = 'marcas';
-    constructor() {
-        super();
-    }
+    
     getMarcas(): Observable<Marca[]> {
         return this.get<Marca[]>(this.apiUrl);
     }

@@ -19,7 +19,7 @@ import { RenderMode } from '@angular/ssr';
 import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, data: { renderMode: RenderMode.Client } },
   { path: 'login', component: LoginComponent },
   { path: 'registrarse', component: RegistrarseComponent },
   { path: 'productos', component: ProductosComponent },

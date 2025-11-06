@@ -5,7 +5,7 @@ import { ApiService } from '@app/services/api.service';
 @Injectable({ providedIn: 'root' })
 export class PlantillaService extends ApiService {
 
-    private apiUrl = 'http://localhost:3000/api/plantillas';
+    private apiUrl = "plantillas";
     constructor() {
     super();
     }

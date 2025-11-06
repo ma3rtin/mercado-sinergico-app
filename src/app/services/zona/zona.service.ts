@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError, timeout } from 'rxjs';
 import { Zona } from '@app/models/ZonasInterfaces/Zona';
+import { environment } from '@environments/environment';
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = `${environment.apiUrl}`;
 
 @Injectable({ providedIn: 'root' })
 export class ZonaService {
