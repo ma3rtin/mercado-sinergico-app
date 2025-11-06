@@ -168,6 +168,7 @@ export class PublicarPaqueteComponent implements OnInit {
       fecha_inicio: new Date(this.fechaInicio),
       fecha_fin: new Date(this.fechaFin),
       cant_productos: this.cantProductos ?? undefined,
+      estado: this.estados.find(e => e.id_estado === this.estadoSeleccionado)!,
     };
 
     this.paquetePublicadoService.createPaquete(paquete).subscribe({

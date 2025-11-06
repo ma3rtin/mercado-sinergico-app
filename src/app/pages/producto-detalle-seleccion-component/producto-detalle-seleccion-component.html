@@ -157,8 +157,8 @@
 
                 <!-- Badge de estado -->
                 <span
-                    [class]="'absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg ' + getPaqueteStatusClass(paquete.estado?.nombre || 'Pendiente')">
-                    {{ paquete.estado?.nombre || 'Pendiente' }}
+                    [class]="'absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg ' + getPaqueteStatusClass(paquete.estado.nombre || 'Pendiente')">
+                    {{ paquete.estado.nombre || 'Pendiente' }}
                 </span>
             </div>
 
