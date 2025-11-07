@@ -2,7 +2,7 @@
 <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
     <div class="max-w-6xl mx-auto">
         <!-- Loading State -->
-        @if (isLoading && !productoOriginal) {
+        @if (isLoading() && !productoOriginal()) {
         <div class="flex justify-center items-center py-12">
             <svg class="animate-spin h-12 w-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
                 viewBox="0 0 24 24">
@@ -15,7 +15,7 @@
         </div>
         }
 
-        @if (!isLoading || productoOriginal) {
+        @if (!isLoading() || productoOriginal()) {
         <h1 class="text-2xl text-gray-900 mb-2 font-display">Editar producto</h1>
 
         <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -28,7 +28,7 @@
                             Nombre <span class="text-red-500">*</span>
                         </label>
                         <input type="text" formControlName="nombre" placeholder="Casco reversible con vidrio templado"
-                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary placeholder-gray-500 ' + 
+                            [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary placeholder-gray-500 ' +
                                 (isFieldInvalid('nombre') ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-blue-500')" />
                         @if (isFieldInvalid('nombre')) {
                         <p class="mt-1 text-sm text-red-600">{{ getErrorMessage('nombre') }}</p>
@@ -40,11 +40,11 @@
                         <label class="block text-lg font-medium text-black mb-2">
                             Marca <span class="text-red-500">*</span>
                         </label>
-                        <select formControlName="marca_id"
+                        <select title="Marca" formControlName="marca_id"
                             [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
                                 (isFieldInvalid('marca_id') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
                             <option value="">Elegí una marca</option>
-                            @for (marca of marcas; track marca.id_marca) {
+                            @for (marca of marcas(); track marca.id_marca) {
                             <option [value]="marca.id_marca">{{ marca.nombre }}</option>
                             }
                         </select>
@@ -58,11 +58,11 @@
                         <label class="block text-lg font-medium text-black mb-2">
                             Categoría <span class="text-red-500">*</span>
                         </label>
-                        <select formControlName="categoria_id"
+                        <select title="Categoría" formControlName="categoria_id"
                             [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
                                 (isFieldInvalid('categoria_id') ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')">
                             <option value="">Elegí una categoría</option>
-                            @for (categoria of categorias; track categoria.id_categoria) {
+                            @for (categoria of categorias(); track categoria.id_categoria) {
                             <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option>
                             }
                         </select>
@@ -91,7 +91,7 @@
                     <p class="text-sm text-gray-600">
                         Insertá las imágenes de tu producto. Podés arrastrarlas para reordenarlas.
                     </p>
-                    @if (formSubmitted && !hasMainImage()) {
+                    @if (formSubmitted() && !hasMainImage()) {
                     <p class="mt-2 text-sm text-red-600 font-medium">
                         ⚠️ La imagen principal es obligatoria
                     </p>
@@ -99,15 +99,15 @@
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                    @for (slot of imageSlots; track $index) {
+                    @for (slot of imageSlots(); track $index) {
                     <div draggable="true" (dragstart)="onDragStart($index, $event)" (dragover)="onDragOver($event)"
                         (drop)="onDrop($index, $event)" (dragend)="onDragEnd()"
                         class="aspect-square rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden transition-all"
                         [ngClass]="{
                             'border-solid border-3 border-secondary-dark hover:shadow-md hover:shadow-secondary-dark hover:bg-yellow-100 bg-yellow-50': $index === 0 && !slot.preview,
                             'bg-gray-100 border-2 border-dashed border-gray-300 hover:bg-gray-50': !slot.preview && $index !== 0,
-                            'border-2 border-blue-400 shadow-lg scale-105': draggedIndex === $index,
-                            'ring-2 ring-red-500': formSubmitted && $index === 0 && !slot.preview
+                            'border-2 border-blue-400 shadow-lg scale-105': draggedIndex() === $index,
+                            'ring-2 ring-red-500': formSubmitted() && $index === 0 && !slot.preview
                         }">
 
                         <!-- Imagen cargada -->
@@ -161,7 +161,7 @@
                         }
 
                         <!-- Input file -->
-                        <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                        <input title="Subir imagen" type="file" accept="image/jpeg,image/png,image/gif,image/webp"
                             (change)="onFileSelected($event, $index)"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0">
                     </div>
@@ -267,8 +267,8 @@
 
                 <!-- Lista de plantillas -->
                 <div class="flex flex-wrap gap-2 mb-6">
-                    @for (template of plantillas; track template.id) {
-                    <app-button type="button" variant="tertiary" [selected]="selectedTemplate?.id === template.id"
+                    @for (template of plantillas(); track template.id) {
+                    <app-button type="button" variant="tertiary" [selected]="selectedTemplate()?.id === template.id"
                         (click)="selectTemplate(template)">
                         {{ template.nombre }}
                     </app-button>
@@ -276,11 +276,11 @@
                 </div>
 
                 <!-- Atributos de la plantilla seleccionada -->
-                @if (selectedTemplate) {
+                @if (selectedTemplate()) {
                 <div class="space-y-6">
                     <p class="text-sm text-gray-600 mb-4">Esta plantilla contiene los siguientes atributos:</p>
 
-                    @for (caracteristica of selectedTemplate.caracteristicas; track caracteristica.id) {
+                    @for (caracteristica of selectedTemplate()!.caracteristicas; track caracteristica.id) {
                     <div>
                         <h4 class="text-sm font-medium text-gray-900 mb-3 capitalize">
                             {{ caracteristica.nombre }}
@@ -293,9 +293,9 @@
                                     (change)="onAttributeChange(caracteristica.nombre, opcion.nombre, $any($event.target).checked)"
                                     class="sr-only">
                                 <span
-                                    [class]="'px-3 py-1.5 text-sm rounded-full cursor-pointer transition-colors ' + 
-                                                (isAttributeSelected(caracteristica.nombre, opcion.nombre) ? 
-                                                    'bg-yellow-100 text-secondary-dark border-2 border-secondary-dark' : 
+                                    [class]="'px-3 py-1.5 text-sm rounded-full cursor-pointer transition-colors ' +
+                                                (isAttributeSelected(caracteristica.nombre, opcion.nombre) ?
+                                                    'bg-yellow-100 text-secondary-dark border-2 border-secondary-dark' :
                                                     'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200')">
                                     {{ opcion.nombre }}
                                 </span>
@@ -314,8 +314,8 @@
                     Cancelar
                 </app-button>
 
-                <app-button type="submit" variant="primary" size="lg" [disabled]="isLoading" class="w-full sm:w-auto">
-                    @if (isLoading) {
+                <app-button type="submit" variant="primary" size="lg" [disabled]="isLoading()" class="w-full sm:w-auto">
+                    @if (isLoading()) {
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
@@ -333,7 +333,7 @@
         </form>
 
         <!-- Modal para crear plantilla -->
-        <app-crear-plantilla-modal [isOpen]="isCreateModalOpen" [plantillaToEdit]="plantillaToEdit"
+        <app-crear-plantilla-modal [isOpen]="isCreateModalOpen()" [plantillaToEdit]="plantillaToEdit()"
             (close)="closeCreateModal()" (plantillaCreated)="onPlantillaCreated($event)">
         </app-crear-plantilla-modal>
         }

@@ -1,5 +1,5 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { Router } from '@angular/router';
@@ -9,54 +9,54 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './productos.html',
-  styleUrls: ['./productos.css']
+  styleUrls: ['./productos.css'],
 })
 export class ProductosComponent implements OnInit {
-  productos: Producto[] = [];
-  isLoading: boolean = true;
-  errorMessage: string = '';
-  private isBrowser: boolean;
+  productos = signal<Producto[]>([]);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   constructor(
     private productosService: ProductosService,
-    private router: Router,
-    @Inject(PLATFORM_ID) platformId: Object
+    private router: Router
   ) {
-    this.isBrowser = isPlatformBrowser(platformId);
   }
 
   ngOnInit(): void {
-    // Solo ejecutar en el navegador, NO en SSR
-    if (this.isBrowser) {
-      this.loadProductos();
-    }
+    this.loadProductos();
   }
 
   private loadProductos(): void {
     console.log('🔄 Cargando productos...');
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this;
 
     this.productosService.getProductos().subscribe({
       next: (productos) => {
         console.log('✅ Productos cargados:', productos.length);
-        this.productos = productos;
-        this.isLoading = false;
+        this.productos.set(productos);
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('❌ Error cargando productos:', error);
-        this.isLoading = false;
+        this.isLoading.set(false);
 
         if (error.name === 'TimeoutError') {
-          this.errorMessage = 'El servidor no respondió a tiempo. Por favor, intentá de nuevo.';
+          this.errorMessage.set(
+            'El servidor no respondió a tiempo. Por favor, intentá de nuevo.'
+          );
         } else if (error.status === 0) {
-          this.errorMessage = 'No se pudo conectar con el servidor. Verificá que el backend esté corriendo.';
+          this.errorMessage.set(
+            'No se pudo conectar con el servidor. Verificá que el backend esté corriendo.'
+          );
         } else {
-          this.errorMessage = 'Error al cargar los productos. Por favor, intentá de nuevo.';
+          this.errorMessage.set(
+            'Error al cargar los productos. Por favor, intentá de nuevo.'
+          );
         }
 
-        this.productos = [];
-      }
+        this.productos.set([]);
+      },
     });
   }
 
@@ -87,7 +87,7 @@ export class ProductosComponent implements OnInit {
       style: 'currency',
       currency: 'ARS',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(price);
   }
 }
