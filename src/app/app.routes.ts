@@ -24,15 +24,6 @@ export const routes: Routes = [
   { path: 'registrarse', component: RegistrarseComponent },
   { path: 'productos', component: ProductosComponent },
   {
-    path: 'producto/:id',
-    component: ProductosComponent,
-    data: { renderMode: RenderMode.Server },
-  },
-  {
-    path: 'detalleSeleccionProducto',
-    component: ProductoDetalleSeleccionComponent,
-  },
-  {
     path: 'detalleSeleccionProducto/:id',
     component: ProductoDetalleSeleccionComponent,
     data: { renderMode: RenderMode.Server },
