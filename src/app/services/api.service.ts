@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '../environment.js';
+import { environment } from '@environments/environment.js';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
     protected http = inject(HttpClient);
 
-    private baseUrl = API_BASE_URL;
+    private baseUrl = environment.apiUrl;
 
     protected buildUrl(path: string): string {
         const cleanedPath = path.startsWith('/') ? path.substring(1) : path;
@@ -15,6 +15,7 @@ export class ApiService {
     }
 
     get<T>(path: string): Observable<T> {
+        console.log('HICE GET A ', this.buildUrl(path));
         return this.http.get<T>(this.buildUrl(path));
     }
 

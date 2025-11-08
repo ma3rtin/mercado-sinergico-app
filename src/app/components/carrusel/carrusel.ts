@@ -1,7 +1,16 @@
-import { Component, Input, ElementRef, ViewChild, OnChanges, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  input,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlechaCarrusel } from '@app/shared/flecha-carrusel/flecha-carrusel';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
+import { PaqueteCardView } from '@app/models/PaquetesInterfaces/PaqueteCardView';
 
 @Component({
   selector: 'app-carrusel',
@@ -9,10 +18,11 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
   imports: [CommonModule, FlechaCarrusel, PaqueteCard],
   templateUrl: './carrusel.html',
   styleUrl: './carrusel.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Carrusel implements OnChanges, AfterViewInit {
-  @Input() items: any[] = [];
-  @Input() tipo: 'paquete' | 'producto' = 'paquete';
+export class Carrusel implements AfterViewInit {
+  items = input.required<PaqueteCardView[]>();
+  tipo = input<string>();
 
   @ViewChild('carousel') carousel!: ElementRef<HTMLDivElement>;
 
@@ -23,9 +33,18 @@ export class Carrusel implements OnChanges, AfterViewInit {
   maxScroll = 0;
   currentIndex = 0;
 
-  ngOnChanges(): void {
-    const totalCards = this.items?.length || 0;
-    this.maxScroll = -((totalCards - this.visibleCards) * (this.cardWidth + this.gap));
+  constructor() {
+    console.log('🚀 Carrusel constructor');
+
+    // ✅ Ahora items() devuelve directamente el array
+    effect(() => {
+      const arr = this.items();
+      const totalCards = arr?.length || 0;
+      this.maxScroll = -(
+        (totalCards - this.visibleCards) * (this.cardWidth + this.gap)
+      );
+      console.log('📊 Carrusel effect:', { totalCards, maxScroll: this.maxScroll });
+    });
   }
 
   ngAfterViewInit(): void {
@@ -34,24 +53,26 @@ export class Carrusel implements OnChanges, AfterViewInit {
 
   scrollLeft(): void {
     if (this.translateX < 0) {
-      this.translateX = Math.min(this.translateX + (this.cardWidth + this.gap), 0);
+      this.translateX = Math.min(
+        this.translateX + (this.cardWidth + this.gap),
+        0
+      );
       this.updateCurrentIndex();
     }
   }
 
   scrollRight(): void {
     if (this.translateX > this.maxScroll) {
-      this.translateX = Math.max(this.translateX - (this.cardWidth + this.gap), this.maxScroll);
+      this.translateX = Math.max(
+        this.translateX - (this.cardWidth + this.gap),
+        this.maxScroll
+      );
       this.updateCurrentIndex();
     }
   }
 
-  onScroll(): void {
-    this.updateCurrentIndex();
-  }
-
   private updateCurrentIndex(): void {
-    const total = this.items.length;
+    const total = this.items().length;
     if (!total) return;
 
     const progress = Math.abs(this.translateX / (this.cardWidth + this.gap));

@@ -1,106 +1,57 @@
 <div class="min-h-screen bg-gray-50 font-body">
-
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
-            <div class="flex flex-col lg:flex-row items-start justify-between gap-6">
-                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                    <div
-                        class="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        <img src="/assets/images/placeholder-product.png" alt="Pablo Nosdeo"
-                            class="w-full h-full object-cover" />
-                    </div>
-                    <div class="text-center sm:text-left">
-                        <h2 class="text-3xl font-display  text-gray-900 mb-2">Pablo Nosdeo</h2>
-                        <p class="text-gray-600 mb-3 text-lg">ejemplo&#64;gmail.com</p>
-                        <span style="background-image: var(--color-tag)"
-                            class="inline-block text-white text-sm px-4 py-2 rounded-full font-medium">
-                            Administrador
-                        </span>
-                    </div>
-                </div>
 
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    <div class="flex flex-col gap-3">
-                        <button (click)="crearProducto()"
-                            class="cursor-pointer bg-accent hover:bg-accent-dark text-gray-900 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 min-w-[200px]">
-                            <span class="text-xl font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                        d="M18 10h-4V6a2 2 0 0 0-4 0l.071 4H6a2 2 0 0 0 0 4l4.071-.071L10 18a2 2 0 0 0 4 0v-4.071L18 14a2 2 0 0 0 0-4" />
-                                </svg></span>
-                            <span>Crear producto</span>
-                        </button>
-                        <button (click)="crearPaquete()"
-                            class="cursor-pointer bg-accent hover:bg-accent-dark text-gray-900 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 min-w-[200px]">
-                            <span class="text-xl font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                        d="M18 10h-4V6a2 2 0 0 0-4 0l.071 4H6a2 2 0 0 0 0 4l4.071-.071L10 18a2 2 0 0 0 4 0v-4.071L18 14a2 2 0 0 0 0-4" />
-                                </svg></span>
-                            <span>Crear paquete</span>
-                        </button>
-                    </div>
+        <!-- 🧍 Perfil admin -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8 flex flex-col lg:flex-row items-start justify-between gap-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div class="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
+                    <img src="/assets/images/placeholder-product.png" alt="Admin" class="w-full h-full object-cover" />
                 </div>
+                <div class="text-center sm:text-left">
+                    <h2 class="text-3xl font-display text-gray-900 mb-2">Administrador</h2>
+                    <p class="text-gray-600 mb-3 text-lg">admin@ejemplo.com</p>
+                    <span class="inline-block bg-secondary text-white text-sm px-4 py-2 rounded-full font-medium">
+                        Rol: Administrador
+                    </span>
+                </div>
+            </div>
+
+            <!-- Botones Crear -->
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
+                <app-button (click)="crearProducto()" class="btn-yellow">Crear producto</app-button>
+                <app-button (click)="crearPaquete()" class="btn-yellow">Crear paquete</app-button>
             </div>
         </div>
 
+        <!-- 🔧 Paneles de administración -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-            <button (click)="navigateToAdminProducts()"
-                class=" cursor-pointer bg-white shadow-md border-2 border-secondary hover:bg-gray-50 text-secondary px-2 py-2 hover:border-secondary-dark hover:text-secondary-dark hover:shadow-secondary-dark rounded-xl font-semibold transition-colors flex items-center justify-center gap-3 min-h-[80px]">
-                <span class="text-lg font-semibold"><svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg"
-                        width="24" height="24" viewBox="0 0 32 32">
-                        <path fill="currentColor"
-                            d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
-                    </svg></span>
-                <span>Administrar productos</span>
-            </button>
-
-            <button (click)="navigateToAdminUsers()"
-                class=" cursor-pointer bg-white shadow-md border-2 border-secondary hover:bg-gray-50 text-secondary px-2 py-2 hover:border-secondary-dark hover:text-secondary-dark hover:shadow-secondary-dark rounded-xl font-semibold transition-colors flex items-center justify-center gap-3 min-h-[80px]">
-                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24">
-                    <path fill="currentColor"
-                        d="M16 17v2H2v-2s0-4 7-4s7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.4 3.4 0 0 0-1.93.59a5 5 0 0 1 0 5.82A3.4 3.4 0 0 0 15 11a3.5 3.5 0 0 0 0-7" />
-                </svg>
-                <span>Administrar usuarios</span>
-            </button>
-
-            <button (click)="navigateToMetrics()"
-                class=" cursor-pointer bg-white shadow-md border-2 border-secondary hover:bg-gray-50 hover:border-secondary-dark hover:text-secondary-dark hover:shadow-secondary-dark text-secondary px-2 py-2  rounded-xl font-semibold transition-colors flex items-center justify-center gap-3 ">
-                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24">
-                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" d="M23 6L13 16l-5-5l-7 7M16 6h7v7" />
-                </svg>
-                <span>Ver métricas</span>
-            </button>
-
-            <button (click)="navigateToAdminPackages()"
-                class="cursor-pointer bg-white shadow-md border-2 border-secondary hover:bg-gray-50 text-secondary px-2 py-2 hover:border-secondary-dark hover:text-secondary-dark hover:shadow-secondary-dark rounded-xl font-semibold transition-colors flex items-center justify-center gap-3 min-h-[80px] sm:col-span-2 lg:col-span-1">
-                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 512 512">
-                    <path fill="currentColor"
-                        d="M224 0v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V0h32c35.3 0 64 28.7 64 64v128c0 5.5-.7 10.9-2 16H130c-1.3-5.1-2-10.5-2-16V64c0-35.3 28.7-64 64-64zm96 512c-11.2 0-21.8-2.9-31-8c9.5-16.5 15-35.6 15-56V320c0-20.4-5.5-39.5-15-56c9.2-5.1 19.7-8 31-8h32v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h32c35.3 0 64 28.7 64 64v128c0 35.3-28.7 64-64 64zM0 320c0-35.3 28.7-64 64-64h32v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h32c35.3 0 64 28.7 64 64v128c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64z" />
-                </svg>
-                <span>Administrar paquetes</span>
-            </button>
+            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</app-button>
+            <app-button variant="tertiary" (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</app-button>
         </div>
 
+        <!-- 📦 Paquetes -->
         <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-2xl font-display  text-gray-900 mb-8 text-center">Paquetes por cerrar/pendientes
+            <h3 class="text-2xl font-display text-gray-900 mb-8 text-center">
+                Paquetes por cerrar / pendientes
             </h3>
-            <!--
+
+            @if (loading()) {
+            <div class="text-center text-gray-500">Cargando paquetes...</div>
+            } @else if (error()) {
+            <div class="text-center text-red-600">{{ error() }}</div>
+            } @else if (paquetes().length > 0) {
             <div class="space-y-4">
-                @if (paquetes.length > 0) {
-                @for (paquete of paquetes; track paquete.id) {
-                <div class="border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-shadow hover:scale-102">
+                @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
+                <div
+                    class="border-2 border-gray-300 rounded-xl p-6 hover:shadow-md transition-transform hover:scale-[1.01]">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-6">
-                            Package Image 
                             <div
-                                class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                                @if (paquete.imagen) {
-                                <img [src]="paquete.imagen" [alt]="paquete.nombre" class="w-full h-full object-cover" />
+                                class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                @if (paquete.imagen_url) {
+                                <img [src]="paquete.imagen_url" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover" />
                                 } @else {
                                 <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -108,56 +59,36 @@
                                 </svg>
                                 }
                             </div>
--->
-            <!-- Package Info 
-                            <div class="flex-1">
-                                <h4 class=" text-xl text-gray-900 mb-2 font-display">{{paquete.nombre}}</h4>
-                                <div class="flex items-center gap-6 text-base">
-                                    <p [class]="'text-xs sm:text-sm font-bold ' + (paquete.estado | statusColor) ">
+                            <div>
+                                <h4 class="text-xl font-display text-gray-900 mb-2">{{ paquete.paqueteBase?.nombre }}</h4>
+                                <div class="flex items-center gap-6 text-sm">
+                                    <p [class]="getStatusColor(paquete.estado )">
                                         {{ paquete.estado }}
                                     </p>
-                                    <span class="flex items-center gap-2 text-gray-700">
-                                        {{paquete.categoria}}
-                                    </span>
-                                    <span class="flex items-center gap-2 text-gray-700">
-                                        <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24"
-                                            height="24" viewBox="0 0 32 32">
-                                            <path fill="currentColor"
-                                                d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
-                                        </svg>
-                                        <span class="font-semibold">{{paquete.productos}}</span>
-                                        <span class="text-gray-500">/{{paquete.maxProductos}}</span>
+                                    <span class="text-gray-700">{{ paquete.paqueteBase?.categoria_id }}</span>
+                                    <span class="text-gray-700">
+                                        {{ paquete.cant_productos }} / {{ paquete.cant_productos_reservados }}
                                     </span>
                                 </div>
                             </div>
                         </div>
--->
-            <!-- Edit Button 
-                        <button (click)="editPackage(paquete)"
-                            class="text-gray-400 hover:text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors flex-shrink-0"
+                        <app-button variant="primary" (click)="editPackage(paquete)"
+                            class="text-gray-400 hover:text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors"
                             title="Editar paquete">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24">
                                 <path fill="currentColor"
-                                    d="M16.698 21.996h-11.6a3.06 3.06 0 0 1-2.2-.92a3.1 3.1 0 0 1-.9-2.21V7.276a3 3 0 0 1 .91-2.19a3 3 0 0 1 1-.67a3.1 3.1 0 0 1 1.2-.24h4.44a.75.75 0 0 1 0 1.5h-4.44a2 2 0 0 0-.63.12a1.62 1.62 0 0 0-.99 1.5v11.59a1.62 1.62 0 0 0 .47 1.16a1.62 1.62 0 0 0 1.15.47h11.6c.213 0 .423-.04.62-.12a1.5 1.5 0 0 0 .52-.35a1.5 1.5 0 0 0 .35-.52a1.5 1.5 0 0 0 .13-.63v-4.44a.75.75 0 1 1 1.5 0v4.47a3.06 3.06 0 0 1-.92 2.2a3.2 3.2 0 0 1-1 .68c-.387.14-.798.205-1.21.19" />
-                                <path fill="currentColor"
-                                    d="M21.808 5.456a1.9 1.9 0 0 0-.46-.68l-2.15-2.15a1.9 1.9 0 0 0-.68-.46a2.1 2.1 0 0 0-2.31.46l-1.71 1.71v.05l-7.74 7.73a2.1 2.1 0 0 0-.61 1.48v2.17a2.12 2.12 0 0 0 2.11 2.11h2.17a2.07 2.07 0 0 0 1.48-.62l7.74-7.74l1.72-1.72c.202-.19.36-.422.46-.68a2 2 0 0 0 0-1.63zm-1.38 1.05a.6.6 0 0 1-.14.2l-1.22 1.22l-3-3l1.23-1.23a.64.64 0 0 1 .44-.18a.6.6 0 0 1 .23.05q.116.049.2.14l2.16 2.15a.7.7 0 0 1 .13.2a.6.6 0 0 1 0 .23a.6.6 0 0 1-.03.22" />
+                                    d="M21.808 5.456a1.9 1.9 0 0 0-.46-.68l-2.15-2.15a1.9 1.9 0 0 0-.68-.46a2.1 2.1 0 0 0-2.31.46l-1.71 1.71v.05l-7.74 7.73a2.1 2.1 0 0 0-.61 1.48v2.17a2.12 2.12 0 0 0 2.11 2.11h2.17a2.07 2.07 0 0 0 1.48-.62l7.74-7.74l1.72-1.72c.202-.19.36-.422.46-.68a2 2 0 0 0 0-1.63z" />
                             </svg>
-                        </button>
+                        </app-button>
                     </div>
                 </div>
                 }
-                } @else {
-                <div class="text-center py-12 text-gray-500">
-                    <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="50" height="50"
-                        viewBox="0 0 512 512">
-                        <path fill="currentColor"
-                            d="M224 0v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V0h32c35.3 0 64 28.7 64 64v128c0 5.5-.7 10.9-2 16H130c-1.3-5.1-2-10.5-2-16V64c0-35.3 28.7-64 64-64zm96 512c-11.2 0-21.8-2.9-31-8c9.5-16.5 15-35.6 15-56V320c0-20.4-5.5-39.5-15-56c9.2-5.1 19.7-8 31-8h32v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h32c35.3 0 64 28.7 64 64v128c0 35.3-28.7 64-64 64zM0 320c0-35.3 28.7-64 64-64h32v64c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16v-64h32c35.3 0 64 28.7 64 64v128c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64z" />
-                    </svg>
-                    <p class="text-xl font-medium">No hay paquetes pendientes</p>
-                    <p class="text-gray-400 mt-1">Los paquetes aparecerán aquí cuando estén disponibles</p>
-                </div>
-                }
             </div>
+            } @else {
+            <div class="text-center py-12 text-gray-500">
+                No hay paquetes pendientes.
+            </div>
+            }
         </div>
     </div>
-</div>-->
+</div>

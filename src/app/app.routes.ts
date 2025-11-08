@@ -16,21 +16,13 @@ import { AdministrarPlantillasComponent } from './pages/admin/components/adminis
 import { AdministrarProductosComponent } from './pages/admin/components/administrar-producto/administrar-producto';
 import { PublicarPaqueteComponent } from './pages/admin/components/publicar-paquete/publicar-paquete';
 import { RenderMode } from '@angular/ssr';
+import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home, data: { renderMode: RenderMode.Client } },
   { path: 'login', component: LoginComponent },
   { path: 'registrarse', component: RegistrarseComponent },
   { path: 'productos', component: ProductosComponent },
-  {
-    path: 'producto/:id',
-    component: ProductosComponent,
-    data: { renderMode: RenderMode.Server },
-  },
-  {
-    path: 'detalleSeleccionProducto',
-    component: ProductoDetalleSeleccionComponent,
-  },
   {
     path: 'detalleSeleccionProducto/:id',
     component: ProductoDetalleSeleccionComponent,
@@ -54,5 +46,6 @@ export const routes: Routes = [
     component: EditarProductoComponent,
     data: { renderMode: RenderMode.Server },
   },
+  { path: 'mis-paquetes', component: MisPaquetesComponent },
   { path: '**', component: Home },
 ];

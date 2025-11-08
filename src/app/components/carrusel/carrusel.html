@@ -1,11 +1,11 @@
-<section class="py-10 relative overflow-x-clip"> <!-- 👈 cambio clave -->
+<section class="py-10 relative overflow-x-clip">
   <h2 class="font-display text-2xl mb-6">
-    {{ tipo === 'paquete' ? 'Paquetes por cerrarse' : 'Productos destacados' }}
+    {{
+      tipo() === "paquete" ? "Paquetes por cerrarse" : "Productos destacados"
+    }}
   </h2>
 
-<div class="relative flex justify-center items-center min-h-[460px]">
-
-    <!-- Flecha izquierda -->
+  <div class="relative flex justify-center items-center min-h-[460px]">
     <app-flecha-carrusel
       direction="left"
       (arrowClick)="scrollLeft()"
@@ -13,31 +13,29 @@
       class="z-10"
     ></app-flecha-carrusel>
 
-    <!-- Carrusel -->
-<div class="relative w-[calc((495px*2)+(40px*2))] z-0 pb-6">
+    <div class="relative w-[calc((495px*2)+(40px*2))] z-0 pb-6">
       <div
         #carousel
         class="flex gap-10 transition-transform duration-500 ease-in-out"
         [style.transform]="'translateX(' + translateX + 'px)'"
       >
+        @for (item of items(); track item.id) {
         <app-paquete-card
-          *ngFor="let item of items"
           [nombre]="item.nombre"
           [imagen]="item.imagen"
           [estado]="item.estado"
           [cantidadActual]="item.cantidadActual"
           [cantidadMaxima]="item.cantidadMaxima"
         ></app-paquete-card>
+        }
       </div>
     </div>
 
-    <!-- Flecha derecha -->
     <app-flecha-carrusel
       direction="right"
       (arrowClick)="scrollRight()"
       [disabled]="translateX === maxScroll"
       class="z-10"
     ></app-flecha-carrusel>
-
   </div>
 </section>

@@ -1,0 +1,349 @@
+<div class="min-h-screen bg-gray-50 font-body">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- Encabezado -->
+        <div class="mb-8">
+            <h1 class="font-display text-3xl md:text-4xl text-gray-900 mb-2">
+                Tus paquetes
+            </h1>
+            <p class="text-gray-600">
+                Administrá tus compras grupales y actualizá tus pedidos
+            </p>
+        </div>
+
+        <!-- Estados de carga -->
+        @if (isLoading) {
+        <div class="flex flex-col items-center justify-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4"></div>
+            <p class="text-gray-600 text-lg">Cargando tus paquetes...</p>
+        </div>
+        }
+
+        @else if (errorMessage) {
+        <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
+            <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Error al cargar</h3>
+            <p class="text-gray-600 mb-6">{{ errorMessage }}</p>
+            <button (click)="cargarMisPaquetes()"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                Reintentar
+            </button>
+        </div>
+        }
+
+        <!-- Lista de paquetes -->
+        @else {
+        <div class="space-y-4">
+            @for (paquete of paquetes; track paquete.id_paquete_publicado) {
+            <article
+                class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg">
+
+                <!-- Header colapsable -->
+                <div (click)="toggleExpansion(paquete)"
+                    class="cursor-pointer p-5 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+
+                    <!-- Imagen del paquete -->
+                    <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                        @if (paquete.paqueteBase?.imagen_url) {
+                        <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre"
+                            class="w-full h-full object-contain p-2">
+                        } @else {
+                        <div class="w-full h-full flex items-center justify-center">
+                            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Información principal -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <h3 class="font-display text-xl text-gray-900 truncate">
+                                {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+                            </h3>
+
+                            <!-- Icono expandir/colapsar -->
+                            <button class="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-transform"
+                                [class.rotate-180]="paquete.expandido">
+                                <svg class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Tags cuando está colapsado -->
+                        @if (!paquete.expandido) {
+                        <div class="flex flex-wrap items-center gap-2 text-sm">
+                            <!-- Marca -->
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-primary text-white rounded-full font-medium">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                    <path
+                                        d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5 8.186 1.113zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z" />
+                                </svg>
+                                {{ getMarcaNombre() }}
+                            </span>
+
+                            <!-- Categoría -->
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-gray-200 text-gray-700 rounded-full font-medium">
+                                {{ getCategoriaNombre() }}
+                            </span>
+
+                            <!-- Tipo de paquete -->
+                            @if (getTipoPaqueteIcono(paquete.tipoPaquete)) {
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-white border-2 border-gray-200 text-gray-700 rounded-full font-medium">
+                                @if (getTipoPaqueteIcono(paquete.tipoPaquete) === TipoPaquete.SINERGICO) {
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                                </svg>
+                                <span class="text-xs">Sinérgico</span>
+                                } @else if (getTipoPaqueteIcono(paquete.tipoPaquete) === TipoPaquete.ENERGICO) {
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                    <path
+                                        d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09z" />
+                                </svg>
+                                <span class="text-xs">Energético</span>
+                                }
+                            </span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Contenido expandido -->
+                @if (paquete.expandido) {
+                <div class="border-t border-gray-200 bg-gray-50">
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                            <!-- Columna izquierda: Productos -->
+                            <div class="lg:col-span-2 space-y-4">
+                                <h4 class="font-display text-lg text-gray-900 mb-3">
+                                    Estás sumado con:
+                                </h4>
+
+                                @for (producto of paquete.productosSeleccionados; track producto.id_producto) {
+                                <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                                    <div class="flex items-center gap-4">
+                                        <!-- Imagen producto -->
+                                        <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                                            @if (producto.imagen_url) {
+                                            <img [src]="producto.imagen_url" [alt]="producto.nombre"
+                                                class="w-full h-full object-contain p-1">
+                                            }
+                                        </div>
+
+                                        <!-- Info producto -->
+                                        <div class="flex-1 min-w-0">
+                                            <p class="font-medium text-gray-900 truncate">{{ producto.nombre }}</p>
+                                            @if (producto.variante) {
+                                            <p class="text-sm text-gray-600">Talle: {{ producto.variante }}</p>
+                                            }
+                                            <p class="text-sm font-semibold text-primary mt-1">
+                                                ${{ producto.precio | number:'1.0-0' }} c/u
+                                            </p>
+                                        </div>
+
+                                        <!-- Controles cantidad -->
+                                        <div class="flex items-center gap-3">
+                                            <button (click)="disminuirCantidad(paquete, producto)"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="3" d="M20 12H4" />
+                                                </svg>
+                                            </button>
+
+                                            <span class="w-12 text-center font-bold text-lg text-gray-900">
+                                                {{ producto.cantidad }}
+                                            </span>
+
+                                            <button (click)="aumentarCantidad(paquete, producto)"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-accent hover:bg-accent-dark text-gray-900 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="3" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Subtotal -->
+                                        <div class="text-right flex-shrink-0 min-w-[100px]">
+                                            <p class="text-sm text-gray-600">Subtotal</p>
+                                            <p class="font-bold text-lg text-gray-900">
+                                                ${{ (producto.precio * producto.cantidad) | number:'1.0-0' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+
+<div class="pb-4 border-b border-gray-200">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Subtotal</span>
+                                                <span class="font-semibold text-gray-900">
+                                                    ${{ paquete.precioTotal | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm text-gray-600">Descuento
+                                                    ({{paquete.descuento}}%)</span>
+                                                <span class="font-semibold text-green-600">
+                                                    -${{ (paquete.precioTotal - paquete.precioFinal) | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                            <div
+                                                class="flex justify-between items-center pt-2 border-t border-gray-200">
+                                                <span class="text-base font-bold text-gray-900">Total</span>
+                                                <span class="text-xl font-bold text-primary">
+                                                    ${{ paquete.precioFinal | number:'1.0-0' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                <!-- Botones de acción -->
+                                <div class="flex flex-wrap gap-3 pt-4">
+                                    <app-button [variant]="'primary'" [label]="'Actualizar pedido'"
+                                        (buttonClick)="actualizarPedido(paquete)">
+                                    </app-button>
+
+                                    <app-button [variant]="'tertiary'" [label]="'Ir al paquete'"
+                                        (buttonClick)="irAlPaquete(paquete)">
+                                    </app-button>
+
+                                    <app-button [variant]="'warning'" [label]="'Salir del paquete'"
+                                        (buttonClick)="salirDelPaquete(paquete)">
+                                    </app-button>
+                                </div>
+                            </div>
+
+                            <!-- Columna derecha: Información del paquete -->
+                            <div class="lg:col-span-1">
+                                <div class="bg-white rounded-lg p-5 shadow-sm border border-gray-200 sticky top-4">
+                                    <h4 class="font-display text-lg text-gray-900 mb-4">
+                                        Información del paquete
+                                    </h4>
+
+                                    <div class="space-y-4">
+                                        <!-- Resumen de precios -->
+
+
+                                        <!-- Estado -->
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-700 mb-1">Estado del paquete</p>
+                                                <span
+                                                    [class]="'inline-block px-3 py-1 rounded-full text-sm font-semibold border ' + getEstadoClass(paquete.estado.nombre)">
+                                                    {{ paquete.estado.nombre || 'Pendiente' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tiempo restante -->
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-700 mb-1">El paquete cierra en
+                                                </p>
+                                                <p class="text-lg font-bold text-gray-900">
+                                                    {{ getTiempoRestante(paquete.fecha_fin) }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Productos comprados -->
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path
+                                                    d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                            </svg>
+
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-700 mb-1">Productos ya comprados
+                                                </p>
+                                                <p class="text-lg font-bold text-gray-900">
+                                                    {{ paquete.cant_productos_reservados || 0 }} / {{
+                                                    paquete.cant_productos || 0 }}
+                                                </p>
+                                                @if (paquete.cant_productos && paquete.cant_productos_reservados) {
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    Faltan {{ paquete.cant_productos - paquete.cant_productos_reservados
+                                                    }} para cerrar
+                                                </p>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Compradores -->
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path
+                                                    d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                                            </svg>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-700 mb-1">Compradores
+                                                    involucrados</p>
+                                                <p class="text-lg font-bold text-gray-900">
+                                                    {{ paquete.cant_usuarios_registrados || 0 }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+            </article>
+            }
+
+            <!-- Empty state -->
+            @empty {
+            <div class="bg-white rounded-xl shadow-md p-12 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                    No estás en ningún paquete
+                </h3>
+                <p class="text-gray-600 mb-6">
+                    Explorá los paquetes disponibles y sumáte a compras grupales
+                </p>
+                <button (click)="router.navigate(['/paquetes'])"
+                    class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    Ver paquetes disponibles
+                </button>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>

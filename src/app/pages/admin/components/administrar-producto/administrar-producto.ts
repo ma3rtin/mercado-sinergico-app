@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 
@@ -12,87 +12,75 @@ import { ProductosService } from '@app/services/producto/producto.service';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-administrar-productos',
+  standalone: true,
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './administrar-producto.html',
-  imports: [CommonModule, FormsModule, ButtonComponent],
-  standalone: true
 })
-export class AdministrarProductosComponent implements OnInit {
-  productos: Producto[] = [];
-  filteredProductos: Producto[] = [];
-  searchTerm: string = '';
-  sortOrder: string = 'nombre-asc';
-  isLoading: boolean = true;
-
-  private toastr = inject(ToastrService);
+export class AdministrarProductosComponent {
   private productosService = inject(ProductosService);
+  private toastr = inject(ToastrService);
   private router = inject(Router);
 
-  ngOnInit(): void {
+  productos = signal<Producto[]>([]);
+  searchTerm = signal('');
+  sortOrder = signal<'nombre-asc' | 'nombre-desc' | 'precio-asc' | 'precio-desc' | 'marca-asc' | 'marca-desc' | 'stock-asc' | 'stock-desc'>('nombre-asc');
+  isLoading = signal(true);
+
+
+  filteredProductos = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const sorted = [...this.productos()];
+
+    // Filtro
+    const filtered = term
+      ? sorted.filter(p =>
+          p.nombre.toLowerCase().includes(term) ||
+          p.marca?.nombre?.toLowerCase().includes(term) ||
+          p.categoria?.nombre?.toLowerCase().includes(term)
+        )
+      : sorted;
+
+    // Ordenamiento
+    const order = this.sortOrder();
+    filtered.sort((a, b) => {
+      switch (order) {
+        case 'nombre-asc': return a.nombre.localeCompare(b.nombre);
+        case 'nombre-desc': return b.nombre.localeCompare(a.nombre);
+        case 'precio-asc': return a.precio - b.precio;
+        case 'precio-desc': return b.precio - a.precio;
+        case 'marca-asc': return (a.marca?.nombre || '').localeCompare(b.marca?.nombre || '');
+        case 'marca-desc': return (b.marca?.nombre || '').localeCompare(a.marca?.nombre || '');
+        case 'stock-asc': return (a.stock || 0) - (b.stock || 0);
+        case 'stock-desc': return (b.stock || 0) - (a.stock || 0);
+        default: return 0;
+      }
+    });
+
+    return filtered;
+  });
+
+  constructor() {
     this.loadProductos();
+
+    effect(() => {
+      console.log('🔍 Buscando:', this.searchTerm(), '| Orden:', this.sortOrder());
+    });
   }
 
-  loadProductos(): void {
-    this.isLoading = true;
+  private loadProductos(): void {
+    this.isLoading.set(true);
     this.productosService.getProductos().subscribe({
       next: (productos) => {
-        this.productos = productos;
-        this.filteredProductos = [...this.productos];
-        this.applySorting();
-        this.isLoading = false;
+        this.productos.set(productos);
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error cargando productos:', error);
         this.toastr.error('Error al cargar los productos');
-        this.isLoading = false;
-      }
-    });
-  }
-
-  onSearch(): void {
-    const term = this.searchTerm.toLowerCase().trim();
-
-    if (!term) {
-      this.filteredProductos = [...this.productos];
-    } else {
-      this.filteredProductos = this.productos.filter(producto =>
-        producto.nombre.toLowerCase().includes(term) ||
-        producto.marca?.nombre?.toLowerCase().includes(term) ||
-        producto.categoria?.nombre?.toLowerCase().includes(term)
-      );
-    }
-
-    this.applySorting();
-  }
-
-  onSortChange(): void {
-    this.applySorting();
-  }
-
-  private applySorting(): void {
-    this.filteredProductos.sort((a, b) => {
-      switch (this.sortOrder) {
-        case 'nombre-asc':
-          return a.nombre.localeCompare(b.nombre);
-        case 'nombre-desc':
-          return b.nombre.localeCompare(a.nombre);
-        case 'precio-asc':
-          return a.precio - b.precio;
-        case 'precio-desc':
-          return b.precio - a.precio;
-        case 'marca-asc':
-          return (a.marca?.nombre || '').localeCompare(b.marca?.nombre || '');
-        case 'marca-desc':
-          return (b.marca?.nombre || '').localeCompare(a.marca?.nombre || '');
-        case 'stock-asc':
-          return (a.stock || 0) - (b.stock || 0);
-        case 'stock-desc':
-          return (b.stock || 0) - (a.stock || 0);
-        default:
-          return 0;
+        this.isLoading.set(false);
       }
     });
   }
@@ -106,7 +94,6 @@ export class AdministrarProductosComponent implements OnInit {
   }
 
   viewProducto(producto: Producto): void {
-    // Abrir modal de vista detallada o navegar a página de detalle
     Swal.fire({
       title: producto.nombre,
       html: `
@@ -129,62 +116,52 @@ export class AdministrarProductosComponent implements OnInit {
     });
   }
 
-  duplicateProducto(producto: Producto): void {
-    Swal.fire({
-      title: '¿Duplicar producto?',
-      text: `Se creará una copia de "${producto.nombre}"`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Sí, duplicar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Crear copia del producto sin el ID
-        // const productoNuevo = {
-        //   ...producto,
-        //   id: undefined,
-        //   nombre: `${producto.nombre} (Copia)`,
-        //   imagenes: []
-        // };
+duplicateProducto(producto: Producto): void {
+  Swal.fire({
+    title: '¿Duplicar producto?',
+    text: `Se creará una copia de "${producto.nombre}".`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Duplicar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#71A8D9'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.productosService.duplicateProduct(producto.id_producto!).subscribe({
+        next: (response) => {
+          this.productos.update((prev) => [...prev, response]);
+          this.toastr.success('Producto duplicado correctamente');
+          this.loadProductos();
+        },
+        error: (error) => {
+          console.error('Error duplicando producto:', error);
+          this.toastr.error('No se pudo duplicar el producto');
+        }
+      });
+    }
+  });
+}
 
-        this.productosService.duplicateProduct(producto.id_producto!).subscribe({
-          next: () => {
-            this.toastr.success('Producto duplicado exitosamente');
-            this.loadProductos();
-          },
-          error: (error) => {
-            console.error('Error duplicando producto:', error);
-            this.toastr.error(error.error?.message || 'Error al duplicar el producto');
-          }
-        });
 
-      }
-    });
-  }
 
   deleteProducto(producto: Producto): void {
     Swal.fire({
-      title: '¿Estás seguro?',
-      html: `Se eliminará el producto <strong>"${producto.nombre}"</strong> permanentemente`,
+      title: '¿Eliminar producto?',
+      text: `Se eliminará "${producto.nombre}" permanentemente`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#AA3A3A',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
+      confirmButtonText: 'Eliminar',
+      confirmButtonColor: '#E53935',
+      cancelButtonText: 'Cancelar',
+    }).then(result => {
       if (result.isConfirmed) {
-        this.productosService.deleteProducto(producto.id_producto!).subscribe({
+        this.productosService.deleteProducto(producto.id_producto??0).subscribe({
           next: () => {
             this.toastr.success('Producto eliminado correctamente');
-            this.productos = this.productos.filter(p => p.id_producto !== producto.id_producto);
-            this.filteredProductos = this.filteredProductos.filter(p => p.id_producto !== producto.id_producto);
+            this.loadProductos();
           },
-          error: (error) => {
-            console.error('Error eliminando producto:', error);
-            this.toastr.error(error.error?.message || 'Error al eliminar el producto');
+          error: () => {
+            this.toastr.error('Error al eliminar producto');
           }
         });
       }
@@ -192,20 +169,6 @@ export class AdministrarProductosComponent implements OnInit {
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(price);
-  }
-
-  getStockStatus(stock?: number): { class: string; text: string } {
-    if (!stock || stock === 0) {
-      return { class: 'text-red-600 bg-red-50', text: 'Sin stock' };
-    } else if (stock < 10) {
-      return { class: 'text-yellow-600 bg-yellow-50', text: 'Stock bajo' };
-    } else {
-      return { class: 'text-green-600 bg-green-50', text: 'En stock' };
-    }
+    return `$${price.toFixed(2)}`;
   }
 }

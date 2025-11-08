@@ -27,7 +27,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()"
+                    <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)"
                         placeholder="Buscar productos por nombre"
                         class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#71A8D9] transition-colors">
                 </div>
@@ -41,7 +41,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
                     </svg>
-                    <select title="Orden" [(ngModel)]="sortOrder" (change)="onSortChange()"
+                    <select title="Orden" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)"
                         class="w-full pl-12 pr-10 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 appearance-none focus:outline-none focus:border-[#71A8D9] transition-colors cursor-pointer">
                         <option value="nombre-asc">Ordenar: Nombre A-Z</option>
                         <option value="nombre-desc">Ordenar: Nombre Z-A</option>
@@ -61,7 +61,7 @@
         </div>
 
         <!-- Loading State -->
-        @if (isLoading) {
+        @if (isLoading()) {
         <div class="flex flex-col items-center justify-center py-20">
             <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#71A8D9] mb-4"></div>
             <p class="text-gray-600 text-lg">Cargando productos...</p>
@@ -69,27 +69,27 @@
         }
 
         <!-- Empty State -->
-        @else if (filteredProductos.length === 0 && !isLoading) {
+        @else if (filteredProductos().length === 0 && !isLoading()) {
         <div class="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center">
             <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
             </svg>
             <h3 class="text-2xl font-bold text-gray-700 mb-2">
-                @if (searchTerm) {
+                @if (searchTerm()) {
                 No se encontraron productos
                 } @else {
                 No hay productos registrados
                 }
             </h3>
             <p class="text-gray-500 mb-6">
-                @if (searchTerm) {
+                @if (searchTerm()) {
                 Intentá con otros términos de búsqueda
                 } @else {
                 Comenzá creando tu primer producto
                 }
             </p>
-            @if (!searchTerm) {
+            @if (!searchTerm()) {
             <app-button variant="primary" (click)="navigateToCreate()">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -105,7 +105,7 @@
         <!-- Lista de Productos (siguiendo diseño Figma) -->
         @else {
         <div class="space-y-4">
-            @for (producto of filteredProductos; track producto.id_producto) {
+            @for (producto of filteredProductos(); track producto.id_producto) {
             <div
                 class="bg-white rounded-2xl border-2 border-gray-200 hover:border-[#71A8D9] transition-all duration-300 overflow-hidden">
                 <div class="flex items-center p-4 md:p-6 gap-4 md:gap-6">

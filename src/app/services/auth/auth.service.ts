@@ -19,74 +19,81 @@ export class AuthService {
   public user$ = this.userSubject.asObservable();
   private logoutInProgress = false;
 
-    // 👇 inyectamos el PLATFORM_ID para detectar SSR
-    private platformId = inject(PLATFORM_ID);
+  // 👇 inyectamos el PLATFORM_ID para detectar SSR
+  private platformId = inject(PLATFORM_ID);
 
   constructor() {
     onAuthStateChanged(auth, async (user) => {
       this.userSubject.next(user);
 
-            if (user && !this.logoutInProgress) {
-                try {
-                    const token = await getIdToken(user);
-                    this.setFirebaseToken(token);
-                } catch (error) {
-                    console.error('❌ Error al obtener token de Firebase:', error);
-                }
-            } else {
-                this.clearTokens();
-            }
-        });
-    }
+      if (user && !this.logoutInProgress) {
+        try {
+          const token = await getIdToken(user);
+          this.setFirebaseToken(token);
+        } catch (error) {
+          console.error('❌ Error al obtener token de Firebase:', error);
+        }
+      } else {
+        this.clearTokens();
+      }
+    });
+  }
 
-    // ✅ Funciones seguras contra SSR (todas chequean si hay window)
+  // ✅ Funciones seguras contra SSR (todas chequean si hay window)
 
-    private isBrowser(): boolean {
-        return isPlatformBrowser(this.platformId);
-    }
+  private isBrowser(): boolean {
+    return isPlatformBrowser(this.platformId);
+  }
 
-    setJwtToken(token: string): void {
-        if (!this.isBrowser()) return;
-        localStorage.setItem(this.jwtKey, token);
-        console.log('🟢 JWT guardado:', token.substring(0, 20) + '...');
-    }
+  setJwtToken(token: string): void {
+    if (!this.isBrowser()) return;
+    localStorage.setItem(this.jwtKey, token);
+    console.log('🟢 JWT guardado:', token.substring(0, 20) + '...');
+  }
 
-    getJwtToken(): string | null {
-        if (!this.isBrowser()) return null;
-        return localStorage.getItem(this.jwtKey);
-    }
+  getJwtToken(): string | null {
+    if (!this.isBrowser()) return null;
 
-    clearJwtToken(): void {
-        if (!this.isBrowser()) return;
-        localStorage.removeItem(this.jwtKey);
-    }
+    const token = localStorage.getItem(this.jwtKey);
+    console.trace(
+      '🔍 getJwtToken llamado desde:',
+      token ? 'token existe' : 'sin token'
+    );
 
-    setFirebaseToken(token: string): void {
-        if (!this.isBrowser()) return;
-        localStorage.setItem(this.firebaseKey, token);
-        console.log('🔵 Token Firebase guardado:', token.substring(0, 20) + '...');
-    }
+    return token;
+  }
 
-    getFirebaseToken(): string | null {
-        if (!this.isBrowser()) return null;
-        return localStorage.getItem(this.firebaseKey);
-    }
+  clearJwtToken(): void {
+    if (!this.isBrowser()) return;
+    localStorage.removeItem(this.jwtKey);
+  }
 
-    clearFirebaseToken(): void {
-        if (!this.isBrowser()) return;
-        localStorage.removeItem(this.firebaseKey);
-    }
+  setFirebaseToken(token: string): void {
+    if (!this.isBrowser()) return;
+    localStorage.setItem(this.firebaseKey, token);
+    console.log('🔵 Token Firebase guardado:', token.substring(0, 20) + '...');
+  }
 
-    clearTokens(): void {
-        if (!this.isBrowser()) return;
-        this.clearJwtToken();
-        this.clearFirebaseToken();
-    }
+  getFirebaseToken(): string | null {
+    if (!this.isBrowser()) return null;
+    return localStorage.getItem(this.firebaseKey);
+  }
 
-    isAuthenticated(): boolean {
-        if (!this.isBrowser()) return false;
-        return !!(this.getJwtToken() || this.getFirebaseToken());
-    }
+  clearFirebaseToken(): void {
+    if (!this.isBrowser()) return;
+    localStorage.removeItem(this.firebaseKey);
+  }
+
+  clearTokens(): void {
+    if (!this.isBrowser()) return;
+    this.clearJwtToken();
+    this.clearFirebaseToken();
+  }
+
+  isAuthenticated(): boolean {
+    if (!this.isBrowser()) return false;
+    return !!(this.getJwtToken() || this.getFirebaseToken());
+  }
 
   async signInWithGoogle(): Promise<User> {
     const provider = new GoogleAuthProvider();
@@ -98,21 +105,21 @@ export class AuthService {
     const token = await getIdToken(user);
     this.setFirebaseToken(token);
 
-        return user;
-    }
+    return user;
+  }
 
-    async signOut(): Promise<void> {
-        try {
-            this.logoutInProgress = true;
-            await firebaseSignOut(auth);
-            this.clearTokens();
-            console.log('✅ Sesión cerrada completamente');
-        } catch (error) {
-            console.error('⚠️ Error al cerrar sesión:', error);
-        } finally {
-            this.logoutInProgress = false;
-        }
+  async signOut(): Promise<void> {
+    try {
+      this.logoutInProgress = true;
+      await firebaseSignOut(auth);
+      this.clearTokens();
+      console.log('✅ Sesión cerrada completamente');
+    } catch (error) {
+      console.error('⚠️ Error al cerrar sesión:', error);
+    } finally {
+      this.logoutInProgress = false;
     }
+  }
 
   getCurrentUser(): User | null {
     return auth.currentUser;

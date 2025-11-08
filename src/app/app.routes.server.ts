@@ -6,7 +6,6 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'login', renderMode: RenderMode.Prerender },
   { path: 'registrarse', renderMode: RenderMode.Prerender },
   { path: 'productos', renderMode: RenderMode.Prerender },
-  { path: 'detalleSeleccionProducto', renderMode: RenderMode.Prerender },
   { path: 'perfil-admin', renderMode: RenderMode.Prerender },
   { path: 'crear-producto', renderMode: RenderMode.Prerender },
   { path: 'crear-paquete', renderMode: RenderMode.Prerender },
@@ -15,10 +14,10 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'administrar-plantillas', renderMode: RenderMode.Prerender },
   { path: 'administrar-productos', renderMode: RenderMode.Prerender },
   { path: 'paquetes-publicados', renderMode: RenderMode.Prerender },
+  { path: 'mis-paquetes', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Prerender },
 
   // Rutas dinámicas
-  { path: 'producto/:id', renderMode: RenderMode.Server },
   { path: 'detalleSeleccionProducto/:id', renderMode: RenderMode.Server },
   { path: 'detalleProductoSumarse/:id', renderMode: RenderMode.Server },
   { path: 'editar-producto/:id', renderMode: RenderMode.Server }

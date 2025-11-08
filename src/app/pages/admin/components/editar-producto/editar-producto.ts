@@ -1,21 +1,18 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
-
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
-
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
@@ -23,8 +20,8 @@ import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-mo
 interface ImageSlot {
   file: File | null;
   preview: string | null;
-  existingUrl?: string; // URL de la imagen existente en el servidor
-  isExisting?: boolean; // Flag para saber si es una imagen ya guardada
+  existingUrl?: string;
+  isExisting?: boolean;
 }
 
 @Component({
@@ -40,47 +37,62 @@ interface ImageSlot {
   standalone: true
 })
 export class EditarProductoComponent implements OnInit {
-  productForm!: FormGroup;
+  // Injections
+  private fb = inject(FormBuilder);
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  
-  // Datos para select
-  plantillas: Plantilla[] = [];
-  marcas: Marca[] = [];
-  categorias: Categoria[] = [];
+  private plantillaService = inject(PlantillaService);
+  private marcaService = inject(MarcaService);
+  private categoriaService = inject(CategoriaService);
+  private productoService = inject(ProductosService);
 
-  // Estado del componente
-  selectedTemplate: Plantilla | null = null;
-  selectedAttributes: { [key: string]: string[] } = {};
-  selectedAttributesTouched: { [key: string]: boolean } = {};
-  
-  // Sistema de slots de imágenes
-  imageSlots: ImageSlot[] = Array(8).fill(null).map(() => ({ 
-    file: null, 
-    preview: null,
-    isExisting: false
-  }));
-  
-  isLoading = false;
-  formSubmitted = false;
-  productoId: number | null = null;
-  productoOriginal: Producto | null = null;
+  // Form
+  productForm!: FormGroup;
 
-  // Drag & Drop
-  draggedIndex: number | null = null;
+  // Signals - Datos para selects
+  plantillas = signal<Plantilla[]>([]);
+  marcas = signal<Marca[]>([]);
+  categorias = signal<Categoria[]>([]);
 
-  // Modal
-  isCreateModalOpen = false;
-  plantillaToEdit?: Plantilla;
+  // Signals - Estado del producto
+  productoId = signal<number | null>(null);
+  productoOriginal = signal<Producto | null>(null);
 
-  constructor(
-    private fb: FormBuilder,
-    private plantillaService: PlantillaService,
-    private marcaService: MarcaService,
-    private categoriaService: CategoriaService,
-    private productoService: ProductosService
-  ) { }
+  // Signals - Plantilla y atributos
+  selectedTemplate = signal<Plantilla | null>(null);
+  selectedAttributes = signal<{ [key: string]: string[] }>({});
+  selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
+
+  // Signals - Imágenes
+  imageSlots = signal<ImageSlot[]>(
+    Array(8).fill(null).map(() => ({
+      file: null,
+      preview: null,
+      isExisting: false
+    }))
+  );
+
+  // Signals - Estado UI
+  isLoading = signal(false);
+  formSubmitted = signal(false);
+  draggedIndex = signal<number | null>(null);
+  isCreateModalOpen = signal(false);
+  plantillaToEdit = signal<Plantilla | undefined>(undefined);
+
+  // Computed signals
+  hasImages = computed(() =>
+    this.imageSlots().some(slot => slot.file !== null || slot.isExisting)
+  );
+
+  hasMainImage = computed(() => {
+    const mainSlot = this.imageSlots()[0];
+    return mainSlot.file !== null || mainSlot.isExisting === true;
+  });
+
+  isFormValid = computed(() =>
+    this.productForm?.valid && this.hasMainImage()
+  );
 
   ngOnInit(): void {
     this.initializeForm();
@@ -105,48 +117,58 @@ export class EditarProductoComponent implements OnInit {
   }
 
   loadInitialData(): void {
-    this.plantillaService.getPlantillas().subscribe((plantillas) => {
-      this.plantillas = plantillas;
+    this.plantillaService.getPlantillas().subscribe({
+      next: (plantillas) => this.plantillas.set(plantillas),
+      error: (error) => {
+        console.error('Error cargando plantillas:', error);
+        this.toastr.error('Error al cargar plantillas');
+      }
     });
 
-    this.marcaService.getMarcas().subscribe((marcas) => {
-      this.marcas = marcas;
+    this.marcaService.getMarcas().subscribe({
+      next: (marcas) => this.marcas.set(marcas),
+      error: (error) => {
+        console.error('Error cargando marcas:', error);
+        this.toastr.error('Error al cargar marcas');
+      }
     });
 
-    this.categoriaService.getCategorias().subscribe((categorias) => {
-      this.categorias = categorias;
+    this.categoriaService.getCategorias().subscribe({
+      next: (categorias) => this.categorias.set(categorias),
+      error: (error) => {
+        console.error('Error cargando categorías:', error);
+        this.toastr.error('Error al cargar categorías');
+      }
     });
   }
 
   loadProductoToEdit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    
     if (!id) {
       this.toastr.error('ID de producto no encontrado');
       this.router.navigate(['/administrar-productos']);
       return;
     }
 
-    this.productoId = Number(id);
-    this.isLoading = true;
+    this.productoId.set(Number(id));
+    this.isLoading.set(true);
 
-    this.productoService.getProductoById(this.productoId).subscribe({
+    this.productoService.getProductoById(this.productoId()!).subscribe({
       next: (producto) => {
-        this.productoOriginal = producto;
+        this.productoOriginal.set(producto);
         this.populateForm(producto);
-        this.isLoading = false;
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error cargando producto:', error);
         this.toastr.error('Error al cargar el producto');
         this.router.navigate(['/administrar-productos']);
-        this.isLoading = false;
+        this.isLoading.set(false);
       }
     });
   }
 
   populateForm(producto: Producto): void {
-    // Llenar el formulario con los datos del producto
     this.productForm.patchValue({
       nombre: producto.nombre,
       descripcion: producto.descripcion,
@@ -163,15 +185,26 @@ export class EditarProductoComponent implements OnInit {
 
     // Cargar plantilla si existe
     if (producto.plantilla) {
-      const plantilla = this.plantillas.find(p => p.id === producto.plantilla?.id);
+      const plantilla = this.plantillas().find(p => p.id === producto.plantilla?.id);
       if (plantilla) {
         this.selectTemplate(plantilla);
       }
     }
 
-    // Cargar imágenes existentes
+    // Cargar imágenes
+    this.loadProductImages(producto);
+  }
+
+  loadProductImages(producto: Producto): void {
+    const newSlots: ImageSlot[] = Array(8).fill(null).map(() => ({
+      file: null,
+      preview: null,
+      isExisting: false
+    }));
+
+    // Imagen principal
     if (producto.imagen_url) {
-      this.imageSlots[0] = {
+      newSlots[0] = {
         file: null,
         preview: producto.imagen_url,
         existingUrl: producto.imagen_url,
@@ -179,28 +212,32 @@ export class EditarProductoComponent implements OnInit {
       };
     }
 
-    // Cargar imágenes adicionales si existen
+    // Imágenes adicionales
     if (producto.imagenes && Array.isArray(producto.imagenes)) {
       producto.imagenes.forEach((imagen, index) => {
-        if (index < 7) { // Máximo 7 imágenes adicionales
-          this.imageSlots[index + 1] = {
+        if (index < 7) {
+          const imageUrl = imagen.url || imagen.url;
+          newSlots[index + 1] = {
             file: null,
-            preview: imagen.url || imagen.url,
-            existingUrl: imagen.url || imagen.url,
+            preview: imageUrl,
+            existingUrl: imageUrl,
             isExisting: true
           };
         }
       });
     }
+
+    this.imageSlots.set(newSlots);
   }
 
   // Selección de plantilla
   selectTemplate(template: Plantilla): void {
-    if (this.selectedTemplate?.id !== template.id) {
-      this.selectedTemplate = template;
-      this.selectedAttributes = {};
-      this.selectedAttributesTouched = {};
+    if (this.selectedTemplate()?.id !== template.id) {
+      this.selectedTemplate.set(template);
+      this.selectedAttributes.set({});
+      this.selectedAttributesTouched.set({});
     }
+
     this.productForm.patchValue({
       plantillaId: template.id
     });
@@ -208,35 +245,39 @@ export class EditarProductoComponent implements OnInit {
 
   // Manejo de atributos
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
-    this.selectedAttributesTouched[attributeName] = true;
+    const touched = { ...this.selectedAttributesTouched() };
+    touched[attributeName] = true;
+    this.selectedAttributesTouched.set(touched);
 
-    if (!this.selectedAttributes[attributeName]) {
-      this.selectedAttributes[attributeName] = [];
+    const attributes = { ...this.selectedAttributes() };
+    if (!attributes[attributeName]) {
+      attributes[attributeName] = [];
     }
 
     if (checked) {
-      if (!this.selectedAttributes[attributeName].includes(value)) {
-        this.selectedAttributes[attributeName].push(value);
+      if (!attributes[attributeName].includes(value)) {
+        attributes[attributeName] = [...attributes[attributeName], value];
       }
     } else {
-      this.selectedAttributes[attributeName] =
-        this.selectedAttributes[attributeName].filter(v => v !== value);
+      attributes[attributeName] = attributes[attributeName].filter(v => v !== value);
     }
+
+    this.selectedAttributes.set(attributes);
   }
 
   isAttributeSelected(attributeName: string, value: string): boolean {
-    if (!this.selectedAttributesTouched[attributeName]) {
+    if (!this.selectedAttributesTouched()[attributeName]) {
       return true;
     }
-    return this.selectedAttributes[attributeName]?.includes(value) ?? false;
+    return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
   // Manejo de imágenes
-  onFileSelected(event: Event, index: number) {
+  onFileSelected(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
+
       if (!file.type.startsWith('image/')) {
         this.toastr.error('Solo se permiten archivos de imagen');
         return;
@@ -247,71 +288,76 @@ export class EditarProductoComponent implements OnInit {
         return;
       }
 
-      this.imageSlots[index].file = file;
-      this.imageSlots[index].isExisting = false;
-      
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.imageSlots[index].preview = e.target.result;
+        const newSlots = [...this.imageSlots()];
+        newSlots[index] = {
+          file,
+          preview: e.target.result,
+          existingUrl: undefined,
+          isExisting: false
+        };
+        this.imageSlots.set(newSlots);
       };
       reader.readAsDataURL(file);
     }
-    
     input.value = '';
   }
 
-  removeImage(index: number, event?: Event) {
+  removeImage(index: number, event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
-    this.imageSlots[index] = { file: null, preview: null, isExisting: false };
-  }
-
-  hasImages(): boolean {
-    return this.imageSlots.some(slot => slot.file !== null || slot.isExisting);
-  }
-
-  hasMainImage(): boolean {
-    return this.imageSlots[0].file !== null || this.imageSlots[0].isExisting === true;
+    const newSlots = [...this.imageSlots()];
+    newSlots[index] = {
+      file: null,
+      preview: null,
+      existingUrl: undefined,
+      isExisting: false
+    };
+    this.imageSlots.set(newSlots);
   }
 
   // Drag & Drop
-  onDragStart(index: number, event: DragEvent) {
-    this.draggedIndex = index;
+  onDragStart(index: number, event: DragEvent): void {
+    this.draggedIndex.set(index);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
     }
   }
 
-  onDragOver(event: DragEvent) {
+  onDragOver(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer) {
       event.dataTransfer.dropEffect = 'move';
     }
   }
 
-  onDrop(targetIndex: number, event: DragEvent) {
+  onDrop(targetIndex: number, event: DragEvent): void {
     event.preventDefault();
-    
-    if (this.draggedIndex === null || this.draggedIndex === targetIndex) {
-      this.draggedIndex = null;
+    const dragIndex = this.draggedIndex();
+
+    if (dragIndex === null || dragIndex === targetIndex) {
+      this.draggedIndex.set(null);
       return;
     }
 
-    const temp = this.imageSlots[this.draggedIndex];
-    this.imageSlots[this.draggedIndex] = this.imageSlots[targetIndex];
-    this.imageSlots[targetIndex] = temp;
-    
-    this.draggedIndex = null;
+    const newSlots = [...this.imageSlots()];
+    const temp = newSlots[dragIndex];
+    newSlots[dragIndex] = newSlots[targetIndex];
+    newSlots[targetIndex] = temp;
+
+    this.imageSlots.set(newSlots);
+    this.draggedIndex.set(null);
   }
 
-  onDragEnd() {
-    this.draggedIndex = null;
+  onDragEnd(): void {
+    this.draggedIndex.set(null);
   }
 
   // Envío del formulario
-  onSubmit() {
-    this.formSubmitted = true;
+  onSubmit(): void {
+    this.formSubmitted.set(true);
 
     if (this.productForm.invalid) {
       this.toastr.error('Por favor completá todos los campos requeridos');
@@ -324,13 +370,30 @@ export class EditarProductoComponent implements OnInit {
       return;
     }
 
-    if (!this.productoId) {
+    const id = this.productoId();
+    if (!id) {
       this.toastr.error('ID de producto no encontrado');
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
+    const formData = this.buildFormData();
 
+    this.productoService.updateProducto(id, formData).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.toastr.success('Producto actualizado exitosamente 🎉');
+        this.router.navigate(['administrar-productos']);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        console.error('Error actualizando producto', err);
+        this.toastr.error(err.error?.message || 'Error actualizando producto');
+      }
+    });
+  }
+
+  private buildFormData(): FormData {
     const formData = new FormData();
 
     // Agregar campos básicos
@@ -340,30 +403,21 @@ export class EditarProductoComponent implements OnInit {
       }
     });
 
-    // Agregar imagen principal solo si es nueva
-    if (this.imageSlots[0].file) {
-      formData.append('icono', this.imageSlots[0].file);
+    const slots = this.imageSlots();
+
+    // Imagen principal solo si es nueva
+    if (slots[0].file) {
+      formData.append('icono', slots[0].file);
     }
 
-    // Agregar imágenes adicionales solo si son nuevas
-    for (let i = 1; i < this.imageSlots.length; i++) {
-      if (this.imageSlots[i].file) {
-        formData.append('imagenes', this.imageSlots[i].file as Blob);
+    // Imágenes adicionales solo si son nuevas
+    for (let i = 1; i < slots.length; i++) {
+      if (slots[i].file) {
+        formData.append('imagenes', slots[i].file as Blob);
       }
     }
 
-    this.productoService.updateProducto(this.productoId, formData).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.toastr.success('Producto actualizado exitosamente 🎉');
-        this.router.navigate(['administrar-productos']);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.error('Error actualizando producto', err);
-        this.toastr.error(err.error?.message || 'Error actualizando producto');
-      }
-    });
+    return formData;
   }
 
   // Cancelar edición
@@ -373,25 +427,25 @@ export class EditarProductoComponent implements OnInit {
 
   // Modal
   openCreateModal(): void {
-    this.isCreateModalOpen = true;
-    this.plantillaToEdit = undefined;
+    this.isCreateModalOpen.set(true);
+    this.plantillaToEdit.set(undefined);
   }
 
   closeCreateModal(): void {
-    this.isCreateModalOpen = false;
-    this.plantillaToEdit = undefined;
+    this.isCreateModalOpen.set(false);
+    this.plantillaToEdit.set(undefined);
   }
 
   onPlantillaCreated(plantilla: Plantilla): void {
-    this.plantillas.push(plantilla);
+    this.plantillas.update(plantillas => [...plantillas, plantilla]);
     this.selectTemplate(plantilla);
     this.closeCreateModal();
   }
 
   // Helpers para validación
   isFieldInvalid(fieldName: string): boolean {
-    const control = this.productForm.get(fieldName);
-    return !!(control && control.invalid && (control.touched || this.formSubmitted));
+    const control = this.productForm?.get(fieldName);
+    return !!(control && control.invalid && (control.touched || this.formSubmitted()));
   }
 
   getErrorMessage(fieldName: string): string {
@@ -435,9 +489,5 @@ export class EditarProductoComponent implements OnInit {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
-  }
-
-  get isFormValid(): boolean {
-    return this.productForm.valid && this.hasMainImage();
   }
 }
