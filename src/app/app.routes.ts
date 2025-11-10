@@ -17,6 +17,7 @@ import { AdministrarProductosComponent } from './pages/admin/components/administ
 import { PublicarPaqueteComponent } from './pages/admin/components/publicar-paquete/publicar-paquete';
 import { RenderMode } from '@angular/ssr';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
 
 export const routes: Routes = [
@@ -45,7 +46,7 @@ export const routes: Routes = [
 
   // 🧑‍💻 Rutas de admin
   {path: 'admin',
-  canActivate: [authGuard],
+  canActivate: [authGuard, adminGuard],
   data: { renderMode: RenderMode.Client },
   children: [
     {path: 'perfil', component: PerfilAdmin},
