@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, effect } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
@@ -26,11 +26,15 @@ export class Perfil implements OnInit {
   mensaje = signal<string | null>(null);
   tieneCambios = signal(false);
   cpSeleccionado = signal('');
-  
+  loadingImagen = signal(false);
+
+  // 📦 Archivo seleccionado
+  selectedFile: File | null = null;
+
   form!: FormGroup;
   private inicializando = true;
 
-  // 🔧 Inicialización del formulario
+  // 🔧 Inicialización
   ngOnInit(): void {
     this.form = this.fb.group({
       telefono: ['', [Validators.required, Validators.minLength(8)]],
@@ -44,23 +48,19 @@ export class Perfil implements OnInit {
       dpto: [''],
     });
 
-    // 📡 Escucha de cambios en el formulario
     this.form.valueChanges.subscribe(() => {
       if (!this.inicializando) this.tieneCambios.set(true);
     });
 
-    // 🌎 Cargar localidades
     this.localidadService.getAll().subscribe({
       next: (locs) => this.localidades.set(locs),
       error: (err) => console.error('Error al obtener localidades:', err),
     });
 
-    // 👤 Cargar usuario logueado
     this.usuarioService.getPerfil().subscribe({
       next: (u) => {
         this.usuario.set(u);
         this.sesionIniciada.set(true);
-
         const fechaFormateada = this.formatDate(u.fecha_nac);
         this.form.patchValue({
           telefono: u.telefono || '',
@@ -73,7 +73,6 @@ export class Perfil implements OnInit {
           piso: u.direccion?.piso || '',
           dpto: u.direccion?.departamento || '',
         });
-
         this.inicializando = false;
         this.tieneCambios.set(false);
         this.cargando.set(false);
@@ -113,7 +112,7 @@ export class Perfil implements OnInit {
     this.form.markAsDirty();
   }
 
-  // 💾 Guardar cambios
+  // 💾 Guardar cambios (datos + imagen)
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -121,45 +120,49 @@ export class Perfil implements OnInit {
       return;
     }
 
-    const datos = this.form.value;
+    this.loadingImagen.set(true);
 
-    this.usuarioService.updatePerfil(datos).subscribe({
-      next: (u) => {
+    // 📦 Crear FormData para enviar JSON + archivo
+    const formData = new FormData();
+    Object.entries(this.form.value).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) formData.append(key, value as string);
+    });
+    if (this.selectedFile) formData.append('imagen', this.selectedFile);
+
+    this.usuarioService.updatePerfil(formData).subscribe({
+      next: (res) => {
+        const u = (res as any).usuario ?? res;
         this.usuario.set(u);
         this.mensaje.set('Perfil actualizado correctamente ✅');
         this.form.markAsPristine();
         this.tieneCambios.set(false);
+        this.loadingImagen.set(false);
+        this.selectedFile = null;
       },
       error: (err) => {
         console.error('Error al actualizar perfil:', err);
         this.mensaje.set('Error al actualizar perfil ❌');
+        this.loadingImagen.set(false);
       }
     });
   }
 
-  // 📸 Subir imagen
+  // 📸 Seleccionar imagen (sin subir todavía)
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
 
-    const file = input.files[0];
+    this.selectedFile = input.files[0]; // 🔹 guardamos el archivo para enviar luego
+
     const reader = new FileReader();
-
     reader.onload = () => {
-      const imgData = reader.result as string;
-
+      const preview = reader.result as string;
       const user = this.usuario();
       if (user) {
-        this.usuario.set({
-          ...user,
-          imagen_url: imgData ?? user.imagen_url,
-        });
+        this.usuario.set({ ...user, imagen_url: preview });
       }
-
-      this.form.patchValue({ imagen_url: imgData });
-      this.form.markAsDirty();
+      this.tieneCambios.set(true);
     };
-
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(this.selectedFile);
   }
 }
