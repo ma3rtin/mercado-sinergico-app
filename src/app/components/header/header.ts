@@ -13,19 +13,20 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './header.css',
 })
 export class Header {
-  // 🧩 Estado local
   searchOpen = false;
   drawerOpen = false;
 
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  // 🧠 Inyección reactiva
   private authService = inject(AuthService);
 
-  // ✅ Signal computada (reactiva automáticamente)
   isLoggedIn = this.authService.isAuthenticated;
+  
+  get profileLink(): string {
+    const role = this.authService.getUserRole();
+    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
+  }
 
-  // 🔒 Cerrar sesión
   async signOut() {
     if (confirm('¿Seguro que desea cerrar sesión?')) {
       await this.authService.signOut();

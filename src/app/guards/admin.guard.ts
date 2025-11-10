@@ -11,11 +11,11 @@ export const adminGuard: CanActivateFn = async (): Promise<boolean | UrlTree> =>
 
     const role = authService.getUserRole();
 
-    if (role === 'Admin') {
+    if (role === 'Administrador') {
         console.log('🛡️ Acceso admin permitido');
         return true;
     }
 
     console.warn('🚫 Acceso denegado: se requiere rol Admin');
-    return router.createUrlTree(['/']); // Redirige al home o donde prefieras
+    return router.createUrlTree(['/']);
 };
