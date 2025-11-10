@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
@@ -13,21 +13,80 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./perfil.css']
 })
 export class Perfil implements OnInit {
+  // 🧩 Servicios
   private usuarioService = inject(UsuarioService);
   private localidadService = inject(LocalidadService);
   private fb = inject(FormBuilder);
 
-  localidades: Localidad[] = [];
-  usuario?: Usuario;
+  // 🧠 Signals
+  localidades = signal<Localidad[]>([]);
+  usuario = signal<Usuario | null>(null);
+  cargando = signal(true);
+  sesionIniciada = signal(false);
+  mensaje = signal<string | null>(null);
+  tieneCambios = signal(false);
+  cpSeleccionado = signal('');
+  
   form!: FormGroup;
-  cargando = true;
-  sesionIniciada = false;
-  mensaje?: string;
-  cpSeleccionado = '';
-
   private inicializando = true;
-  tieneCambios = false;
 
+  // 🔧 Inicialización del formulario
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      telefono: ['', [Validators.required, Validators.minLength(8)]],
+      fecha_nac: ['', Validators.required],
+      imagen_url: [''],
+      localidad: ['', Validators.required],
+      cp: [''],
+      calle: [''],
+      numero: [''],
+      piso: [''],
+      dpto: [''],
+    });
+
+    // 📡 Escucha de cambios en el formulario
+    this.form.valueChanges.subscribe(() => {
+      if (!this.inicializando) this.tieneCambios.set(true);
+    });
+
+    // 🌎 Cargar localidades
+    this.localidadService.getAll().subscribe({
+      next: (locs) => this.localidades.set(locs),
+      error: (err) => console.error('Error al obtener localidades:', err),
+    });
+
+    // 👤 Cargar usuario logueado
+    this.usuarioService.getPerfil().subscribe({
+      next: (u) => {
+        this.usuario.set(u);
+        this.sesionIniciada.set(true);
+
+        const fechaFormateada = this.formatDate(u.fecha_nac);
+        this.form.patchValue({
+          telefono: u.telefono || '',
+          fecha_nac: fechaFormateada,
+          imagen_url: u.imagen_url || '',
+          localidad: u.direccion?.localidad?.id_localidad || '',
+          cp: u.direccion?.codigo_postal || '',
+          calle: u.direccion?.calle || '',
+          numero: u.direccion?.numero || '',
+          piso: u.direccion?.piso || '',
+          dpto: u.direccion?.departamento || '',
+        });
+
+        this.inicializando = false;
+        this.tieneCambios.set(false);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error al obtener usuario:', err);
+        this.cargando.set(false);
+        this.sesionIniciada.set(false);
+      }
+    });
+  }
+
+  // 📅 Formatear fecha
   private formatDate(date: any): string {
     if (!date) return '';
     if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
@@ -45,71 +104,20 @@ export class Perfil implements OnInit {
     return '';
   }
 
+  // 🏙️ Cambio de localidad
   onLocalidadChange(event: Event) {
     const id = Number((event.target as HTMLSelectElement).value);
-    const loc = this.localidades.find(l => l.id_localidad === id);
+    const loc = this.localidades().find(l => l.id_localidad === id);
     this.form.patchValue({ cp: loc?.codigo_postal || '' });
-    this.cpSeleccionado = loc?.codigo_postal?.toString() || '';
+    this.cpSeleccionado.set(loc?.codigo_postal?.toString() || '');
     this.form.markAsDirty();
   }
 
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      telefono: ['', [Validators.required, Validators.minLength(8)]],
-      fecha_nac: ['', Validators.required],
-      imagen_url: [''],
-      localidad: ['', Validators.required],
-      cp: [''],
-      calle: [''],
-      numero: [''],
-      piso: [''],
-      dpto: [''],
-    });
-
-    this.form.valueChanges.subscribe(() => {
-      if (!this.inicializando) this.tieneCambios = true;
-    });
-
-    this.localidadService.getAll().subscribe({
-      next: (locs) => (this.localidades = locs),
-      error: (err) => console.error('Error al obtener localidades:', err),
-    });
-
-    this.usuarioService.getPerfil().subscribe({
-      next: (u) => {
-        this.usuario = u;
-        this.sesionIniciada = true;
-
-        const fechaFormateada = this.formatDate(u.fecha_nac);
-
-        this.form.patchValue({
-          telefono: u.telefono || '',
-          fecha_nac: fechaFormateada,
-          imagen_url: u.imagen_url || '',
-          localidad: u.direccion?.localidad?.id_localidad || '',
-          cp: u.direccion?.codigo_postal || '',
-          calle: u.direccion?.calle || '',
-          numero: u.direccion?.numero || '',
-          piso: u.direccion?.piso || '',
-          dpto: u.direccion?.departamento || ''
-        });
-
-        this.inicializando = false;
-        this.tieneCambios = false;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al obtener usuario:', err);
-        this.cargando = false;
-        this.sesionIniciada = false;
-      }
-    });
-  }
-
+  // 💾 Guardar cambios
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.mensaje = 'Tenés campos obligatorios sin completar ❌';
+      this.mensaje.set('Tenés campos obligatorios sin completar ❌');
       return;
     }
 
@@ -117,18 +125,19 @@ export class Perfil implements OnInit {
 
     this.usuarioService.updatePerfil(datos).subscribe({
       next: (u) => {
-        this.usuario = u;
-        this.mensaje = 'Perfil actualizado correctamente ✅';
+        this.usuario.set(u);
+        this.mensaje.set('Perfil actualizado correctamente ✅');
         this.form.markAsPristine();
-        this.tieneCambios = false;
+        this.tieneCambios.set(false);
       },
       error: (err) => {
         console.error('Error al actualizar perfil:', err);
-        this.mensaje = 'Error al actualizar perfil ❌';
+        this.mensaje.set('Error al actualizar perfil ❌');
       }
     });
   }
 
+  // 📸 Subir imagen
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
@@ -139,11 +148,12 @@ export class Perfil implements OnInit {
     reader.onload = () => {
       const imgData = reader.result as string;
 
-      if (this.usuario) {
-        this.usuario = {
-          ...this.usuario,
-          imagen_url: imgData ?? this.usuario.imagen_url,
-        };
+      const user = this.usuario();
+      if (user) {
+        this.usuario.set({
+          ...user,
+          imagen_url: imgData ?? user.imagen_url,
+        });
       }
 
       this.form.patchValue({ imagen_url: imgData });

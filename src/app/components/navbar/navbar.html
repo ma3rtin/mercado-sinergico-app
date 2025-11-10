@@ -12,7 +12,7 @@
                 <a routerLink="/contacto" class="hover:text-secondary transition-colors duration-200">Contacto</a>
             </li>
 
-            @if (isLoggedIn) {
+            @if (isLoggedIn()) {
             <li>
                 <button (click)="signOut()"
                     class="text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">

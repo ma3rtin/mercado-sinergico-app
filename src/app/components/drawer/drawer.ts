@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './drawer.html',
 })
 export class Drawer {
-  @Input() isLoggedIn = false;
+  @Input() isLoggedIn: boolean | null = false;
   @Output() closeDrawer = new EventEmitter<void>();
   @Output() openSearch = new EventEmitter<void>();
   @Output() signOut = new EventEmitter<void>();

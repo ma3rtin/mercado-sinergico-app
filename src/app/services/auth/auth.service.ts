@@ -1,4 +1,4 @@
-import { Injectable, effect, inject, PLATFORM_ID, signal, computed } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID, signal, computed } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
     signInWithPopup,
@@ -16,48 +16,48 @@ export class AuthService {
     private readonly firebaseKey = 'firebase_token';
     private readonly platformId = inject(PLATFORM_ID);
 
-    // 🔹 Signals
     private userSignal = signal<User | null>(null);
     private jwtSignal = signal<string | null>(null);
     private firebaseTokenSignal = signal<string | null>(null);
+    private sessionReadySignal = signal(false);
 
-    // 🔹 Computed
     isAuthenticated = computed(() => !!(this.jwtSignal() || this.firebaseTokenSignal()));
 
     constructor() {
         if (this.isBrowser()) {
-            // 🔄 Detecta cambios en el usuario de Firebase
-            onAuthStateChanged(auth, async (user) => {
-                this.userSignal.set(user);
-                if (user) {
-                    try {
-                        const token = await getIdToken(user);
-                        this.setFirebaseToken(token);
-                    } catch (error) {
-                        console.error('❌ Error al obtener token de Firebase:', error);
-                    }
-                } else {
+            this.setupFirebaseListener();
+            this.restoreTokensFromStorage();
+        }
+    }
+
+    // 🌍 Helpers
+    private isBrowser(): boolean {
+        return isPlatformBrowser(this.platformId);
+    }
+
+    private setupFirebaseListener(): void {
+        onAuthStateChanged(auth, async (user) => {
+            this.userSignal.set(user);
+
+            if (user) {
+                try {
+                    const token = await getIdToken(user);
+                    this.setFirebaseToken(token);
+                } catch (error) {
+                    console.error('❌ Error al obtener token de Firebase:', error);
+                }
+            } else {
+                // 🚫 No limpiar JWT si el login fue por backend
+                if (!localStorage.getItem(this.jwtKey)) {
                     this.clearTokens();
                 }
-            });
-
-            // 🔁 Sincroniza tokens del localStorage al iniciar
-            this.jwtSignal.set(localStorage.getItem(this.jwtKey));
-            this.firebaseTokenSignal.set(localStorage.getItem(this.firebaseKey));
-        }
-
-        // 👀 Log automático en consola cuando cambia el estado
-        effect(() => {
-            console.log('🧠 AuthService - Usuario actual:', this.userSignal());
-            console.log('🔑 JWT Token:', this.jwtSignal()?.substring(0, 20) + '...');
-            console.log('🔵 Firebase Token:', this.firebaseTokenSignal()?.substring(0, 20) + '...');
-            console.log('✅ Autenticado:', this.isAuthenticated());
+            }
         });
     }
 
-    // 🧱 Helpers
-    private isBrowser(): boolean {
-        return isPlatformBrowser(this.platformId);
+    private restoreTokensFromStorage(): void {
+        this.jwtSignal.set(localStorage.getItem(this.jwtKey));
+        this.firebaseTokenSignal.set(localStorage.getItem(this.firebaseKey));
     }
 
     // 🔐 JWT
@@ -94,7 +94,7 @@ export class AuthService {
         this.firebaseTokenSignal.set(null);
     }
 
-    // 🚮 Limpieza
+    // 🧹 Limpieza general
     clearTokens(): void {
         this.clearJwtToken();
         this.clearFirebaseToken();
@@ -105,7 +105,7 @@ export class AuthService {
         return this.userSignal.asReadonly();
     }
 
-    // 🔐 Login con Google
+    // 🔐 Login con Google (opcional)
     async signInWithGoogle(): Promise<User> {
         const provider = new GoogleAuthProvider();
         provider.addScope('email');
@@ -122,15 +122,47 @@ export class AuthService {
     async signOut(): Promise<void> {
         try {
             await firebaseSignOut(auth);
+        } catch {
+            /* Ignorar si no había sesión Firebase */
+        } finally {
             this.clearTokens();
             this.userSignal.set(null);
-            console.log('✅ Sesión cerrada correctamente');
-        } catch (error) {
-            console.error('⚠️ Error al cerrar sesión:', error);
         }
     }
 
     getCurrentUser(): User | null {
         return this.userSignal();
+    }
+
+    // ♻️ Restaurar sesión al iniciar la app
+    async restoreSession(): Promise<void> {
+        if (!this.isBrowser()) {
+            this.sessionReadySignal.set(true);
+            return;
+        }
+
+        await new Promise<void>((resolve) => {
+            setTimeout(() => {
+                this.restoreTokensFromStorage();
+                this.sessionReadySignal.set(true);
+                resolve();
+            }, 0);
+        });
+    }
+
+    // 🕐 Utilidad para guards
+    async waitForSessionReady(): Promise<void> {
+        if (this.sessionReadySignal()) return;
+        await new Promise<void>((resolve) => {
+            const check = () => {
+                if (this.sessionReadySignal()) resolve();
+                else setTimeout(check, 50);
+            };
+            check();
+        });
+    }
+
+    isSessionReady(): boolean {
+        return this.sessionReadySignal();
     }
 }

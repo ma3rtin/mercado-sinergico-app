@@ -79,7 +79,7 @@
 
     <!-- DRAWER (mobile) -->
     @if (drawerOpen) {
-    <app-drawer [isLoggedIn]="isLoggedIn" (closeDrawer)="toggleDrawer()" (openSearch)="openSearch()"
+    <app-drawer [isLoggedIn]="isLoggedIn()" (closeDrawer)="toggleDrawer()" (openSearch)="openSearch()"
         (signOut)="signOut()"></app-drawer>
     }
 
