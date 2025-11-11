@@ -10,7 +10,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './productos.html',
-  styleUrls: ['./productos.css']
+  styleUrls: ['./productos.css'],
 })
 export class ProductosComponent implements OnInit {
   // 🔧 Services
@@ -96,7 +96,7 @@ export class ProductosComponent implements OnInit {
       style: 'currency',
       currency: 'ARS',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(price);
   }
 
