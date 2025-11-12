@@ -1,7 +1,7 @@
 <div class="container mx-auto px-4 py-8 font-body">
 
     <!-- Loading State -->
-    @if (isLoading) {
+    @if (isLoading()) {
     <div class="flex flex-col items-center justify-center py-20">
         <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4"></div>
         <p class="text-gray-600 text-lg">Cargando producto...</p>
@@ -9,13 +9,13 @@
     }
 
     <!-- Contenido del producto -->
-    @else if (producto) {
+    @else if (producto()) {
     <!-- HEADER del producto con galería -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start mb-12">
 
         <!-- Visor de imágenes (lado izquierdo) -->
         <div class="order-2 lg:order-1">
-            <app-visor-imagenes [producto]="producto" [altText]="producto.nombre">
+            <app-visor-imagenes [producto]="producto()!" [altText]="producto()!.nombre">
             </app-visor-imagenes>
         </div>
 
@@ -24,19 +24,19 @@
             <div class="bg-white rounded-xl shadow-md p-6">
                 <!-- Título -->
                 <h1 class="text-3xl md:text-4xl text-gray-800 mb-4 font-display">
-                    {{ producto.nombre }}
+                    {{ producto()!.nombre }}
                 </h1>
 
                 <!-- Marca y Categoría -->
                 <div class="flex flex-wrap items-center gap-2 mb-4">
-                    @if (producto.marca) {
+                    @if (producto()!.marca) {
                     <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                        {{ producto.marca.nombre }}
+                        {{ producto()!.marca.nombre }}
                     </span>
                     }
-                    @if (producto.categoria) {
+                    @if (producto()!.categoria) {
                     <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
-                        {{ producto.categoria.nombre }}
+                        {{ producto()!.categoria?.nombre }}
                     </span>
                     }
                 </div>
@@ -45,7 +45,7 @@
                 <div class="mb-6">
                     <div class="flex items-baseline gap-3 mb-3">
                         <span class="text-4xl font-bold text-gray-900">
-                            {{ formatPrice(producto.precio) }}
+                            {{ formatPrice(producto()!.precio) }}
                         </span>
                     </div>
 
@@ -71,21 +71,21 @@
                 </div>
 
                 <!-- Descripción -->
-                @if (producto.descripcion) {
+                @if (producto()!.descripcion) {
                 <div class="mb-6">
                     <h3 class="font-semibold text-gray-900 mb-2 text-lg">Descripción:</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        {{ producto.descripcion }}
+                        {{ producto()!.descripcion }}
                     </p>
                 </div>
                 }
 
                 <!-- Características del producto -->
-                @if (getCaracteristicas().length > 0) {
+                @if (caracteristicas().length > 0) {
                 <div class="mb-6">
                     <h3 class="font-semibold text-gray-900 mb-3 text-lg">Características:</h3>
                     <ul class="space-y-2">
-                        @for (caracteristica of getCaracteristicas(); track $index) {
+                        @for (caracteristica of caracteristicas(); track $index) {
                         <li class="flex items-start gap-3 text-gray-700">
                             <span class="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                             <div>
@@ -99,15 +99,15 @@
                 }
 
                 <!-- Stock Badge -->
-                @if (producto.stock !== undefined) {
+                @if (producto()!.stock !== undefined) {
                 <div class="mt-6 pt-6 border-t border-gray-200">
-                    @if (producto.stock > 0) {
+                    @if (tieneStock()) {
                     <div class="flex items-center gap-2 text-green-600">
-                        <!--<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
-                        <span class="font-semibold">Disponible en stock ({{ producto.stock }} unidades)</span>-->
+                        <span class="font-semibold">Disponible en stock ({{ producto()!.stock }} unidades)</span>
                     </div>
                     } @else {
                     <div class="flex items-center gap-2 text-red-600">
@@ -135,9 +135,9 @@
     </div>
 
     <!-- Grid de paquetes -->
-    @if (paquetes.length > 0) {
+    @if (paquetes().length > 0) {
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @for (paquete of paquetes; track paquete.id_paquete_publicado) {
+        @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
         <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
             (click)="seleccionarPaquete(paquete.id_paquete_publicado ?? 0)">
 
@@ -156,10 +156,12 @@
                 }
 
                 <!-- Badge de estado -->
+                @if (paquete.estado.nombre) {
                 <span
-                    [class]="'absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg ' + getPaqueteStatusClass(paquete.estado.nombre || 'Pendiente')">
-                    {{ paquete.estado.nombre || 'Pendiente' }}
+                    [class]="'absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full font-semibold shadow-lg ' + getPaqueteStatusClass(paquete.estado.nombre)">
+                    {{ paquete.estado.nombre }}
                 </span>
+                }
             </div>
 
             <!-- Info del paquete -->
