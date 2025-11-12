@@ -1,6 +1,8 @@
 import {
   ApplicationConfig,
   provideZonelessChangeDetection,
+  provideAppInitializer,
+  inject,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -13,9 +15,10 @@ import { provideToastr } from 'ngx-toastr';
 import {
   provideHttpClient,
   withFetch,
-  //  withInterceptors
+  withInterceptors,
 } from '@angular/common/http';
-//import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { AuthService } from './services/auth/auth.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,11 +37,16 @@ export const appConfig: ApplicationConfig = {
       messageClass: 'text-sm text-gray-200',
     }),
 
-    // ⚠️ COMENTAR TEMPORALMENTE
-    provideHttpClient(withFetch()),
-    // provideHttpClient(withFetch(), withInterceptors([AuthInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
+
+    provideAppInitializer(() => {
+      const authService = inject(AuthService);
+      // Retornamos la promesa — así Angular realmente espera
+      return authService.restoreSession();
+    }),
+
   ],
 };

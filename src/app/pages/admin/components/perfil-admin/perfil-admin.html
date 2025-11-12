@@ -5,11 +5,19 @@
         <div class="bg-white rounded-lg shadow-sm p-6 mb-8 flex flex-col lg:flex-row items-start justify-between gap-6">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 <div class="w-32 h-32 rounded-full bg-gray-200 overflow-hidden">
-                    <img src="/assets/images/placeholder-product.png" alt="Admin" class="w-full h-full object-cover" />
+                    <img [src]="usuario()?.imagen_url || '/assets/images/placeholder-product.png'"
+                        [alt]="usuario()?.nombre || 'Administrador'" class="w-full h-full object-cover" />
                 </div>
+
                 <div class="text-center sm:text-left">
-                    <h2 class="text-3xl font-display text-gray-900 mb-2">Administrador</h2>
-                    <p class="text-gray-600 mb-3 text-lg">admin@ejemplo.com</p>
+                    <h2 class="text-3xl font-display text-gray-900 mb-2">
+                        {{ usuario()?.nombre }}
+                    </h2>
+
+                    <p class="text-gray-600 mb-3 text-lg">
+                        {{ usuario()?.email }}
+                    </p>
+
                     <span class="inline-block bg-secondary text-white text-sm px-4 py-2 rounded-full font-medium">
                         Rol: Administrador
                     </span>
@@ -18,17 +26,24 @@
 
             <!-- Botones Crear -->
             <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
-                <app-button (click)="crearProducto()" class="btn-yellow">Crear producto</app-button>
-                <app-button (click)="crearPaquete()" class="btn-yellow">Crear paquete</app-button>
+                <app-button (click)="crearProducto()" class="btn-yellow">
+                    Crear producto
+                </app-button>
+                <app-button (click)="crearPaquete()" class="btn-yellow">
+                    Crear paquete
+                </app-button>
             </div>
         </div>
 
         <!-- 🔧 Paneles de administración -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</app-button>
-            <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar
+                productos</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar
+                usuarios</app-button>
             <app-button variant="tertiary" (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</app-button>
-            <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar
+                paquetes</app-button>
         </div>
 
         <!-- 📦 Paquetes -->
@@ -51,7 +66,8 @@
                             <div
                                 class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 @if (paquete.imagen_url) {
-                                <img [src]="paquete.imagen_url" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover" />
+                                <img [src]="paquete.imagen_url" [alt]="paquete.paqueteBase?.nombre"
+                                    class="w-full h-full object-cover" />
                                 } @else {
                                 <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -60,14 +76,19 @@
                                 }
                             </div>
                             <div>
-                                <h4 class="text-xl font-display text-gray-900 mb-2">{{ paquete.paqueteBase?.nombre }}</h4>
+                                <h4 class="text-xl font-display text-gray-900 mb-2">
+                                    {{ paquete.paqueteBase?.nombre }}
+                                </h4>
                                 <div class="flex items-center gap-6 text-sm">
-                                    <p [class]="getStatusColor(paquete.estado )">
+                                    <p [class]="getStatusColor(paquete.estado)">
                                         {{ paquete.estado }}
                                     </p>
-                                    <span class="text-gray-700">{{ paquete.paqueteBase?.categoria_id }}</span>
+                                    <span class="text-gray-700">{{
+                                        paquete.paqueteBase?.categoria_id
+                                        }}</span>
                                     <span class="text-gray-700">
-                                        {{ paquete.cant_productos }} / {{ paquete.cant_productos_reservados }}
+                                        {{ paquete.cant_productos }} /
+                                        {{ paquete.cant_productos_reservados }}
                                     </span>
                                 </div>
                             </div>
