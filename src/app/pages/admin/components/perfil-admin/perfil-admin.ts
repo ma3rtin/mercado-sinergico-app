@@ -100,6 +100,10 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/administrar-plantillas']);
   }
 
+  navigateToAdminPostPackages() {
+    this.router.navigate(['/admin/publicar-paquete']);
+  }
+
   editPackage(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
   }
