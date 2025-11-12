@@ -86,11 +86,11 @@ export class AdministrarProductosComponent {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/crear-producto']);
+    this.router.navigate(['admin/crear-producto']);
   }
 
   editProducto(producto: Producto): void {
-    this.router.navigate(['/editar-producto/', producto.id_producto]);
+    this.router.navigate(['admin/editar-producto/', producto.id_producto]);
   }
 
   viewProducto(producto: Producto): void {

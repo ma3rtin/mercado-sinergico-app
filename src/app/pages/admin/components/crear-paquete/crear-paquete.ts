@@ -13,7 +13,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
-
+import { Router } from '@angular/router';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -66,7 +66,8 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     private marcaService: MarcaService,
     private categoriaService: CategoriaService,
     private productoService: ProductosService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private router: Router
   ) {
     // 🔄 Efecto opcional: reacciona cuando cambia el texto de búsqueda
     effect(() => {
@@ -250,6 +251,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
         next: () => {
           this.toastr.success('Paquete base creado con éxito!', 'Éxito');
           this.resetForm();
+          this.router.navigate(['admin/perfil']);
         },
         error: (err) => {
           this.toastr.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');

@@ -93,7 +93,15 @@ export class PerfilAdmin implements OnInit {
     console.log('Por implementar');
   }
   navigateToAdminPackages() {
-    this.router.navigate(['/admin/paquetes']);
+    this.router.navigate(['/admin/administrar-paquetes']);
+  }
+
+  navigateToAdminTemplates() {
+    this.router.navigate(['/admin/administrar-plantillas']);
+  }
+
+  navigateToAdminPostPackages() {
+    this.router.navigate(['/admin/publicar-paquete']);
   }
 
   editPackage(paquete: PaquetePublicado) {
