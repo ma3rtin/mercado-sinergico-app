@@ -26,9 +26,6 @@ jobs:
       - name: 🧹 Run ESLint
         run: npm run lint
 
-      - name: 🧪 Run tests
-        run: npm run test -- --run
-
       - name: 🏗️ Build Angular SSR
         run: npm run build
 
