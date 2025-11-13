@@ -19,6 +19,6 @@ export const serverRoutes: ServerRoute[] = [
 
   // Rutas dinámicas
   { path: 'detalleSeleccionProducto/:id', renderMode: RenderMode.Server },
-  { path: 'detalleProductoSumarse/:id', renderMode: RenderMode.Server },
+  { path: 'detalleProductoSumarse/:productoId/:paqueteId',renderMode: RenderMode.Server },
   { path: 'editar-producto/:id', renderMode: RenderMode.Server }
 ];

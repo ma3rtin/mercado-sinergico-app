@@ -136,8 +136,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       console.error('❌ ID de paquete inválido');
       return;
     }
-    // ✅ Navegar a la vista de detalle del paquete
-    this.router.navigate(['paquete-detalle', id]);
+    this.router.navigate(['detalleProductoSumarse', this.producto()?.id_producto, id]);
   }
 
   // 🎨 HELPERS VISUALES

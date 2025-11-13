@@ -3,14 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
+import { Marca } from '@app/models/Producto-Paquete/Marca';
+import { Categoria } from '@app/models/Producto-Paquete/Categoria';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 // Models
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
 
 // Services
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
-
+import { MarcaService } from '@app/services/producto/marca.service';
+import { CategoriaService } from '@app/services/producto/categoria.service';
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 
@@ -43,11 +47,15 @@ export class MisPaquetesComponent implements OnInit {
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-
+  private readonly marcaService = inject(MarcaService);
+  private readonly categoriaService = inject(CategoriaService);
+  private toastr = inject(ToastrService);
   // 🚀 Signals
   paquetes = signal<PaqueteUsuario[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
+  categorias = signal<Categoria[]>([]);
+  marcas = signal<Marca[]>([]);
 
   // 📊 Enums públicos para el template
   public readonly TipoPaquete = TipoPaquete;
@@ -58,6 +66,8 @@ export class MisPaquetesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarMisPaquetes();
+    this.cargarCategorias();
+    this.cargarMarcas();
   }
 
   // 📥 CARGA DE DATOS
@@ -179,42 +189,51 @@ export class MisPaquetesComponent implements OnInit {
     console.log('🔄 Actualizando pedido del paquete:', paquete.id_paquete_publicado);
     console.log('Productos:', paquete.productosSeleccionados);
     
-    // TODO: Implementar actualización de pedido en el backend
-    // this.pedidoService.actualizarPedido({
-    //   paqueteId: paquete.id_paquete_publicado,
-    //   productos: paquete.productosSeleccionados
-    // }).subscribe(...)
-    
-    alert('Pedido actualizado exitosamente'); // Temporal
+          this.toastr.success('Pedido actualizado exitosamente'); // Temporal
   }
 
   salirDelPaquete(paquete: PaqueteUsuario): void {
-    console.log('🚪 Saliendo del paquete:', paquete.id_paquete_publicado);
+    //sweetalert2 confirmación
+    Swal.fire({
+      title: '¿Estás seguro que querés salir del paquete?',
+      text: `Se eliminará tu participación en el paquete "${paquete.paqueteBase?.nombre}".`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#71A8D9',
+      cancelButtonColor: 'rgba(170, 58, 58, 1)',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Lógica para salir del paquete
+            const paquetes = this.paquetes().filter(
+      p => p.id_paquete_publicado !== paquete.id_paquete_publicado
+    );
+    this.paquetes.set(paquetes);
+      }
+    })
     
-    if (!confirm(`¿Estás seguro que querés salir del paquete "${paquete.paqueteBase?.nombre}"?`)) {
-      return;
-    }
+    //if (!confirm(`¿Estás seguro que querés salir del paquete "${paquete.paqueteBase?.nombre}"?`)) {
+      //return;
+    //}
     
     // TODO: Implementar lógica de salida del paquete
     // this.pedidoService.salirDelPaquete(paquete.id_paquete_publicado).subscribe(...)
     
     // Remover del array local
-    const paquetes = this.paquetes().filter(
-      p => p.id_paquete_publicado !== paquete.id_paquete_publicado
-    );
-    this.paquetes.set(paquetes);
+
   }
 
-  irAlPaquete(paquete: PaqueteUsuario): void {
+/*  irAlPaquete(paquete: PaqueteUsuario): void {
     if (!paquete.id_paquete_publicado) {
       console.error('❌ ID de paquete inválido');
       return;
     }
-    this.router.navigate(['paquete-detalle', paquete.id_paquete_publicado]);
+    this.router.navigate(['detalleProductoSumarse/', paquete.id_paquete_publicado]);
   }
-
+*/
   navegarAPaquetes(): void {
-    this.router.navigate(['paquetes']);
+    this.router.navigate(['paquetes-publicados']);
   }
 
   // 🎨 HELPERS VISUALES
@@ -267,13 +286,43 @@ export class MisPaquetesComponent implements OnInit {
     return TipoPaquete.POR_DEFINIR;
   }
 
-  getMarcaNombre(): string {
-    return  'Sin marca';
+  cargarMarcas(): void {
+    this.marcaService.getMarcas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (marcas) => {
+          this.marcas.set(marcas);
+        },
+        error: (error) => {
+          console.error('❌ Error cargando marcas:', error);
+          this.marcas.set([]);
+        }
+      });
+  }
+  cargarCategorias(): void {
+    this.categoriaService.getCategorias()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (categorias) => {
+          this.categorias.set(categorias);
+        },
+        error: (error) => {
+          console.error('❌ Error cargando categorías:', error);
+          this.categorias.set([]);
+        }
+      });
+  }
+  getMarcaNombre(idMarca: number | undefined ): string {
+    const marca = this.marcas().find(m => m.id_marca === idMarca);
+    return marca ? marca.nombre : 'Desconocida';
+  }
+  getCategoriaNombre(idCategoria: number | undefined): string {
+    const categoria = this.categorias().find(c => c.id_categoria === idCategoria);
+    return categoria ? categoria.nombre : 'Desconocida';
   }
 
-  getCategoriaNombre(): string {
-    return  'Sin categoría';
-  }
+  
+
 
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-AR', {

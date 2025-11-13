@@ -31,8 +31,10 @@ export class ProductosComponent implements OnInit {
   hasProductos = computed(() => this.productos().length > 0);
 
   ngOnInit(): void {
+    
     if (this.isBrowser) {
       this.loadProductos();
+      
     }
   }
 
