@@ -1,14 +1,20 @@
-import { Component, computed, inject, OnInit, signal, DestroyRef,PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser} from '@angular/common';
+import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
+// 🍞 Importar Breadcrumb
+import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    BreadcrumbComponent  // 👈 Agregar
+  ],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
@@ -17,7 +23,7 @@ export class ProductosComponent implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly destroyRef = inject(DestroyRef); // ✅ DestroyRef agregado
+  private readonly destroyRef = inject(DestroyRef);
   
   // 🚀 Signals
   productos = signal<Producto[]>([]);
@@ -43,7 +49,7 @@ export class ProductosComponent implements OnInit {
     this.errorMessage.set('');
 
     this.productosService.getProductos()
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ✅ Limpieza automática
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (productos) => {
           console.log('✅ Productos cargados:', productos.length);
