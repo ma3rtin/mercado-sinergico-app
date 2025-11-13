@@ -146,7 +146,7 @@ export class EditarProductoComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.toastr.error('ID de producto no encontrado');
-      this.router.navigate(['/administrar-productos']);
+      this.router.navigate(['admin/administrar-productos']);
       return;
     }
 
@@ -162,7 +162,7 @@ export class EditarProductoComponent implements OnInit {
       error: (error) => {
         console.error('Error cargando producto:', error);
         this.toastr.error('Error al cargar el producto');
-        this.router.navigate(['/administrar-productos']);
+        this.router.navigate(['admin/administrar-productos']);
         this.isLoading.set(false);
       }
     });
@@ -383,7 +383,7 @@ export class EditarProductoComponent implements OnInit {
       next: () => {
         this.isLoading.set(false);
         this.toastr.success('Producto actualizado exitosamente 🎉');
-        this.router.navigate(['administrar-productos']);
+        this.router.navigate(['admin/administrar-productos']);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -422,7 +422,7 @@ export class EditarProductoComponent implements OnInit {
 
   // Cancelar edición
   cancelEdit(): void {
-    this.router.navigate(['/administrar-productos']);
+    this.router.navigate(['admin/administrar-productos']);
   }
 
   // Modal

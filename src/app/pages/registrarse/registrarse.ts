@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -10,11 +10,10 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { PLATFORM_ID } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { UsuarioService } from '../../services/usuario/usuario.service';
+import { AuthService } from '../../services/auth/auth.service';
 import { CrearUsuarioDTO } from '@app/models/DTOs/crearUsuarioDTO';
 import { ButtonComponent } from './../../shared/botones-component/buttonComponent';
 
@@ -26,24 +25,26 @@ import { ButtonComponent } from './../../shared/botones-component/buttonComponen
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    ButtonComponent
+    ButtonComponent,
   ],
   templateUrl: './registrarse.html',
   styleUrls: ['./registrarse.css'],
 })
 export class RegistrarseComponent implements OnInit {
-  form!: FormGroup;
-  submitted = false;
+  // 🧠 Signals
+  loading = signal(false);
+  submitted = signal(false);
 
+  // 🧱 Formulario
+  form!: FormGroup;
+
+  // 🧩 Inyecciones
   private fb = inject(FormBuilder);
   private toastr = inject(ToastrService);
   private platformId = inject(PLATFORM_ID);
   private usuarioService = inject(UsuarioService);
+  private authService = inject(AuthService);
   private router = inject(Router);
-
-  constructor(@Inject(PLATFORM_ID) platformId: Object) {
-    this.platformId = platformId;
-  }
 
   ngOnInit(): void {
     this.form = this.fb.group(
@@ -72,16 +73,16 @@ export class RegistrarseComponent implements OnInit {
           [
             Validators.required,
             Validators.minLength(8),
-            Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&*!?-_]).+$/),
+            Validators.pattern(/^(?=.*[A-Z])(?=.*\d).+$/),
           ],
         ],
         confirmPassword: ['', Validators.required],
-        recaptcha: [''], //Validar en el backend
+        recaptcha: [''],
       },
       { validators: this.passwordsMatch }
     );
-    
-    // Cargar el script de reCAPTCHA solo en el navegador
+
+    // ⚙️ Cargar script reCAPTCHA solo en navegador
     if (isPlatformBrowser(this.platformId)) {
       const script = document.createElement('script');
       script.src = 'https://www.google.com/recaptcha/api.js';
@@ -89,29 +90,30 @@ export class RegistrarseComponent implements OnInit {
       script.defer = true;
       document.head.appendChild(script);
       (window as any).onRecaptchaSuccess = (token: string) => {
-        this.form.get('recaptcha')?.setValue(token); // Almacena el token y lo guarda en el form
+        this.form.get('recaptcha')?.setValue(token);
       };
     }
   }
 
-  // validador custom
+  // 🔍 Validador custom
   passwordsMatch(group: AbstractControl): ValidationErrors | null {
     const pass = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
     return pass === confirm ? null : { mismatch: true };
   }
 
-  // helper para template
+  // 📄 Helper para el template
   get f() {
     return this.form.controls;
   }
 
+  // 🚀 Envío del formulario
   onSubmit(): void {
-    this.submitted = true;
+    this.submitted.set(true);
     this.form.markAllAsTouched();
 
     if (this.form.invalid) {
-      this.mostrarError();
+      this.mostrarError('Por favor completá correctamente el formulario');
       return;
     }
 
@@ -125,24 +127,36 @@ export class RegistrarseComponent implements OnInit {
       rolId: 1,
     };
 
+    this.loading.set(true);
+
     this.usuarioService.register(datos).subscribe({
-      next: () => {
-        this.mostrarExito();
-        this.form.reset();
-        this.submitted = false;
+      next: (response: any) => {
+        this.loading.set(false);
+
+        // ✅ Si el backend devuelve un token al registrarse
+        if (response?.token) {
+          this.authService.setJwtToken(response.token);
+        }
+
+        this.mostrarExito('Registro exitoso');
         this.router.navigate(['/login']);
       },
-      error: () => {
-        this.mostrarError();
+      error: (error) => {
+        this.loading.set(false);
+        console.error('❌ Error en registro:', error);
+        this.mostrarError(
+          error?.error?.message || 'Error al registrarte. Intentá nuevamente.'
+        );
       },
     });
   }
 
-  mostrarExito(): void {
-    this.toastr.success('Registro exitoso', 'Éxito');
+  // 🧾 Toasts
+  mostrarExito(msg: string): void {
+    this.toastr.success(msg, 'Éxito');
   }
-  
-  mostrarError(): void {
-    this.toastr.error('Por favor completá correctamente el formulario', 'Error');
+
+  mostrarError(msg: string): void {
+    this.toastr.error(msg, 'Error');
   }
 }

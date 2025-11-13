@@ -16,6 +16,8 @@ import { AdministrarPlantillasComponent } from './pages/admin/components/adminis
 import { AdministrarProductosComponent } from './pages/admin/components/administrar-producto/administrar-producto';
 import { EditarProductoComponent } from './pages/admin/components/editar-producto/editar-producto';
 import { Perfil } from './modules/usuario/pages/perfil/perfil';
+import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
 
 export const routes: Routes = [
@@ -23,6 +25,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'registrarse', component: RegistrarseComponent },
   { path: 'productos', component: ProductosComponent },
+
   {
     path: 'detalleSeleccionProducto/:id',
     component: ProductoDetalleSeleccionComponent,
@@ -34,18 +37,27 @@ export const routes: Routes = [
   data: { renderMode: RenderMode.Server },
 },
   { path: 'paquetes-publicados', component: PaquetesComponent },
-  { path: 'perfil-admin', component: PerfilAdmin },
-  { path: 'crear-producto', component: CrearProductoComponent },
-  { path: 'crear-paquete', component: CrearPaqueteComponent },
-  { path: 'publicar-paquete', component: PublicarPaqueteComponent },
-  { path: 'perfil', component: Perfil },
-  { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
-  { path: 'administrar-productos', component: AdministrarProductosComponent },
-  {
-    path: 'editar-producto/:id',
-    component: EditarProductoComponent,
-    data: { renderMode: RenderMode.Server },
+
+  // 👤 Rutas usuario (con login)
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+  { path: 'mis-paquetes', component: MisPaquetesComponent, canActivate: [authGuard] },
+
+  // 🧑‍💻 Rutas de admin
+  {path: 'admin',
+  canActivate: [authGuard, adminGuard],
+  data: { renderMode: RenderMode.Client },
+  children: [
+    {path: 'perfil', component: PerfilAdmin},
+    {path: 'crear-producto', component: CrearProductoComponent},
+    {path: 'crear-paquete', component: CrearPaqueteComponent},
+    {path: 'publicar-paquete', component: PublicarPaqueteComponent},
+    {path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
+    {path: 'administrar-productos', component: AdministrarProductosComponent },
+    {path: 'editar-producto/:id',component: EditarProductoComponent, data: { renderMode: RenderMode.Client }},
+  ]
   },
-  { path: 'mis-paquetes', component: MisPaquetesComponent },
+
+  // 🌍 Fallback
   { path: '**', component: Home },
 ];
+

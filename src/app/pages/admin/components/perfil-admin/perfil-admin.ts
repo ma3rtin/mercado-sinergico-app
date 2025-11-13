@@ -5,36 +5,49 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { UsuarioService } from '@app/services/usuario/usuario.service';
+import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
   imports: [CommonModule, ButtonComponent],
   templateUrl: './perfil-admin.html',
-  styleUrl: './perfil-admin.css'
+  styleUrl: './perfil-admin.css',
 })
 export class PerfilAdmin implements OnInit {
   private paquetePublicadoService = inject(PaquetePublicadoService);
+  private usuarioService = inject(UsuarioService);
   private router = inject(Router);
 
   paquetes = signal<PaquetePublicado[]>([]);
+  usuario = signal<Usuario | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
-  //export interface EstadoPaquetePublicado {
-  //id_estado: number;
-  //nombre: string;
 
-  // Relaciones
-  //paquetes?: PaquetePublicado[];
   estado = signal<EstadoPaquetePublicado[]>([
     { id_estado: 1, nombre: 'Pendiente' },
     { id_estado: 2, nombre: 'Abierto' },
     { id_estado: 3, nombre: 'Cerrado' },
-    { id_estado: 4, nombre: 'Completo' }
+    { id_estado: 4, nombre: 'Completo' },
   ]);
 
   ngOnInit() {
+    this.loadPerfil();
     this.loadPaquetes();
+  }
+
+  loadPerfil() {
+    this.usuarioService.getPerfil().subscribe({
+      next: (usuario) => {
+        console.log('👤 Perfil cargado:', usuario);
+        this.usuario.set(usuario);
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar perfil:', err);
+        this.error.set('No se pudo cargar el perfil del usuario.');
+      },
+    });
   }
 
   loadPaquetes() {
@@ -50,28 +63,55 @@ export class PerfilAdmin implements OnInit {
         console.error('Error loading packages:', err);
         this.error.set('Ocurrió un error al cargar los paquetes.');
         this.loading.set(false);
-      }
+      },
     });
   }
 
   getStatusColor(estado: EstadoPaquetePublicado): string {
-    if (estado.nombre === 'Pendiente') return 'text-yellow-600';
-    if (estado.nombre === 'Abierto') return 'text-green-600';
-    if (estado.nombre === 'Cerrado') return 'text-blue-600';
-    if (estado.nombre === 'Completo') return 'text-gray-600';
-    return 'text-gray-600';
+    switch (estado.nombre) {
+      case 'Pendiente':
+        return 'text-yellow-600';
+      case 'Abierto':
+        return 'text-green-600';
+      case 'Cerrado':
+        return 'text-blue-600';
+      case 'Completo':
+        return 'text-gray-600';
+      default:
+        return 'text-gray-600';
+    }
   }
 
-  // Navegaciones
-  navigateToAdminProducts() { this.router.navigate(['/administrar-productos']); }
-  navigateToAdminUsers() { console.log('Navigate to admin users - not implemented yet'); }
-  navigateToMetrics() { console.log('Navigate to metrics - not implemented yet'); }
-  navigateToAdminPackages() { this.router.navigate(['/admin/paquetes']); }
+  // 🧭 Navegaciones
+  navigateToAdminProducts() {
+    this.router.navigate(['/admin/administrar-productos']);
+  }
+  navigateToAdminUsers() {
+    console.log('Por implementar');
+  }
+  navigateToMetrics() {
+    console.log('Por implementar');
+  }
+  navigateToAdminPackages() {
+    this.router.navigate(['/admin/administrar-paquetes']);
+  }
+
+  navigateToAdminTemplates() {
+    this.router.navigate(['/admin/administrar-plantillas']);
+  }
+
+  navigateToAdminPostPackages() {
+    this.router.navigate(['/admin/publicar-paquete']);
+  }
 
   editPackage(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
   }
 
-  crearProducto() { this.router.navigate(['/crear-producto']); }
-  crearPaquete() { this.router.navigate(['/crear-paquete']); }
+  crearProducto() {
+    this.router.navigate(['/admin/crear-producto']);
+  }
+  crearPaquete() {
+    this.router.navigate(['/admin/crear-paquete']);
+  }
 }

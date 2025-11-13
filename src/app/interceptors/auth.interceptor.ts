@@ -5,40 +5,41 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 import { catchError, throwError } from 'rxjs';
 
-export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const platformId = inject(PLATFORM_ID);
     const router = inject(Router);
     const authService = inject(AuthService);
 
-    // ⚠️ NO ejecutar en SSR
-    if (!isPlatformBrowser(platformId)) {
+    // 🧩 Ignorar en entorno no browser (SSR)
+    if (!isPlatformBrowser(platformId)) return next(req);
+
+    // 🚫 URLs públicas (sin autenticación)
+    const publicEndpoints = ['/login', '/registrarse', '/auth', '/firebase'];
+    if (publicEndpoints.some((url) => req.url.includes(url))) {
         return next(req);
     }
 
-    // ⚠️ Ignorar rutas de autenticación
-    const authPaths = ['/login', '/register', '/auth', '/firebase'];
-    const shouldSkip = authPaths.some(path => req.url.includes(path));
+    // 🔑 Intentar obtener token válido (JWT o Firebase)
+    const token = authService.getJwtToken() ?? authService.getFirebaseToken();
 
-    if (shouldSkip) {
-        console.log('🔵 Omitiendo interceptor para:', req.url);
-        return next(req);
-    }
-
-    const token = authService.getJwtToken();
-
+    // 📨 Clonar request con encabezado Authorization si hay token
     const authReq = token
         ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
         : req;
 
-    console.log('🟡 Token agregado al header:', token ? 'Sí ✅' : 'No ❌', 'URL:', req.url);
-
+    // 🚨 Manejo global de errores
     return next(authReq).pipe(
         catchError((error) => {
             if (error.status === 401) {
-                console.warn('⚠️ Token inválido o expirado. Redirigiendo al login...');
-                authService.clearTokens();
-                router.navigate(['/login']);
+                const hasAnyToken =
+                    !!authService.getJwtToken() || !!authService.getFirebaseToken();
+
+                if (!hasAnyToken) {
+                    authService.clearTokens();
+                    router.navigate(['/login']);
+                }
             }
+
             return throwError(() => error);
         })
     );

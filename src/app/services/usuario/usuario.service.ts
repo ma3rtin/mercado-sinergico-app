@@ -51,10 +51,21 @@ export class UsuarioService extends ApiService {
     );
   }
 
-  updatePerfil(usuario: Partial<Usuario>): Observable<Usuario> {
-    return this.patch<Usuario>('usuarios/me', usuario).pipe(
+  updatePerfil(data: any): Observable<Usuario> {
+    return this.patch<Usuario>('usuarios/me', data).pipe(
       timeout(60000),
       catchError(this.handleError('updatePerfil'))
+    );
+  }
+
+
+  uploadImagenPerfil(file: File): Observable<Usuario> {
+    const formData = new FormData();
+    formData.append('imagen', file);
+
+    return this.patch<Usuario>('usuarios/me', formData).pipe(
+      timeout(60000),
+      catchError(this.handleError('uploadImagenPerfil'))
     );
   }
 

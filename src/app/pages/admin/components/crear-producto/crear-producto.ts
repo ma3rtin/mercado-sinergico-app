@@ -317,7 +317,7 @@ export class CrearProductoComponent implements OnInit {
     this.imageSlots.set(Array(8).fill(null).map(() => ({ file: null, preview: null })));
     this.shouldCreateTemplate = 'false';
     this.formSubmitted.set(false);
-    this.router.navigate(['/administrar-productos']);
+    this.router.navigate(['/admin/administrar-productos']);
   }
 
   // 🎯 Modal

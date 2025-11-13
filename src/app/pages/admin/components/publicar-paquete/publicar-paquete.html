@@ -15,10 +15,10 @@
                 class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600" />
 
             <!-- Lista desplegable -->
-            @if (mostrandoResultados && resultadosBusqueda.length > 0) {
+            @if (mostrandoResultados() && resultadosBusqueda().length > 0) {
             <ul
                 class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
-                @for (paquete of resultadosBusqueda; track paquete.id_paquete) {
+                @for (paquete of resultadosBusqueda(); track paquete.id_paquete_base) {
                 <li (click)="seleccionarPaquete(paquete)" class="p-2.5 hover:bg-gray-100 cursor-pointer">
                     {{ paquete.nombre }}
                 </li>
@@ -27,7 +27,7 @@
             }
 
             <!-- Sin resultados -->
-            @if (mostrandoResultados && resultadosBusqueda.length === 0) {
+            @if (mostrandoResultados() && resultadosBusqueda().length === 0) {
             <div
                 class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
                 No se encontraron resultados.
@@ -53,7 +53,7 @@
             <select title="Elegí una zona" [(ngModel)]="zonaSeleccionada"
                 class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
                 <option value="" disabled selected hidden>Elegí una zona</option>
-                @for (zona of zonas; track zona.id_zona) {
+                @for (zona of zonas(); track zona.id_zona) {
                 <option [value]="zona.id_zona">{{ zona.nombre }}</option>
                 }
             </select>
