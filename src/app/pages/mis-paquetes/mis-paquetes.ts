@@ -17,7 +17,7 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-
+import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
 // Interfaces locales
 interface ProductoSeleccionado {
   id_producto: number;
@@ -39,7 +39,7 @@ interface PaqueteUsuario extends PaquetePublicado {
 @Component({
   selector: 'app-mis-paquetes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, BreadcrumbComponent],
   templateUrl: './mis-paquetes.html'
 })
 export class MisPaquetesComponent implements OnInit {
@@ -210,6 +210,7 @@ export class MisPaquetesComponent implements OnInit {
       p => p.id_paquete_publicado !== paquete.id_paquete_publicado
     );
     this.paquetes.set(paquetes);
+    this.toastr.success('Has salido del paquete exitosamente');
       }
     })
     

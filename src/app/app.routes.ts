@@ -21,43 +21,157 @@ import { adminGuard } from './guards/admin.guard';
 import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
 
 export const routes: Routes = [
-  { path: '', component: Home, data: { renderMode: RenderMode.Client } },
-  { path: 'login', component: LoginComponent },
-  { path: 'registrarse', component: RegistrarseComponent },
-  { path: 'productos', component: ProductosComponent },
+  { 
+    path: '', 
+    component: Home, 
+    data: { 
+      renderMode: RenderMode.Client,
+      breadcrumb: '' // Vacío porque "Home" es la raíz
+    } 
+  },
+  
+  { 
+    path: 'login', 
+    component: LoginComponent,
+    data: { breadcrumb: 'Iniciar Sesión' }
+  },
+  
+  { 
+    path: 'registrarse', 
+    component: RegistrarseComponent,
+    data: { breadcrumb: 'Registrarse' }
+  },
+  
+  // 🛍️ Flujo de compra: Home > Productos > Detalle > Sumarse > Mis Paquetes
+  { 
+    path: 'productos', 
+    component: ProductosComponent,
+    data: { breadcrumb: 'Productos' }
+  },
 
   {
     path: 'detalleSeleccionProducto/:id',
     component: ProductoDetalleSeleccionComponent,
-    data: { renderMode: RenderMode.Server },
+    data: { 
+      renderMode: RenderMode.Server,
+      breadcrumb: 'Detalle'
+    },
   },
-{
-  path: 'detalleProductoSumarse/:productoId/:paqueteId',
-  component: DetalleProductoSumarse,
-  data: { renderMode: RenderMode.Server },
-},
-  { path: 'paquetes-publicados', component: PaquetesComponent },
+
+  {
+    path: 'detalleProductoSumarse/:productoId/:paqueteId',
+    component: DetalleProductoSumarse,
+    data: { 
+      renderMode: RenderMode.Server,
+      breadcrumb: 'Sumarse'
+    },
+  },
+
+  { 
+    path: 'paquetes-publicados', 
+    component: PaquetesComponent,
+    data: { breadcrumb: 'Paquetes Publicados' }
+  },
 
   // 👤 Rutas usuario (con login)
-  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
-  { path: 'mis-paquetes', component: MisPaquetesComponent, canActivate: [authGuard] },
+  { 
+    path: 'perfil', 
+    component: Perfil, 
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Mi Perfil' }
+  },
+
+  { 
+    path: 'mis-paquetes', 
+    component: MisPaquetesComponent, 
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Mis Paquetes' }
+  },
 
   // 🧑‍💻 Rutas de admin
-  {path: 'admin',
-  canActivate: [authGuard, adminGuard],
-  data: { renderMode: RenderMode.Client },
-  children: [
-    {path: 'perfil', component: PerfilAdmin},
-    {path: 'crear-producto', component: CrearProductoComponent},
-    {path: 'crear-paquete', component: CrearPaqueteComponent},
-    {path: 'publicar-paquete', component: PublicarPaqueteComponent},
-    {path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
-    {path: 'administrar-productos', component: AdministrarProductosComponent },
-    {path: 'editar-producto/:id',component: EditarProductoComponent, data: { renderMode: RenderMode.Client }},
-  ]
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    data: { 
+      renderMode: RenderMode.Client,
+      breadcrumb: 'Administración'
+    },
+    children: [
+      {
+        path: '',
+        redirectTo: 'perfil',
+        pathMatch: 'full'
+      },
+      {
+        path: 'perfil', 
+        component: PerfilAdmin,
+        data: { breadcrumb: 'Perfil Admin' }
+      },
+      {
+        path: 'crear-producto', 
+        component: CrearProductoComponent,
+        data: { breadcrumb: 'Crear Producto' }
+      },
+      {
+        path: 'crear-paquete', 
+        component: CrearPaqueteComponent,
+        data: { breadcrumb: 'Crear Paquete' }
+      },
+      {
+        path: 'publicar-paquete', 
+        component: PublicarPaqueteComponent,
+        data: { breadcrumb: 'Publicar Paquete' }
+      },
+      {
+        path: 'administrar-plantillas', 
+        component: AdministrarPlantillasComponent,
+        data: { breadcrumb: 'Administrar Plantillas' }
+      },
+      {
+        path: 'administrar-productos', 
+        component: AdministrarProductosComponent,
+        data: { breadcrumb: 'Administrar Productos' }
+      },
+      {
+        path: 'editar-producto/:id',
+        component: EditarProductoComponent, 
+        data: { 
+          renderMode: RenderMode.Client,
+          breadcrumb: 'Editar Producto'
+        }
+      },
+    ]
   },
 
   // 🌍 Fallback
-  { path: '**', component: Home },
+  { 
+    path: '**', 
+    component: Home,
+    data: { breadcrumb: 'Página no encontrada' }
+  },
 ];
 
+/**
+ * 📍 Ejemplos de breadcrumbs resultantes:
+ * 
+ * Ruta: /
+ * Breadcrumb: Inicio
+ * 
+ * Ruta: /productos
+ * Breadcrumb: Inicio > Productos
+ * 
+ * Ruta: /detalleSeleccionProducto/123
+ * Breadcrumb: Inicio > Detalle del Producto
+ * 
+ * Ruta: /admin/crear-producto
+ * Breadcrumb: Inicio > Administración > Crear Producto
+ * 
+ * Ruta: /admin/editar-producto/456
+ * Breadcrumb: Inicio > Administración > Editar Producto
+ * 
+ * Ruta: /perfil
+ * Breadcrumb: Inicio > Mi Perfil
+ * 
+ * Ruta: /paquetes-publicados
+ * Breadcrumb: Inicio > Paquetes Publicados
+ */

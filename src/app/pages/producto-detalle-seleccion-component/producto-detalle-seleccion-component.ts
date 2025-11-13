@@ -7,10 +7,10 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes-component/visor-imagenes-component';
-
+import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
 @Component({
   selector: 'app-producto-detalle-seleccion-component',
-  imports: [CommonModule, VisorImagenesComponent],
+  imports: [CommonModule, VisorImagenesComponent, BreadcrumbComponent],
   templateUrl: './producto-detalle-seleccion-component.html',
   standalone: true
 })
