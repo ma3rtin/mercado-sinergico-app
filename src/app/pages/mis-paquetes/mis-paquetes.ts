@@ -212,7 +212,7 @@ export class MisPaquetesComponent implements OnInit {
     this.paquetes.set(paquetes);
     this.toastr.success('Has salido del paquete exitosamente');
       }
-    })
+    });
     
     //if (!confirm(`¿Estás seguro que querés salir del paquete "${paquete.paqueteBase?.nombre}"?`)) {
       //return;
