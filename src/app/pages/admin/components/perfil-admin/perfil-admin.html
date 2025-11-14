@@ -36,13 +36,16 @@
         </div>
 
         <!-- 🔧 Paneles de administración -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</app-button>
+        <div class="flex flex-wrap justify-center gap-30 mb-8">
+            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar
+                productos</app-button>
             <!-- <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</app-button> -->
             <!-- <app-button variant="tertiary" (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</app-button> -->
             <!-- <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</app-button> -->
-            <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" class="btn-secondary">Publicar paquete</app-button>
-            <app-button variant="tertiary" (click)="navigateToAdminTemplates()" class="btn-secondary">Administrar plantillas</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" class="btn-secondary">Publicar
+                paquete</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminTemplates()" class="btn-secondary">Administrar
+                plantillas</app-button>
         </div>
 
         <!-- 📦 Paquetes -->
@@ -80,14 +83,27 @@
                                 </h4>
                                 <div class="flex items-center gap-6 text-sm">
                                     <p [class]="getStatusColor(paquete.estado)">
-                                        {{ paquete.estado }}
+                                        {{ paquete.estado.nombre }}
                                     </p>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 48 48">
+                                        <path fill="gray" stroke="gray" stroke-width="4"
+                                            d="M24 33a9 9 0 1 0 0-18a9 9 0 0 0 0 18Z" />
+                                    </svg>
                                     <span class="text-gray-700">{{
-                                        paquete.paqueteBase?.categoria_id
+                                        paquete.paqueteBase?.categoria?.nombre
                                         }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 48 48">
+                                        <path fill="gray" stroke="gray" stroke-width="4"
+                                            d="M24 33a9 9 0 1 0 0-18a9 9 0 0 0 0 18Z" />
+                                    </svg>
                                     <span class="text-gray-700">
-                                        {{ paquete.cant_productos }} /
-                                        {{ paquete.cant_productos_reservados }}
+                                        <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24"
+                                            height="24" viewBox="0 0 32 32">
+                                            <path fill="gray"
+                                                d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
+                                        </svg>
+                                        {{ paquete.cant_productos_reservados }} /
+                                        {{ paquete.cant_productos }}
                                     </span>
                                 </div>
                             </div>

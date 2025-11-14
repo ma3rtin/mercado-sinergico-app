@@ -90,7 +90,7 @@ export class CrearProductoComponent implements OnInit {
     this.plantillaService.getPlantillas().subscribe({
       next: (plantillas) => {
         this.plantillas.set(plantillas);
-        console.log('✅ Plantillas cargadas:', plantillas);
+        console.log('✅ Plantillas cargadas:', this.plantillas());
       },
       error: (err) => {
         console.error('❌ Error plantillas:', err);
@@ -322,6 +322,7 @@ export class CrearProductoComponent implements OnInit {
 
   // 🎯 Modal
   openCreateModal(): void {
+    console.log('Abriendo modal de creación de plantilla');
     this.isCreateModalOpen.set(true);
     this.plantillaToEdit = undefined;
   }

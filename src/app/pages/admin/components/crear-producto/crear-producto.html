@@ -380,7 +380,7 @@
           <app-button
             type="button"
             variant="tertiary"
-            [selected]="selectedTemplate()!.id === template.id"
+            [selected]="selectedTemplate()?.id === template.id"
             (click)="selectTemplate(template)"
           >
             {{ template.nombre }}

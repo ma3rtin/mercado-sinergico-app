@@ -1,22 +1,32 @@
 <nav class="hidden md:block bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <ul class="flex items-center justify-center gap-12 py-3 text-black">
-            <li >
-                <a routerLink="/mis-paquetes" class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h5v-2H7zm1-4l4-2l4 2V5H8z"/></svg>Mis Paquetes</a>
+            <li>
+                <a routerLink="/mis-paquetes"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h5v-2H7zm1-4l4-2l4 2V5H8z" />
+                    </svg>Mis Paquetes</a>
             </li>
             <li>
-                                <a routerLink="/productos" class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 32 32">
-                    <path fill="currentColor"
-                        d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
-                </svg>Productos</a>
+                <a routerLink="/productos"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 32 32">
+                        <path fill="currentColor"
+                            d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
+                    </svg>Productos</a>
             </li>
 
             @if (isLoggedIn()) {
             <li>
                 <button (click)="signOut()"
                     class=" flex justify-center items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z"/></svg>Cerrar sesión
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h7v2H5v14h7v2zm11-4l-1.375-1.45l2.55-2.55H9v-2h8.175l-2.55-2.55L16 7l5 5z" />
+                    </svg>Cerrar sesión
                 </button>
             </li>
             }

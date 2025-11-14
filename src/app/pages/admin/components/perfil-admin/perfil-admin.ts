@@ -7,6 +7,7 @@ import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaq
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-perfil-admin',
@@ -19,6 +20,8 @@ export class PerfilAdmin implements OnInit {
   private paquetePublicadoService = inject(PaquetePublicadoService);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
+
 
   paquetes = signal<PaquetePublicado[]>([]);
   usuario = signal<Usuario | null>(null);
@@ -56,6 +59,7 @@ export class PerfilAdmin implements OnInit {
 
     this.paquetePublicadoService.getPaquetes().subscribe({
       next: (paquetes) => {
+        console.log('✅ Paquetes cargados:', paquetes);
         this.paquetes.set(paquetes);
         this.loading.set(false);
       },
@@ -105,7 +109,8 @@ export class PerfilAdmin implements OnInit {
   }
 
   editPackage(paquete: PaquetePublicado) {
-    this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
+    // this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
+    this.toastr.info('Funcionalidad de edición de paquetes aún no implementada.');
   }
 
   crearProducto() {
