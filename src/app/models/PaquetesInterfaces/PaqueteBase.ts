@@ -1,4 +1,4 @@
-import { Categoria } from "../Producto-Paquete/Categoria";
+import { Categoria } from '../Producto-Paquete/Categoria';
 
 export interface PaqueteBase {
   id_paquete_base?: number; // opcional para creación

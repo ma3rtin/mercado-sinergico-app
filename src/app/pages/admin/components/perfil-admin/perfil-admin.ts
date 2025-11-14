@@ -108,7 +108,8 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/publicar-paquete']);
   }
 
-  editPackage(paquete: PaquetePublicado) {
+  //  editPackage(paquete: PaquetePublicado) {
+  editPackage() {
     // this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
     this.toastr.info('Funcionalidad de edición de paquetes aún no implementada.');
   }
