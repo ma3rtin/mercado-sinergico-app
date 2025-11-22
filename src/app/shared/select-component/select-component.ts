@@ -9,7 +9,9 @@ import {
   DestroyRef,
   inject,
   effect,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  OnInit,
+  Injector
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -48,10 +50,11 @@ export interface SelectGroup {
   templateUrl: './select-component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SelectComponent implements ControlValueAccessor {
+export class SelectComponent implements ControlValueAccessor, OnInit {
   // 🧩 Inyecciones
-  private destroyRef = inject(DestroyRef);
-  public ngControl = inject(NgControl, { optional: true, self: true });
+private destroyRef = inject(DestroyRef);
+private injector = inject(Injector); // 👈 NUEVO
+public ngControl: NgControl | null = null; // 👈 NUEVO
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -247,6 +250,16 @@ export class SelectComponent implements ControlValueAccessor {
       }
     });
   }
+ngOnInit(): void {
+  try {
+    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
+    }
+  } catch (e) {
+    console.warn('SelectComponent: No se pudo obtener NgControl', e);
+  }
+}
 
   // 🎨 Setters para Inputs
   @Input() set labelValue(value: string) { this.label.set(value); }

@@ -9,7 +9,9 @@ import {
   DestroyRef,
   inject,
   effect,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  Injector,
+  OnInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
@@ -39,10 +41,11 @@ export type InputSize = 'sm' | 'md' | 'lg';
   templateUrl: './input-component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InputComponent implements ControlValueAccessor {
+export class InputComponent implements ControlValueAccessor, OnInit {
   // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
-  public ngControl = inject(NgControl, { optional: true, self: true });
+  private injector = inject(Injector); 
+  public ngControl?: NgControl|null = null ; 
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -174,10 +177,18 @@ export class InputComponent implements ControlValueAccessor {
 
   suffixClass = computed(() => 'text-gray-500 text-sm');
 
-  constructor() {
-    // Registrar el control
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
+  // 🎯 ngOnInit - Obtener NgControl de forma segura
+  ngOnInit(): void {
+    // Obtener NgControl del injector DESPUÉS de la construcción
+    try {
+      this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+      if (this.ngControl) {
+        // Registrar este componente como valueAccessor
+        this.ngControl.valueAccessor = this;
+      }
+    } catch (e) {
+      // Si falla, el componente funciona como standalone sin validaciones
+      console.warn('InputComponent: No se pudo obtener NgControl', e);
     }
 
     // 🔥 Debounce para valores numéricos (evita re-renders innecesarios)

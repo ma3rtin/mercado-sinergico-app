@@ -9,7 +9,9 @@ import {
   DestroyRef,
   inject,
   effect,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  OnInit,
+  Injector
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -37,10 +39,11 @@ export type CheckboxSize = 'sm' | 'md' | 'lg';
   templateUrl: './checkbox.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CheckboxComponent implements ControlValueAccessor {
-  // 🧩 Inyecciones
-  private destroyRef = inject(DestroyRef);
-  public ngControl = inject(NgControl, { optional: true, self: true });
+export class CheckboxComponent implements ControlValueAccessor, OnInit {
+
+private destroyRef = inject(DestroyRef);
+private injector = inject(Injector); // 👈 NUEVO
+public ngControl: NgControl | null = null; // 👈 NUEVO
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -204,6 +207,16 @@ export class CheckboxComponent implements ControlValueAccessor {
       }
     });
   }
+ngOnInit(): void {
+  try {
+    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
+    }
+  } catch (e) {
+    console.warn('CheckboxComponent: No se pudo obtener NgControl', e);
+  }
+}
 
   // 🎨 Setters para Inputs
   @Input() set labelValue(value: string) { this.label.set(value); }

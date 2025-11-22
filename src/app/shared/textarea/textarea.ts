@@ -12,7 +12,9 @@ import {
   ChangeDetectionStrategy,
   ElementRef,
   ViewChild,
-  AfterViewInit
+  AfterViewInit,
+  Injector,
+  OnInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -42,12 +44,23 @@ export type TextareaResize = 'none' | 'vertical' | 'horizontal' | 'both' | 'auto
   templateUrl: './textarea.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TextareaComponent implements ControlValueAccessor, AfterViewInit {
+export class TextareaComponent implements ControlValueAccessor, AfterViewInit, OnInit {
+ngOnInit(): void {
+  try {
+    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+    if (this.ngControl) {
+      this.ngControl.valueAccessor = this;
+    }
+  } catch (e) {
+    console.warn('TextareaComponent: No se pudo obtener NgControl', e);
+  }
+}
   @ViewChild('textareaElement', { static: false }) textareaElement?: ElementRef<HTMLTextAreaElement>;
 
   // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
-  public ngControl = inject(NgControl, { optional: true, self: true });
+  private injector = inject(Injector); 
+  public ngControl?: NgControl|null = null ; 
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -199,35 +212,6 @@ export class TextareaComponent implements ControlValueAccessor, AfterViewInit {
     }
   }
 
-  constructor() {
-    // Registrar el control
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
-    }
-
-    // 🔥 Debounce para valores (evita re-renders innecesarios)
-    this.valueChanges$
-      .pipe(
-        debounceTime(100),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(value => {
-        this.onChange(value);
-        this.valueChange.emit(value);
-      });
-
-    // 🎯 Effect para sincronizar con el FormControl
-    effect(() => {
-      if (this.ngControl?.control) {
-        this.ngControl.control.statusChanges
-          ?.pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => {
-            // Trigger change detection cuando cambia el estado del control
-          });
-      }
-    });
-  }
 
   // 🎨 Setters para Inputs
   @Input() set labelValue(value: string) { this.label.set(value); }
