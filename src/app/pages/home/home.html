@@ -1,103 +1,213 @@
-<section class="max-w-7xl mx-auto px-4 py-12">
+<!-- home.html - HERO SECTION ACTUALIZADO -->
 
-    <div class="flex flex-col md:flex-row items-center justify-between gap-10 mb-20">
-        <div class="max-w-xl">
-            <h1 class="font-display text-3xl md:text-4xl font-bold mb-4">
-                Cambiemos el <span class="text-primary">"yo"</span> por el <span class="text-primary">"nosotros"</span>
-            </h1>
-            <p class="font-body text-gray-600 mb-6">
-                Unite a nuestra comunidad de compras en conjunto. Juntos compramos, juntos ahorramos.
-            </p>
-            <button [routerLink]="'/registrarse'" class="bg-accent shadow-md text-black font-semibold px-6 py-2 rounded-full border-black border
-                    hover:bg-accent-dark hover:scale-105 cursor-pointer">
-                ¡Quiero sumarme!
-            </button>
-        </div>
-        <div class="w-full md:w-1/2 h-90 bg-gray-200 flex items-center justify-center rounded-xl">
-            <img src="https://media.discordapp.net/attachments/1406645162091876514/1438209261187498116/imagen.jpg?ex=69160c40&is=6914bac0&hm=a9972271881aff6afd13b924ba0f395873fa3f73f3d0bf8fe6a555e94847940e&=&format=webp"
-                alt="" class="w-full h-full object-cover rounded-xl" loading="lazy" />
+<!-- 🎨 HERO SECTION CON FONDO COMPLETO -->
+<section class="relative w-full h-screen flex items-center justify-center overflow-hidden bg-gray-900">
+
+    <!-- 🖼️ IMAGEN DE FONDO -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://media.istockphoto.com/id/1221101939/es/foto/concepto-de-entrega-asian-man-mano-aceptando-una-entrega-de-cajas-de-reparto-de-repartidor.jpg?s=612x612&w=0&k=20&c=PmIkuzTsEg8B_d7mROP1ocLY-CE-yFeJGpyWgkl9gCg="
+            alt="Comunidad de compras" class="w-full h-full object-cover" />
+        <!-- Overlay gradiente para mejor legibilidad -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+    </div>
+
+    <!-- 📝 CONTENIDO - Arriba del fondo -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+            <!-- Texto a la izquierda -->
+            <div class="text-white max-w-xl">
+                <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                    Cambiemos el <span class="text-yellow-400">"yo"</span> por el
+                    <span class="text-yellow-400">"nosotros"</span>
+                </h1>
+
+                <p class="font-body text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
+                    Unite a nuestra comunidad de compras en conjunto.
+                    <span class="text-yellow-300 font-semibold">Juntos compramos, juntos ahorramos.</span>
+                </p>
+
+                <button [routerLink]="'/registrarse'" class="font-body bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-8 py-3 rounded-full 
+                 transition-all duration-300 hover:scale-105 shadow-lg inline-flex items-center gap-2">
+                    ¡Quiero sumarme!
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Espacio vacío a la derecha (la imagen de fondo lo llena) -->
+            <div class="hidden md:block"></div>
         </div>
     </div>
 
-    <!-- ¿Cómo funciona? -->
-    <div class="text-center mb-16">
-        <h2 class="font-display text-2xl font-bold mb-6">¿Cómo funciona?</h2>
-        <p class="font-body text-gray-600 max-w-2xl mx-auto mb-8">
-            Te explicamos brevemente como funciona nuestro sistema.
-        </p>
+    <!-- ↓ Indicador de scroll -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
+    </div>
+</section>
 
-        <div class="flex flex-col md:flex-row items-stretch justify-center gap-12 md:gap-0">
+<!-- ✨ SECCIÓN: ¿Cómo funciona? -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center mb-16">
+            <h2 class="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6">
+                ¿Cómo funciona?
+            </h2>
+            <p class="font-body text-lg text-gray-600 max-w-2xl mx-auto">
+                Te explicamos brevemente como funciona nuestro sistema.
+            </p>
+        </div>
+
+        <!-- Cards de proceso -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 mb-12">
+
             <!-- Card 1 -->
-            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
-                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
-                font-bold flex items-center justify-center shadow-sm">1</div>
-                <h3 class="mt-8 font-body font-bold text-primary">
-                    Buscá tu paquete preferido cerca de tu zona.
+            <div
+                class="relative bg-white border-2 border-primary rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-secondary text-white 
+                    font-semibold flex items-center justify-center text-lg shadow-md">
+                    1
+                </div>
+                <h3 class="mt-8 font-display font-semibold text-secondary text-xl mb-3">
+                    Buscá tu paquete preferido
                 </h3>
-                <p class="font-body text-sm text-gray-600 mt-3">
+                <p class="font-body text-gray-600">
                     Es fácil y rápido unirte a un paquete en tu zona.
                 </p>
             </div>
 
-            <!-- Conector 1→2 -->
-            <span class="hidden md:block my-auto h-px w-24 bg-blue-300"></span>
-
             <!-- Card 2 -->
-            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
-                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
-                font-bold flex items-center justify-center shadow-sm">2</div>
-                <h3 class="mt-8 font-body font-bold text-primary">
-                    Uní fuerzas con otros y completá tu paquete.
+            <div
+                class="relative bg-white border-2 border-primary  rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-secondary text-white 
+                    font-semibold flex items-center justify-center text-lg shadow-md">
+                    2
+                </div>
+                <h3 class="mt-8 font-display font-bold text-secondary text-xl mb-3">
+                    Uní fuerzas con otros
                 </h3>
-                <p class="font-body text-sm text-gray-600 mt-3">
+                <p class="font-body text-gray-600">
                     Colaborar es la clave para obtener mejores precios.
                 </p>
             </div>
 
-            <!-- Conector 2→3 -->
-            <span class="hidden md:block my-auto h-px w-24 bg-blue-300"></span>
-
             <!-- Card 3 -->
-            <div class="relative flex-1 max-w-md mx-auto text-center bg-white border border-blue-300 rounded-2xl p-8">
-                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-9 h-9 rounded-full bg-primary text-white
-                font-bold flex items-center justify-center shadow-sm">3</div>
-                <h3 class="mt-8 font-body font-bold text-primary">
-                    Una vez que se complete, disfrutá de tu compra.
+            <div
+                class="relative bg-white border-2 border-primary rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-secondary text-white 
+                    font-bold flex items-center justify-center text-lg shadow-md">
+                    3
+                </div>
+                <h3 class="mt-8 font-display font-semibold text-secondary text-xl mb-3">
+                    Disfrutá tu compra
                 </h3>
-                <p class="font-body text-sm text-gray-600 mt-3">
+                <p class="font-body text-gray-600">
                     Esperar es parte del proceso, ¡no te preocupes!
                 </p>
             </div>
         </div>
 
-        <button [routerLink]="'/productos'"
-            class="mt-8 bg-primary shadow-md text-white px-6 py-2 rounded-full hover:bg-secondary hover:scale-105 cursor-pointer">
-            Conocer más
-        </button>
+        <div class="text-center">
+            <button [routerLink]="'/productos'" class="bg-white border-2 border-secondary text-secondary font-semibold px-8 py-3 rounded-full 
+               transition-all duration-300 hover:scale-105 shadow-lg inline-flex items-center gap-2">
+                Explorar paquetes
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6">
+                    </path>
+                </svg>
+            </button>
+        </div>
     </div>
+</section>
 
-    <!-- Paquetes por cerrarse -->
-    <app-carrusel [items]="paquetesPorCerrarse()" tipo="paquete"></app-carrusel>
+<!-- 🎠 CARRUSEL CON PAQUETES POR CERRARSE -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- Preguntas frecuentes -->
-    <div class="bg-gray-100 rounded-xl p-6">
-        <h2 class="font-display text-2xl mb-4">Preguntas frecuentes</h2>
-        <div class="divide-y divide-gray-300">
-            <details class="py-4">
-                <summary class="font-semibold cursor-pointer">¿Cuándo pago?</summary>
-                <p class="text-sm text-gray-600 mt-2">Pagás una vez que el paquete alcanza la cantidad mínima.</p>
+        @if (isLoading()) {
+        <div class="flex justify-center py-20">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
+        </div>
+        } @else if (errorMessage()) {
+        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg mb-8">
+            <h3 class="text-red-800 font-bold text-lg mb-2">Error al cargar paquetes</h3>
+            <p class="text-red-700 mb-4">{{ errorMessage() }}</p>
+            <button (click)="recargarPaquetes()"
+                class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                Intentar de nuevo
+            </button>
+        </div>
+        } @else if (paquetesPorCerrarse().length > 0) {
+        <!-- Carrusel -->
+        <app-carrusel [items]="paquetesPorCerrarse()" tipo="paquete">
+        </app-carrusel>
+        } @else {
+        <div class="text-center py-12">
+            <p class="text-gray-600 text-lg">No hay paquetes por cerrarse en este momento</p>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ❓ PREGUNTAS FRECUENTES -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center mb-12">
+            <h2 class="font-display text-4xl md:text-4xl text-gray-900 mb-4">
+                Preguntas frecuentes
+            </h2>
+        </div>
+
+        <div class="space-y-4">
+            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
+                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
+                    ¿Cuándo pago?
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
+                        </path>
+                    </svg>
+                </summary>
+                <p class="text-gray-600 mt-3">Pagás una vez que el paquete alcanza la cantidad mínima de productos.</p>
             </details>
-            <details class="py-4">
-                <summary class="font-semibold cursor-pointer">¿Qué pasa si no se completa un paquete?</summary>
-                <p class="text-sm text-gray-600 mt-2">Se cancela sin compromiso y sin cobro.</p>
+
+            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
+                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
+                    ¿Qué pasa si no se completa un paquete?
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
+                        </path>
+                    </svg>
+                </summary>
+                <p class="text-gray-600 mt-3">Se cancela sin compromiso y sin cobro alguno. No hay penalidad.</p>
             </details>
-            <details class="py-4">
-                <summary class="font-semibold cursor-pointer">¿Puedo comprar más de una unidad?</summary>
-                <p class="text-sm text-gray-600 mt-2">Sí, podés reservar varias unidades del mismo paquete.</p>
+
+            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
+                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
+                    ¿Puedo comprar más de una unidad?
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
+                        </path>
+                    </svg>
+                </summary>
+                <p class="text-gray-600 mt-3">Sí, podés reservar varias unidades del mismo paquete sin problemas.</p>
             </details>
-            <details class="py-4">
-                <summary class="font-semibold cursor-pointer">¿Qué zonas hay?</summary>
-                <p class="text-sm text-gray-600 mt-2">Podés buscar por código postal o ciudad.</p>
+
+            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
+                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
+                    ¿Qué zonas hay disponibles?
+                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
+                        </path>
+                    </svg>
+                </summary>
+                <p class="text-gray-600 mt-3">Contamos con zonas en CABA, Zona Norte, Sur y Oeste. Podés buscar por tu
+                    código postal.</p>
             </details>
         </div>
     </div>

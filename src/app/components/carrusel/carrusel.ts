@@ -1,3 +1,6 @@
+// ============================================
+// CARRUSEL COMPONENT - Recibe PaquetePublicado
+// ============================================
 import {
   Component,
   ElementRef,
@@ -6,11 +9,13 @@ import {
   ChangeDetectionStrategy,
   input,
   effect,
+  output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlechaCarrusel } from '@app/shared/flecha-carrusel/flecha-carrusel';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
-import { PaqueteCardView } from '@app/models/PaquetesInterfaces/PaqueteCardView';
+import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-carrusel',
@@ -21,29 +26,31 @@ import { PaqueteCardView } from '@app/models/PaquetesInterfaces/PaqueteCardView'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Carrusel implements AfterViewInit {
-  items = input.required<PaqueteCardView[]>();
+  // 📥 Inputs - Recibe directamente PaquetePublicado[]
+  items = input.required<PaquetePublicado[]>();
   tipo = input<string>();
+
+  // 📤 Outputs
+  paqueteSelected = output<number>();
 
   @ViewChild('carousel') carousel!: ElementRef<HTMLDivElement>;
 
+  // 🎯 Estado interno
   translateX = 0;
-  readonly cardWidth = 310;
-  readonly gap = 40;
+  readonly cardWidth = 320;
+  readonly gap = 16;
   readonly visibleCards = 3;
   maxScroll = 0;
   currentIndex = 0;
 
-  constructor() {
-    console.log('🚀 Carrusel constructor');
-
-    // ✅ Ahora items() devuelve directamente el array
+  constructor(private router: Router) {
     effect(() => {
       const arr = this.items();
       const totalCards = arr?.length || 0;
       this.maxScroll = -(
         (totalCards - this.visibleCards) * (this.cardWidth + this.gap)
       );
-      console.log('📊 Carrusel effect:', { totalCards, maxScroll: this.maxScroll });
+      console.log('📊 Carrusel actualizado:', { totalCards, maxScroll: this.maxScroll });
     });
   }
 
@@ -51,6 +58,7 @@ export class Carrusel implements AfterViewInit {
     this.updateCurrentIndex();
   }
 
+  // 🔄 Métodos de scroll
   scrollLeft(): void {
     if (this.translateX < 0) {
       this.translateX = Math.min(
@@ -74,8 +82,14 @@ export class Carrusel implements AfterViewInit {
   private updateCurrentIndex(): void {
     const total = this.items().length;
     if (!total) return;
-
     const progress = Math.abs(this.translateX / (this.cardWidth + this.gap));
     this.currentIndex = Math.round(progress);
+  }
+
+  // 🔗 Manejo del click de la card
+  onPaqueteClick(id: number): void {
+    console.log('🔗 Paquete clickeado:', id);
+    this.paqueteSelected.emit(id);
+    this.router.navigate(['/paquete-detalle', id]);
   }
 }
