@@ -6,8 +6,8 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { VisorImagenesComponent } from '@app/shared/visor-imagenes-component/visor-imagenes-component';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 @Component({
   selector: 'app-producto-detalle-seleccion-component',
   imports: [CommonModule, VisorImagenesComponent, BreadcrumbComponent],

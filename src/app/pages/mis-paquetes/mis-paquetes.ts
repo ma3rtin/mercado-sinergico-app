@@ -16,8 +16,8 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 // Components
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 // Interfaces locales
 interface ProductoSeleccionado {
   id_producto: number;

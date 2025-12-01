@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 
 // 🍞 Importar el componente de breadcrumb
 //D:\mercado sinergia\front\mercado-sinergico-app\src\app\shared\breadcrumb-component
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';

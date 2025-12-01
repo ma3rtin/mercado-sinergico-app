@@ -6,7 +6,7 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // 🍞 Importar Breadcrumb
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 
 @Component({
   selector: 'app-productos',
