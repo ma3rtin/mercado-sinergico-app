@@ -41,8 +41,13 @@ export class Header {
   profileMenuOpen = false;
 
   toggleProfileMenu() {
+    if (!this.isLoggedIn()) {
+      window.location.href = '/login';
+      return;
+    }
     this.profileMenuOpen = !this.profileMenuOpen;
   }
+
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {

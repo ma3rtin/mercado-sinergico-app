@@ -73,12 +73,12 @@
                     </button>
 
                     <!-- MENÚ DE PERFIL -->
-                    @if (profileMenuOpen) {
+                    @if (profileMenuOpen && isLoggedIn()) {
                     <div
                         class="absolute right-0 mt-2 w-44 bg-white text-black rounded-md shadow-lg border border-gray-200 z-50 animate-fadeIn">
 
                         <a [routerLink]="profileLink" class="block px-4 py-2 hover:bg-gray-100 transition">
-                            Mi Perfil
+                            Mi perfil
                         </a>
 
                         <button (click)="signOut()"
