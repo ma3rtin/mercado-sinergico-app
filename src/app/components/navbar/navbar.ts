@@ -11,4 +11,7 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './navbar.css',
 })
 export class Navbar {
+  auth = inject(AuthService);
+
+  isLoggedIn = this.auth.isAuthenticated;
 }
