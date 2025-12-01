@@ -11,14 +11,4 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './navbar.css',
 })
 export class Navbar {
-  private authService = inject(AuthService);
-
-  isLoggedIn = this.authService.isAuthenticated;
-
-  async signOut() {
-    if (confirm('¿Seguro que desea cerrar sesión?')) {
-      await this.authService.signOut();
-      window.location.href = '/login';
-    }
-  }
 }
