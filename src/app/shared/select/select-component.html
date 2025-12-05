@@ -15,14 +15,11 @@
         [attr.aria-describedby]="hasHelperOrError() ? selectId() + '-helper' : null" (click)="toggleDropdown()"
         (keydown)="onKeyDown($event)" [class]="selectClasses()">
         <div class="flex items-center justify-between">
-            <!-- Selected Value / Placeholder 
-<span [class]="
-            internalValue === null || internalValue === undefined || internalValue === '' || (multiple() && Array.isArray(internalValue) && $any(internalValue).length === 0)
-            ? 'text-gray-400'
-            : 'text-gray-900'
-        ">
-            {{ selectedLabel() }}
-        </span>-->
+            <!-- Selected Value / Placeholder -->
+            <span [class]="selectedLabel() === placeholder() ? 'text-gray-400' : 'text-gray-900'">
+                {{ selectedLabel() }}
+            </span>
+
             <!-- Icons -->
             <div class="flex items-center gap-2">
                 <!-- Loading Spinner -->

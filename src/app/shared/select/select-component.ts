@@ -52,9 +52,9 @@ export interface SelectGroup {
 })
 export class SelectComponent implements ControlValueAccessor, OnInit {
   // 🧩 Inyecciones
-private destroyRef = inject(DestroyRef);
-private injector = inject(Injector); // 👈 NUEVO
-public ngControl: NgControl | null = null; // 👈 NUEVO
+  private destroyRef = inject(DestroyRef);
+  private injector = inject(Injector); // 👈 NUEVO
+  public ngControl: NgControl | null = null; // 👈 NUEVO
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -98,8 +98,8 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
   internalValue: any = null;
 
   // Control de formulario
-  private onChange: (value: any) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: any) => void = () => { };
+  private onTouched: () => void = () => { };
 
   // 🎨 Computed Signals
   hasGroups = computed(() => this.groups().length > 0);
@@ -191,10 +191,10 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
     const state = this.currentError()
       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
       : this.successMessage()
-      ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
-      : this.isFocused()
-      ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
-      : 'border-gray-300 hover:border-gray-400';
+        ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+        : this.isFocused()
+          ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
+          : 'border-gray-300 hover:border-gray-400';
 
     const disabledClass = this.isDisabled()
       ? 'bg-gray-100 cursor-not-allowed opacity-60'
@@ -214,13 +214,8 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
       ? 'opacity-100 translate-y-0 pointer-events-auto'
       : 'opacity-0 -translate-y-2 pointer-events-none';
   });
-
   constructor() {
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
-    }
-
-    // Cerrar dropdown al hacer click fuera
+    // Solo binds UI (click outside), nada de ngControl acá
     if (typeof document !== 'undefined') {
       effect(() => {
         if (this.showDropdown()) {
@@ -238,28 +233,25 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
         return undefined;
       });
     }
+  }
 
-    // Effect para sincronizar con el FormControl
-    effect(() => {
-      if (this.ngControl?.control) {
-        this.ngControl.control.statusChanges
+  ngOnInit(): void {
+    try {
+      this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+      if (this.ngControl) {
+        this.ngControl.valueAccessor = this;
+
+        this.ngControl.control?.valueChanges
           ?.pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => {
-            // Trigger change detection
+          .subscribe(value => {
+            this.internalValue = value !== null && value !== undefined ? Number(value) : null;
           });
       }
-    });
-  }
-ngOnInit(): void {
-  try {
-    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
+
+    } catch (e) {
+      console.warn('SelectComponent: No se pudo obtener NgControl', e);
     }
-  } catch (e) {
-    console.warn('SelectComponent: No se pudo obtener NgControl', e);
   }
-}
 
   // 🎨 Setters para Inputs
   @Input() set labelValue(value: string) { this.label.set(value); }
@@ -280,7 +272,7 @@ ngOnInit(): void {
 
   // 🔄 ControlValueAccessor
   writeValue(value: any): void {
-    this.internalValue = value ?? (this.multiple() ? [] : null);
+    this.internalValue = value !== null && value !== undefined ? Number(value) : null;
   }
 
   registerOnChange(fn: any): void {
@@ -331,7 +323,7 @@ ngOnInit(): void {
 
       this.internalValue = currentValues;
     } else {
-      this.internalValue = option.value;
+      this.internalValue = Number(option.value);
       this.closeDropdown();
     }
 
@@ -358,17 +350,17 @@ ngOnInit(): void {
     if (this.multiple()) {
       return Array.isArray(this.internalValue) && this.internalValue.includes(option.value);
     }
-    return this.internalValue === option.value;
+    return Number(this.internalValue) === Number(option.value);
   }
 
   private findOptionByValue(value: any): SelectOption | undefined {
     // Buscar en opciones planas
-    let found = this.options().find(opt => opt.value === value);
+    let found = this.options().find(opt => Number(opt.value) === Number(value));
     if (found) return found;
 
     // Buscar en grupos
     for (const group of this.groups()) {
-      found = group.options.find(opt => opt.value === value);
+      found = group.options.find(opt => Number(opt.value) === Number(value));
       if (found) return found;
     }
 
@@ -397,5 +389,10 @@ ngOnInit(): void {
         }
         break;
     }
+  }
+
+  // 🎹 Helpers
+  isEmptyArray(value: any): boolean {
+    return Array.isArray(value) && value.length === 0;
   }
 }
