@@ -11,6 +11,9 @@ export class PaquetePublicadoService extends ApiService {
     getPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
     }
+    getPaqueteById(id: number): Observable<PaquetePublicado> {
+        return this.get<PaquetePublicado>(`${this.apiUrl}/${id}`);
+    }
     createPaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
         return this.post<PaquetePublicado>(this.apiUrl, paquete);
     }

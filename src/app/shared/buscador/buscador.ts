@@ -11,10 +11,13 @@ import {
   HostListener,
   forwardRef,
   effect,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface OpcionSelect {
   id: string | number;
@@ -24,9 +27,25 @@ export interface OpcionSelect {
   [key: string]: any;
 }
 
-export interface ConfigFuenteDatos<T = any> {
-  mapeo: (item: T) => OpcionSelect;
-  obtenerDatos: () => Promise<T[]> | Observable<T[]>;
+/**
+ * Configuración genérica para buscar datos
+ * T = tipo de datos que retorna el servicio (ej: PaquetePublicado, Producto)
+ */
+export interface ConfigBuscador<T = any> {
+  // Función que retorna un Observable con los datos
+  obtenerDatos: () => Observable<T[]>;
+  
+  // Función que filtra los datos según el término de búsqueda
+  filtrar: (datos: T[], termino: string) => T[];
+  
+  // Función que mapea los datos T a OpcionSelect para mostrar
+  mapear: (item: T) => OpcionSelect;
+  
+  // Campo por el que se busca (ej: 'nombre', 'etiqueta')
+  campoTexto?: string;
+  
+  // Debounce en ms para la búsqueda
+  debounceMs?: number;
 }
 
 @Component({
@@ -42,15 +61,13 @@ export interface ConfigFuenteDatos<T = any> {
     },
   ],
 })
-export class BuscadorComponent implements OnInit, ControlValueAccessor {
+export class BuscadorComponent<T = any> implements OnInit, ControlValueAccessor, OnChanges {
   @ViewChild('contenedorDropdown') contenedorDropdown!: ElementRef;
   @ViewChild('inputBusqueda') inputBusqueda!: ElementRef;
 
-  // Inputs - Datos
+  // Inputs - Configuración genérica
   @Input() etiqueta = signal<string>('');
   @Input() marcador = signal<string>('Seleccionar opción');
-  @Input() opciones = signal<OpcionSelect[]>([]);
-  @Input() fuenteDatos = signal<ConfigFuenteDatos | null>(null);
   @Input() requerido = signal<boolean>(false);
   @Input() deshabilitado = signal<boolean>(false);
   @Input() limpiable = signal<boolean>(true);
@@ -66,11 +83,15 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   @Input() textoVacio = signal<string>('No se encontraron opciones');
   @Input() textoErrorCarga = signal<string>('Error al cargar opciones');
 
+  // 🎯 INPUT PRINCIPAL: Configuración del buscador
+  @Input() config: ConfigBuscador<T> | null = null;
+
   // Outputs
   @Output() cambioValor = new EventEmitter<OpcionSelect | OpcionSelect[] | null>();
   @Output() cambioApertura = new EventEmitter<boolean>();
   @Output() datosCargados = new EventEmitter<OpcionSelect[]>();
   @Output() errorDatos = new EventEmitter<Error>();
+  @Output() seleccionado = new EventEmitter<any>(); // Emite el dato original T
 
   // Estado interno
   valorSeleccionado = signal<OpcionSelect | OpcionSelect[] | null>(null);
@@ -82,13 +103,15 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   errorCarga = signal<string | null>(null);
   idEntrada = signal<string>(`select-${Math.random().toString(36).substr(2, 9)}`);
 
+  // Datos internos
+  private datosOriginales: T[] = [];
+  private opcionesInternas = signal<OpcionSelect[]>([]);
+
   // Propiedades accesibles en el template
   ObjectKeys = Object.keys;
 
   // Computed
-  todasOpciones = computed(() => {
-    return this.opciones().length > 0 ? this.opciones() : [];
-  });
+  todasOpciones = computed(() => this.opcionesInternas());
 
   opcionesFiltradas = computed(() => {
     const termino = this.terminoBusqueda().toLowerCase();
@@ -149,7 +172,7 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
 
   clasesEntrada = computed(() => {
     const base =
-      'w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 cursor-pointer';
+      'w-full px-4 py-2.5 border rounded-full transition-all focus:outline-none focus:ring-2 cursor-pointer';
     const tamaños: { [key: string]: string } = {
       sm: 'text-sm',
       md: 'text-base',
@@ -176,45 +199,51 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
 
   constructor() {
     effect(() => {
-      const fuenteDatos = this.fuenteDatos();
-      if (fuenteDatos) {
-        this.cargarDatosFuente(fuenteDatos);
+      if (this.config) {
+        this.cargarDatos();
       }
     });
   }
 
   ngOnInit(): void {
-    if (this.fuenteDatos() && this.opciones().length === 0) {
-      this.cargarDatosFuente(this.fuenteDatos()!);
+    if (this.config) {
+      this.cargarDatos();
     }
   }
 
-  private async cargarDatosFuente(config: ConfigFuenteDatos): Promise<void> {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['config'] && !changes['config'].firstChange) {
+      this.cargarDatos();
+    }
+  }
+
+  // 📥 Cargar datos usando la configuración
+  private async cargarDatos(): Promise<void> {
+    if (!this.config) return;
+
     try {
       this.cargando.set(true);
       this.errorCarga.set(null);
 
-      const resultado = config.obtenerDatos();
-      let datos: any[];
-
-      if (resultado instanceof Promise) {
-        datos = await resultado;
-      } else if (resultado instanceof Observable) {
-        datos = await new Promise((resolve, reject) => {
-          const suscripcion = resultado.subscribe({
-            next: (valor) => {
-              suscripcion.unsubscribe();
-              resolve(valor);
-            },
-            error: reject,
-          });
+      const datos = await new Promise<T[]>((resolve, reject) => {
+        const observable = this.config!.obtenerDatos();
+        const suscripcion = observable.pipe(
+          debounceTime(this.config!.debounceMs || 300),
+          distinctUntilChanged()
+        ).subscribe({
+          next: (valor) => {
+            suscripcion.unsubscribe();
+            resolve(valor);
+          },
+          error: reject,
         });
-      } else {
-        throw new Error('obtenerDatos debe retornar Promise u Observable');
-      }
+      });
 
-      const opcionesMapeadas = datos.map((item) => config.mapeo(item));
-      this.opciones.set(opcionesMapeadas);
+      this.datosOriginales = datos;
+
+      // Mapear a OpcionSelect
+      const opcionesMapeadas = datos.map((item) => this.config!.mapear(item));
+      this.opcionesInternas.set(opcionesMapeadas);
       this.datosCargados.emit(opcionesMapeadas);
       this.cargando.set(false);
     } catch (error) {
@@ -270,8 +299,13 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   seleccionarOpcion(opcion: OpcionSelect): void {
     if (opcion.deshabilitado) return;
 
+    // Encontrar el dato original
+    const datosOriginal = this.datosOriginales.find(
+      (d) => this.config!.mapear(d).id === opcion.id
+    );
+
     if (this.multiSeleccion()) {
-      this.manejarMultiSeleccion(opcion);
+      this.manejarMultiSeleccion(opcion, datosOriginal);
     } else {
       this.valorSeleccionado.set(opcion);
       this.idsSeleccionados.set([opcion.id]);
@@ -279,10 +313,11 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
       this.terminoBusqueda.set('');
       this.alCambiar(opcion);
       this.cambioValor.emit(opcion);
+      this.seleccionado.emit(datosOriginal); // Emitir dato original
     }
   }
 
-  private manejarMultiSeleccion(opcion: OpcionSelect): void {
+  private manejarMultiSeleccion(opcion: OpcionSelect, datosOriginal?: T): void {
     const actual = Array.isArray(this.valorSeleccionado())
       ? this.valorSeleccionado()
       : [];
@@ -348,9 +383,7 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   }
 
   recargarDatos(): void {
-    if (this.fuenteDatos()) {
-      this.cargarDatosFuente(this.fuenteDatos()!);
-    }
+    this.cargarDatos();
   }
 
   @HostListener('document:click', ['$event'])
@@ -383,16 +416,5 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   getSeleccionados(): OpcionSelect[] {
     const valor = this.valorSeleccionado();
     return Array.isArray(valor) ? valor : [];
-  }
-
-  // 🎯 MÉTODO GENÉRICO PARA CONFIGURAR FUENTE DE DATOS
-  configurarFuenteDatos<T>(
-    obtenerDatos: () => Observable<T[]> | Promise<T[]>,
-    mapeo: (item: T) => OpcionSelect
-  ): void {
-    this.fuenteDatos.set({
-      obtenerDatos,
-      mapeo,
-    });
   }
 }
