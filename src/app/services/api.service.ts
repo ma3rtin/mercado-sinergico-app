@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@environments/environment.js';
+import { AuthService } from './auth/auth.service';
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -15,7 +17,6 @@ export class ApiService {
     }
 
     get<T>(path: string): Observable<T> {
-        console.log('HICE GET A ', this.buildUrl(path));
         return this.http.get<T>(this.buildUrl(path));
     }
 

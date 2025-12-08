@@ -1,0 +1,151 @@
+<!-- Producto Card -->
+<article
+  (click)="onCardClick()"
+  class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-primary cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] flex flex-col h-full">
+
+  <!-- 🖼️ IMAGEN -->
+  <div class="relative w-full aspect-square bg-gray-100 overflow-hidden">
+    <img
+      [src]="imagenUrl()"
+      [alt]="producto().nombre"
+      (error)="onImageError($event)"
+      class="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+      loading="lazy"
+    />
+
+    <!-- Overlay hover -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+    <!-- 🏷️ BADGES (top) -->
+    <div class="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+      <!-- Categoría -->
+      <span class="inline-flex items-center gap-1 bg-gray-50 border border-primary text-gray-900 text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
+        </svg>
+        {{ categoriaNombre() }}
+      </span>
+
+      <!-- Descuento badge (si aplica) -->
+      @if (tieneDescuento() && !descuento()?.aplicado) {
+        <span class="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992a.252.252 0 0 1 .02-.022zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486-.943 1.179z"/>
+          </svg>
+          -{{ descuento()?.porcentaje }}%
+        </span>
+      }
+    </div>
+  </div>
+
+  <!-- 📝 CONTENIDO -->
+  <div class="p-4 sm:p-5 flex flex-col flex-grow">
+    
+    <!-- 🏷️ MARCA -->
+    <div class="mb-2">
+      <span class="inline-flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5 8.186 1.113zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+        </svg>
+        {{ marcaNombre() }}
+      </span>
+    </div>
+
+    <!-- 📌 NOMBRE DEL PRODUCTO -->
+    <h3 class="font-display text-base sm:text-lg font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blacktransition-colors">
+      {{ producto().nombre }}
+    </h3>
+
+    <!-- 📄 DESCRIPCIÓN -->
+    @if (mostrarDescripcion() && descripcionTruncada()) {
+      <p class="text-xs sm:text-sm text-gray-600 line-clamp-3 mb-3">
+        {{ descripcionTruncada() }}
+      </p>
+    }
+
+    <!-- Spacer para empujar el contenido inferior hacia abajo -->
+    <div class="flex-grow"></div>
+
+    <!-- 📦 STOCK (si aplica y debeMostrarStock es true) -->
+    @if (debeMostrarStock()) {
+      <div class="mb-3 flex items-center gap-2">
+        <svg [class]="'w-4 h-4 ' + getStockClass()" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976l2.61-3.045zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0zM1.5 8.5A.5.5 0 0 1 2 9v6h12V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+        <span [class]="'text-xs font-medium ' + getStockClass()">
+          {{ getStockTexto() }}
+        </span>
+      </div>
+    }
+
+    <!-- 💰 PRECIO -->
+    <div class="mb-4">
+      <!-- Precio base con tooltip -->
+      <div class="flex items-center gap-2 mb-1">
+        <p class="text-xs text-gray-500 font-medium">
+          Precio base
+        </p>
+        
+        <!-- Info icon con tooltip -->
+        @if (tieneDescuento()) {
+          <div class="group/tooltip relative inline-block">
+            <svg class="w-4 h-4 text-blue-500 cursor-help" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+            </svg>
+            
+            <!-- Tooltip -->
+            <div class="invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-10">
+              <p class="mb-1 font-semibold">💡 Precio con descuento</p>
+              <p class="text-gray-300">
+                Este precio será descontado según el paquete al que pertenezca. 
+                @if (descuento()?.nombrePaquete) {
+                  <span class="text-yellow-300">{{ descuento()?.nombrePaquete }}</span> ofrece {{ descuento()?.porcentaje }}% OFF.
+                } @else {
+                  Los paquetes ofrecen descuentos especiales.
+                }
+              </p>
+              <!-- Flecha del tooltip -->
+              <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                <div class="border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Precio tachado si hay descuento -->
+      @if (tieneDescuento() && !descuento()?.aplicado) {
+        <p class="text-lg font-bold text-gray-400 line-through">
+          {{ precioBase() }}
+        </p>
+        <p class="text-2xl sm:text-3xl font-bold text-green-600">
+          {{ precioConDescuento() }}
+        </p>
+        <p class="text-xs text-green-600 font-medium mt-1">
+          ¡Ahorrás {{ descuento()?.porcentaje }}% en este paquete!
+        </p>
+      } @else {
+        <p class="text-2xl sm:text-3xl font-bold text-gray-900">
+          {{ precioBase() }}
+        </p>
+      }
+    </div>
+
+    <!-- 🔗 CTA BUTTON -->
+    <div class="pt-3 border-t border-gray-200">
+      <app-button
+        [variant]="'secondary'"
+        [type]="'button'"
+        class="w-full">
+        <span class="flex items-center justify-center gap-2 text-sm font-medium">
+          {{ textoBoton() }}
+          <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </app-button>
+    </div>
+
+  </div>
+</article>

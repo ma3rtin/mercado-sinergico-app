@@ -7,7 +7,7 @@ import { RegistrarseComponent } from './pages/registrarse/registrarse';
 import { ProductosComponent } from './pages/productos/productos';
 import { ProductoDetalleSeleccionComponent } from './pages/producto-detalle-seleccion-component/producto-detalle-seleccion-component';
 import { DetalleProductoSumarse } from './pages/detalle-producto-sumarse/detalle-producto-sumarse';
-import { PaquetesComponent } from './pages/paquetes/paquetes';
+import { PaquetesPublicosComponent} from './pages/paquetes/paquetes';
 import { PerfilAdmin } from './pages/admin/components/perfil-admin/perfil-admin';
 import { CrearProductoComponent } from './pages/admin/components/crear-producto/crear-producto';
 import { CrearPaqueteComponent } from './pages/admin/components/crear-paquete/crear-paquete';
@@ -57,7 +57,13 @@ export const routes: Routes = [
       breadcrumb: 'Detalle'
     },
   },
-
+{
+  path: 'productos-del-paquete/:paqueteId',
+  component: ProductosComponent,
+  data: {
+    breadcrumb: 'Productos del Paquete'
+  }
+},
   {
     path: 'detalleProductoSumarse/:productoId/:paqueteId',
     component: DetalleProductoSumarse,
@@ -69,7 +75,7 @@ export const routes: Routes = [
 
   { 
     path: 'paquetes-publicados', 
-    component: PaquetesComponent,
+    component: PaquetesPublicosComponent,
     data: { breadcrumb: 'Paquetes Publicados' }
   },
 
@@ -150,28 +156,3 @@ export const routes: Routes = [
     data: { breadcrumb: 'Página no encontrada' }
   },
 ];
-
-/**
- * 📍 Ejemplos de breadcrumbs resultantes:
- * 
- * Ruta: /
- * Breadcrumb: Inicio
- * 
- * Ruta: /productos
- * Breadcrumb: Inicio > Productos
- * 
- * Ruta: /detalleSeleccionProducto/123
- * Breadcrumb: Inicio > Detalle del Producto
- * 
- * Ruta: /admin/crear-producto
- * Breadcrumb: Inicio > Administración > Crear Producto
- * 
- * Ruta: /admin/editar-producto/456
- * Breadcrumb: Inicio > Administración > Editar Producto
- * 
- * Ruta: /perfil
- * Breadcrumb: Inicio > Mi Perfil
- * 
- * Ruta: /paquetes-publicados
- * Breadcrumb: Inicio > Paquetes Publicados
- */

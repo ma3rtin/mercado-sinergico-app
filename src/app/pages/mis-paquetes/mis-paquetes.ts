@@ -71,7 +71,7 @@ export class MisPaquetesComponent implements OnInit {
 
   // 📊 Configuración del buscador
   configBuscador: ConfigBuscador<PaquetePublicado> = {
-    obtenerDatos: () => this.paquetePublicadoService.getPaquetes(),
+    obtenerDatos: () => this.paquetePublicadoService.getPaquetesDelUsuario(),
     
     filtrar: (paquetes: PaquetePublicado[], termino: string) => {
       const t = termino.toLowerCase();
@@ -160,7 +160,7 @@ export class MisPaquetesComponent implements OnInit {
     return new Promise((resolve, reject) => {
       console.log('🔄 Cargando todos los paquetes...');
 
-      this.paquetePublicadoService.getPaquetes()
+      this.paquetePublicadoService.getPaquetesDelUsuario()
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: async (paquetes) => {

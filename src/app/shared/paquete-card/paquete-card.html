@@ -68,15 +68,15 @@
     <div class="px-4 py-3 space-y-2 flex-grow flex flex-col">
 
         <!-- Nombre -->
-        <h3 class="font-display text-base font-bold text-gray-900 line-clamp-2 
-                   group-hover:text-secondary-dark transition-colors">
+        <h3 class="font-display text-base font-semibold text-gray-900 line-clamp-2 
+                   group-hover:text-black transition-colors">
             {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
         </h3>
 
         <!-- Stock - Prominente -->
         <div class="flex items-baseline gap-1 text-sm">
             <span class="text-gray-600">Quedan</span>
-            <span class="font-bold text-secondary-dark">{{ stockDisponible() }}</span>
+            <span class="font-bold text-gray-600 transition-colors">{{ stockDisponible() }}</span>
         <span class="text-gray-600">de <span class="font-bold text-secondary-dark">{{ paquete.cant_productos || 0 }}</span> productos</span>
         
         </div>

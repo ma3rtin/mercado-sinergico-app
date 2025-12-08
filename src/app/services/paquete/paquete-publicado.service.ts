@@ -1,10 +1,12 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Observable } from 'rxjs';
 import { ApiService } from '@app/services/api.service';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+
 @Injectable({ providedIn: 'root' })
 export class PaquetePublicadoService extends ApiService {
     private apiUrl = 'paquetes-publicados';
+
     constructor() {
     super();
     }
@@ -25,5 +27,8 @@ export class PaquetePublicadoService extends ApiService {
     }
     getPaquetesPorCerrarse(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
+    }
+    getPaquetesDelUsuario(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/mis-paquetes`);
     }
 }
