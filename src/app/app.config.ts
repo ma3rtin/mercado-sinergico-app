@@ -196,6 +196,7 @@ export const appConfig: ApplicationConfig = {
         featherMail,
         featherBell,
         featherZap,
+
       })
     ),
   ],
