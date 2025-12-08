@@ -81,7 +81,10 @@ import {
   featherMail,
   featherBell,
   featherZap,
+  featherTag,
+  featherLayers
 } from '@ng-icons/feather-icons';
+import { L } from 'vitest/dist/chunks/reporters.d.BFLkQcL6';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -123,6 +126,8 @@ export const appConfig: ApplicationConfig = {
         featherMenu,
         featherX,
         featherHome,
+        featherTag,
+        featherLayers,
 
         // 🔍 Búsqueda
         featherSearch,

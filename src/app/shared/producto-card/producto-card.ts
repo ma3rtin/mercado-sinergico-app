@@ -12,6 +12,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { IconComponent } from "../icono/icono";
 
 /**
  * Contexto de uso del ProductoCard
@@ -41,7 +42,7 @@ export interface DescuentoProducto {
 @Component({
   selector: 'app-producto-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent],
   templateUrl: './producto-card.html',
 })
 export class ProductoCard {

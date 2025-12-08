@@ -52,7 +52,7 @@ interface PaqueteDelUsuario extends PaquetePublicado {
   templateUrl: './mis-paquetes.html'
 })
 export class MisPaquetesComponent implements OnInit {
-  // 🔧 Services
+
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);

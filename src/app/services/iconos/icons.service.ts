@@ -207,6 +207,7 @@ export class IconsService {
     Map: featherMap,
     Loader: featherLoader,
     Calendar: featherCalendar,
+    LogOut: featherLogOut,
     
   };
 
