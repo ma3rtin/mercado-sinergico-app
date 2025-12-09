@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { Navbar } from '../navbar/navbar';
 import { Drawer } from '../drawer/drawer';
 import { AuthService } from '../../services/auth/auth.service';
+import { BuscadorComponent } from '@app/shared/buscador/buscador';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, CommonModule, Navbar, Drawer],
+  imports: [RouterModule, CommonModule, Navbar, Drawer,BuscadorComponent],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })

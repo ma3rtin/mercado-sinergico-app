@@ -1,20 +1,20 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
+  model,
   signal,
   computed,
   OnInit,
   ViewChild,
   ElementRef,
   HostListener,
-  forwardRef,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface OpcionSelect {
   id: string | number;
@@ -24,9 +24,16 @@ export interface OpcionSelect {
   [key: string]: any;
 }
 
-export interface ConfigFuenteDatos<T = any> {
-  mapeo: (item: T) => OpcionSelect;
-  obtenerDatos: () => Promise<T[]> | Observable<T[]>;
+/**
+ * Configuración genérica para buscar datos
+ * T = tipo de datos que retorna el servicio (ej: PaquetePublicado, Producto)
+ */
+export interface ConfigBuscador<T = any> {
+  obtenerDatos: () => Observable<T[]>;
+  filtrar: (datos: T[], termino: string) => T[];
+  mapear: (item: T) => OpcionSelect;
+  campoTexto?: string;
+  debounceMs?: number;
 }
 
 @Component({
@@ -34,45 +41,41 @@ export interface ConfigFuenteDatos<T = any> {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './buscador.html',
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => BuscadorComponent),
-      multi: true,
-    },
-  ],
 })
-export class BuscadorComponent implements OnInit, ControlValueAccessor {
+export class BuscadorComponent<T = any> implements OnInit {
   @ViewChild('contenedorDropdown') contenedorDropdown!: ElementRef;
   @ViewChild('inputBusqueda') inputBusqueda!: ElementRef;
 
-  // Inputs - Datos
-  @Input() etiqueta = signal<string>('');
-  @Input() marcador = signal<string>('Seleccionar opción');
-  @Input() opciones = signal<OpcionSelect[]>([]);
-  @Input() fuenteDatos = signal<ConfigFuenteDatos | null>(null);
-  @Input() requerido = signal<boolean>(false);
-  @Input() deshabilitado = signal<boolean>(false);
-  @Input() limpiable = signal<boolean>(true);
-  @Input() buscable = signal<boolean>(true);
-  @Input() multiSeleccion = signal<boolean>(false);
-  @Input() maxSelecciones = signal<number>(0);
-  @Input() textAyuda = signal<string>('');
-  @Input() mensajeError = signal<string>('');
-  @Input() mensajeExito = signal<string>('');
-  @Input() tamañoEtiqueta = signal<'sm' | 'md' | 'lg'>('md');
-  @Input() tamaño = signal<'sm' | 'md' | 'lg'>('md');
-  @Input() textoCargando = signal<string>('Cargando opciones...');
-  @Input() textoVacio = signal<string>('No se encontraron opciones');
-  @Input() textoErrorCarga = signal<string>('Error al cargar opciones');
+  // 🎯 SIGNAL INPUTS - La forma moderna de Angular 17+
+  // Estos SÍ aceptan valores directos desde el template
+  etiqueta = input<string>('');
+  marcador = input<string>('Seleccionar opción');
+  requerido = input<boolean>(false);
+  deshabilitado = input<boolean>(false);
+  limpiable = input<boolean>(true);
+  buscable = input<boolean>(true);
+  multiSeleccion = input<boolean>(false);
+  maxSelecciones = input<number>(0);
+  textAyuda = input<string>('');
+  mensajeError = input<string>('');
+  mensajeExito = input<string>('');
+  tamañoEtiqueta = input<'sm' | 'md' | 'lg'>('md');
+  tamaño = input<'sm' | 'md' | 'lg'>('md');
+  textoCargando = input<string>('Cargando opciones...');
+  textoVacio = input<string>('No se encontraron opciones');
+  textoErrorCarga = input<string>('Error al cargar opciones');
+  
+  // Config también puede ser signal input
+  config = input<ConfigBuscador<T> | null>(null);
 
-  // Outputs
-  @Output() cambioValor = new EventEmitter<OpcionSelect | OpcionSelect[] | null>();
-  @Output() cambioApertura = new EventEmitter<boolean>();
-  @Output() datosCargados = new EventEmitter<OpcionSelect[]>();
-  @Output() errorDatos = new EventEmitter<Error>();
+  // 📤 OUTPUTS modernos
+  cambioValor = output<OpcionSelect | OpcionSelect[] | null>();
+  cambioApertura = output<boolean>();
+  datosCargados = output<OpcionSelect[]>();
+  errorDatos = output<Error>();
+  seleccionado = output<any>(); // Emite el dato original T
 
-  // Estado interno
+  // 🎨 Estado interno (signals normales)
   valorSeleccionado = signal<OpcionSelect | OpcionSelect[] | null>(null);
   idsSeleccionados = signal<(string | number)[]>([]);
   terminoBusqueda = signal<string>('');
@@ -82,13 +85,15 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   errorCarga = signal<string | null>(null);
   idEntrada = signal<string>(`select-${Math.random().toString(36).substr(2, 9)}`);
 
+  // Datos internos
+  private datosOriginales: T[] = [];
+  private opcionesInternas = signal<OpcionSelect[]>([]);
+
   // Propiedades accesibles en el template
   ObjectKeys = Object.keys;
 
-  // Computed
-  todasOpciones = computed(() => {
-    return this.opciones().length > 0 ? this.opciones() : [];
-  });
+  // 📊 COMPUTED - Ahora usando signal inputs directamente
+  todasOpciones = computed(() => this.opcionesInternas());
 
   opcionesFiltradas = computed(() => {
     const termino = this.terminoBusqueda().toLowerCase();
@@ -149,7 +154,7 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
 
   clasesEntrada = computed(() => {
     const base =
-      'w-full px-4 py-2.5 border rounded-lg transition-all focus:outline-none focus:ring-2 cursor-pointer';
+      'w-full px-4 py-2.5 border rounded-full transition-all focus:outline-none focus:ring-2 cursor-pointer';
     const tamaños: { [key: string]: string } = {
       sm: 'text-sm',
       md: 'text-base',
@@ -174,47 +179,49 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
       !!this.mensajeExito()
   );
 
+  // 🎯 EFFECT - Reemplaza OnChanges para signal inputs
   constructor() {
+    // Effect para cargar datos cuando cambia la config
     effect(() => {
-      const fuenteDatos = this.fuenteDatos();
-      if (fuenteDatos) {
-        this.cargarDatosFuente(fuenteDatos);
+      const cfg = this.config();
+      if (cfg) {
+        this.cargarDatos();
       }
     });
   }
 
   ngOnInit(): void {
-    if (this.fuenteDatos() && this.opciones().length === 0) {
-      this.cargarDatosFuente(this.fuenteDatos()!);
-    }
+    // Ya no necesitas OnInit para esto, el effect lo maneja
   }
 
-  private async cargarDatosFuente(config: ConfigFuenteDatos): Promise<void> {
+  // 📥 Cargar datos usando la configuración
+  private async cargarDatos(): Promise<void> {
+    const cfg = this.config();
+    if (!cfg) return;
+
     try {
       this.cargando.set(true);
       this.errorCarga.set(null);
 
-      const resultado = config.obtenerDatos();
-      let datos: any[];
-
-      if (resultado instanceof Promise) {
-        datos = await resultado;
-      } else if (resultado instanceof Observable) {
-        datos = await new Promise((resolve, reject) => {
-          const suscripcion = resultado.subscribe({
-            next: (valor) => {
-              suscripcion.unsubscribe();
-              resolve(valor);
-            },
-            error: reject,
-          });
+      const datos = await new Promise<T[]>((resolve, reject) => {
+        const observable = cfg.obtenerDatos();
+        const suscripcion = observable.pipe(
+          debounceTime(cfg.debounceMs || 300),
+          distinctUntilChanged()
+        ).subscribe({
+          next: (valor) => {
+            suscripcion.unsubscribe();
+            resolve(valor);
+          },
+          error: reject,
         });
-      } else {
-        throw new Error('obtenerDatos debe retornar Promise u Observable');
-      }
+      });
 
-      const opcionesMapeadas = datos.map((item) => config.mapeo(item));
-      this.opciones.set(opcionesMapeadas);
+      this.datosOriginales = datos;
+
+      // Mapear a OpcionSelect
+      const opcionesMapeadas = datos.map((item) => cfg.mapear(item));
+      this.opcionesInternas.set(opcionesMapeadas);
       this.datosCargados.emit(opcionesMapeadas);
       this.cargando.set(false);
     } catch (error) {
@@ -223,36 +230,6 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
       this.errorDatos.emit(err);
       this.cargando.set(false);
     }
-  }
-
-  // ControlValueAccessor
-  private alCambiar: (valor: any) => void = () => {};
-  private alTocar: () => void = () => {};
-
-  writeValue(valor: any): void {
-    if (valor === null || valor === undefined) {
-      this.valorSeleccionado.set(null);
-      this.idsSeleccionados.set([]);
-      this.terminoBusqueda.set('');
-    } else if (Array.isArray(valor)) {
-      this.valorSeleccionado.set(valor);
-      this.idsSeleccionados.set(valor.map((v) => v.id));
-    } else {
-      this.valorSeleccionado.set(valor);
-      this.idsSeleccionados.set([valor.id]);
-    }
-  }
-
-  registerOnChange(fn: (valor: any) => void): void {
-    this.alCambiar = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.alTocar = fn;
-  }
-
-  setDisabledState(deshabilitado: boolean): void {
-    this.deshabilitado.set(deshabilitado);
   }
 
   // Métodos públicos
@@ -270,19 +247,27 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   seleccionarOpcion(opcion: OpcionSelect): void {
     if (opcion.deshabilitado) return;
 
+    const cfg = this.config();
+    if (!cfg) return;
+
+    // Encontrar el dato original
+    const datosOriginal = this.datosOriginales.find(
+      (d) => cfg.mapear(d).id === opcion.id
+    );
+
     if (this.multiSeleccion()) {
-      this.manejarMultiSeleccion(opcion);
+      this.manejarMultiSeleccion(opcion, datosOriginal);
     } else {
       this.valorSeleccionado.set(opcion);
       this.idsSeleccionados.set([opcion.id]);
       this.abierto.set(false);
       this.terminoBusqueda.set('');
-      this.alCambiar(opcion);
       this.cambioValor.emit(opcion);
+      this.seleccionado.emit(datosOriginal); // Emitir dato original
     }
   }
 
-  private manejarMultiSeleccion(opcion: OpcionSelect): void {
+  private manejarMultiSeleccion(opcion: OpcionSelect, datosOriginal?: T): void {
     const actual = Array.isArray(this.valorSeleccionado())
       ? this.valorSeleccionado()
       : [];
@@ -304,7 +289,6 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
       this.idsSeleccionados.set(actualizado.map((o) => o.id));
     }
 
-    this.alCambiar(this.valorSeleccionado());
     this.cambioValor.emit(this.valorSeleccionado());
   }
 
@@ -317,7 +301,6 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
     this.idsSeleccionados.set([]);
     this.terminoBusqueda.set('');
     this.abierto.set(false);
-    this.alCambiar(null);
     this.cambioValor.emit(null);
   }
 
@@ -329,14 +312,12 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
       const actualizado = (actual as OpcionSelect[]).filter((o) => o.id !== opcion.id);
       this.valorSeleccionado.set(actualizado.length > 0 ? actualizado : null);
       this.idsSeleccionados.set(actualizado.map((o) => o.id));
-      this.alCambiar(this.valorSeleccionado());
       this.cambioValor.emit(this.valorSeleccionado());
     }
   }
 
   manejarDesenfoque(): void {
     this.enfocado.set(false);
-    this.alTocar();
   }
 
   manejarEnfoque(): void {
@@ -348,9 +329,7 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   }
 
   recargarDatos(): void {
-    if (this.fuenteDatos()) {
-      this.cargarDatosFuente(this.fuenteDatos()!);
-    }
+    this.cargarDatos();
   }
 
   @HostListener('document:click', ['$event'])
@@ -383,16 +362,5 @@ export class BuscadorComponent implements OnInit, ControlValueAccessor {
   getSeleccionados(): OpcionSelect[] {
     const valor = this.valorSeleccionado();
     return Array.isArray(valor) ? valor : [];
-  }
-
-  // 🎯 MÉTODO GENÉRICO PARA CONFIGURAR FUENTE DE DATOS
-  configurarFuenteDatos<T>(
-    obtenerDatos: () => Observable<T[]> | Promise<T[]>,
-    mapeo: (item: T) => OpcionSelect
-  ): void {
-    this.fuenteDatos.set({
-      obtenerDatos,
-      mapeo,
-    });
   }
 }

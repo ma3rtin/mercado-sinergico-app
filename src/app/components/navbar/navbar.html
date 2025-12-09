@@ -1,14 +1,30 @@
 <nav class="hidden md:block bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <ul class="flex items-center justify-center gap-12 py-3 text-black">
-            @if (isLoggedIn()) {
             <li>
                 <a routerLink="/mis-paquetes"
                     class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path fill="currentColor"
-                            d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h5v-2H7zm1-4l4-2l4 2V5H8z" />
-                    </svg>Mis paquetes</a>
+                    <app-icon name="ShoppingBag" class="color-secondary"></app-icon>Mis Paquetes</a>
+            </li>
+            <li>
+                <a routerLink="/productos"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <app-icon name="box" class="color-secondary"></app-icon>Productos
+                </a>
+            </li>
+            <li>
+                <a routerLink="/paquetes-publicados"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <app-icon name="Package" class="color-secondary"></app-icon>
+                    Paquetes</a>
+            </li>
+
+            @if (isLoggedIn()) {
+            <li>
+                <button (click)="signOut()"
+                    class=" flex justify-center items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
+<app-icon name="LogOut" class="color-secondary" size="20"></app-icon>Cerrar sesión
+                </button>
             </li>
             }
             <li>

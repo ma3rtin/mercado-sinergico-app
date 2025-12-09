@@ -12,7 +12,6 @@ import {
   output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FlechaCarrusel } from '@app/shared/flecha-carrusel/flecha-carrusel';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Router } from '@angular/router';
@@ -20,7 +19,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-carrusel',
   standalone: true,
-  imports: [CommonModule, FlechaCarrusel, PaqueteCard],
+  imports: [CommonModule, PaqueteCard],
   templateUrl: './carrusel.html',
   styleUrl: './carrusel.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
