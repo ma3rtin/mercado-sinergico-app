@@ -1,6 +1,7 @@
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { EstadoPedido } from '@app/models/PedidosInterfaces/EstadoPedidos';
+import { PedidoProducto } from '@app/models/PedidosInterfaces/PedidoProducto';
 
 export interface Pedido {
   id_pedido?: number; // opcional para creación
@@ -14,4 +15,5 @@ export interface Pedido {
   usuario?: Usuario;
   paquetePublicado?: PaquetePublicado;
   estado?: EstadoPedido;
+  pedidoProductos?: PedidoProducto[];
 }

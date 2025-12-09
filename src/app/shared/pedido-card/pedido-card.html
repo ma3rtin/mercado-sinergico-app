@@ -1,0 +1,97 @@
+<article (click)="onAbrir()" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 
+         overflow-hidden border border-gray-200 hover:border-blue-400 cursor-pointer 
+         flex flex-col h-full hover:scale-[1.02] active:scale-100 max-w-sm">
+
+    <!-- TAGS SECTION -->
+    <div class="px-3 pt-2 pb-2">
+        <div class="flex flex-wrap items-center gap-1.5">
+
+            <!-- Marca -->
+            @if (marca()) {
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary text-white 
+                     rounded-full font-semibold text-xs whitespace-nowrap">
+                {{ marca() }}
+            </span>
+            }
+
+            <!-- Categoría -->
+            @if (categoria()) {
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-800 
+                     rounded-full font-semibold text-xs whitespace-nowrap">
+                {{ categoria() }}
+            </span>
+            }
+
+            <!-- Estado del pedido -->
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
+                [class]="badgeEstadoClass()">
+                {{ estado() }}
+            </span>
+
+            <!-- Tiempo restante del paquete -->
+            @if (tiempoRestante()) {
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 border border-red-300 
+                     rounded-full font-semibold text-xs whitespace-nowrap">
+                ⏳ {{ tiempoRestante() }}
+            </span>
+            }
+        </div>
+    </div>
+
+    <!-- IMAGEN -->
+    <div class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 1/1;">
+        <img [src]="imagenPrincipal()"
+            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            (error)="onImageError($event)" />
+
+        <!-- Badge urgente si existe fecha fin -->
+        @if (tiempoRestante()) {
+        <div class="absolute top-2 right-2 bg-red-500 text-white rounded-lg px-2 py-1 text-xs font-bold 
+                  shadow-lg animate-pulse">
+            {{ tiempoRestante() }}
+        </div>
+        }
+    </div>
+
+    <!-- INFORMACIÓN CENTRAL -->
+    <div class="px-4 py-3 space-y-2 flex-grow flex flex-col">
+
+        <!-- Nombre del paquete -->
+        <h3 class="font-display text-base font-bold text-gray-900 line-clamp-2 
+               group-hover:text-secondary-dark transition-colors">
+            {{ paquete()?.paqueteBase?.nombre ?? 'Paquete no disponible' }}
+        </h3>
+
+        <!-- Cantidad de productos -->
+        <p class="text-sm text-gray-700">
+            Productos en el pedido:
+            <span class="font-semibold text-secondary-dark">{{ productosCount() }}</span>
+        </p>
+
+        <!-- Fecha del pedido -->
+        <p class="text-xs text-gray-500">
+            Fecha del pedido: {{ fechaPedido() }}
+        </p>
+
+    </div>
+
+    <!-- CTA FOOTER -->
+    <div class="px-4 py-2 bg-gray-50 flex items-center justify-between 
+           text-secondary font-semibold text-sm group-hover:bg-blue-50 transition-colors">
+
+        <div class="flex items-center gap-1">
+            <span>Ver detalles</span>
+            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </div>
+
+        <!-- eliminar -->
+        <button (click)="onEliminar($event)" class="text-red-500 hover:text-red-700 text-xs font-semibold">
+            Eliminar
+        </button>
+
+    </div>
+
+</article>

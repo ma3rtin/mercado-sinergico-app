@@ -18,7 +18,7 @@ import { EditarProductoComponent } from './pages/admin/components/editar-product
 import { Perfil } from './modules/usuario/pages/perfil/perfil';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
-import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
+import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 
 export const routes: Routes = [
   { 
@@ -83,7 +83,7 @@ export const routes: Routes = [
 
   { 
     path: 'mis-paquetes', 
-    component: MisPaquetesComponent, 
+    component: MisPedidosComponent, 
     canActivate: [authGuard],
     data: { breadcrumb: 'Mis Paquetes' }
   },
