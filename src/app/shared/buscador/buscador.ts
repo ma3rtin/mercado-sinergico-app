@@ -64,7 +64,7 @@ export class BuscadorComponent<T = any> implements OnInit {
   textoCargando = input<string>('Cargando opciones...');
   textoVacio = input<string>('No se encontraron opciones');
   textoErrorCarga = input<string>('Error al cargar opciones');
-  
+
   // Config también puede ser signal input
   config = input<ConfigBuscador<T> | null>(null);
 
@@ -204,30 +204,37 @@ export class BuscadorComponent<T = any> implements OnInit {
       this.errorCarga.set(null);
 
       const datos = await new Promise<T[]>((resolve, reject) => {
-        const observable = cfg.obtenerDatos();
-        const suscripcion = observable.pipe(
-          debounceTime(cfg.debounceMs || 300),
-          distinctUntilChanged()
-        ).subscribe({
-          next: (valor) => {
-            suscripcion.unsubscribe();
-            resolve(valor);
-          },
-          error: reject,
+        let suscripcion: any;
+
+        suscripcion = cfg.obtenerDatos()
+          .pipe(
+            debounceTime(cfg.debounceMs || 300),
+            distinctUntilChanged()
+          )
+          .subscribe({
+            next: (valor) => resolve(valor),
+            error: reject,
+          });
+
+        // 🔐 Esto garantiza que siempre se desuscriba
+        suscripcion.add(() => {
+          suscripcion = null;
         });
       });
 
+      // Guardar datos
       this.datosOriginales = datos;
 
-      // Mapear a OpcionSelect
       const opcionesMapeadas = datos.map((item) => cfg.mapear(item));
       this.opcionesInternas.set(opcionesMapeadas);
       this.datosCargados.emit(opcionesMapeadas);
-      this.cargando.set(false);
+
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.errorCarga.set(err.message);
       this.errorDatos.emit(err);
+
+    } finally {
       this.cargando.set(false);
     }
   }

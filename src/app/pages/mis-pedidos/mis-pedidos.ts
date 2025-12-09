@@ -1,13 +1,13 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
-import { PedidoProducto } from '@app/models/PedidosInterfaces/PedidoProducto';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Services
@@ -39,7 +39,6 @@ interface PedidoDelUsuario extends Pedido {
   precioFinal: number;
   descuento: number;
 }
-
 
 @Component({
   selector: 'app-mis-pedidos',
@@ -74,14 +73,17 @@ export class MisPedidosComponent implements OnInit {
 
   tienePedidos = computed(() => this.pedidos().length > 0);
 
+  @ViewChild(BuscadorComponent) buscador!: BuscadorComponent<any>;
+
 
   // ------------------------------
   // BUSCADOR
   // ------------------------------
-  configBuscador: ConfigBuscador<Pedido> = {
-    obtenerDatos: () => this.pedidoService.getPedidos(),
 
-    filtrar: (pedidos: Pedido[], termino: string) => {
+  configBuscador: ConfigBuscador<PedidoDelUsuario> = {
+    obtenerDatos: () => of(this.pedidos()),
+
+    filtrar: (pedidos: PedidoDelUsuario[], termino: string) => {
       const t = termino.toLowerCase();
       return pedidos.filter(p =>
         p.id_pedido?.toString().includes(t) ||
@@ -90,7 +92,7 @@ export class MisPedidosComponent implements OnInit {
       );
     },
 
-    mapear: (p: Pedido): OpcionSelect => ({
+    mapear: (p: PedidoDelUsuario): OpcionSelect => ({
       id: p.id_pedido!,
       etiqueta: `Pedido #${p.id_pedido} (${p.estado?.nombre})`,
       grupo: p.estado?.nombre ?? 'Estado'
@@ -122,6 +124,8 @@ export class MisPedidosComponent implements OnInit {
 
           this.pedidos.set(enriched);
           this.pedidosFiltrados.set(enriched);
+          setTimeout(() => this.buscador?.recargarDatos(), 0);
+
           this.isLoading.set(false);
         },
         error: err => {
@@ -168,11 +172,9 @@ export class MisPedidosComponent implements OnInit {
       return;
     }
     const selected = Array.isArray(opcion) ? opcion[0] : opcion;
-
     const filtrado = this.pedidos().filter(p => p.id_pedido === selected.id);
     this.pedidosFiltrados.set(filtrado);
   }
-
 
   // ------------------------------
   // CÁLCULOS
@@ -205,7 +207,6 @@ export class MisPedidosComponent implements OnInit {
       this.recalcularPedido(pedido);
     }
   }
-
 
   // ------------------------------
   // NEGOCIO

@@ -15,7 +15,10 @@
 
         <!-- 🔍 Buscador -->
         <div class="mb-6">
-            <app-buscador [config]="configBuscador" (cambioValor)="onBuscadorCambio($event)">
+            <app-buscador
+                    #buscador
+                    [config]="configBuscador"
+                    (cambioValor)="onBuscadorCambio($event)">
             </app-buscador>
         </div>
 

@@ -88,10 +88,10 @@ export const routes: Routes = [
   },
 
   { 
-    path: 'mis-paquetes', 
+    path: 'mis-pedidos', 
     component: MisPedidosComponent, 
     canActivate: [authGuard],
-    data: { breadcrumb: 'Mis Paquetes' }
+    data: { breadcrumb: 'Mis pedidos' }
   },
 
   // 🧑‍💻 Rutas de admin

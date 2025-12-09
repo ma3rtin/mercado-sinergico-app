@@ -21,7 +21,7 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
   imports: [
     CurrencyPipe, 
     CommonModule,
-    BreadcrumbComponent  // 👈 Agregar aquí
+    BreadcrumbComponent
   ],
   templateUrl: './detalle-producto-sumarse.html',
   styleUrl: './detalle-producto-sumarse.css',
@@ -226,8 +226,8 @@ export class DetalleProductoSumarse implements OnInit {
       color: this.selectedColor(),
       cantidad: this.quantity()
     });
-    this.toastr.success('Producto agregado "Mis-paquetes" con éxito.');
-    this.router.navigate(['mis-paquetes']);
+    this.toastr.success('Producto agregado "Mis-pedidos" con éxito.');
+    this.router.navigate(['mis-pedidos']);
   }
 
   goBack(): void {
