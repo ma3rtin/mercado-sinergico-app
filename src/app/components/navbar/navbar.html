@@ -19,14 +19,6 @@
                     Paquetes</a>
             </li>
 
-            @if (isLoggedIn()) {
-            <li>
-                <button (click)="signOut()"
-                    class=" flex justify-center items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
-<app-icon name="LogOut" class="color-secondary" size="20"></app-icon>Cerrar sesión
-                </button>
-            </li>
-            }
             <li>
                 <a routerLink="/productos"
                     class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">

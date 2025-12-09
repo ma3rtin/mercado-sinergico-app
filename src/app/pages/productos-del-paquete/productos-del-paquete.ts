@@ -29,7 +29,7 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { BuscadorComponent } from '@app/shared/buscador/buscador';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 
 @Component({
   selector: 'app-productos-del-paquete',
