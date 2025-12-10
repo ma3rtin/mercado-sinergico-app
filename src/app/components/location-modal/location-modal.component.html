@@ -1,0 +1,30 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+    <!-- Header -->
+    <div class="bg-primary p-6 text-center">
+      <h2 class="text-2xl font-bold text-white mb-2">¡Bienvenido!</h2>
+      <p class="text-white/90">Por favor, selecciona tu localidad para continuar</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 max-h-[60vh] overflow-y-auto">
+      @if (isLoading) {
+        <div class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      } @else {
+        <div class="grid gap-3">
+          @for (loc of localidades; track loc.id_localidad) {
+            <button 
+              (click)="selectLocation(loc)"
+              class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all duration-200 group flex items-center justify-between"
+            >
+              <span class="font-medium text-gray-700 group-hover:text-primary">{{ loc.nombre }}</span>
+              <span class="text-sm text-gray-400 group-hover:text-primary/70">CP {{ loc.codigo_postal }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
