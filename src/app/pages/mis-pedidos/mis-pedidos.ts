@@ -72,9 +72,6 @@ export class MisPedidosComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
 
-  categorias = signal<any[]>([]);
-  marcas = signal<any[]>([]);
-
   // ------------------------------
   // SIGNALS PRINCIPALES
   // ------------------------------

@@ -59,8 +59,6 @@
             @for (pedido of pedidosFiltrados(); track pedido.id_pedido) {
             <app-paquete-usuario-card
                 [pedido]="pedido"
-                [marcas]="marcas"
-                [categorias]="categorias"
                 (toggleExpansion)="toggleExpansion(pedido)"
                 (aumentarCantidad)="aumentarCantidad(pedido, $event)"
                 (disminuirCantidad)="disminuirCantidad(pedido, $event)"
