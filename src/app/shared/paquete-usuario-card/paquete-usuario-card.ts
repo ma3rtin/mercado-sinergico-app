@@ -75,6 +75,10 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     return 'Por definir';
   }
 
+  get puedeEditarCantidades(): boolean {
+    const estado = this.pedido?.estado?.nombre?.toLowerCase();
+    return estado === 'pendiente';
+  }
 
   getEstadoClass(estado?: string): string {
     if (!estado) return 'text-gray-600 bg-gray-100 border-gray-200';
@@ -112,13 +116,25 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   onAumentarCantidad(prod: any): void {
-    prod.id_producto = prod.productoId ?? prod.id_producto;
-    this.aumentarCantidad.emit(prod);
+    if (!this.puedeEditarCantidades) return;
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto
+    };
+
+    this.aumentarCantidad.emit(limpio);
   }
 
   onDisminuirCantidad(prod: any): void {
-    prod.id_producto = prod.productoId ?? prod.id_producto;
-    this.disminuirCantidad.emit(prod);
+    if (!this.puedeEditarCantidades) return;
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto
+    };
+
+    this.disminuirCantidad.emit(limpio);
   }
 
   onSalirDelPaquete(): void {

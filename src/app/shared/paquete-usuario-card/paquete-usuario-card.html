@@ -160,8 +160,11 @@
               <!-- Cantidad -->
               <div class="flex items-center gap-3">
 
-                <button type="button" (click)="onDisminuirCantidad(producto)"
-                  class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors">
+                @if (puedeEditarCantidades) {
+
+                <!-- Botón - -->
+                <button type="button" (click)="onDisminuirCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-full 
+                   bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
                   </svg>
@@ -171,13 +174,21 @@
                   {{ producto.cantidad }}
                 </span>
 
-                <button type="button" (click)="onAumentarCantidad(producto)"
-                  class="w-8 h-8 flex items-center justify-center rounded-full bg-accent hover:bg-accent-dark text-gray-900 transition-colors">
+                <!-- Botón + -->
+                <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-full 
+                   bg-accent hover:bg-accent-dark text-gray-900 transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
                   </svg>
                 </button>
 
+                } @else {
+
+                <!-- Estado NO editable (solo mostrar cantidad) -->
+                <span class="px-3 py-1 rounded-md bg-gray-100 text-gray-500 font-semibold select-none">
+                  {{ producto.cantidad }}
+                </span>
+                }
               </div>
 
               <!-- Subtotal -->
@@ -237,17 +248,11 @@
           <!-- BOTONES -->
           <div class="flex flex-col sm:flex-row gap-3 pt-4">
             @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-            <app-button
-              variant="primary"
-              label="Finalizar compra"
-              (buttonClick)="onFinalizarCompra()">
+            <app-button variant="primary" label="Finalizar compra" (buttonClick)="onFinalizarCompra()">
             </app-button>
             }
 
-            <app-button
-              variant="warning"
-              label="Salir del paquete"
-              (buttonClick)="onSalirDelPaquete()">
+            <app-button variant="warning" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
             </app-button>
           </div>
 

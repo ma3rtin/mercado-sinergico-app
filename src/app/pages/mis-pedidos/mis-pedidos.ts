@@ -202,42 +202,78 @@ export class MisPedidosComponent implements OnInit {
     pedido.expandido = !pedido.expandido;
   }
 
-  aumentarCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido): void {
-    const anterior = producto.cantidad;
+  aumentarCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
+    // 1. Reemplazar el array sin mutar objetos
+    pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+      (p: ProductoEnPedido) =>
+        p.id_producto === producto.id_producto
+          ? { ...p, cantidad: p.cantidad + 1 }
+          : p
+    );
 
-    producto.cantidad++;
+    // 2. Recalcular totales
     this.recalcularPedido(pedido);
 
+    // 3. Buscar nueva versión del producto (ya actualizada)
+    const actualizado = pedido.productosSeleccionados.find(
+      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+    )!;
+
+    // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      producto.id_producto!,
-      { cantidad: producto.cantidad, variante: producto.variante ?? null }
+      actualizado.id_producto,
+      { cantidad: actualizado.cantidad, variante: actualizado.variante }
     ).subscribe({
       error: () => {
-        producto.cantidad = anterior;
-        this.toastr.error("No se pudo aumentar la cantidad.");
+        // revertir cambios en caso de error
+        pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+          (p: ProductoEnPedido) =>
+            p.id_producto === producto.id_producto
+              ? { ...p, cantidad: producto.cantidad }
+              : p
+        );
+
         this.recalcularPedido(pedido);
+        this.toastr.error("No se pudo aumentar la cantidad.");
       }
     });
   }
 
-  disminuirCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido): void {
-    if (producto.cantidad <= 1) return;
+  disminuirCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
+    // 1. Reemplazar el array sin mutar objetos
+    pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+      (p: ProductoEnPedido) =>
+        p.id_producto === producto.id_producto
+          ? { ...p, cantidad: p.cantidad - 1 }
+          : p
+    );
 
-    const anterior = producto.cantidad;
-
-    producto.cantidad--;
+    // 2. Recalcular totales
     this.recalcularPedido(pedido);
 
+    // 3. Buscar nueva versión del producto (ya actualizada)
+    const actualizado = pedido.productosSeleccionados.find(
+      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+    )!;
+
+    // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      producto.id_producto!,
-      { cantidad: producto.cantidad, variante: producto.variante ?? null }
+      actualizado.id_producto,
+      { cantidad: actualizado.cantidad, variante: actualizado.variante }
     ).subscribe({
       error: () => {
-        producto.cantidad = anterior;
-        this.toastr.error("No se pudo disminuir la cantidad.");
+        // revertir cambios en caso de error
+        pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+          (p: ProductoEnPedido) =>
+            p.id_producto === producto.id_producto
+              ? { ...p, cantidad: producto.cantidad }
+              : p
+        );
+
         this.recalcularPedido(pedido);
+        this.toastr.error("No se pudo disminuir la cantidad.");
       }
     });
   }
