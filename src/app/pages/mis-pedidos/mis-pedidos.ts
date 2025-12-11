@@ -38,6 +38,7 @@ type ProductoEnPedido = {
   id_producto: number;
   nombre: string;
   precio: number;
+  precioConDescuento?: number;
   imagen_url?: string;
   cantidad: number;
   variante?: string | null;
@@ -146,29 +147,40 @@ export class MisPedidosComponent implements OnInit {
   // MAPEO / NORMALIZACIÓN
   // ------------------------------
   private async mapPedido(p: Pedido): Promise<PedidoDelUsuario> {
+
     const productosSeleccionados: ProductoEnPedido[] =
       (p.detalles ?? [])
         .filter(x => x.producto)
-        .map(x => ({
-          id_producto: x.productoId,
-          nombre: x.producto!.nombre,
-          precio: x.producto!.precio,
-          imagen_url: x.producto!.imagen_url,
-          cantidad: x.cantidad,
-          variante: x.variante ?? null
-        }));
+        .map(x => {
+          const precio = x.producto!.precio;
+          const descuento = p.paquetePublicado?.descuento ?? 0;
+          const precioConDescuento = precio - (precio * descuento / 100);
+
+          return {
+            id_producto: x.productoId,
+            nombre: x.producto!.nombre,
+            precio,
+            precioConDescuento,
+            imagen_url: x.producto!.imagen_url,
+            cantidad: x.cantidad,
+            variante: x.variante ?? null
+          };
+        });
 
     const subtotal = this.calcularSubtotal(productosSeleccionados);
+    const descuento = p.paquetePublicado?.descuento ?? 0;
+    const total = subtotal - (subtotal * descuento / 100);
 
     return {
       ...p,
       expandido: false,
       productosSeleccionados,
       subtotal,
-      total: subtotal,
-      descuento: 0
+      total,
+      descuento
     };
   }
+
 
   // ------------------------------
   // BUSCADOR
@@ -191,9 +203,12 @@ export class MisPedidosComponent implements OnInit {
 
   private recalcularPedido(p: PedidoDelUsuario): void {
     const subtotal = this.calcularSubtotal(p.productosSeleccionados);
+    const descuento = p.descuento ?? 0;
+
     p.subtotal = subtotal;
-    p.total = subtotal;
+    p.total = subtotal - (subtotal * descuento / 100);
   }
+
 
   // ------------------------------
   // ACCIONES DE UI

@@ -15,6 +15,7 @@ export interface PaquetePublicado {
   cant_productos_reservados?: number;
   cant_usuarios_registrados?: number;
   monto_total?: number;
+  descuento?: number;
   imagen_url?: string;
   tipoPaquete?: TipoPaquete;
 
