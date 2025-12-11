@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal, computed, DestroyRef, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
@@ -18,8 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 // Shared components
 import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { BuscadorComponent, ConfigBuscador, OpcionSelect } from "@app/shared/buscador/buscador";
-import { PedidoCard } from '@app/shared/pedido-card/pedido-card';
-
+import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
 
 // ------------------------------
 // INTERNAS
@@ -48,7 +46,7 @@ interface PedidoDelUsuario extends Pedido {
     FormsModule,
     BreadcrumbComponent,
     BuscadorComponent,
-    PedidoCard
+    PaqueteUsuarioCardComponent
   ],
   templateUrl: './mis-pedidos.html'
 })
@@ -58,9 +56,7 @@ export class MisPedidosComponent implements OnInit {
   // INYECCIONES
   // ------------------------------
   private readonly pedidoService = inject(PedidoService);
-  private readonly productosService = inject(ProductosService);
   private readonly toastr = inject(ToastrService);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   // ------------------------------
@@ -100,6 +96,9 @@ export class MisPedidosComponent implements OnInit {
 
     debounceMs: 300
   };
+
+  marcas: any[] = [];
+  categorias: any[] = [];
 
   // ------------------------------
   // INIT
@@ -233,6 +232,9 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  finalizarCompra(pedido: PedidoDelUsuario) {
+    console.log("Finalizar compra del pedido:", pedido.id_pedido);
+  }
 
   // ------------------------------
   // HELPERS
@@ -240,6 +242,10 @@ export class MisPedidosComponent implements OnInit {
   onImageError(ev: Event): void {
     const img = ev.target as HTMLImageElement;
     img.src = "/assets/images/placeholder-product.png";
+  }
+
+  onPagarPedido(idPedido: number) {
+    console.log("Botón pagar presionado, pedido:", idPedido);
   }
 
   formatPrice(n: number): string {

@@ -16,9 +16,9 @@
         <!-- 🔍 Buscador -->
         <div class="mb-6">
             <app-buscador
-                    #buscador
-                    [config]="configBuscador"
-                    (cambioValor)="onBuscadorCambio($event)">
+                #buscador
+                [config]="configBuscador"
+                (cambioValor)="onBuscadorCambio($event)">
             </app-buscador>
         </div>
 
@@ -54,13 +54,21 @@
         </div>
 
         <!-- GRID DE CARDS -->
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="flex flex-col gap-6">
 
             @for (pedido of pedidosFiltrados(); track pedido.id_pedido) {
-            <app-pedido-card [pedido]="pedido" (verDetalle)="toggleExpansion(pedido)"
-                (eliminar)="eliminarPedido(pedido)"
-                (editar)="actualizarPedido(pedido)">
-            </app-pedido-card>
+            <app-paquete-usuario-card
+                [pedido]="pedido"
+                [marcas]="marcas"
+                [categorias]="categorias"
+                (toggleExpansion)="toggleExpansion(pedido)"
+                (aumentarCantidad)="aumentarCantidad(pedido, $event)"
+                (disminuirCantidad)="disminuirCantidad(pedido, $event)"
+                (actualizarPedido)="actualizarPedido(pedido)"
+                (salirDelPaquete)="eliminarPedido(pedido)"
+                (finalizarCompra)="finalizarCompra(pedido)"
+                (imageError)="onImageError($event)">
+            </app-paquete-usuario-card>
             }
 
             @empty {
