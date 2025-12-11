@@ -19,7 +19,6 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() toggleExpansion = new EventEmitter<void>();
   @Output() aumentarCantidad = new EventEmitter<any>();
   @Output() disminuirCantidad = new EventEmitter<any>();
-  @Output() actualizarPedido = new EventEmitter<void>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
   @Output() imageError = new EventEmitter<Event>();
@@ -27,29 +26,17 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   public readonly TipoPaquete = TipoPaquete;
   isActualizando = signal(false);
 
-  // ⭐ GETTERS para no tocar el HTML
   get paquete() {
     return this.pedido.paquetePublicado;
   }
 
   get productosEnPedido() {
-    return this.pedido.detalles?.map((d: any) => ({
-      id_producto: d.producto.id_producto,
-      nombre: d.producto.nombre,
-      imagen_url: d.producto.imagen_url,
-      precio: d.precio_unitario,
-      cantidad: d.cantidad,
-      variante: d.variante
-    })) ?? [];
+    return this.pedido.productosSeleccionados;
   }
 
   ngOnInit(): void {
-    console.log('📦 Card inicializado para pedido:', this.pedido.id_pedido);
   }
 
-  // --------------------------
-  // HELPERS
-  // --------------------------
   getMarcaNombre(): string {
     return this.paquete?.paqueteBase?.marca?.nombre ?? 'Desconocida';
   }
@@ -120,25 +107,18 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     return (fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24) <= 2;
   }
 
-  // --------------------------
-  // EVENTOS
-  // --------------------------
   onToggleExpansion(): void {
     this.toggleExpansion.emit();
   }
 
   onAumentarCantidad(prod: any): void {
+    prod.id_producto = prod.productoId ?? prod.id_producto;
     this.aumentarCantidad.emit(prod);
   }
 
   onDisminuirCantidad(prod: any): void {
+    prod.id_producto = prod.productoId ?? prod.id_producto;
     this.disminuirCantidad.emit(prod);
-  }
-
-  onActualizarPedido(): void {
-    this.isActualizando.set(true);
-    this.actualizarPedido.emit();
-    setTimeout(() => this.isActualizando.set(false), 1200);
   }
 
   onSalirDelPaquete(): void {

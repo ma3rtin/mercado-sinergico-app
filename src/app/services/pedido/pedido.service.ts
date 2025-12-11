@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '@app/services/api.service';
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
+import { PedidoActualizado } from '@app/models/DTOs/Pedido/PedidoActualizadoDTO';
 
 @Injectable({ providedIn: 'root' })
 export class PedidoService extends ApiService {
@@ -19,9 +20,12 @@ export class PedidoService extends ApiService {
     crearPedido(body: Partial<Pedido>): Observable<Pedido> {
         return this.post<Pedido>(this.apiUrl, body);
     }
-
-    actualizarPedido(id: number, body: Partial<Pedido>): Observable<Pedido> {
-        return this.put<Pedido>(`${this.apiUrl}/${id}`, body);
+    
+    actualizarCantidad(pedidoId: number, productoId: number, body: { cantidad: number; variante?: string | null }) {
+        return this.patch<any>(
+            `${this.apiUrl}/${pedidoId}/producto/${productoId}`,
+            body
+        );
     }
 
     eliminarPedido(id: number): Observable<void> {

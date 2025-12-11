@@ -1,4 +1,13 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef, ViewChild, effect } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  DestroyRef,
+  ViewChild
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -7,34 +16,38 @@ import { of } from 'rxjs';
 
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
-import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
-import { ProductosService } from '@app/services/producto/producto.service';
 import { ToastrService } from 'ngx-toastr';
 
 // Shared components
 import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
-import { BuscadorComponent, ConfigBuscador, OpcionSelect } from "@app/shared/buscador/buscador";
+import {
+  BuscadorComponent,
+  ConfigBuscador,
+  OpcionSelect
+} from "@app/shared/buscador/buscador";
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
 
 // ------------------------------
-// INTERNAS
+// MODELOS INTERNOS
 // ------------------------------
 
-interface ProductoEnPedido extends Producto {
+type ProductoEnPedido = {
+  id_producto: number;
+  nombre: string;
+  precio: number;
+  imagen_url?: string;
   cantidad: number;
-  variante?: string;
-}
+  variante?: string | null;
+};
 
 interface PedidoDelUsuario extends Pedido {
   expandido?: boolean;
-
   productosSeleccionados: ProductoEnPedido[];
-
-  precioTotal: number;
-  precioFinal: number;
+  subtotal: number;
+  total: number;
   descuento: number;
 }
 
@@ -59,46 +72,46 @@ export class MisPedidosComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly destroyRef = inject(DestroyRef);
 
+  categorias = signal<any[]>([]);
+  marcas = signal<any[]>([]);
+
   // ------------------------------
-  // SIGNALS
+  // SIGNALS PRINCIPALES
   // ------------------------------
   pedidos = signal<PedidoDelUsuario[]>([]);
-  pedidosFiltrados = signal<PedidoDelUsuario[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
+  terminoBusqueda = signal<string>('');   // <-- nuevo
 
-  tienePedidos = computed(() => this.pedidos().length > 0);
+  // 👉 NO ROMPE NADA del HTML porque tu HTML usa pedidosFiltrados()
+  pedidosFiltrados = computed(() => {
+    const lista = this.pedidos();
+    const t = this.terminoBusqueda().toLowerCase();
+
+    if (!t) return lista;
+
+    return lista.filter(p =>
+      p.id_pedido?.toString().includes(t) ||
+      p.estado?.nombre?.toLowerCase().includes(t) ||
+      p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
+    );
+  });
 
   @ViewChild(BuscadorComponent) buscador!: BuscadorComponent<any>;
 
-
   // ------------------------------
-  // BUSCADOR
+  // CONFIG BUSCADOR
   // ------------------------------
-
   configBuscador: ConfigBuscador<PedidoDelUsuario> = {
     obtenerDatos: () => of(this.pedidos()),
-
-    filtrar: (pedidos: PedidoDelUsuario[], termino: string) => {
-      const t = termino.toLowerCase();
-      return pedidos.filter(p =>
-        p.id_pedido?.toString().includes(t) ||
-        p.estado?.nombre?.toLowerCase().includes(t) ||
-        p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
-      );
-    },
-
+    filtrar: () => [], // ya no filtra aquí — ahora filtramos con computed
     mapear: (p: PedidoDelUsuario): OpcionSelect => ({
       id: p.id_pedido!,
       etiqueta: `Pedido #${p.id_pedido} (${p.estado?.nombre})`,
       grupo: p.estado?.nombre ?? 'Estado'
     }),
-
     debounceMs: 300
   };
-
-  marcas: any[] = [];
-  categorias: any[] = [];
 
   // ------------------------------
   // INIT
@@ -117,18 +130,15 @@ export class MisPedidosComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: async pedidos => {
-          const enriched = await Promise.all(
-            pedidos.map(p => this.enriquecerPedido(p))
-          );
+          const enriched = await Promise.all(pedidos.map(p => this.mapPedido(p)));
 
           this.pedidos.set(enriched);
-          this.pedidosFiltrados.set(enriched);
-          setTimeout(() => this.buscador?.recargarDatos(), 0);
+
+          queueMicrotask(() => this.buscador?.recargarDatos());
 
           this.isLoading.set(false);
         },
-        error: err => {
-          console.error(err);
+        error: () => {
           this.errorMessage.set("Error al cargar los pedidos.");
           this.isLoading.set(false);
         }
@@ -136,28 +146,29 @@ export class MisPedidosComponent implements OnInit {
   }
 
   // ------------------------------
-  // ENRIQUECER PEDIDO
+  // MAPEO / NORMALIZACIÓN
   // ------------------------------
-  private async enriquecerPedido(p: Pedido): Promise<PedidoDelUsuario> {
-
-    // Convertir pedidoProductos[] → productosSeleccionados[]
+  private async mapPedido(p: Pedido): Promise<PedidoDelUsuario> {
     const productosSeleccionados: ProductoEnPedido[] =
-      (p.pedidoProductos ?? [])
-        .filter(x => !!x.producto)
+      (p.detalles ?? [])
+        .filter(x => x.producto)
         .map(x => ({
-          ...x.producto!,
+          id_producto: x.productoId,
+          nombre: x.producto!.nombre,
+          precio: x.producto!.precio,
+          imagen_url: x.producto!.imagen_url,
           cantidad: x.cantidad,
-          variante: x.variante
+          variante: x.variante ?? null
         }));
 
-    const precioTotal = this.calcularSubtotal(productosSeleccionados);
+    const subtotal = this.calcularSubtotal(productosSeleccionados);
 
     return {
       ...p,
       expandido: false,
       productosSeleccionados,
-      precioTotal,
-      precioFinal: precioTotal,
+      subtotal,
+      total: subtotal,
       descuento: 0
     };
   }
@@ -167,12 +178,11 @@ export class MisPedidosComponent implements OnInit {
   // ------------------------------
   onBuscadorCambio(opcion: OpcionSelect | OpcionSelect[] | null) {
     if (!opcion) {
-      this.pedidosFiltrados.set(this.pedidos());
+      this.terminoBusqueda.set('');
       return;
     }
     const selected = Array.isArray(opcion) ? opcion[0] : opcion;
-    const filtrado = this.pedidos().filter(p => p.id_pedido === selected.id);
-    this.pedidosFiltrados.set(filtrado);
+    this.terminoBusqueda.set(selected.etiqueta ?? '');
   }
 
   // ------------------------------
@@ -183,37 +193,61 @@ export class MisPedidosComponent implements OnInit {
   }
 
   private recalcularPedido(p: PedidoDelUsuario): void {
-    p.precioTotal = this.calcularSubtotal(p.productosSeleccionados);
-    p.precioFinal = p.precioTotal;
+    const subtotal = this.calcularSubtotal(p.productosSeleccionados);
+    p.subtotal = subtotal;
+    p.total = subtotal;
   }
 
-
   // ------------------------------
-  // UI ACTIONS
+  // ACCIONES DE UI
   // ------------------------------
   toggleExpansion(pedido: PedidoDelUsuario): void {
     pedido.expandido = !pedido.expandido;
   }
 
   aumentarCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido): void {
+    const anterior = producto.cantidad;
+
     producto.cantidad++;
     this.recalcularPedido(pedido);
+
+    this.pedidoService.actualizarCantidad(
+      pedido.id_pedido!,
+      producto.id_producto!,
+      { cantidad: producto.cantidad, variante: producto.variante ?? null }
+    ).subscribe({
+      error: () => {
+        producto.cantidad = anterior;
+        this.toastr.error("No se pudo aumentar la cantidad.");
+        this.recalcularPedido(pedido);
+      }
+    });
   }
 
   disminuirCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido): void {
-    if (producto.cantidad > 1) {
-      producto.cantidad--;
-      this.recalcularPedido(pedido);
-    }
+    if (producto.cantidad <= 1) return;
+
+    const anterior = producto.cantidad;
+
+    producto.cantidad--;
+    this.recalcularPedido(pedido);
+
+    this.pedidoService.actualizarCantidad(
+      pedido.id_pedido!,
+      producto.id_producto!,
+      { cantidad: producto.cantidad, variante: producto.variante ?? null }
+    ).subscribe({
+      error: () => {
+        producto.cantidad = anterior;
+        this.toastr.error("No se pudo disminuir la cantidad.");
+        this.recalcularPedido(pedido);
+      }
+    });
   }
 
   // ------------------------------
   // NEGOCIO
   // ------------------------------
-  actualizarPedido(pedido: PedidoDelUsuario): void {
-    this.toastr.success("Pedido actualizado.");
-  }
-
   eliminarPedido(pedido: PedidoDelUsuario): void {
     Swal.fire({
       title: "¿Eliminar pedido?",
@@ -221,31 +255,24 @@ export class MisPedidosComponent implements OnInit {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar"
     }).then(result => {
       if (result.isConfirmed) {
         const nuevos = this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido);
         this.pedidos.set(nuevos);
-        this.pedidosFiltrados.set(nuevos);
         this.toastr.success("Pedido eliminado.");
       }
     });
   }
 
-  finalizarCompra(pedido: PedidoDelUsuario) {
-    console.log("Finalizar compra del pedido:", pedido.id_pedido);
+  finalizarCompra(p: PedidoDelUsuario) {
+    console.log("Finalizar compra:", p.id_pedido);
   }
 
   // ------------------------------
   // HELPERS
   // ------------------------------
   onImageError(ev: Event): void {
-    const img = ev.target as HTMLImageElement;
-    img.src = "/assets/images/placeholder-product.png";
-  }
-
-  onPagarPedido(idPedido: number) {
-    console.log("Botón pagar presionado, pedido:", idPedido);
+    (ev.target as HTMLImageElement).src = "/assets/images/placeholder-product.png";
   }
 
   formatPrice(n: number): string {
