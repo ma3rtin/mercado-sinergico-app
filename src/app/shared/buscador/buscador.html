@@ -13,34 +13,35 @@
     <!-- Select Container -->
     <div class="relative" #contenedorDropdown>
         <!-- Select Button/Input -->
-        <button [id]="idEntrada()" type="button" (click)="alternarDropdown()" (blur)="manejarDesenfoque()" (focus)="manejarEnfoque()"
-            [disabled]="deshabilitado() || cargando()" [attr.aria-label]="etiqueta() || 'Seleccionar'"
-            [attr.aria-expanded]="abierto()" [attr.aria-haspopup]="'listbox'" [class]="clasesEntrada()"
+        <button [id]="idEntrada()" type="button" (click)="alternarDropdown()" (blur)="manejarDesenfoque()"
+            (focus)="manejarEnfoque()" [disabled]="deshabilitado() || cargando()"
+            [attr.aria-label]="etiqueta() || 'Seleccionar'" [attr.aria-expanded]="abierto()"
+            [attr.aria-haspopup]="'listbox'" [class]="clasesEntrada()"
             class="flex items-center justify-between text-left">
 
             <!-- Selected Display -->
             <span class="flex-1 truncate" [class]="!valorMostrado ? 'text-gray-500' : ''">
                 @if (multiSeleccion() && esArray(valorSeleccionado())) {
-                    @if (conteoSeleccionados() > 0) {
-                    <span class="inline-flex items-center gap-2 flex-wrap gap-y-1">
-                        @for (item of getSeleccionados(); track item.id) {
-                        <span
-                            class="inline-flex items-center gap-1 bg-secondary/10 text-secondary px-2 py-1 rounded text-sm">
-                            {{ item.etiqueta }}
-                            <button type="button" (click)="eliminarSeleccion(item, $event)"
-                                [attr.aria-label]="'Quitar ' + item.etiqueta"
-                                class="hover:text-red-500 transition-colors focus:outline-none">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </span>
-                        }
+                @if (conteoSeleccionados() > 0) {
+                <span class="inline-flex items-center gap-2 flex-wrap gap-y-1">
+                    @for (item of getSeleccionados(); track item.id) {
+                    <span
+                        class="inline-flex items-center gap-1 bg-secondary/10 text-secondary px-2 py-1 rounded text-sm">
+                        {{ item.etiqueta }}
+                        <button type="button" (click)="eliminarSeleccion(item, $event)"
+                            [attr.aria-label]="'Quitar ' + item.etiqueta"
+                            class="hover:text-red-500 transition-colors focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     </span>
-                    } @else {
-                    {{ marcador() }}
                     }
+                </span>
+                } @else {
+                {{ marcador() }}
+                }
                 } @else {
                 {{ valorMostrado || marcador() }}
                 }
@@ -137,8 +138,8 @@
                     <!-- Group Options -->
                     @for (opcion of getGroupOptions(grupo); track opcion.id) {
                     <button type="button" role="option" [attr.aria-selected]="esOpcionSeleccionada(opcion)"
-                        (click)="seleccionarOpcion(opcion)" [disabled]="opcion.deshabilitado" [attr.aria-label]="opcion.etiqueta"
-                        [class]="'w-full text-left px-4 py-2.5 transition-colors ' +
+                        (click)="seleccionarOpcion(opcion)" [disabled]="opcion.deshabilitado"
+                        [attr.aria-label]="opcion.etiqueta" [class]="'w-full text-left px-4 py-2.5 transition-colors ' +
                         (opcion.deshabilitado ? 'opacity-50 cursor-not-allowed text-gray-400' : 'cursor-pointer hover:bg-blue-50') +
                         (esOpcionSeleccionada(opcion) ? ' bg-secondary/10 text-secondary font-medium' : '')">
 
@@ -146,7 +147,8 @@
                         @if (multiSeleccion()) {
                         <div class="flex items-center gap-2">
                             <div class="flex-shrink-0">
-                                <input type="checkbox" [checked]="esOpcionSeleccionada(opcion)" [disabled]="opcion.deshabilitado"
+                                <input type="checkbox" [checked]="esOpcionSeleccionada(opcion)"
+                                    [disabled]="opcion.deshabilitado"
                                     class="w-4 h-4 text-secondary rounded border-gray-300 focus:ring-secondary cursor-pointer"
                                     (click)="$event.stopPropagation()" />
                             </div>

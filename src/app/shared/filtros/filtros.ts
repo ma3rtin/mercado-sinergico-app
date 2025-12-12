@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-import { IconComponent } from "../icono/icono";
+import { IconComponent } from '../icono/icono';
 
 // 📦 Interfaces para los filtros
 export interface OpcionFiltro {

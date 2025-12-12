@@ -22,7 +22,7 @@ import { ToastrService } from 'ngx-toastr';
 // Components
 import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
-import { BuscadorComponent, ConfigBuscador, OpcionSelect } from "@app/shared/buscador/buscador";
+import { BuscadorComponent, ConfigBuscador, OpcionSelect } from '@app/shared/buscador/buscador';
 
 // Interfaces locales
 interface ProductoEnPedido extends Producto {
