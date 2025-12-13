@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Observable, map } from 'rxjs';
+import { map } from 'rxjs';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -25,7 +25,7 @@ import { ProductoCard } from '@app/shared/producto-card/producto-card';
     CommonModule,
     BreadcrumbComponent,
     FiltrosComponent,
-    ProductoCard 
+    ProductoCard
   ],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
@@ -38,16 +38,16 @@ export class ProductosComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
-  
+
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
   productosFiltrados = signal<Producto[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
-  
+
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-  
+
   // 🧩 Computed signals
   hasProductos = computed(() => this.productosOriginales().length > 0);
 
@@ -61,7 +61,7 @@ export class ProductosComponent implements OnInit {
         valor: cat.id_categoria
       } as OpcionFiltro)))
     ),
-    
+
     obtenerMarcas: () => this.marcaService.getMarcas().pipe(
       map(marcas => marcas.map(marca => ({
         id: marca.id_marca,
@@ -69,7 +69,7 @@ export class ProductosComponent implements OnInit {
         valor: marca.id_marca
       } as OpcionFiltro)))
     ),
-    
+
     // 🎨 Filtros a mostrar (solo para productos)
     mostrarCategoria: true,
     mostrarMarca: true,
@@ -77,7 +77,7 @@ export class ProductosComponent implements OnInit {
     mostrarRangoPrecio: true,  // SÍ para productos
     mostrarOrdenamiento: true,
     mostrarEstados: false, // No aplica para productos
-    
+
     // 📋 Opciones de Ordenamiento para productos
     opcionesOrdenamiento: [
       { id: 1, nombre: 'Más recientes', valor: 'recientes' },
@@ -87,7 +87,7 @@ export class ProductosComponent implements OnInit {
       { id: 5, nombre: 'Precio: Mayor a Menor', valor: 'precio-desc' },
       { id: 6, nombre: 'Más stock', valor: 'mas-stock' },
     ],
-    
+
     // 🎯 Textos personalizados
     tituloCategoria: 'Categorías',
     tituloMarca: 'Marcas',
@@ -119,7 +119,7 @@ export class ProductosComponent implements OnInit {
         error: (error) => {
           console.error('❌ Error cargando productos:', error);
           this.isLoading.set(false);
-          
+
           // Manejo de errores específicos
           if (error.name === 'TimeoutError') {
             this.errorMessage.set('El servidor no respondió a tiempo. Por favor, intentá de nuevo.');
@@ -130,7 +130,7 @@ export class ProductosComponent implements OnInit {
           } else {
             this.errorMessage.set('Error al cargar los productos. Por favor, intentá de nuevo.');
           }
-          
+
           this.productosOriginales.set([]);
           this.productosFiltrados.set([]);
         }
@@ -140,23 +140,23 @@ export class ProductosComponent implements OnInit {
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
     console.log('🎯 Filtros recibidos:', filtros);
-    
+
     let resultado = [...this.productosOriginales()];
-    
+
     // Filtrar por categorías
     if (filtros.categorias.length > 0) {
-      resultado = resultado.filter(p => 
+      resultado = resultado.filter(p =>
         filtros.categorias.includes(p.categoria_id)
       );
     }
-    
+
     // Filtrar por marcas
     if (filtros.marcas.length > 0) {
-      resultado = resultado.filter(p => 
+      resultado = resultado.filter(p =>
         filtros.marcas.includes(p.marca_id)
       );
     }
-    
+
     // Filtrar por rango de precio
     if (filtros.rangoPrecio.min !== null) {
       resultado = resultado.filter(p => p.precio >= filtros.rangoPrecio.min!);
@@ -164,12 +164,12 @@ export class ProductosComponent implements OnInit {
     if (filtros.rangoPrecio.max !== null) {
       resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
     }
-    
+
     // Ordenar
     if (filtros.ordenamiento) {
       resultado = this.ordenarProductos(resultado, filtros.ordenamiento);
     }
-    
+
     this.productosFiltrados.set(resultado);
   }
 
@@ -187,7 +187,7 @@ export class ProductosComponent implements OnInit {
         return [...productos].sort((a, b) => (b.stock || 0) - (a.stock || 0));
       case 'recientes':
       default:
-        return [...productos].sort((a, b) => 
+        return [...productos].sort((a, b) =>
           (b.id_producto || 0) - (a.id_producto || 0)
         );
     }
@@ -218,7 +218,7 @@ export class ProductosComponent implements OnInit {
 
   formatPrice(price?: number): string {
     if (!price) return '$0';
-    
+
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',

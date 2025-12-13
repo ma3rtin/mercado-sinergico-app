@@ -2,7 +2,6 @@ import {
   Component,
   input,
   output,
-  model,
   signal,
   computed,
   OnInit,
@@ -64,7 +63,7 @@ export class BuscadorComponent<T = any> implements OnInit {
   textoCargando = input<string>('Cargando opciones...');
   textoVacio = input<string>('No se encontraron opciones');
   textoErrorCarga = input<string>('Error al cargar opciones');
-  
+
   // Config también puede ser signal input
   config = input<ConfigBuscador<T> | null>(null);
 
@@ -256,7 +255,7 @@ export class BuscadorComponent<T = any> implements OnInit {
     );
 
     if (this.multiSeleccion()) {
-      this.manejarMultiSeleccion(opcion, datosOriginal);
+      this.manejarMultiSeleccion(opcion);
     } else {
       this.valorSeleccionado.set(opcion);
       this.idsSeleccionados.set([opcion.id]);
@@ -267,7 +266,7 @@ export class BuscadorComponent<T = any> implements OnInit {
     }
   }
 
-  private manejarMultiSeleccion(opcion: OpcionSelect, datosOriginal?: T): void {
+  private manejarMultiSeleccion(opcion: OpcionSelect): void {
     const actual = Array.isArray(this.valorSeleccionado())
       ? this.valorSeleccionado()
       : [];

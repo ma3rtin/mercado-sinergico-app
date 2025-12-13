@@ -41,7 +41,7 @@ export interface ConfigFiltros<T = any> {
   // 🎯 Servicios para obtener datos
   obtenerCategorias?: () => Observable<OpcionFiltro[]>;
   obtenerMarcas?: () => Observable<OpcionFiltro[]>;
-  
+
   // 🎨 Filtros a mostrar (true = mostrar, false = ocultar)
   mostrarCategoria?: boolean;
   mostrarMarca?: boolean;
@@ -49,12 +49,12 @@ export interface ConfigFiltros<T = any> {
   mostrarRangoPrecio?: boolean;
   mostrarOrdenamiento?: boolean;
   mostrarEstados?: boolean;
-  
+
   // 📋 Opciones personalizadas
   opcionesTipoPaquete?: OpcionFiltro[];
   opcionesOrdenamiento?: OpcionFiltro[];
   opcionesEstados?: OpcionFiltro[];
-  
+
   // 🎯 Textos personalizables
   tituloCategoria?: string;
   tituloMarca?: string;
@@ -71,15 +71,15 @@ export interface ConfigFiltros<T = any> {
   templateUrl: './filtros.html',
 })
 export class FiltrosComponent<T = any> {
-  
+
   // 🎯 SIGNAL INPUTS
   config = input.required<ConfigFiltros<T>>();
   titulo = input<string>('Filtros');
-  
+
   // 📤 OUTPUTS
   filtrosAplicados = output<FiltrosAplicados>();
   filtrosLimpiados = output<void>();
-  
+
   // 🎨 ESTADO INTERNO
   categorias = signal<OpcionFiltro[]>([]);
   marcas = signal<OpcionFiltro[]>([]);
@@ -90,10 +90,10 @@ export class FiltrosComponent<T = any> {
   ordenSeleccionado = signal<string>('');
   precioMin = signal<number | null>(null);
   precioMax = signal<number | null>(null);
-  
+
   cargando = signal<boolean>(false);
   error = signal<string | null>(null);
-  
+
   // 📊 COMPUTED
   tieneCategoriasSeleccionadas = computed(() => this.categoriasSeleccionadas().length > 0);
   tieneMarcasSeleccionadas = computed(() => this.marcasSeleccionadas().length > 0);
@@ -101,8 +101,8 @@ export class FiltrosComponent<T = any> {
   tieneEstadosSeleccionados = computed(() => this.estadosSeleccionados().length > 0);
   tieneRangoPrecio = computed(() => this.precioMin() !== null || this.precioMax() !== null);
   tieneOrdenamiento = computed(() => !!this.ordenSeleccionado());
-  
-  tieneFiltrosActivos = computed(() => 
+
+  tieneFiltrosActivos = computed(() =>
     this.tieneCategoriasSeleccionadas() ||
     this.tieneMarcasSeleccionadas() ||
     this.tieneTiposPaqueteSeleccionados() ||
@@ -110,7 +110,7 @@ export class FiltrosComponent<T = any> {
     this.tieneRangoPrecio() ||
     this.tieneOrdenamiento()
   );
-  
+
   contadorFiltrosActivos = computed(() => {
     let count = 0;
     if (this.tieneCategoriasSeleccionadas()) count++;
@@ -121,7 +121,7 @@ export class FiltrosComponent<T = any> {
     if (this.tieneOrdenamiento()) count++;
     return count;
   });
-  
+
   // 🎯 EFFECTS - Cargar datos cuando cambia la config
   constructor() {
     effect(() => {
@@ -131,15 +131,15 @@ export class FiltrosComponent<T = any> {
       }
     });
   }
-  
+
   // 📥 Cargar datos de categorías y marcas
   private async cargarDatosFiltros(): Promise<void> {
     const cfg = this.config();
     if (!cfg) return;
-    
+
     this.cargando.set(true);
     this.error.set(null);
-    
+
     try {
       // Cargar categorías si está configurado
       if (cfg.obtenerCategorias && cfg.mostrarCategoria) {
@@ -152,7 +152,7 @@ export class FiltrosComponent<T = any> {
           }
         });
       }
-      
+
       // Cargar marcas si está configurado
       if (cfg.obtenerMarcas && cfg.mostrarMarca) {
         cfg.obtenerMarcas().subscribe({
@@ -164,7 +164,7 @@ export class FiltrosComponent<T = any> {
           }
         });
       }
-      
+
       this.cargando.set(false);
     } catch (error) {
       console.error('Error general cargando filtros:', error);
@@ -172,95 +172,95 @@ export class FiltrosComponent<T = any> {
       this.cargando.set(false);
     }
   }
-  
+
   // 🎯 MÉTODOS DE SELECCIÓN
-  
+
   // Categorías
   toggleCategoria(categoriaId: string | number): void {
     const seleccionadas = [...this.categoriasSeleccionadas()];
     const index = seleccionadas.indexOf(categoriaId);
-    
+
     if (index > -1) {
       seleccionadas.splice(index, 1);
     } else {
       seleccionadas.push(categoriaId);
     }
-    
+
     this.categoriasSeleccionadas.set(seleccionadas);
   }
-  
+
   esCategoriaSeleccionada(categoriaId: string | number): boolean {
     return this.categoriasSeleccionadas().includes(categoriaId);
   }
-  
+
   // Marcas
   toggleMarca(marcaId: string | number): void {
     const seleccionadas = [...this.marcasSeleccionadas()];
     const index = seleccionadas.indexOf(marcaId);
-    
+
     if (index > -1) {
       seleccionadas.splice(index, 1);
     } else {
       seleccionadas.push(marcaId);
     }
-    
+
     this.marcasSeleccionadas.set(seleccionadas);
   }
-  
+
   esMarcaSeleccionada(marcaId: string | number): boolean {
     return this.marcasSeleccionadas().includes(marcaId);
   }
-  
+
   // Tipos de Paquete
   toggleTipoPaquete(tipo: string): void {
     const seleccionados = [...this.tiposPaqueteSeleccionados()];
     const index = seleccionados.indexOf(tipo);
-    
+
     if (index > -1) {
       seleccionados.splice(index, 1);
     } else {
       seleccionados.push(tipo);
     }
-    
+
     this.tiposPaqueteSeleccionados.set(seleccionados);
   }
-  
+
   esTipoPaqueteSeleccionado(tipo: string): boolean {
     return this.tiposPaqueteSeleccionados().includes(tipo);
   }
-  
+
   // Estados
   toggleEstado(estado: string): void {
     const seleccionados = [...this.estadosSeleccionados()];
     const index = seleccionados.indexOf(estado);
-    
+
     if (index > -1) {
       seleccionados.splice(index, 1);
     } else {
       seleccionados.push(estado);
     }
-    
+
     this.estadosSeleccionados.set(seleccionados);
   }
-  
+
   esEstadoSeleccionado(estado: string): boolean {
     return this.estadosSeleccionados().includes(estado);
   }
-  
+
   // Ordenamiento
   cambiarOrdenamiento(orden: string): void {
     this.ordenSeleccionado.set(orden);
   }
-  
+
   // Rango de Precio
   cambiarPrecioMin(precio: number | null): void {
     this.precioMin.set(precio);
   }
-  
+
   cambiarPrecioMax(precio: number | null): void {
     this.precioMax.set(precio);
   }
-  
+
   // 🎯 APLICAR Y LIMPIAR FILTROS
   aplicarFiltros(): void {
     const filtros: FiltrosAplicados = {
@@ -274,11 +274,11 @@ export class FiltrosComponent<T = any> {
       },
       estados: this.estadosSeleccionados(),
     };
-    
+
     console.log('🎯 Filtros aplicados:', filtros);
     this.filtrosAplicados.emit(filtros);
   }
-  
+
   limpiarFiltros(): void {
     this.categoriasSeleccionadas.set([]);
     this.marcasSeleccionadas.set([]);
@@ -287,23 +287,23 @@ export class FiltrosComponent<T = any> {
     this.ordenSeleccionado.set('');
     this.precioMin.set(null);
     this.precioMax.set(null);
-    
+
     this.filtrosLimpiados.emit();
     this.aplicarFiltros();
   }
-  
+
   // 🎨 HELPERS PARA EL TEMPLATE
   mostrarFiltro(nombreFiltro: keyof ConfigFiltros): boolean {
     const cfg = this.config();
     return cfg?.[nombreFiltro] === true;
   }
-  
+
   obtenerTitulo(nombreFiltro: string): string {
     const cfg = this.config();
     const key = `titulo${nombreFiltro}` as keyof ConfigFiltros;
     return (cfg?.[key] as string) || nombreFiltro;
   }
-  
+
   obtenerOpciones(nombreFiltro: string): OpcionFiltro[] {
     const cfg = this.config();
     const key = `opciones${nombreFiltro}` as keyof ConfigFiltros;

@@ -8,7 +8,6 @@ import {
   computed,
   DestroyRef,
   inject,
-  effect,
   ChangeDetectionStrategy,
   ElementRef,
   ViewChild,
@@ -23,8 +22,6 @@ import {
   FormsModule,
   NgControl
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 export type TextareaSize = 'sm' | 'md' | 'lg';
@@ -59,8 +56,8 @@ ngOnInit(): void {
 
   // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
-  private injector = inject(Injector); 
-  public ngControl?: NgControl|null = null ; 
+  private injector = inject(Injector);
+  public ngControl?: NgControl|null = null ;
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -224,7 +221,7 @@ ngOnInit(): void {
   @Input() set requiredValue(value: boolean) { this.required.set(value); }
   @Input() set readonlyValue(value: boolean) { this.readonly.set(value); }
   @Input() set resizeValue(value: TextareaResize) { this.resize.set(value); }
-  @Input() set autoResizeValue(value: boolean) { 
+  @Input() set autoResizeValue(value: boolean) {
     this.autoResize.set(value);
     if (value) {
       this.resize.set('auto');
@@ -285,7 +282,7 @@ ngOnInit(): void {
     this.internalValue = '';
     this.onChange('');
     this.valueChange.emit('');
-    
+
     if (this.autoResize() && this.textareaElement) {
       this.textareaElement.nativeElement.style.height = 'auto';
     }
@@ -296,18 +293,18 @@ ngOnInit(): void {
     if (!this.textareaElement) return;
 
     const textarea = this.textareaElement.nativeElement;
-    
+
     // Reset height to auto to get the correct scrollHeight
     textarea.style.height = 'auto';
-    
+
     const scrollHeight = textarea.scrollHeight;
     const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight);
-    
+
     const minHeight = this.minRows() * lineHeight;
     const maxHeight = this.maxRows() * lineHeight;
-    
+
     let newHeight = scrollHeight;
-    
+
     if (newHeight < minHeight) {
       newHeight = minHeight;
     } else if (newHeight > maxHeight) {
@@ -316,7 +313,7 @@ ngOnInit(): void {
     } else {
       textarea.style.overflowY = 'hidden';
     }
-    
+
     textarea.style.height = `${newHeight}px`;
   }
 }

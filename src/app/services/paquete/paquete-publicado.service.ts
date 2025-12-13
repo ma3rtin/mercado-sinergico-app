@@ -1,7 +1,7 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Observable } from 'rxjs';
 import { ApiService } from '@app/services/api.service';
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class PaquetePublicadoService extends ApiService {

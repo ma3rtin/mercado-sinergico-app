@@ -3,8 +3,6 @@ import { PaqueteBase } from '@app/models/PaquetesInterfaces/PaqueteBase';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
 import { Zona } from '@app/models/ZonasInterfaces/Zona';
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
-import { Marca } from '../Producto-Paquete/Marca';
-import { Categoria } from '../Producto-Paquete/Categoria';
 
 export interface PaquetePublicado {
 

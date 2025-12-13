@@ -11,7 +11,7 @@ import {
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { Carrusel } from '@app/components/carrusel/carrusel';
@@ -64,7 +64,7 @@ export class Home implements OnInit {
       .subscribe((paquetes) => {
         console.log('📦 Paquetes recibidos:', paquetes);
         console.log('📊 Cantidad:', paquetes.length);
-        
+
         // Debug: mostrar primer paquete
         if (paquetes.length > 0) {
           console.log('🔍 Primer paquete:', paquetes[0]);
