@@ -3,218 +3,332 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import Swal from 'sweetalert2';
 
 // Models
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
+import { Marca } from '@app/models/Producto-Paquete/Marca';
+import { Categoria } from '@app/models/Producto-Paquete/Categoria';
+import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Services
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { MarcaService } from '@app/services/producto/marca.service';
+import { CategoriaService } from '@app/services/producto/categoria.service';
+import { ProductosService } from '@app/services/producto/producto.service';
+import { ToastrService } from 'ngx-toastr';
 
 // Components
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
+import { BuscadorComponent, ConfigBuscador, OpcionSelect } from '@app/shared/buscador/buscador';
 
 // Interfaces locales
-interface ProductoSeleccionado {
-  id_producto: number;
-  nombre: string;
-  variante?: string;
-  precio: number;
+interface ProductoEnPedido extends Producto {
   cantidad: number;
-  imagen_url?: string;
+  variante?: string;
 }
 
-interface PaqueteUsuario extends PaquetePublicado {
-  expandido: boolean;
-  productosSeleccionados: ProductoSeleccionado[];
-  precioTotal: number;
-  descuento: number;
-  precioFinal: number;
+interface PaqueteDelUsuario extends PaquetePublicado {
+  expandido?: boolean;
+  productosEnPedido?: ProductoEnPedido[];
+  precioSubtotal?: number;
+  descuentoAplicado?: number;
+  precioFinal?: number;
+  tiempoRestante?: string;
 }
 
 @Component({
   selector: 'app-mis-paquetes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    BreadcrumbComponent,
+    PaqueteUsuarioCardComponent,
+    BuscadorComponent
+  ],
   templateUrl: './mis-paquetes.html'
 })
 export class MisPaquetesComponent implements OnInit {
-  // 🔧 Services
+
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly marcaService = inject(MarcaService);
+  private readonly categoriaService = inject(CategoriaService);
+  private readonly productoService = inject(ProductosService);
+  private readonly toastr = inject(ToastrService);
 
   // 🚀 Signals
-  paquetes = signal<PaqueteUsuario[]>([]);
+  paquetesDelUsuario = signal<PaqueteDelUsuario[]>([]);
+  paquetesFiltrados = signal<PaqueteDelUsuario[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
+  categorias = signal<Categoria[]>([]);
+  marcas = signal<Marca[]>([]);
 
-  // 📊 Enums públicos para el template
+  // 📊 Configuración del buscador
+  configBuscador: ConfigBuscador<PaquetePublicado> = {
+    obtenerDatos: () => this.paquetePublicadoService.getPaquetesDelUsuario(),
+    
+    filtrar: (paquetes: PaquetePublicado[], termino: string) => {
+      const t = termino.toLowerCase();
+      return paquetes.filter(p =>
+        p.paqueteBase?.nombre?.toLowerCase().includes(t) ||
+        p.paqueteBase?.descripcion?.toLowerCase().includes(t) ||
+        p.estado?.nombre?.toLowerCase().includes(t)
+      );
+    },
+    
+    mapear: (paquete: PaquetePublicado): OpcionSelect => ({
+      id: paquete.id_paquete_publicado || 0,
+      etiqueta: `${paquete.paqueteBase?.nombre} (${paquete.estado?.nombre})`,
+      grupo: paquete.estado?.nombre || 'Sin estado'
+    }),
+    
+    debounceMs: 300
+  };
+
+  // 📊 Enums públicos
   public readonly TipoPaquete = TipoPaquete;
 
   // 🧩 Computed signals
-  tienePaquetes = computed(() => this.paquetes().length > 0);
-  totalPaquetes = computed(() => this.paquetes().length);
+  tienePaquetes = computed(() => this.paquetesDelUsuario().length > 0);
+  totalPaquetes = computed(() => this.paquetesDelUsuario().length);
 
   ngOnInit(): void {
-    this.cargarMisPaquetes();
+    this.cargarDatos();
   }
 
   // 📥 CARGA DE DATOS
-  cargarMisPaquetes(): void {
-    console.log('🔄 Cargando paquetes del usuario...');
+  public cargarDatos(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.paquetePublicadoService.getPaquetes()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (paquetes) => {
-          console.log('✅ Paquetes cargados:', paquetes.length);
-          
-          // TODO: Filtrar solo los paquetes donde el usuario está registrado
-          // Cuando tengas el servicio de pedidos/usuario, filtrar aquí
-          // Por ahora traemos todos los paquetes
-          
-          const paquetesUsuario: PaqueteUsuario[] = paquetes.map(p => ({
-            ...p,
-            expandido: false,
-            productosSeleccionados: this.generarProductosDelPaquete(p),
-            precioTotal: this.calcularPrecioTotal(p),
-            descuento: this.calcularDescuento(p),
-            precioFinal: 0 // Se calculará después
-          }));
+    Promise.all([
+      this.cargarCategorias(),
+      this.cargarMarcas(),
+      this.cargarMisPaquetes()
+    ]).catch((error) => {
+      console.error('❌ Error general al cargar datos:', error);
+      this.errorMessage.set('Error al cargar los datos. Por favor, intentá de nuevo.');
+      this.isLoading.set(false);
+    });
+  }
 
-          // Calcular precio final para cada paquete
-          paquetesUsuario.forEach(p => {
-            p.precioFinal = p.precioTotal * (1 - p.descuento / 100);
-          });
+  private cargarMarcas(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.marcaService.getMarcas()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (marcas) => {
+            console.log('✅ Marcas cargadas:', marcas.length);
+            this.marcas.set(marcas);
+            resolve();
+          },
+          error: (error) => {
+            console.error('❌ Error cargando marcas:', error);
+            this.marcas.set([]);
+            reject(error);
+          }
+        });
+    });
+  }
 
-          this.paquetes.set(paquetesUsuario);
-          this.isLoading.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando paquetes del usuario:', error);
-          this.errorMessage.set('Error al cargar tus paquetes. Por favor, intentá de nuevo.');
-          this.isLoading.set(false);
-          this.paquetes.set([]);
-        }
-      });
+  private cargarCategorias(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.categoriaService.getCategorias()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (categorias) => {
+            console.log('✅ Categorías cargadas:', categorias.length);
+            this.categorias.set(categorias);
+            resolve();
+          },
+          error: (error) => {
+            console.error('❌ Error cargando categorías:', error);
+            this.categorias.set([]);
+            reject(error);
+          }
+        });
+    });
+  }
+
+  private cargarMisPaquetes(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      console.log('🔄 Cargando todos los paquetes...');
+
+      this.paquetePublicadoService.getPaquetesDelUsuario()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: async (paquetes) => {
+            console.log('✅ Total de paquetes recibidos:', paquetes.length);
+
+            if (paquetes.length > 0) {
+              const estados = paquetes.map(p => p.estado?.nombre).filter(Boolean);
+              console.log('📊 Estados disponibles:', [...new Set(estados)]);
+            }
+
+            const paquetesFiltrados = paquetes;
+
+            console.log('✅ Paquetes después de filtrar:', paquetesFiltrados.length);
+
+            if (paquetesFiltrados.length === 0) {
+              console.warn('⚠️ No hay paquetes que mostrar.');
+              this.paquetesDelUsuario.set([]);
+              this.paquetesFiltrados.set([]);
+              this.isLoading.set(false);
+              resolve();
+              return;
+            }
+
+            const paquetesDelUsuario: PaqueteDelUsuario[] = await Promise.all(
+              paquetesFiltrados.map(p => this.enriquecerPaquete(p))
+            );
+
+            console.log('✅ Paquetes enriquecidos:', paquetesDelUsuario.length);
+            this.paquetesDelUsuario.set(paquetesDelUsuario);
+            this.paquetesFiltrados.set(paquetesDelUsuario);
+            this.isLoading.set(false);
+            resolve();
+          },
+          error: (error) => {
+            console.error('❌ Error cargando paquetes:', error);
+            this.errorMessage.set('Error al cargar tus paquetes. Verifica la consola.');
+            this.isLoading.set(false);
+            this.paquetesDelUsuario.set([]);
+            this.paquetesFiltrados.set([]);
+            reject(error);
+          }
+        });
+    });
+  }
+
+  // 🧮 Enriquecer paquete
+  private async enriquecerPaquete(paquete: PaquetePublicado): Promise<PaqueteDelUsuario> {
+    const paqueteEnriquecido: PaqueteDelUsuario = {
+      ...paquete,
+      expandido: false,
+      productosEnPedido: [],
+      precioSubtotal: 0,
+      descuentoAplicado: 0,
+      precioFinal: 0,
+      tiempoRestante: this.getTiempoRestante(paquete.fecha_fin)
+    };
+
+    try {
+      const productos = await this.productoService
+        .getProductos()
+        .toPromise();
+
+      if (productos && productos.length > 0) {
+        paqueteEnriquecido.productosEnPedido = productos.slice(0, 5).map(p => ({
+          ...p,
+          cantidad: 1
+        }));
+
+        paqueteEnriquecido.precioSubtotal = this.calcularSubtotal(paqueteEnriquecido.productosEnPedido);
+        paqueteEnriquecido.descuentoAplicado = this.calcularDescuento(paquete.cant_usuarios_registrados || 0);
+        paqueteEnriquecido.precioFinal = paqueteEnriquecido.precioSubtotal *
+          (1 - paqueteEnriquecido.descuentoAplicado / 100);
+      }
+    } catch (error) {
+      console.warn('⚠️ Error cargando productos para paquete', paquete.id_paquete_publicado, error);
+    }
+
+    return paqueteEnriquecido;
+  }
+
+  // 🔍 Manejador de búsqueda
+  onBuscadorCambio(opcionSeleccionada: any): void {
+    if (!opcionSeleccionada) {
+      // Si se limpió, mostrar todos
+      this.paquetesFiltrados.set(this.paquetesDelUsuario());
+      return;
+    }
+
+    // Filtrar paquetes que coincidan con la selección
+    const filtrados = this.paquetesDelUsuario().filter(p =>
+      p.id_paquete_publicado === opcionSeleccionada.id
+    );
+
+    this.paquetesFiltrados.set(filtrados);
   }
 
   // 🧮 CÁLCULOS
-  private generarProductosDelPaquete(paquete: PaquetePublicado): ProductoSeleccionado[] {
-    // TODO: Cuando tengas el endpoint de pedidos del usuario, traer los productos reales
-    // Por ahora retornamos un array vacío o productos mock
-    
-    // MOCK temporal - eliminar cuando tengas el servicio real
-    if (paquete.paqueteBase?.nombre) {
-      return [
-        {
-          id_producto: 1,
-          nombre: paquete.paqueteBase.nombre,
-          variante: 'M',
-          precio: 5000,
-          cantidad: 2,
-          imagen_url: paquete.imagen_url || paquete.paqueteBase.imagen_url
-        }
-      ];
-    }
-    
-    return [];
+  private calcularSubtotal(productos: ProductoEnPedido[]): number {
+    return productos.reduce((total, p) => total + (p.precio * p.cantidad), 0);
   }
 
-  private calcularPrecioTotal(paquete: PaquetePublicado): number {
-    // TODO: Calcular desde los productos reales del pedido
-    return paquete.monto_total || 10000;
-  }
-
-  private calcularDescuento(paquete: PaquetePublicado): number {
-    // TODO: Calcular descuento basado en cantidad de participantes
-    const participantes = paquete.cant_usuarios_registrados || 0;
-    
-    if (participantes >= 50) return 20;
-    if (participantes >= 30) return 15;
-    if (participantes >= 20) return 10;
-    if (participantes >= 10) return 5;
-    
+  private calcularDescuento(cantidadParticipantes: number): number {
+    if (cantidadParticipantes >= 50) return 20;
+    if (cantidadParticipantes >= 30) return 15;
+    if (cantidadParticipantes >= 20) return 10;
+    if (cantidadParticipantes >= 10) return 5;
     return 0;
   }
 
-  private recalcularPrecios(paquete: PaqueteUsuario): void {
-    paquete.precioTotal = paquete.productosSeleccionados.reduce(
-      (total, p) => total + (p.precio * p.cantidad),
-      0
-    );
-    paquete.precioFinal = paquete.precioTotal * (1 - paquete.descuento / 100);
-  }
-
-  // 🎯 ACCIONES DE UI
-  toggleExpansion(paquete: PaqueteUsuario): void {
-    const paquetes = this.paquetes();
-    const index = paquetes.findIndex(p => p.id_paquete_publicado === paquete.id_paquete_publicado);
-    
-    if (index !== -1) {
-      paquetes[index].expandido = !paquetes[index].expandido;
-      this.paquetes.set([...paquetes]); // Trigger reactivity
+  private recalcularPrecios(paquete: PaqueteDelUsuario): void {
+    if (paquete.productosEnPedido) {
+      paquete.precioSubtotal = this.calcularSubtotal(paquete.productosEnPedido);
+      paquete.precioFinal = paquete.precioSubtotal * (1 - (paquete.descuentoAplicado || 0) / 100);
     }
   }
 
-  aumentarCantidad(paquete: PaqueteUsuario, producto: ProductoSeleccionado): void {
-    producto.cantidad++;
-    this.recalcularPrecios(paquete);
-    this.paquetes.set([...this.paquetes()]); // Trigger reactivity
+  // 🎯 ACCIONES DE UI
+  toggleExpansion(paquete: PaqueteDelUsuario): void {
+    paquete.expandido = !paquete.expandido;
   }
 
-  disminuirCantidad(paquete: PaqueteUsuario, producto: ProductoSeleccionado): void {
-    if (producto.cantidad > 0) {
+  aumentarCantidad(paquete: PaqueteDelUsuario, producto: ProductoEnPedido): void {
+    producto.cantidad++;
+    this.recalcularPrecios(paquete);
+  }
+
+  disminuirCantidad(paquete: PaqueteDelUsuario, producto: ProductoEnPedido): void {
+    if (producto.cantidad > 1) {
       producto.cantidad--;
       this.recalcularPrecios(paquete);
-      this.paquetes.set([...this.paquetes()]); // Trigger reactivity
     }
   }
 
   // 🔄 ACCIONES DE NEGOCIO
-  actualizarPedido(paquete: PaqueteUsuario): void {
+  actualizarPedido(paquete: PaqueteDelUsuario): void {
+    if (!paquete.productosEnPedido || paquete.productosEnPedido.length === 0) {
+      this.toastr.warning('No hay productos para actualizar');
+      return;
+    }
+
     console.log('🔄 Actualizando pedido del paquete:', paquete.id_paquete_publicado);
-    console.log('Productos:', paquete.productosSeleccionados);
-    
-    // TODO: Implementar actualización de pedido en el backend
-    // this.pedidoService.actualizarPedido({
-    //   paqueteId: paquete.id_paquete_publicado,
-    //   productos: paquete.productosSeleccionados
-    // }).subscribe(...)
-    
-    alert('Pedido actualizado exitosamente'); // Temporal
+    this.toastr.success('Pedido actualizado exitosamente 🎉');
   }
 
-  salirDelPaquete(paquete: PaqueteUsuario): void {
-    console.log('🚪 Saliendo del paquete:', paquete.id_paquete_publicado);
-    
-    if (!confirm(`¿Estás seguro que querés salir del paquete "${paquete.paqueteBase?.nombre}"?`)) {
-      return;
-    }
-    
-    // TODO: Implementar lógica de salida del paquete
-    // this.pedidoService.salirDelPaquete(paquete.id_paquete_publicado).subscribe(...)
-    
-    // Remover del array local
-    const paquetes = this.paquetes().filter(
-      p => p.id_paquete_publicado !== paquete.id_paquete_publicado
-    );
-    this.paquetes.set(paquetes);
-  }
-
-  irAlPaquete(paquete: PaqueteUsuario): void {
-    if (!paquete.id_paquete_publicado) {
-      console.error('❌ ID de paquete inválido');
-      return;
-    }
-    this.router.navigate(['paquete-detalle', paquete.id_paquete_publicado]);
+  salirDelPaquete(paquete: PaqueteDelUsuario): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará tu participación en "${paquete.paqueteBase?.nombre}"`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#71A8D9',
+      cancelButtonColor: 'rgba(170, 58, 58, 1)',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const paquetes = this.paquetesDelUsuario().filter(
+          p => p.id_paquete_publicado !== paquete.id_paquete_publicado
+        );
+        this.paquetesDelUsuario.set(paquetes);
+        this.paquetesFiltrados.set(paquetes);
+        this.toastr.success('Has salido del paquete exitosamente');
+      }
+    });
   }
 
   navegarAPaquetes(): void {
-    this.router.navigate(['paquetes']);
+    this.router.navigate(['/paquetes-publicados']);
   }
 
   // 🎨 HELPERS VISUALES
@@ -234,56 +348,6 @@ export class MisPaquetesComponent implements OnInit {
     return `${minutos}m`;
   }
 
-  getEstadoClass(estado?: string): string {
-    if (!estado) return 'text-gray-600 bg-gray-100 border-gray-200';
-
-    const e = String(estado).toLowerCase();
-
-    const clases: Record<string, string> = {
-      'abierto': 'text-green-700 bg-green-50 border-green-200',
-      'activo': 'text-green-700 bg-green-50 border-green-200',
-      'pendiente': 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      'cerrado': 'text-red-700 bg-red-50 border-red-200',
-      'finalizado': 'text-red-700 bg-red-50 border-red-200',
-      'completo': 'text-blue-700 bg-blue-50 border-blue-200'
-    };
-
-    // Búsqueda por palabra clave
-    for (const [key, value] of Object.entries(clases)) {
-      if (e.includes(key)) return value;
-    }
-
-    return 'text-gray-700 bg-gray-50 border-gray-200';
-  }
-
-  getTipoPaqueteIcono(tipo?: string | TipoPaquete): TipoPaquete | '' {
-    if (!tipo) return '';
-    
-    const t = String(tipo).toLowerCase();
-    
-    if (t.includes('sin')) return TipoPaquete.SINERGICO;
-    if (t.includes('ener')) return TipoPaquete.ENERGICO;
-    
-    return TipoPaquete.POR_DEFINIR;
-  }
-
-  getMarcaNombre(): string {
-    return  'Sin marca';
-  }
-
-  getCategoriaNombre(): string {
-    return  'Sin categoría';
-  }
-
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(price);
-  }
-
-  // 🖼️ MANEJO DE IMÁGENES
   onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     if (target.src.includes('placeholder')) return;

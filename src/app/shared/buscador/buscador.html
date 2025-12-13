@@ -1,0 +1,235 @@
+<!-- searchable-select.html -->
+<div class="w-full">
+    <!-- Label -->
+    @if (etiqueta()) {
+    <label [for]="idEntrada()" [class]="'block font-medium mb-2 ' + claseEtiqueta()">
+        {{ etiqueta() }}
+        @if (requerido()) {
+        <span class="text-red-500 ml-1">*</span>
+        }
+    </label>
+    }
+
+    <!-- Select Container -->
+    <div class="relative" #contenedorDropdown>
+        <!-- Select Button/Input -->
+        <button [id]="idEntrada()" type="button" (click)="alternarDropdown()" (blur)="manejarDesenfoque()"
+            (focus)="manejarEnfoque()" [disabled]="deshabilitado() || cargando()"
+            [attr.aria-label]="etiqueta() || 'Seleccionar'" [attr.aria-expanded]="abierto()"
+            [attr.aria-haspopup]="'listbox'" [class]="clasesEntrada()"
+            class="flex items-center justify-between text-left">
+
+            <!-- Selected Display -->
+            <span class="flex-1 truncate" [class]="!valorMostrado ? 'text-gray-500' : ''">
+                @if (multiSeleccion() && esArray(valorSeleccionado())) {
+                @if (conteoSeleccionados() > 0) {
+                <span class="inline-flex items-center gap-2 flex-wrap gap-y-1">
+                    @for (item of getSeleccionados(); track item.id) {
+                    <span
+                        class="inline-flex items-center gap-1 bg-secondary/10 text-secondary px-2 py-1 rounded text-sm">
+                        {{ item.etiqueta }}
+                        <button type="button" (click)="eliminarSeleccion(item, $event)"
+                            [attr.aria-label]="'Quitar ' + item.etiqueta"
+                            class="hover:text-red-500 transition-colors focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </span>
+                    }
+                </span>
+                } @else {
+                {{ marcador() }}
+                }
+                } @else {
+                {{ valorMostrado || marcador() }}
+                }
+            </span>
+
+            <!-- Icons -->
+            <span class="flex items-center gap-2 flex-shrink-0 ml-2">
+                <!-- Loading Spinner -->
+                @if (cargando()) {
+                <svg class="animate-spin w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                } @else {
+                <!-- Clear Icon -->
+                @if (limpiable() && conteoSeleccionados() > 0 && !deshabilitado()) {
+                <button type="button" (click)="limpiarValor(); $event.stopPropagation()"
+                    [attr.aria-label]="'Limpiar selección'"
+                    class="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-1 focus:ring-secondary/30 rounded">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+                }
+
+                <!-- Dropdown Icon -->
+                <svg class="w-5 h-5 text-gray-400 transition-transform" [class.rotate-180]="abierto()" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+                }
+            </span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        @if (abierto()) {
+        <div role="listbox" [attr.aria-label]="etiqueta() || 'Opciones'"
+            class="absolute top-full left-0 right-0 z-50 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+
+            <!-- Loading State -->
+            @if (cargando()) {
+            <div class="px-4 py-8 text-center">
+                <svg class="animate-spin w-8 h-8 text-secondary mx-auto mb-3" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <p class="text-gray-600 text-sm mt-2">{{ textoCargando() }}</p>
+            </div>
+            } @else if (errorCarga()) {
+            <!-- Error State -->
+            <div class="px-4 py-8 text-center">
+                <svg class="w-8 h-8 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-red-600 text-sm font-medium">{{ textoErrorCarga() }}</p>
+                <p class="text-gray-500 text-xs mt-1">{{ errorCarga() }}</p>
+                <button type="button" (click)="recargarDatos()"
+                    class="mt-3 px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+                    Reintentar
+                </button>
+            </div>
+            } @else {
+            <!-- Search Input -->
+            @if (buscable()) {
+            <div class="p-3 border-b border-gray-100 sticky top-0 bg-white">
+                <input #inputBusqueda type="text" placeholder="Buscar..." [value]="terminoBusqueda()"
+                    (input)="alCambiarBusqueda($any($event.target).value)" (keydown.escape)="abierto.set(false)"
+                    [attr.aria-label]="'Buscar en ' + (etiqueta() || 'opciones')"
+                    class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary" />
+            </div>
+            }
+
+            <!-- Options or Empty State -->
+            <div class="max-h-64 overflow-y-auto">
+                @if (opcionesFiltradas().length > 0) {
+                <!-- Grouped or Flat List -->
+                @for (grupo of getGroupKeys(); track grupo) {
+                <div>
+                    <!-- Group Label (if not "Sin grupo") -->
+                    @if (grupo !== 'Sin grupo') {
+                    <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50">
+                        {{ grupo }}
+                    </div>
+                    }
+
+                    <!-- Group Options -->
+                    @for (opcion of getGroupOptions(grupo); track opcion.id) {
+                    <button type="button" role="option" [attr.aria-selected]="esOpcionSeleccionada(opcion)"
+                        (click)="seleccionarOpcion(opcion)" [disabled]="opcion.deshabilitado"
+                        [attr.aria-label]="opcion.etiqueta" [class]="'w-full text-left px-4 py-2.5 transition-colors ' +
+                        (opcion.deshabilitado ? 'opacity-50 cursor-not-allowed text-gray-400' : 'cursor-pointer hover:bg-blue-50') +
+                        (esOpcionSeleccionada(opcion) ? ' bg-secondary/10 text-secondary font-medium' : '')">
+
+                        <!-- Multi-select Checkbox -->
+                        @if (multiSeleccion()) {
+                        <div class="flex items-center gap-2">
+                            <div class="flex-shrink-0">
+                                <input type="checkbox" [checked]="esOpcionSeleccionada(opcion)"
+                                    [disabled]="opcion.deshabilitado"
+                                    class="w-4 h-4 text-secondary rounded border-gray-300 focus:ring-secondary cursor-pointer"
+                                    (click)="$event.stopPropagation()" />
+                            </div>
+                            <span>{{ opcion.etiqueta }}</span>
+                        </div>
+                        } @else {
+                        <!-- Single Select -->
+                        <div class="flex items-center justify-between">
+                            <span>{{ opcion.etiqueta }}</span>
+                            @if (esOpcionSeleccionada(opcion)) {
+                            <svg class="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            }
+                        </div>
+                        }
+                    </button>
+                    }
+                </div>
+                }
+                } @else {
+                <!-- Empty State -->
+                <div class="px-4 py-8 text-center">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M20 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"></path>
+                    </svg>
+                    <p class="text-gray-500 text-sm">{{ textoVacio() }}</p>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- Helper Text / Error / Success -->
+    @if (tieneAyudaOError()) {
+    <div [id]="idEntrada() + '-helper'" class="mt-1">
+        <!-- Helper Text -->
+        @if (textAyuda() && !errorActual() && !mensajeExito()) {
+        <p class="text-sm text-gray-500">{{ textAyuda() }}</p>
+        }
+
+        <!-- Error Message -->
+        @if (errorActual()) {
+        <p class="text-sm text-red-600 flex items-start gap-1">
+            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+            </svg>
+            {{ errorActual() }}
+        </p>
+        }
+
+        <!-- Success Message -->
+        @if (mensajeExito() && !errorActual()) {
+        <p class="text-sm text-green-600 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+            </svg>
+            {{ mensajeExito() }}
+        </p>
+        }
+    </div>
+    }
+
+    <!-- Selection Count (multiSeleccion) -->
+    @if (multiSeleccion() && conteoSeleccionados() > 0) {
+    <p class="text-xs text-gray-500 mt-2">
+        {{ conteoSeleccionados() }}
+        @if (maxSelecciones()) {
+        / {{ maxSelecciones() }}
+        }
+        seleccionado(s)
+    </p>
+    }
+</div>

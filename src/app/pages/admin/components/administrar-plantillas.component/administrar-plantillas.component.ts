@@ -5,12 +5,13 @@ import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
   styleUrls: ['./administrar-plantillas.component.css'],
-  imports: [CrearPlantillaModalComponent, ButtonComponent],
+  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent],
 })
 export class AdministrarPlantillasComponent implements OnInit {
   // ✅ signals

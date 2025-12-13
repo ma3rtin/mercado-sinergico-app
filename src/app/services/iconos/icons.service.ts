@@ -1,0 +1,236 @@
+import { Injectable } from '@angular/core';
+import { NgIconsModule } from '@ng-icons/core';
+
+// 📦 Importar los iconos de feather que necesites
+import {
+  // ➕ Navegación
+  featherChevronRight,
+  featherChevronLeft,
+  featherArrowRight,
+  featherArrowLeft,
+  featherMenu,
+  featherX,
+  featherHome,
+
+  // 🔍 Búsqueda y Filtros
+  featherSearch,
+  featherFilter,
+  featherSliders,
+
+  // 💰 Precios y Dinero
+  featherDollarSign,
+  featherShoppingCart,
+  featherShoppingBag,
+  featherTrendingUp,
+  featherTrendingDown,
+
+  // ✅ Estados y Validación
+  featherCheck,
+  featherCheckCircle,
+  featherAlertCircle,
+  featherAlertTriangle,
+  featherInfo,
+  featherX as featherXIcon,
+
+  // 👤 Usuario y Perfil
+  featherUser,
+  featherUsers,
+  featherUserCheck,
+  featherLogOut,
+  featherLogIn,
+
+  // 📦 Productos y Paquetes
+  featherBox,
+  featherPackage,
+  featherGift,
+  featherStar,
+  featherHeart,
+
+  // 🗺️ Ubicación
+  featherMapPin,
+  featherMap,
+  featherNavigation,
+
+  // ⚙️ Configuración
+  featherSettings,
+  featherEdit,
+  featherEdit2,
+  featherTrash,
+  featherTrash2,
+  featherCopy,
+
+  // 📋 Documentos
+  featherFile,
+  featherFileText,
+  featherFilePlus,
+  featherFileMinus,
+
+
+  // ⏰ Tiempo
+  featherClock,
+  featherCalendar,
+
+  // 📊 Datos
+  featherBarChart2,
+  featherPieChart,
+  featherTrendingUp as featherTrendingUpIcon,
+
+  // 🔗 Links y Acciones
+  featherLink,
+  featherExternalLink,
+  featherDownload,
+  featherUpload,
+  featherShare2,
+
+  // 🎨 UI
+  featherEye,
+  featherEyeOff,
+  featherLoader,
+  featherRefreshCw,
+  featherChevronDown,
+  featherChevronUp,
+
+  // 📱 Misc
+  featherPhone,
+  featherMail,
+  featherBell,
+  featherZap,
+  featherLayers,
+} from '@ng-icons/feather-icons';;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class IconsService {
+  
+  // 📋 Mapeo centralizado de iconos
+  // Facilita cambiar un icono en un solo lugar
+  public readonly icons = {
+    // ➕ Navegación
+    chevronRight: featherChevronRight,
+    chevronLeft: featherChevronLeft,
+    chevronDown: featherChevronDown,
+    chevronUp: featherChevronUp,
+    arrowRight: featherArrowRight,
+    arrowLeft: featherArrowLeft,
+    menu: featherMenu,
+    close: featherX,
+    home: featherHome,
+
+    // 🔍 Búsqueda
+    search: featherSearch,
+    filter: featherFilter,
+    sliders: featherSliders,
+
+    // 💰 Precios
+    dollar: featherDollarSign,
+    cart: featherShoppingCart,
+    bag: featherShoppingBag,
+    trendingUp: featherTrendingUp,
+    trendingDown: featherTrendingDown,
+
+    // ✅ Estados
+    check: featherCheck,
+    checkCircle: featherCheckCircle,
+    alert: featherAlertCircle,
+    alertTriangle: featherAlertTriangle,
+    info: featherInfo,
+    error: featherXIcon,
+
+    // 👤 Usuario
+    user: featherUser,
+    users: featherUsers,
+    userCheck: featherUserCheck,
+    logout: featherLogOut,
+    login: featherLogIn,
+
+    // 📦 Productos
+    box: featherBox,
+    package: featherPackage,
+    gift: featherGift,
+    star: featherStar,
+    heart: featherHeart,
+
+    // 🗺️ Ubicación
+    mapPin: featherMapPin,
+    map: featherMap,
+    navigation: featherNavigation,
+
+    // ⚙️ Configuración
+    settings: featherSettings,
+    edit: featherEdit,
+    edit2: featherEdit2,
+    trash: featherTrash,
+    trash2: featherTrash2,
+    copy: featherCopy,
+
+    // ⏰ Tiempo
+    clock: featherClock,
+    calendar: featherCalendar,
+
+    // 📊 Datos
+    barChart: featherBarChart2,
+    pieChart: featherPieChart,
+
+    // 🔗 Links
+    link: featherLink,
+    externalLink: featherExternalLink,
+    download: featherDownload,
+    upload: featherUpload,
+    share: featherShare2,
+
+    // 🎨 UI
+    eye: featherEye,
+    eyeOff: featherEyeOff,
+    loader: featherLoader,
+    refresh: featherRefreshCw,
+
+    // 📱 Misc
+    phone: featherPhone,
+    mail: featherMail,
+    bell: featherBell,
+    zap: featherZap,
+
+    // 📋 Documentos
+    file: featherFile,
+    fileText: featherFileText,
+    filePlus: featherFilePlus,
+    fileMinus: featherFileMinus,
+    layers: featherLayers,
+
+    //Otros
+    Box: featherBox,
+    TrendingUp: featherTrendingUpIcon,
+    X: featherXIcon,
+    Heart: featherHeart,
+    Star: featherStar,
+    Map: featherMap,
+    Loader: featherLoader,
+    Calendar: featherCalendar,
+    LogOut: featherLogOut,
+    
+  };
+
+  constructor() {
+    console.log('✅ IconsService inicializado');
+  }
+
+  /**
+   * Obtener un icono por su nombre
+   * @param name - Nombre del icono del mapeo
+   * @returns El icono de feather o undefined
+   */
+  getIcon(name: keyof typeof this.icons) {
+    return this.icons[name];
+  }
+
+  /**
+   * Obtener todos los iconos disponibles
+   */
+  getAllIcons() {
+    return this.icons;
+  }
+}
+
+// 📌 EXPORTAR los módulos necesarios para usar en componentes
+export { NgIconsModule };

@@ -1,0 +1,244 @@
+<!-- Contenedor de Filtros - Desktop -->
+<div class="hidden lg:block w-64 xl:w-72 flex-shrink-0">
+  <div class="sticky top-4 bg-white rounded-xl shadow-md p-4 xl:p-6">
+    
+    <!-- 🎯 Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-display text-lg xl:text-xl font-bold text-gray-800">
+        {{ titulo() }}
+      </h2>
+      
+      @if (tieneFiltrosActivos()) {
+        <button
+          (click)="limpiarFiltros()"
+          class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-1"
+          title="Limpiar filtros">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Limpiar
+        </button>
+      }
+    </div>
+
+    <!-- 📊 Contador de filtros activos -->
+    @if (tieneFiltrosActivos()) {
+      <div class="mb-4 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm text-blue-700 font-medium">
+          {{ contadorFiltrosActivos() }} filtro(s) activo(s)
+        </p>
+      </div>
+    }
+
+    <!-- ⏳ Loading State -->
+    @if (cargando()) {
+      <div class="flex items-center justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
+      </div>
+    }
+
+    <!-- ❌ Error State -->
+    @else if (error()) {
+      <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-sm text-red-600">{{ error() }}</p>
+      </div>
+    }
+
+    <!-- ✅ Filtros -->
+    @else {
+      <div class="space-y-6">
+
+        <!-- 📂 CATEGORÍAS -->
+        @if (mostrarFiltro('mostrarCategoria')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('Categoria') }}
+            </label>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              @for (categoria of categorias(); track categoria.id) {
+                <label
+                  class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors group">
+                  <input
+                    type="checkbox"
+                    [checked]="esCategoriaSeleccionada(categoria.id)"
+                    (change)="toggleCategoria(categoria.id)"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                  <span class="text-sm text-gray-700 group-hover:text-gray-900">
+                    {{ categoria.nombre }}
+                  </span>
+                </label>
+              } @empty {
+                <p class="text-sm text-gray-500 italic">No hay categorías disponibles</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 🏷️ MARCAS -->
+        @if (mostrarFiltro('mostrarMarca')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('Marca') }}
+            </label>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              @for (marca of marcas(); track marca.id) {
+                <label
+                  class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors group">
+                  <input
+                    type="checkbox"
+                    [checked]="esMarcaSeleccionada(marca.id)"
+                    (change)="toggleMarca(marca.id)"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                  <span class="text-sm text-gray-700 group-hover:text-gray-900">
+                    {{ marca.nombre }}
+                  </span>
+                </label>
+              } @empty {
+                <p class="text-sm text-gray-500 italic">No hay marcas disponibles</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 📦 TIPO DE PAQUETE -->
+        @if (mostrarFiltro('mostrarTipoPaquete')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('TipoPaquete') }}
+            </label>
+            <div class="space-y-2">
+              @for (tipo of obtenerOpciones('TipoPaquete'); track tipo.id) {
+                <label
+                  [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
+                    (esTipoPaqueteSeleccionado(tipo.valor) 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
+                  <input
+                    type="checkbox"
+                    [checked]="esTipoPaqueteSeleccionado(tipo.valor)"
+                    (change)="toggleTipoPaquete(tipo.valor)"
+                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                  <span [class]="'text-sm font-medium ' + (esTipoPaqueteSeleccionado(tipo.valor) ? 'text-blue-700' : 'text-gray-700')">
+                    {{ tipo.nombre }}
+                  </span>
+                </label>
+              } @empty {
+                <p class="text-sm text-gray-500 italic">No hay tipos disponibles</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 💰 RANGO DE PRECIO -->
+        @if (mostrarFiltro('mostrarRangoPrecio')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('RangoPrecio') }}
+            </label>
+            <div class="space-y-2">
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"><app-icon name="DollarSign" size="14"></app-icon></span>
+                <input
+                  type="number"
+                  placeholder="Mínimo"
+                  [value]="precioMin() || ''"
+                  (input)="cambiarPrecioMin($any($event.target).value ? +$any($event.target).value : null)"
+                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all">
+              </div>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"><app-icon name="DollarSign" size="14"></app-icon></span>
+                <input
+                  type="number"
+                  placeholder="Máximo"
+                  [value]="precioMax() || ''"
+                  (input)="cambiarPrecioMax($any($event.target).value ? +$any($event.target).value : null)"
+                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all">
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- 📋 ORDENAMIENTO -->
+        @if (mostrarFiltro('mostrarOrdenamiento')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('Ordenamiento') }}
+            </label>
+            <select
+              [value]="ordenSeleccionado()"
+              (change)="cambiarOrdenamiento($any($event.target).value)"
+              class="w-full p-3 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all cursor-pointer">
+              <option value="">Seleccionar orden</option>
+              @for (opcion of obtenerOpciones('Ordenamiento'); track opcion.id) {
+                <option [value]="opcion.valor">{{ opcion.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <!-- 🔖 ESTADOS (Por cerrar, Recién abiertos, etc) -->
+        @if (mostrarFiltro('mostrarEstados')) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              {{ obtenerTitulo('Estados') }}
+            </label>
+            <div class="space-y-2">
+              @for (estado of obtenerOpciones('Estados'); track estado.id) {
+                <label
+                  [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
+                    (esEstadoSeleccionado(estado.valor) 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
+                  <input
+                    type="checkbox"
+                    [checked]="esEstadoSeleccionado(estado.valor)"
+                    (change)="toggleEstado(estado.valor)"
+                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500 cursor-pointer">
+                  <span [class]="'text-sm font-medium ' + (esEstadoSeleccionado(estado.valor) ? 'text-green-700' : 'text-gray-700')">
+                    {{ estado.nombre }}
+                  </span>
+                </label>
+              } @empty {
+                <p class="text-sm text-gray-500 italic">No hay estados disponibles</p>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 🎯 BOTÓN APLICAR -->
+        <div class="pt-4 border-t border-gray-200">
+          <app-button
+            [variant]="'primary'"
+            [type]="'button'"
+            (buttonClick)="aplicarFiltros()"
+            class="w-full">
+            <span class="flex items-center justify-center gap-2">
+              <app-icon name="Filter" size="18"></app-icon>
+              Aplicar filtros
+            </span>
+          </app-button>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- 📱 Filtros Mobile - Modal/Drawer (Próximamente) -->
+<div class="lg:hidden">
+  <!-- Botón flotante para abrir filtros en móvil -->
+  <button
+    class="fixed bottom-6 right-6 z-40 bg-secondary shadow-lg hover:shadow-xl text-white w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+    title="Abrir filtros">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    </svg>
+    @if (tieneFiltrosActivos()) {
+      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+        {{ contadorFiltrosActivos() }}
+      </span>
+    }
+  </button>
+</div>

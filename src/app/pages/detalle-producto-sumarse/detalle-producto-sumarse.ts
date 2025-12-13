@@ -2,6 +2,11 @@ import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angula
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastrService } from 'ngx-toastr';
+
+// 🍞 Importar el componente de breadcrumb
+//D:\mercado sinergia\front\mercado-sinergico-app\src\app\shared\breadcrumb-component
+import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -13,7 +18,11 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
-  imports: [CurrencyPipe, CommonModule],
+  imports: [
+    CurrencyPipe, 
+    CommonModule,
+    BreadcrumbComponent  // 👈 Agregar aquí
+  ],
   templateUrl: './detalle-producto-sumarse.html',
   styleUrl: './detalle-producto-sumarse.css',
   standalone: true
@@ -25,7 +34,8 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly productosService = inject(ProductosService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
-
+  private toastr = inject(ToastrService);
+  
   // 🚀 Signals - Datos principales
   producto = signal<Producto | undefined>(undefined);
   paqueteSeleccionado = signal<PaquetePublicado | undefined>(undefined);
@@ -216,16 +226,15 @@ export class DetalleProductoSumarse implements OnInit {
       color: this.selectedColor(),
       cantidad: this.quantity()
     });
-
-    // TODO: Implementar lógica de carrito
-    // this.carritoService.agregarProducto({...})
+    this.toastr.success('Producto agregado "Mis-paquetes" con éxito.');
+    this.router.navigate(['mis-paquetes']);
   }
 
   goBack(): void {
     const paqueteId = this.paqueteSeleccionado()?.id_paquete_publicado;
     
     if (paqueteId) {
-      this.router.navigate(['paquete-detalle', paqueteId]);
+      this.router.navigate(['detalleSeleccionProducto', this.producto()?.id_producto]);
     } else {
       this.router.navigate(['paquetes']);
     }
@@ -239,8 +248,8 @@ export class DetalleProductoSumarse implements OnInit {
     
     const productoId = this.producto()?.id_producto;
     
-    if (productoId) {
-      this.router.navigate(['detalle-producto-sumarse', productoId, paqueteId]);
+    if (productoId) { 
+      this.toastr.info('Página en construcción. Pronto podrás ver los detalles del paquete <3.');
       // Recargar datos
       this.loadPaqueteSeleccionado(paqueteId);
     }

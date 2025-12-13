@@ -1,0 +1,246 @@
+<div class="min-h-screen bg-gray-50 font-body">
+  <app-breadcrumb />
+  
+  <div class="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 max-w-[1920px] py-6 sm:py-8 lg:py-12">
+
+    <!-- 🎯 Header Section -->
+    <div class="mb-6 sm:mb-8 lg:mb-12">
+      
+      <!-- Botón volver -->
+      <div class="mb-4">
+        <button
+          (click)="volverAPaquetes()"
+          class="inline-flex items-center gap-2 text-secondary-dark hover:secondary-dark font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Volver a Paquetes
+        </button>
+      </div>
+
+      <!-- Información del Paquete -->
+      @if (paquete()) {
+        <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <!-- Imagen del paquete -->
+            @if (paquete()?.paqueteBase?.imagen_url) {
+              <img
+                [src]="paquete()?.paqueteBase?.imagen_url"
+                [alt]="paquete()?.paqueteBase?.nombre"
+                class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg"
+                (error)="onImageError($event)"
+              />
+            }
+            
+            <!-- Info del paquete -->
+            <div class="flex-1">
+              <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                {{ paquete()?.paqueteBase?.nombre || 'Paquete' }}
+              </h1>
+              
+              <div class="flex flex-wrap items-center gap-3 mb-3">
+                
+                <!-- Badge Estado -->
+                @if (paquete()?.estado?.nombre) {
+                  <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    {{ paquete()?.estado?.nombre }}
+                  </span>
+                }
+                
+                <!-- Badge Zona -->
+                @if (paquete()?.zona?.nombre) {
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                    </svg>
+                    {{ paquete()?.zona?.nombre }}
+                  </span>
+                }
+              </div>
+
+              @if (paquete()?.paqueteBase?.descripcion) {
+                <p class="text-gray-600 text-sm sm:text-base">
+                  {{ paquete()?.paqueteBase?.descripcion }}
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Título y Buscador -->
+      <div class="text-center mb-6 sm:mb-8">
+        <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+          Productos del Paquete
+        </h2>
+        <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+          Elegí los productos que querés incluir en tu paquete
+        </p>
+      </div>
+
+      <!-- 🔍 Buscador -->
+      <div class="max-w-3xl mx-auto mb-6 sm:mb-8">
+        <app-buscador
+          [config]="configBuscador()"
+          [etiqueta]="'Buscar productos'"
+          [marcador]="'Buscar por nombre, marca, categoría...'"
+          [buscable]="true"
+          [limpiable]="true"
+          [textAyuda]="'Buscá entre ' + totalProductos() + ' productos disponibles'"
+          [textoCargando]="'Cargando productos...'"
+          [textoVacio]="'No se encontraron productos'"
+          (seleccionado)="alSeleccionarProducto($event)"
+          (cambioValor)="limpiarBusqueda()"
+        />
+      </div>
+
+      <!-- 📊 Estadísticas -->
+      @if (!isLoading() && !errorMessage()) {
+        <div class="flex items-center justify-between max-w-3xl mx-auto px-4 text-sm text-gray-600">
+          <span>
+            Mostrando <strong class="text-gray-900">{{ productosMostrados() }}</strong> 
+            de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
+          </span>
+          
+          @if (productoSeleccionado()) {
+            <button
+              (click)="limpiarBusqueda()"
+              class="text-blue-600 hover:secondary-dark font-medium transition-colors flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Limpiar búsqueda
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- 📐 Layout: Filtros + Grid -->
+    <div class="flex flex-col lg:flex-row gap-6">
+      
+      <!-- 🎨 FILTROS (Izquierda) -->
+      <app-filtros
+        [config]="configFiltrosProductos()"
+        [titulo]="'Filtrar Productos'"
+        (filtrosAplicados)="aplicarFiltros($event)"
+        (filtrosLimpiados)="limpiarFiltros()"
+      />
+
+      <!-- 📦 GRID DE PRODUCTOS (Derecha) -->
+      <div class="flex-1 min-w-0">
+
+        <!-- 🔄 Estado de Carga -->
+        @if (isLoading()) {
+          <div class="flex flex-col items-center justify-center py-20 sm:py-32">
+            <div class="relative">
+              <div class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                </svg>
+              </div>
+            </div>
+            <p class="text-gray-600 text-base sm:text-lg font-medium mt-6">Cargando productos...</p>
+          </div>
+        }
+
+        <!-- ❌ Estado de Error -->
+        @else if (errorMessage()) {
+          <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <svg class="w-10 h-10 sm:w-12 sm:h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+              Error al cargar productos
+            </h3>
+            <p class="text-gray-600 text-center mb-6 sm:mb-8 max-w-md px-4">
+              {{ errorMessage() }}
+            </p>
+            <button
+              (click)="recargarProductos()"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Intentar nuevamente
+            </button>
+          </div>
+        }
+
+        <!-- ✅ Grid de Productos -->
+        @else {
+@if (productoSeleccionado()) {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+    <app-producto-card
+      [producto]="productoSeleccionado()!"
+      [contexto]="'paquete-detalle'"
+      [tipoPaquete]="tipoPaquete()"
+      [descuento]="descuentoPaquete()"
+      [paqueteId]="idPaquete()"
+      [navegacion]="'detalle-sumarse'"
+      [mostrarDescripcion]="true"
+    />
+  </div>
+} @else {
+            <!-- Mostrar grid completo filtrado -->
+            <div class="grid grid-cols-1
+                        sm:grid-cols-2
+                        lg:grid-cols-2
+                        xl:grid-cols-3
+                        2xl:grid-cols-4
+                        gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
+                        auto-rows-fr">
+              
+              @for (producto of productosFiltrados(); track producto.id_producto) {
+  <div class="flex">
+    <app-producto-card
+      [producto]="producto"
+      [contexto]="'paquete-detalle'"
+      [tipoPaquete]="tipoPaquete()"
+      [descuento]="descuentoPaquete()"
+      [paqueteId]="idPaquete()"
+      [navegacion]="'detalle-sumarse'"
+      [mostrarDescripcion]="true"
+      class="w-full"
+    />
+  </div>
+}
+
+              <!-- 🚫 Estado Vacío -->
+              @empty {
+                <div class="col-span-full">
+                  <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                      <svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+                      No hay productos disponibles
+                    </h3>
+                    <p class="text-gray-600 text-center mb-6 max-w-md px-4">
+                      No se encontraron productos con los filtros seleccionados.
+                    </p>
+                    <button
+                      (click)="limpiarFiltros()"
+                      class="text-blue-600 hover:secondary-dark font-medium transition-colors">
+                      Limpiar filtros
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+      </div>
+    </div>
+
+  </div>
+</div>
