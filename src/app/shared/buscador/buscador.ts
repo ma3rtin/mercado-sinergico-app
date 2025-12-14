@@ -2,7 +2,6 @@ import {
   Component,
   input,
   output,
-  model,
   signal,
   computed,
   OnInit,
@@ -263,7 +262,7 @@ export class BuscadorComponent<T = any> implements OnInit {
     );
 
     if (this.multiSeleccion()) {
-      this.manejarMultiSeleccion(opcion, datosOriginal);
+      this.manejarMultiSeleccion(opcion);
     } else {
       this.valorSeleccionado.set(opcion);
       this.idsSeleccionados.set([opcion.id]);
@@ -274,7 +273,7 @@ export class BuscadorComponent<T = any> implements OnInit {
     }
   }
 
-  private manejarMultiSeleccion(opcion: OpcionSelect, datosOriginal?: T): void {
+  private manejarMultiSeleccion(opcion: OpcionSelect): void {
     const actual = Array.isArray(this.valorSeleccionado())
       ? this.valorSeleccionado()
       : [];
