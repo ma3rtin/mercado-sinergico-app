@@ -293,22 +293,69 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
+    Swal.fire({
+      title: "¿Eliminar producto?",
+      text: producto.nombre,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Eliminar"
+    }).then(result => {
+      if (!result.isConfirmed) return;
+
+      this.pedidoService
+        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
+        .subscribe({
+          next: () => {
+            pedido.productosSeleccionados =
+              pedido.productosSeleccionados.filter(p => p.id_producto !== producto.id_producto);
+
+            this.recalcularPedido(pedido);
+            this.toastr.success("Producto eliminado.");
+          },
+          error: () => {
+            this.toastr.error("No se pudo eliminar el producto.");
+          }
+        });
+    });
+  }
+
   // ------------------------------
   // NEGOCIO
   // ------------------------------
-  eliminarPedido(pedido: PedidoDelUsuario): void {
+  salirDelPaquete(pedido: PedidoDelUsuario): void {
+
+    const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
+
+    if (!paqueteId) {
+      this.toastr.error("No se pudo identificar el paquete.");
+      return;
+    }
+
     Swal.fire({
-      title: "¿Eliminar pedido?",
-      text: `Eliminarás el pedido #${pedido.id_pedido}`,
+      title: "¿Salir del paquete?",
+      text: "Perderás los productos reservados",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
+      confirmButtonText: "Sí, salir",
+      cancelButtonText: "Cancelar"
     }).then(result => {
-      if (result.isConfirmed) {
-        const nuevos = this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido);
-        this.pedidos.set(nuevos);
-        this.toastr.success("Pedido eliminado.");
-      }
+      if (!result.isConfirmed) return;
+
+      this.pedidoService
+        .salirDelPaquete(paqueteId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.pedidos.set(
+              this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
+            );
+            this.toastr.success("Saliste del paquete.");
+          },
+          error: () => {
+            this.toastr.error("No se pudo salir del paquete.");
+          }
+        });
     });
   }
 

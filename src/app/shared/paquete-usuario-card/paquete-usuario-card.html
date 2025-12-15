@@ -43,14 +43,34 @@
       </span>
     </div>
 
-    <!-- PROGRESO + Meta -->
-    <div class="flex justify-between items-center mt-3 text-sm text-gray-600">
-      <span>{{ paquete.cant_productos_reservados }} / {{ paquete.cant_productos }} reservados</span>
-      <span class="font-medium">{{ pedido.tiempoRestante }}</span>
+    <!-- PROGRESO + META -->
+    <div class="mt-3">
+
+      <!-- Barra -->
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="h-2 rounded-full transition-all" [ngClass]="{
+        'bg-green-500': porcentajeReservado < 50,
+        'bg-yellow-500': porcentajeReservado >= 50 && porcentajeReservado < 80,
+        'bg-red-500': porcentajeReservado >= 80
+      }" [style.width.%]="porcentajeReservado">
+        </div>
+      </div>
+
+      <!-- Texto -->
+      <div class="flex justify-between items-center mt-1 text-xs text-gray-500">
+        <span>
+          {{ paquete?.cant_productos_reservados ?? 0 }}
+          /
+          {{ paquete?.cant_productos ?? 0 }}
+          productos reservados
+        </span>
+
+        <span>
+          {{ porcentajeReservado }}%
+        </span>
+      </div>
     </div>
-
   </div>
-
 </div>
 }
 
@@ -84,27 +104,40 @@
         </svg>
       </div>
 
-      <!-- TAGS -->
-      <div class="flex flex-wrap gap-2 mt-2 text-xs">
-        <span class="px-2 py-1 rounded-full bg-primary text-white">
-          {{ getMarcaNombre() }}
-        </span>
+      <div class="flex justify-between items-center mt-2 text-xs gap-3">
 
-        <span class="px-2 py-1 rounded-full bg-gray-200 text-gray-700">
-          {{ getCategoriaNombre() }}
-        </span>
+        <!-- TAGS -->
+        <div class="flex flex-wrap gap-2">
+          <span class="px-2 py-1 rounded-full bg-primary text-white">
+            {{ getMarcaNombre() }}
+          </span>
 
-        <span class="px-2 py-1 rounded-full border border-gray-300 text-gray-700">
-          {{ obtenerTextoTipo() }}
-        </span>
+          <span class="px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+            {{ getCategoriaNombre() }}
+          </span>
 
-        <span [class]="'px-2 py-1 rounded-full border text-gray-700 ' + getEstadoClass(pedido.estado?.nombre)">
-          {{ pedido.estado?.nombre }}
-        </span>
+          <span class="px-2 py-1 rounded-full border border-gray-300 text-gray-700">
+            {{ obtenerTextoTipo() }}
+          </span>
+
+          <span [class]="'px-2 py-1 rounded-full border text-gray-700 ' + getEstadoClass(pedido.estado?.nombre)">
+            {{ pedido.estado?.nombre }}
+          </span>
+        </div>
+
+        <!-- CONTADOR -->
+        <div class="text-gray-600 whitespace-nowrap" [ngClass]="{
+    'text-green-600 font-semibold': cantidadProductosUsuario >= paquete?.cant_productos * 0.8
+  }"> <span class="font-semibold text-gray-900">
+            {{ cantidadProductosUsuario }}
+          </span>
+          /
+          {{ paquete?.cant_productos ?? 0 }}
+          productos
+        </div>
       </div>
     </div>
   </div>
-
 
   <!-- Contenido expandido -->
   <div class="border-t border-gray-200 bg-gray-50">
@@ -227,6 +260,20 @@
                 </p>
               </div>
 
+              @if (puedeEditarCantidades) {
+
+              <!-- Tachito -->
+              <button type="button" (click)="onEliminarProducto(producto)" class="ml-2 w-8 h-8 flex items-center justify-center rounded-full
+           bg-red-100 hover:bg-red-200 text-red-600 transition">
+
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+           a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
+           m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
+                </svg>
+              </button>
+              }
+
             </div>
           </div>
 
@@ -236,6 +283,12 @@
             <p class="text-gray-500">No hay productos en este pedido</p>
           </div>
           }
+
+          <div class="flex justify-center py-2">
+            <button type="button" class="text-sm text-primary hover:underline hover:font-bold cursor-pointer" (click)="verProductosDisponibles()">
+              Ver todos los productos disponibles del paquete
+            </button>
+          </div>
 
           <!-- Resumen -->
           @if (pedido.precioSubtotal !== undefined) {
@@ -272,21 +325,9 @@
             </div>
           </div>
           }
-
-          <!-- BOTONES -->
-          <div class="flex flex-col sm:flex-row gap-3 pt-4">
-            @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-            <app-button variant="primary" label="Finalizar compra" (buttonClick)="onFinalizarCompra()">
-            </app-button>
-            }
-
-            <app-button variant="warning" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
-            </app-button>
-          </div>
-
         </div>
 
-        <!-- DERECHA: info -->
+        <!-- INFORMACIÓN -->
         <div class="lg:col-span-1">
           <div class="bg-white rounded-lg p-5 shadow-sm border border-gray-200 sticky top-4 mt-5">
 
@@ -294,10 +335,10 @@
               Información
             </h4>
 
-            <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
 
               <!-- Estado -->
-              <div class="flex items-start gap-2">
+              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -314,7 +355,7 @@
               </div>
 
               <!-- Tiempo restante -->
-              <div class="flex items-start gap-2">
+              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
                   viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -323,14 +364,17 @@
 
                 <div class="flex-1">
                   <p class="text-sm font-medium text-gray-700 mb-1">Cierra en</p>
-                  <p class="text-lg font-bold text-gray-900">
-                    {{ pedido.tiempoRestante }}
+                  <p class="text-lg font-bold" [ngClass]="{
+                        'text-red-600': esUrgente,
+                        'text-gray-900': !esUrgente
+                      }">
+                    {{ tiempoRestante }}
                   </p>
                 </div>
               </div>
 
               <!-- Productos -->
-              <div class="flex items-start gap-2">
+              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
@@ -347,7 +391,7 @@
               </div>
 
               <!-- Compradores -->
-              <div class="flex items-start gap-2">
+              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660 .07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
@@ -360,12 +404,22 @@
                   </p>
                 </div>
               </div>
-
             </div>
+          </div>
 
+          <!-- BOTONES -->
+          <div class="flex flex-col sm:flex-row gap-3 pt-4 justify-end">
+            @if (puedeSalirDelPaquete) {
+            <app-button variant="warning" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
+            </app-button>
+            }
+
+            @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
+            <app-button variant="primary" label="Finalizar compra" (buttonClick)="onFinalizarCompra()">
+            </app-button>
+            }
           </div>
         </div>
-
       </div>
     </div>
   </div>

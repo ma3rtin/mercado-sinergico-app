@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { TipoPaquete } from '@app/models/Enums';
+import { interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-paquete-usuario-card',
@@ -19,12 +22,17 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() toggleExpansion = new EventEmitter<void>();
   @Output() aumentarCantidad = new EventEmitter<any>();
   @Output() disminuirCantidad = new EventEmitter<any>();
+  @Output() eliminarProducto = new EventEmitter<any>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
   @Output() imageError = new EventEmitter<Event>();
 
   public readonly TipoPaquete = TipoPaquete;
   isActualizando = signal(false);
+
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly router = inject(Router);
 
   get paquete() {
     return this.pedido.paquetePublicado;
@@ -35,6 +43,11 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    interval(60000) // cada 1 minuto
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // forzamos reevaluación del getter
+      });
   }
 
   getMarcaNombre(): string {
@@ -51,6 +64,50 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       currency: 'ARS',
       minimumFractionDigits: 0
     }).format(price);
+  }
+
+  get porcentajeReservado(): number {
+    const total = this.paquete?.cant_productos ?? 0;
+    const reservados = this.paquete?.cant_productos_reservados ?? 0;
+    if (total === 0) return 0;
+    return Math.round((reservados / total) * 100);
+  }
+
+  get cantidadProductosUsuario(): number {
+    if (!this.productosEnPedido?.length) return 0;
+
+    return this.productosEnPedido.reduce(
+      (total: number, p: any) => total + (p.cantidad ?? 0),
+      0
+    );
+  }
+  get tiempoRestante(): string {
+    if (!this.paquete?.fecha_fin) return '—';
+
+    const ahora = new Date().getTime();
+    const fin = new Date(this.paquete.fecha_fin).getTime();
+
+    const diffMs = fin - ahora;
+
+    if (diffMs <= 0) return 'Cerrado';
+
+    const minutos = Math.floor(diffMs / 60000);
+    const horas = Math.floor(minutos / 60);
+    const dias = Math.floor(horas / 24);
+
+    if (dias > 0) return `${dias} día${dias > 1 ? 's' : ''}`;
+    if (horas > 0) return `${horas} h`;
+    return `${minutos} min`;
+  }
+
+  verProductosDisponibles(): void {
+    const idPaquete = this.paquete?.id_paquete_publicado;
+
+    if (!idPaquete) return;
+
+    console.log('🧭 Navegando a paquete:', idPaquete);
+
+    this.router.navigate(['/productos-del-paquete', idPaquete]);
   }
 
   getTipoPaqueteIcono(tipo?: string | TipoPaquete) {
@@ -104,12 +161,16 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     );
   }
 
-  esUrgente(): boolean {
+  get esUrgente(): boolean {
     if (!this.paquete?.fecha_fin) return false;
-    const hoy = new Date();
-    const fin = new Date(this.paquete.fecha_fin);
-    return (fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24) <= 2;
+
+    const ahora = Date.now();
+    const fin = new Date(this.paquete.fecha_fin).getTime();
+
+    const horasRestantes = (fin - ahora) / (1000 * 60 * 60);
+    return horasRestantes <= 24;
   }
+
 
   onToggleExpansion(): void {
     this.toggleExpansion.emit();
@@ -137,12 +198,25 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     this.disminuirCantidad.emit(limpio);
   }
 
+  get puedeSalirDelPaquete(): boolean {
+    const estado = this.pedido?.estado?.nombre?.toLowerCase();
+    return estado === 'pendiente'
+      || estado === 'confirmado'
+      || estado === 'pagado';
+  }
+
   onSalirDelPaquete(): void {
     this.salirDelPaquete.emit();
   }
 
   onFinalizarCompra(): void {
     this.finalizarCompra.emit();
+  }
+
+  onEliminarProducto(prod: any): void {
+    this.eliminarProducto.emit({
+      id_producto: prod.productoId ?? prod.id_producto
+    });
   }
 
   onImageError(ev: Event): void {

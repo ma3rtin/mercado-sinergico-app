@@ -17,18 +17,31 @@ export class PedidoService extends ApiService {
         return this.get<Pedido>(`${this.apiUrl}/${id}`);
     }
 
-    crearPedido(body: Partial<Pedido>): Observable<Pedido> {
-        return this.post<Pedido>(this.apiUrl, body);
+    crearPedido(paqueteId: number, body: Partial<Pedido>): Observable<Pedido> {
+        return this.post<Pedido>(`${this.apiUrl}/${paqueteId}`, body);
     }
-    
-    actualizarCantidad(pedidoId: number, productoId: number, body: { cantidad: number; variante?: string | null }) {
-        return this.patch<any>(
+
+    actualizarCantidad(
+        pedidoId: number,
+        productoId: number,
+        body: { cantidad: number; variante?: string | null }
+    ): Observable<PedidoActualizado> {
+        return this.patch<PedidoActualizado>(
             `${this.apiUrl}/${pedidoId}/producto/${productoId}`,
             body
         );
     }
 
-    eliminarPedido(id: number): Observable<void> {
-        return this.delete<void>(`${this.apiUrl}/${id}`);
+    eliminarProductoDelPedido(
+        pedidoId: number,
+        productoId: number
+    ): Observable<void> {
+        return this.delete<void>(
+            `${this.apiUrl}/${pedidoId}/producto/${productoId}`
+        );
+    }
+
+    salirDelPaquete(paqueteId: number): Observable<void> {
+        return this.get<void>(`${this.apiUrl}/bajarse/${paqueteId}`);
     }
 }
