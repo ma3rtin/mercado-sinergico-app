@@ -1,183 +1,239 @@
-import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal, computed, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+// Services
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+
+// Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { VisorImagenesComponent } from '@app/shared/visor-imagenes-component/visor-imagenes-component';
+
+// Components
 import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { ProductoCard } from '@app/shared/producto-card/producto-card';
+import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
+import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
+
 @Component({
-  selector: 'app-producto-detalle-seleccion-component',
-  imports: [CommonModule, VisorImagenesComponent, BreadcrumbComponent],
+  selector: 'app-producto-detalle-seleccion',
+  standalone: true,
+  imports: [
+    CommonModule,
+    BreadcrumbComponent,
+    ProductoCard,
+    PaqueteCard,
+    ButtonComponent,
+    IconComponent
+],
   templateUrl: './producto-detalle-seleccion-component.html',
-  standalone: true
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
-  // 🚀 Signals
-  producto = signal<Producto | undefined>(undefined);
-  paquetes = signal<PaquetePublicado[]>([]);
-  isLoading = signal(true);
-  
-  // 📊 Computed signals
-  caracteristicas = computed(() => {
-    const prod = this.producto();
-    if (!prod) return [];
-
-    const resultado: Array<{label: string, value: string}> = [];
-
-    if (prod.peso) {
-      resultado.push({
-        label: 'Peso',
-        value: `${prod.peso} kg`
-      });
-    }
-
-    if (prod.altura || prod.ancho || prod.profundidad) {
-      resultado.push({
-        label: 'Dimensiones',
-        value: `${prod.altura || '?'} x ${prod.ancho || '?'} x ${prod.profundidad || '?'} cm`
-      });
-    }
-
-    if (prod.stock !== undefined) {
-      resultado.push({
-        label: 'Stock disponible',
-        value: `${prod.stock} unidades`
-      });
-    }
-
-    if (prod.marca) {
-      resultado.push({
-        label: 'Marca',
-        value: prod.marca.nombre
-      });
-    }
-
-    if (prod.categoria) {
-      resultado.push({
-        label: 'Categoría',
-        value: prod.categoria.nombre
-      });
-    }
-
-    return resultado;
-  });
-  
-  // ✅ Computed para saber si hay stock
-  tieneStock = computed(() => {
-    const prod = this.producto();
-    return prod?.stock !== undefined && prod.stock > 0;
-  });
-
-  // 🔧 Services inyectados correctamente
+  // 🔧 Services
   private readonly productosService = inject(ProductosService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef); // ✅ Agregado DestroyRef
-  readonly router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  // 🌐 Platform check
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+
+  // 🚀 Signals
+  productoSeleccionado = signal<Producto | null>(null);
+  todosLosPaquetes = signal<PaquetePublicado[]>([]);
+  isLoadingProducto = signal(true);
+  isLoadingPaquetes = signal(true);
+  errorMessage = signal('');
+
+  // 📊 Computed Signals
+  paquetesDelProducto = computed(() => this.todosLosPaquetes());
+
+  // Loading general
+  isLoading = computed(() =>
+    this.isLoadingProducto() || this.isLoadingPaquetes()
+  );
+
+  // Hay paquetes disponibles
+  hayPaquetesDisponibles = computed(() =>
+    this.paquetesDelProducto().length > 0
+  );
+
+  // Nombre del producto para breadcrumb
+  nombreProductoBreadcrumb = computed(() =>
+    this.productoSeleccionado()?.nombre || 'Producto'
+  );
 
   ngOnInit(): void {
-    this.loadProducto();
-    this.loadPaquetes();
+    if (this.isBrowser) {
+      this.cargarDatos();
+    }
   }
 
-  private loadProducto(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    
-    if (!id || isNaN(id)) {
-      console.error('❌ ID de producto inválido');
-      this.isLoading.set(false);
+  // 📥 CARGA DE DATOS
+  private cargarDatos(): void {
+    // Obtener el ID del producto de la URL
+    const productoId = Number(this.route.snapshot.paramMap.get('id'));
+
+    console.log('🚀 Cargando datos para producto ID:', productoId);
+
+    if (!productoId || isNaN(productoId)) {
+      console.error('❌ ID de producto inválido:', productoId);
+      this.errorMessage.set('ID de producto inválido');
+      this.isLoadingProducto.set(false);
+      this.isLoadingPaquetes.set(false);
       return;
     }
 
-    this.productosService.getProductoById(id)
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ✅ Pasar destroyRef como parámetro
+    // Cargar producto
+    this.cargarProducto(productoId);
+
+    // Cargar paquetes
+    this.cargarPaquetes();
+  }
+
+  // 📦 Cargar producto por ID
+  private cargarProducto(id: number): void {
+    this.isLoadingProducto.set(true);
+
+    this.productosService
+      .getProductoById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (producto) => {
           console.log('✅ Producto cargado:', producto);
-          this.producto.set(producto);
-          this.isLoading.set(false);
+          this.productoSeleccionado.set(producto);
+          this.isLoadingProducto.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando producto:', error);
-          this.isLoading.set(false);
+          this.isLoadingProducto.set(false);
+
+          let mensaje = 'Error al cargar el producto.';
+
+          if (error.status === 404) {
+            mensaje = 'Producto no encontrado.';
+          } else if (error.status === 0) {
+            mensaje = 'No se pudo conectar con el servidor.';
+          }
+
+          this.errorMessage.set(mensaje);
         }
       });
   }
 
-  private loadPaquetes(): void {
-    this.paquetePublicadoService.getPaquetes()
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ✅ Pasar destroyRef como parámetro
+  // 🎁 Cargar todos los paquetes
+  private cargarPaquetes(): void {
+    this.isLoadingPaquetes.set(true);
+
+    this.paquetePublicadoService
+      .getPaquetes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (paquetes: PaquetePublicado[]) => { // ✅ Tipo correcto
-          console.log('✅ Paquetes cargados:', paquetes);
-          this.paquetes.set(paquetes); // ✅ Actualizar el signal
+        next: (paquetes) => {
+          console.log('✅ Paquetes cargados:', paquetes.length);
+          this.todosLosPaquetes.set(paquetes);
+          this.isLoadingPaquetes.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes:', error);
-          this.paquetes.set([]); // ✅ Array vacío en caso de error
+          this.isLoadingPaquetes.set(false);
+
+          let mensaje = 'Error al cargar los paquetes.';
+
+          if (error.status === 0) {
+            mensaje = 'No se pudo conectar con el servidor.';
+          } else if (error.status === 404) {
+            mensaje = 'No se encontraron paquetes.';
+          }
+
+          this.errorMessage.set(mensaje);
+          this.todosLosPaquetes.set([]);
         }
       });
   }
 
-  // 🧭 NAVEGACIÓN
-  navegarAProducto(id: number): void {
-    if (!id) {
-      console.error('❌ ID inválido');
-      return;
-    }
-    this.router.navigate(['detalleProductoSumarse', id]);
+  // 🔄 Recargar datos
+  recargarDatos(): void {
+    console.log('🔄 Recargando datos...');
+    this.errorMessage.set('');
+    this.cargarDatos();
   }
 
-  seleccionarPaquete(id: number): void {
-    if (!id) {
+  // 🧭 NAVEGACIÓN
+
+  /**
+   * Navegar a la vista de "sumarse" al paquete seleccionado
+   */
+  navegarASumarse(paqueteId: number): void {
+    if (!paqueteId) {
       console.error('❌ ID de paquete inválido');
       return;
     }
-    this.router.navigate(['detalleProductoSumarse', this.producto()?.id_producto, id]);
+
+    const productoId = this.productoSeleccionado()?.id_producto;
+    if (!productoId) {
+      console.error('❌ No hay producto seleccionado');
+      return;
+    }
+
+    console.log('🧭 Navegando a sumarse:', { productoId, paqueteId });
+
+    // Navegar a la vista de "sumarse" con ambos IDs
+    this.router.navigate(['detalleProductoSumarse/', productoId, paqueteId], {
+      queryParams: { productoId, paqueteId },
+    });
+  }
+
+  /**
+   * Volver a la vista de productos
+   */
+  volverAProductos(): void {
+    this.router.navigate(['/productos']);
+  }
+
+  /**
+   * Ver detalle completo del producto
+   */
+  verDetalleProducto(productoId: number): void {
+    if (!productoId) {
+      console.error('❌ ID de producto inválido');
+      return;
+    }
+    this.router.navigate(['/producto', productoId]);
   }
 
   // 🎨 HELPERS VISUALES
-  getPaqueteStatusClass(estado: string): string {
-    const estadoLower = estado.toLowerCase();
-    
-    const clases: Record<string, string> = {
-      'abierto': 'bg-blue-500',
-      'activo': 'bg-blue-500',
-      'pendiente': 'bg-orange-500',
-      'cerrado': 'bg-red-500',
-      'completo': 'bg-green-500'
-    };
-    
-    return clases[estadoLower] || 'bg-gray-500';
-  }
 
-  getEstadoTextClass(estado: string): string {
-    const estadoLower = estado.toLowerCase();
-    
-    const clases: Record<string, string> = {
-      'abierto': 'text-blue-600',
-      'activo': 'text-blue-600',
-      'pendiente': 'text-orange-600',
-      'cerrado': 'text-red-600',
-      'completo': 'text-green-600'
-    };
-    
-    return clases[estadoLower] || 'text-gray-600';
-  }
-
+  /**
+   * Formatear precio en pesos argentinos
+   */
   formatPrice(price?: number): string {
-    if (!price) return '$0';
+    if (!price && price !== 0) return '$0';
+
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(price);
   }
 
-  onPaqueteImageError(event: Event): void {
+  /**
+   * Obtener URL de imagen con fallback
+   */
+  getImageUrl(producto: Producto): string {
+    return producto.imagen_url || '/assets/images/placeholder-product.png';
+  }
+
+  /**
+   * Manejo de error de imagen
+   */
+  onImageError(event: Event): void {
     const target = event.target as HTMLImageElement;
     if (target.src.includes('placeholder')) return;
     target.src = '/assets/images/placeholder-product.png';

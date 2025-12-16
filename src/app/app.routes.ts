@@ -19,77 +19,83 @@ import { Perfil } from './modules/usuario/pages/perfil/perfil';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPaquetesComponent } from './pages/mis-paquetes/mis-paquetes';
+import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
 
 export const routes: Routes = [
-  { 
-    path: '', 
-    component: Home, 
-    data: { 
+  {
+    path: '',
+    component: Home,
+    data: {
       renderMode: RenderMode.Client,
       breadcrumb: '' // Vacío porque "Home" es la raíz
-    } 
+    }
   },
-  
-  { 
-    path: 'login', 
+
+  {
+    path: 'login',
     component: LoginComponent,
     data: { breadcrumb: 'Iniciar Sesión' }
   },
-  
-  { 
-    path: 'registrarse', 
+
+  {
+    path: 'registrarse',
     component: RegistrarseComponent,
     data: { breadcrumb: 'Registrarse' }
   },
-  
+
   // 🛍️ Flujo de compra: Home > Productos > Detalle > Sumarse > Mis Paquetes
-  { 
-    path: 'productos', 
+  {
+    path: 'productos',
     component: ProductosComponent,
     data: { breadcrumb: 'Productos' }
   },
 
   {
+    //producto/:id
     path: 'detalleSeleccionProducto/:id',
     component: ProductoDetalleSeleccionComponent,
-    data: { 
+    data: {
       renderMode: RenderMode.Server,
       breadcrumb: 'Detalle'
     },
   },
 {
+  //paquete/:paqueteId/productos
   path: 'productos-del-paquete/:paqueteId',
-  component: ProductosComponent,
+  component: ProductosDelPaquete,
   data: {
     breadcrumb: 'Productos del Paquete'
   }
 },
   {
+    //paquete/:paqueteId/producto/:productoId
     path: 'detalleProductoSumarse/:productoId/:paqueteId',
     component: DetalleProductoSumarse,
-    data: { 
+    data: {
       renderMode: RenderMode.Server,
       breadcrumb: 'Sumarse'
     },
   },
 
-  { 
-    path: 'paquetes-publicados', 
+  {
+    //paquetes
+    path: 'paquetes-publicados',
     component: PaquetesPublicosComponent,
     data: { breadcrumb: 'Paquetes Publicados' }
   },
 
   // 👤 Rutas usuario (con login)
-  { 
-    path: 'perfil', 
-    component: Perfil, 
+  {
+    path: 'perfil',
+    component: Perfil,
     canActivate: [authGuard],
     data: { breadcrumb: 'Mi Perfil' }
   },
 
-  { 
-    path: 'mis-paquetes', 
-    component: MisPaquetesComponent, 
+  {
+    //mis-pedidos
+    path: 'mis-paquetes',
+    component: MisPaquetesComponent,
     canActivate: [authGuard],
     data: { breadcrumb: 'Mis Paquetes' }
   },
@@ -98,7 +104,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    data: { 
+    data: {
       renderMode: RenderMode.Client,
       breadcrumb: 'Administración'
     },
@@ -109,39 +115,39 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'perfil', 
+        path: 'perfil',
         component: PerfilAdmin,
         data: { breadcrumb: 'Perfil Admin' }
       },
       {
-        path: 'crear-producto', 
+        path: 'crear-producto',
         component: CrearProductoComponent,
         data: { breadcrumb: 'Crear Producto' }
       },
       {
-        path: 'crear-paquete', 
+        path: 'crear-paquete',
         component: CrearPaqueteComponent,
         data: { breadcrumb: 'Crear Paquete' }
       },
       {
-        path: 'publicar-paquete', 
+        path: 'publicar-paquete',
         component: PublicarPaqueteComponent,
         data: { breadcrumb: 'Publicar Paquete' }
       },
       {
-        path: 'administrar-plantillas', 
+        path: 'administrar-plantillas',
         component: AdministrarPlantillasComponent,
         data: { breadcrumb: 'Administrar Plantillas' }
       },
       {
-        path: 'administrar-productos', 
+        path: 'administrar-productos',
         component: AdministrarProductosComponent,
         data: { breadcrumb: 'Administrar Productos' }
       },
       {
         path: 'editar-producto/:id',
-        component: EditarProductoComponent, 
-        data: { 
+        component: EditarProductoComponent,
+        data: {
           renderMode: RenderMode.Client,
           breadcrumb: 'Editar Producto'
         }
@@ -150,8 +156,8 @@ export const routes: Routes = [
   },
 
   // 🌍 Fallback
-  { 
-    path: '**', 
+  {
+    path: '**',
     component: Home,
     data: { breadcrumb: 'Página no encontrada' }
   },

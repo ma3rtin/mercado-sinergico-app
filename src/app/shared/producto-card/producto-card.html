@@ -38,7 +38,7 @@
 
   <!-- 📝 CONTENIDO -->
   <div class="p-4 sm:p-5 flex flex-col flex-grow">
-    
+
     <!-- 🏷️ MARCA -->
     <div class="mb-2">
       <span class="inline-flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
@@ -52,17 +52,10 @@
       {{ producto().nombre }}
     </h3>
 
-    <!-- 📄 DESCRIPCIÓN -->
-    @if (mostrarDescripcion() && descripcionTruncada()) {
-      <p class="text-xs sm:text-sm text-gray-600 line-clamp-3 mb-3">
-        {{ descripcionTruncada() }}
-      </p>
-    }
-
     <!-- Spacer para empujar el contenido inferior hacia abajo -->
     <div class="flex-grow"></div>
 
-    <!-- 📦 STOCK (si aplica y debeMostrarStock es true) -->
+    <!-- 📦 STOCK (si aplica y debeMostrarStock es true)
     @if (debeMostrarStock()) {
       <div class="mb-3 flex items-center gap-2">
         <svg [class]="'w-4 h-4 ' + getStockClass()" fill="currentColor" viewBox="0 0 16 16">
@@ -73,7 +66,7 @@
         </span>
       </div>
     }
-
+-->
     <!-- 💰 PRECIO -->
     <div class="mb-4">
       <!-- Precio base con tooltip -->
@@ -81,7 +74,7 @@
         <p class="text-xs text-gray-500 font-medium">
           Precio base
         </p>
-        
+
         <!-- Info icon con tooltip -->
         @if (tieneDescuento()) {
           <div class="group/tooltip relative inline-block">
@@ -89,12 +82,12 @@
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
               <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
             </svg>
-            
+
             <!-- Tooltip -->
             <div class="invisible group-hover/tooltip:visible opacity-0 group-hover/tooltip:opacity-100 transition-all absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl z-10">
               <p class="mb-1 font-semibold">💡 Precio con descuento</p>
               <p class="text-gray-300">
-                Este precio será descontado según el paquete al que pertenezca. 
+                Este precio será descontado según el paquete al que pertenezca.
                 @if (descuento()?.nombrePaquete) {
                   <span class="text-yellow-300">{{ descuento()?.nombrePaquete }}</span> ofrece {{ descuento()?.porcentaje }}% OFF.
                 } @else {
