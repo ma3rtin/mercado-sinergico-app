@@ -27,7 +27,7 @@ import {
   BuscadorComponent,
   ConfigBuscador,
   OpcionSelect
-} from "@app/shared/buscador/buscador";
+} from '@app/shared/buscador/buscador';
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
 
 // ------------------------------
@@ -137,7 +137,7 @@ export class MisPedidosComponent implements OnInit {
           this.isLoading.set(false);
         },
         error: () => {
-          this.errorMessage.set("Error al cargar los pedidos.");
+          this.errorMessage.set('Error al cargar los pedidos.');
           this.isLoading.set(false);
         }
       });
@@ -250,7 +250,7 @@ export class MisPedidosComponent implements OnInit {
         );
 
         this.recalcularPedido(pedido);
-        this.toastr.error("No se pudo aumentar la cantidad.");
+        this.toastr.error('No se pudo aumentar la cantidad.');
       }
     });
   }
@@ -288,18 +288,18 @@ export class MisPedidosComponent implements OnInit {
         );
 
         this.recalcularPedido(pedido);
-        this.toastr.error("No se pudo disminuir la cantidad.");
+        this.toastr.error('No se pudo disminuir la cantidad.');
       }
     });
   }
 
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
     Swal.fire({
-      title: "¿Eliminar producto?",
+      title: '¿Eliminar producto?',
       text: producto.nombre,
-      icon: "warning",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Eliminar"
+      confirmButtonText: 'Eliminar'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -311,10 +311,10 @@ export class MisPedidosComponent implements OnInit {
               pedido.productosSeleccionados.filter(p => p.id_producto !== producto.id_producto);
 
             this.recalcularPedido(pedido);
-            this.toastr.success("Producto eliminado.");
+            this.toastr.success('Producto eliminado.');
           },
           error: () => {
-            this.toastr.error("No se pudo eliminar el producto.");
+            this.toastr.error('No se pudo eliminar el producto.');
           }
         });
     });
@@ -328,17 +328,17 @@ export class MisPedidosComponent implements OnInit {
     const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
 
     if (!paqueteId) {
-      this.toastr.error("No se pudo identificar el paquete.");
+      this.toastr.error('No se pudo identificar el paquete.');
       return;
     }
 
     Swal.fire({
-      title: "¿Salir del paquete?",
-      text: "Perderás los productos reservados",
-      icon: "warning",
+      title: '¿Salir del paquete?',
+      text: 'Perderás los productos reservados',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Sí, salir",
-      cancelButtonText: "Cancelar"
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -350,27 +350,27 @@ export class MisPedidosComponent implements OnInit {
             this.pedidos.set(
               this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
             );
-            this.toastr.success("Saliste del paquete.");
+            this.toastr.success('Saliste del paquete.');
           },
           error: () => {
-            this.toastr.error("No se pudo salir del paquete.");
+            this.toastr.error('No se pudo salir del paquete.');
           }
         });
     });
   }
 
   finalizarCompra(p: PedidoDelUsuario) {
-    console.log("Finalizar compra:", p.id_pedido);
+    console.log('Finalizar compra:', p.id_pedido);
   }
 
   // ------------------------------
   // HELPERS
   // ------------------------------
   onImageError(ev: Event): void {
-    (ev.target as HTMLImageElement).src = "/assets/images/placeholder-product.png";
+    (ev.target as HTMLImageElement).src = '/assets/images/placeholder-product.png';
   }
 
   formatPrice(n: number): string {
-    return n.toLocaleString("es-AR");
+    return n.toLocaleString('es-AR');
   }
 }

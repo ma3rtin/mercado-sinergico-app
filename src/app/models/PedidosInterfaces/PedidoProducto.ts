@@ -1,4 +1,4 @@
-import { Producto } from "@app/models/ProductosInterfaces/Producto";
+import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 export interface PedidoProducto {
     id_pedido_producto?: number;
