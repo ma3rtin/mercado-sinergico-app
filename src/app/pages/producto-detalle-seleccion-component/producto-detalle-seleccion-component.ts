@@ -12,10 +12,10 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 // Components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({

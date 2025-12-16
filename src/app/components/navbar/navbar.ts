@@ -12,14 +12,7 @@ import { IconComponent } from '@app/shared/icono/icono';
   styleUrl: './navbar.css',
 })
 export class Navbar {
-  private authService = inject(AuthService);
+  auth = inject(AuthService);
 
-  isLoggedIn = this.authService.isAuthenticated;
-
-  async signOut() {
-    if (confirm('¿Seguro que desea cerrar sesión?')) {
-      await this.authService.signOut();
-      window.location.href = '/login';
-    }
-  }
+  isLoggedIn = this.auth.isAuthenticated;
 }

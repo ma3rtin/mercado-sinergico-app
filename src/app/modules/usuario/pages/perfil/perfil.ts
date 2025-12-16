@@ -1,14 +1,16 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { LocalidadService, Localidad } from '@app/services/localidad/localidad.service';
 import { CommonModule } from '@angular/common';
+import { InputComponent } from '@app/shared/input/input-component';
+import { SelectComponent } from '@app/shared/select/select-component';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent],
   templateUrl: './perfil.html',
   styleUrls: ['./perfil.css']
 })
@@ -66,7 +68,7 @@ export class Perfil implements OnInit {
           telefono: u.telefono || '',
           fecha_nac: fechaFormateada,
           imagen_url: u.imagen_url || '',
-          localidad: u.direccion?.localidad?.id_localidad || '',
+          localidad: u.direccion?.localidad?.id_localidad ?? null,
           cp: u.direccion?.codigo_postal || '',
           calle: u.direccion?.calle || '',
           numero: u.direccion?.numero || '',
@@ -101,15 +103,6 @@ export class Perfil implements OnInit {
       return `${year}-${month}-${day}`;
     }
     return '';
-  }
-
-  // 🏙️ Cambio de localidad
-  onLocalidadChange(event: Event) {
-    const id = Number((event.target as HTMLSelectElement).value);
-    const loc = this.localidades().find(l => l.id_localidad === id);
-    this.form.patchValue({ cp: loc?.codigo_postal || '' });
-    this.cpSeleccionado.set(loc?.codigo_postal?.toString() || '');
-    this.form.markAsDirty();
   }
 
   // 💾 Guardar cambios (datos + imagen)
@@ -164,5 +157,18 @@ export class Perfil implements OnInit {
       this.tieneCambios.set(true);
     };
     reader.readAsDataURL(this.selectedFile);
+  }
+
+  // 🏙️ Opciones de localidades para el select
+  opcionesLocalidades = computed(() =>
+    this.localidades().map(l => ({
+      value: l.id_localidad,
+      label: l.nombre
+    }))
+  );
+
+  actualizarCP(id: number) {
+    const loc = this.localidades().find(l => l.id_localidad === id);
+    this.form.patchValue({ cp: loc?.codigo_postal || '' });
   }
 }

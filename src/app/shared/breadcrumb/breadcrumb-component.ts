@@ -125,7 +125,7 @@ export class BreadcrumbComponent implements OnInit {
       'paquetes-publicados': 'Paquetes Publicados',
       'detalleSeleccionProducto': 'Detalle del Producto',
       'detalleProductoSumarse': 'Sumarse al Paquete',
-      'mis-paquetes': 'Mis Paquetes',
+      'mis-pedidos': 'Mis pedidos',
       'perfil': 'Perfil',
       'admin': 'Administración',
       'crear-producto': 'Crear Producto',

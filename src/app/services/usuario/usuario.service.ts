@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError, timeout, tap } from 'rxjs';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { Direccion } from '@app/models/ZonasInterfaces/Direccion';
-import { CrearUsuarioDTO } from '@app/models/DTOs/crearUsuarioDTO';
+import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
 import { AuthService } from '../auth/auth.service';
 import { ApiService } from '../api.service';
 import { FirebaseLoginResponse, LoginResponse } from './types';

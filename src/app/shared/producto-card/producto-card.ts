@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Components
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '../icono/icono';
 
 /**

@@ -14,8 +14,8 @@ import { PLATFORM_ID } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { CrearUsuarioDTO } from '@app/models/DTOs/crearUsuarioDTO';
-import { ButtonComponent } from './../../shared/botones-component/buttonComponent';
+import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
+import { ButtonComponent } from '../../shared/botones/buttonComponent';
 
 @Component({
   selector: 'app-registrarse',

@@ -17,8 +17,8 @@ import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 
 // Components
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
-import { InputComponent } from '@app/shared/input-component/input-component'; // 👈 NUEVO
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { InputComponent } from '@app/shared/input/input-component'; // 👈 NUEVO
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 
 import Swal from 'sweetalert2';

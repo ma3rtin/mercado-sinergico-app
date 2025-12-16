@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '../icono/icono';
 
 // 📦 Interfaces para los filtros
@@ -37,7 +37,7 @@ export interface FiltrosAplicados {
  * Configuración de filtros disponibles
  * Define qué filtros mostrar y cómo obtener sus datos
  */
-export interface ConfigFiltros<T = any> {
+export interface ConfigFiltros {
   // 🎯 Servicios para obtener datos
   obtenerCategorias?: () => Observable<OpcionFiltro[]>;
   obtenerMarcas?: () => Observable<OpcionFiltro[]>;
@@ -70,10 +70,10 @@ export interface ConfigFiltros<T = any> {
   imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
   templateUrl: './filtros.html',
 })
-export class FiltrosComponent<T = any> {
+export class FiltrosComponent {
 
   // 🎯 SIGNAL INPUTS
-  config = input.required<ConfigFiltros<T>>();
+  config = input.required<ConfigFiltros>();
   titulo = input<string>('Filtros');
 
   // 📤 OUTPUTS
