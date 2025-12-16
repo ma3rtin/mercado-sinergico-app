@@ -19,6 +19,7 @@ import { Perfil } from './modules/usuario/pages/perfil/perfil';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
+import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
 
 export const routes: Routes = [
   { 
@@ -59,7 +60,7 @@ export const routes: Routes = [
   },
 {
   path: 'productos-del-paquete/:paqueteId',
-  component: ProductosComponent,
+  component: ProductosDelPaquete,
   data: {
     breadcrumb: 'Productos del Paquete'
   }

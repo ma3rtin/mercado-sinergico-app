@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '@app/services/api.service';
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { PedidoActualizado } from '@app/models/DTOs/Pedido/PedidoActualizadoDTO';
+import { SumarseAPedidoDTO } from '@app/models/DTOs/Pedido/SumarseAPedidoDTO';
 
 @Injectable({ providedIn: 'root' })
 export class PedidoService extends ApiService {
@@ -39,6 +40,13 @@ export class PedidoService extends ApiService {
         return this.delete<void>(
             `${this.apiUrl}/${pedidoId}/producto/${productoId}`
         );
+    }
+
+    sumarseAlPaquete(
+        paqueteId: number,
+        body: SumarseAPedidoDTO
+    ): Observable<Pedido> {
+        return this.post<Pedido>(`${this.apiUrl}/${paqueteId}`, body);
     }
 
     salirDelPaquete(paqueteId: number): Observable<void> {
