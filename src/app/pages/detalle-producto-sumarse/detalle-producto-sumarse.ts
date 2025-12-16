@@ -15,6 +15,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { FormsModule } from '@angular/forms';
+import { PedidoService } from '@app/services/pedido/pedido.service';
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
@@ -35,6 +36,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly productosService = inject(ProductosService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
+  private readonly pedidoService = inject(PedidoService);
   private toastr = inject(ToastrService);
 
   // 🚀 Signals - Datos principales
@@ -116,25 +118,25 @@ export class DetalleProductoSumarse implements OnInit {
   }
 
   // 📦 Producto
- private loadProducto(id: number): void {
-  this.productosService.getProductoDetalle(id)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        console.log('🟢 PRODUCTO DETALLE RECIBIDO:', response);
+  private loadProducto(id: number): void {
+    this.productosService.getProductoDetalle(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          console.log('🟢 PRODUCTO DETALLE RECIBIDO:', response);
 
-        // ⚠️ IMPORTANTE: el producto viene dentro de response
-        this.producto.set(response.producto);
+          // ⚠️ IMPORTANTE: el producto viene dentro de response
+          this.producto.set(response.producto);
 
-        this.productoCargado.set(true);
-        this.finalizarCarga();
-      },
-      error: () => {
-        this.errorMessage.set('No se pudo cargar el producto');
-        this.isLoading.set(false);
-      }
-    });
-}
+          this.productoCargado.set(true);
+          this.finalizarCarga();
+        },
+        error: () => {
+          this.errorMessage.set('No se pudo cargar el producto');
+          this.isLoading.set(false);
+        }
+      });
+  }
 
   // 📦 Paquete + validación producto
   private loadPaqueteSeleccionado(id: number): void {
@@ -217,23 +219,36 @@ export class DetalleProductoSumarse implements OnInit {
     const paquete = this.paqueteSeleccionado();
 
     if (!producto || !paquete) {
-      console.error('❌ Producto o paquete no disponible');
+      this.toastr.error('Producto o paquete no disponible');
       return;
     }
 
-    console.log('🛒 Agregando al carrito:', {
-      producto: producto.nombre,
-      productoId: producto.id_producto,
-      paquete: paquete.paqueteBase?.nombre,
-      paqueteId: paquete.id_paquete_publicado,
-      talle: this.selectedSize(),
-      color: this.selectedColor(),
-      cantidad: this.quantity()
-    });
-    this.toastr.success('Producto agregado "Mis-pedidos" con éxito.');
-    this.router.navigate(['mis-pedidos']);
-  }
+    if (!producto.id_producto) {
+      this.toastr.error('Producto inválido');
+      return;
+    }
 
+    const body = {
+      productoId: producto.id_producto, // ✅ ahora es number seguro
+      cantidad: this.quantity(),
+      variante: this.selectedSize()
+    };
+
+    this.pedidoService
+      .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toastr.success('Te sumaste al paquete con éxito');
+          this.router.navigate(['mis-pedidos']);
+        },
+        error: (err) => {
+          console.error('❌ Error al sumarse:', err);
+          this.toastr.error('No se pudo crear el pedido');
+        }
+      });
+  }
+  
   goBack(): void {
     const paqueteId = this.paqueteSeleccionado()?.id_paquete_publicado;
 
