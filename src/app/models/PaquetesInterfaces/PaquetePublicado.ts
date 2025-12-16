@@ -24,5 +24,4 @@ export interface PaquetePublicado {
   estado: EstadoPaquetePublicado;
   zona?: Zona;
   pedidos?: Pedido[];
-
 }
