@@ -88,7 +88,7 @@ export class PaquetesPublicosComponent implements OnInit {
   });
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PAQUETES
-  configFiltrosPaquetes = computed<ConfigFiltros<PaquetePublicado>>(() => ({
+  configFiltrosPaquetes = computed<ConfigFiltros>(() => ({
     // 📊 Servicios para obtener datos
     obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
       map(categorias => categorias.map(cat => ({

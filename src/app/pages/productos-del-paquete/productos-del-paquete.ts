@@ -82,7 +82,7 @@ export class ProductosDelPaquete implements OnInit {
   }));
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS DEL PAQUETE
-  configFiltrosProductos = computed<ConfigFiltros<Producto>>(() => ({
+  configFiltrosProductos = computed<ConfigFiltros>(() => ({
     obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
       map(categorias => categorias.map(cat => ({
         id: cat.id_categoria,

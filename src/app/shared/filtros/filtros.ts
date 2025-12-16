@@ -37,7 +37,7 @@ export interface FiltrosAplicados {
  * Configuración de filtros disponibles
  * Define qué filtros mostrar y cómo obtener sus datos
  */
-export interface ConfigFiltros{
+export interface ConfigFiltros {
   // 🎯 Servicios para obtener datos
   obtenerCategorias?: () => Observable<OpcionFiltro[]>;
   obtenerMarcas?: () => Observable<OpcionFiltro[]>;
