@@ -3,6 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, timeout, catchError, retry, shareReplay } from 'rxjs/operators';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ApiService } from '../api.service';
+import { ProductoDetalleDTO } from '@app/models/DTOs/Producto/productoDetalleDTO';
 
 @Injectable({ providedIn: 'root' })
 export class ProductosService extends ApiService {
@@ -49,6 +50,10 @@ export class ProductosService extends ApiService {
       })
     );
   }
+
+  getProductoDetalle(id: number): Observable<ProductoDetalleDTO> {
+  return this.get<ProductoDetalleDTO>(`productos/${id}`);
+}
 
   createProduct(data: FormData): Observable<Producto> {
     return this.post<Producto>('productos', data).pipe(

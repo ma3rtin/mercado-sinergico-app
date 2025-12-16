@@ -52,7 +52,7 @@ export class ProductosComponent implements OnInit {
   hasProductos = computed(() => this.productosOriginales().length > 0);
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS
-  configFiltrosProductos = computed<ConfigFiltros<Producto>>(() => ({
+  configFiltrosProductos = computed<ConfigFiltros>(() => ({
     // 📊 Servicios para obtener datos
     obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
       map(categorias => categorias.map(cat => ({

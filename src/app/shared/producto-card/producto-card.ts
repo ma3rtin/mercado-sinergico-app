@@ -12,7 +12,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-import { IconComponent } from "../icono/icono";
+import { IconComponent } from '../icono/icono';
 
 /**
  * Contexto de uso del ProductoCard
