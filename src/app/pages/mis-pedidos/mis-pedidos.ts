@@ -294,31 +294,87 @@ export class MisPedidosComponent implements OnInit {
   }
 
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
+
+  const esUltimoProducto = pedido.productosSeleccionados.length === 1;
+
+  // 🧨 CASO B: último producto → eliminar pedido completo
+  if (esUltimoProducto) {
     Swal.fire({
-      title: '¿Eliminar producto?',
-      text: producto.nombre,
+      title: '¿Eliminar pedido completo?',
+      html: `
+        <p class="mb-2">
+          <strong>${producto.nombre}</strong> es el único producto del pedido.
+        </p>
+        <p>
+          Si continuás, se eliminará el pedido completo
+          y saldrás del paquete.
+        </p>
+      `,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Eliminar'
+      confirmButtonText: 'Sí, eliminar pedido',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33'
     }).then(result => {
       if (!result.isConfirmed) return;
 
+      const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
+
+      if (!paqueteId) {
+        this.toastr.error('No se pudo identificar el paquete.');
+        return;
+      }
+
+      // 👉 reutilizamos la lógica existente
       this.pedidoService
-        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
+        .salirDelPaquete(paqueteId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            pedido.productosSeleccionados =
-              pedido.productosSeleccionados.filter(p => p.id_producto !== producto.id_producto);
-
-            this.recalcularPedido(pedido);
-            this.toastr.success('Producto eliminado.');
+            this.pedidos.set(
+              this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
+            );
+            this.toastr.success('Pedido eliminado y salida del paquete confirmada.');
           },
           error: () => {
-            this.toastr.error('No se pudo eliminar el producto.');
+            this.toastr.error('No se pudo eliminar el pedido.');
           }
         });
     });
+
+    return;
   }
+
+  // 📦 CASO A: hay más productos → eliminar solo el producto
+  Swal.fire({
+    title: '¿Eliminar producto?',
+    text: producto.nombre,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then(result => {
+    if (!result.isConfirmed) return;
+
+    this.pedidoService
+      .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
+      .subscribe({
+        next: () => {
+          pedido.productosSeleccionados =
+            pedido.productosSeleccionados.filter(
+              p => p.id_producto !== producto.id_producto
+            );
+
+          this.recalcularPedido(pedido);
+          this.toastr.success('Producto eliminado.');
+        },
+        error: () => {
+          this.toastr.error('No se pudo eliminar el producto.');
+        }
+      });
+  });
+}
+
 
   // ------------------------------
   // NEGOCIO
