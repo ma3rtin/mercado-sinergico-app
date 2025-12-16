@@ -4,7 +4,7 @@ import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-mo
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({

@@ -6,8 +6,8 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { VisorImagenesComponent } from '@app/shared/visor-imagenes-component/visor-imagenes-component';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 @Component({
   selector: 'app-producto-detalle-seleccion-component',
   imports: [CommonModule, VisorImagenesComponent, BreadcrumbComponent],
@@ -19,13 +19,13 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   producto = signal<Producto | undefined>(undefined);
   paquetes = signal<PaquetePublicado[]>([]);
   isLoading = signal(true);
-  
+
   // 📊 Computed signals
   caracteristicas = computed(() => {
     const prod = this.producto();
     if (!prod) return [];
 
-    const resultado: Array<{label: string, value: string}> = [];
+    const resultado: Array<{ label: string, value: string }> = [];
 
     if (prod.peso) {
       resultado.push({
@@ -64,7 +64,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
     return resultado;
   });
-  
+
   // ✅ Computed para saber si hay stock
   tieneStock = computed(() => {
     const prod = this.producto();
@@ -85,19 +85,20 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
   private loadProducto(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    
+
     if (!id || isNaN(id)) {
       console.error('❌ ID de producto inválido');
       this.isLoading.set(false);
       return;
     }
 
-    this.productosService.getProductoById(id)
-      .pipe(takeUntilDestroyed(this.destroyRef)) // ✅ Pasar destroyRef como parámetro
+    this.productosService.getProductoDetalle(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (producto) => {
-          console.log('✅ Producto cargado:', producto);
-          this.producto.set(producto);
+        next: (response) => {
+          console.log('✅ Response producto detalle:', response);
+
+          this.producto.set(response.producto);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -106,6 +107,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
         }
       });
   }
+
 
   private loadPaquetes(): void {
     this.paquetePublicadoService.getPaquetes()
@@ -142,7 +144,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   // 🎨 HELPERS VISUALES
   getPaqueteStatusClass(estado: string): string {
     const estadoLower = estado.toLowerCase();
-    
+
     const clases: Record<string, string> = {
       'abierto': 'bg-blue-500',
       'activo': 'bg-blue-500',
@@ -150,13 +152,13 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       'cerrado': 'bg-red-500',
       'completo': 'bg-green-500'
     };
-    
+
     return clases[estadoLower] || 'bg-gray-500';
   }
 
   getEstadoTextClass(estado: string): string {
     const estadoLower = estado.toLowerCase();
-    
+
     const clases: Record<string, string> = {
       'abierto': 'text-blue-600',
       'activo': 'text-blue-600',
@@ -164,7 +166,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       'cerrado': 'text-red-600',
       'completo': 'text-green-600'
     };
-    
+
     return clases[estadoLower] || 'text-gray-600';
   }
 

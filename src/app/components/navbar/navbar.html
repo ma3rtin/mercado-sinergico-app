@@ -2,9 +2,9 @@
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <ul class="flex items-center justify-center gap-12 py-3 text-black">
             <li>
-                <a routerLink="/mis-paquetes"
+                <a routerLink="/mis-pedidos"
                     class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
-                    <app-icon name="ShoppingBag" class="color-secondary"></app-icon>Mis Paquetes</a>
+                    <app-icon name="ShoppingBag" class="color-secondary"></app-icon>Mis pedidos</a>
             </li>
             <li>
                 <a routerLink="/productos"
@@ -18,15 +18,6 @@
                     <app-icon name="Package" class="color-secondary"></app-icon>
                     Paquetes</a>
             </li>
-
-            @if (isLoggedIn()) {
-            <li>
-                <button (click)="signOut()"
-                    class=" flex justify-center items-center gap-2 text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
-<app-icon name="LogOut" class="color-secondary" size="20"></app-icon>Cerrar sesión
-                </button>
-            </li>
-            }
         </ul>
     </div>
 </nav>

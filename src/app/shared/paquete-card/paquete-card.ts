@@ -16,7 +16,7 @@ import { TipoPaquete } from '@app/models/Enums';
 export class PaqueteCard implements OnInit {
   // 📦 Input: Datos del paquete
   @Input() paquete!: PaquetePublicado;
-  
+
   // 📤 Output: Emitir click de la card
   @Output() cardClick = new EventEmitter<number>();
 
@@ -43,7 +43,7 @@ export class PaqueteCard implements OnInit {
     return 0;
   });
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     if (!this.paquete) {
@@ -70,7 +70,7 @@ export class PaqueteCard implements OnInit {
 
   obtenerBadgeEstado(): { clase: string; emoji: string } {
     const estado = this.paquete.estado?.nombre || '';
-    
+
     const mapEstados: { [key: string]: { clase: string; emoji: string } } = {
       'Abierto': { clase: 'bg-green-100 text-green-800', emoji: '🟢' },
       'Cerrado': { clase: 'bg-red-100 text-red-800', emoji: '🔴' },
@@ -96,17 +96,18 @@ export class PaqueteCard implements OnInit {
   obtenerFechaCierre(): string {
     if (!this.paquete.fecha_fin) return 'N/A';
     const fecha = new Date(this.paquete.fecha_fin);
-    return fecha.toLocaleDateString('es-AR', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
+    return fecha.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
   }
 
   obtenerImagenUrl(): string {
-    return this.paquete.imagen_url || 
-           this.paquete.paqueteBase?.imagen_url ||
-           '/assets/images/placeholder-product.png';
+    return (
+      this.paquete.paqueteBase?.imagen_url ??
+      '/assets/images/placeholder-product.png'
+    );
   }
 
   // 🔴 Urgencia: muestra si falta poco para cerrar

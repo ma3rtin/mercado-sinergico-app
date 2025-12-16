@@ -211,10 +211,6 @@ export class IconsService {
     
   };
 
-  constructor() {
-    console.log('✅ IconsService inicializado');
-  }
-
   /**
    * Obtener un icono por su nombre
    * @param name - Nombre del icono del mapeo

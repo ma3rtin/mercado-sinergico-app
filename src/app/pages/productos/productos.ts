@@ -14,7 +14,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
 
 // Components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb-component/breadcrumb-component';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 
@@ -52,7 +52,7 @@ export class ProductosComponent implements OnInit {
   hasProductos = computed(() => this.productosOriginales().length > 0);
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS
-  configFiltrosProductos = computed<ConfigFiltros<Producto>>(() => ({
+  configFiltrosProductos = computed<ConfigFiltros>(() => ({
     // 📊 Servicios para obtener datos
     obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
       map(categorias => categorias.map(cat => ({

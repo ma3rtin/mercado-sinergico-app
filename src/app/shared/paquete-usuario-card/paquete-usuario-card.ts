@@ -1,64 +1,61 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { TipoPaquete } from '@app/models/Enums';
-import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { Producto } from '@app/models/ProductosInterfaces/Producto';
-import { PaqueteCard } from '../paquete-card/paquete-card';
-
-interface ProductoEnPedido extends Producto {
-  id_producto?: number;
-  nombre: string;
-  precio: number;
-  imagen_url?: string;
-  cantidad: number;
-  variante?: string;
-}
-
-interface PaqueteDelUsuario extends PaquetePublicado {
-  expandido?: boolean;
-  productosEnPedido?: ProductoEnPedido[];
-  precioSubtotal?: number;
-  descuentoAplicado?: number;
-  precioFinal?: number;
-  tiempoRestante?: string;
-}
+import { interval } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, PaqueteCard],
+  imports: [CommonModule, ButtonComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
-  @Input() paquete!: PaqueteDelUsuario;
+
+  @Input() pedido!: any;
+
   @Input() marcas: any[] = [];
   @Input() categorias: any[] = [];
 
-  // Outputs para acciones
   @Output() toggleExpansion = new EventEmitter<void>();
-  @Output() aumentarCantidad = new EventEmitter<ProductoEnPedido>();
-  @Output() disminuirCantidad = new EventEmitter<ProductoEnPedido>();
-  @Output() actualizarPedido = new EventEmitter<void>();
+  @Output() aumentarCantidad = new EventEmitter<any>();
+  @Output() disminuirCantidad = new EventEmitter<any>();
+  @Output() eliminarProducto = new EventEmitter<any>();
   @Output() salirDelPaquete = new EventEmitter<void>();
+  @Output() finalizarCompra = new EventEmitter<void>();
   @Output() imageError = new EventEmitter<Event>();
 
   public readonly TipoPaquete = TipoPaquete;
   isActualizando = signal(false);
 
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly router = inject(Router);
+
+  get paquete() {
+    return this.pedido.paquetePublicado;
+  }
+
+  get productosEnPedido() {
+    return this.pedido.productosSeleccionados;
+  }
+
   ngOnInit(): void {
-    console.log('📦 PaqueteUsuarioCard inicializado con:', this.paquete?.id_paquete_publicado);
+    interval(60000) // cada 1 minuto
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // forzamos reevaluación del getter
+      });
   }
 
-  // Métodos helper
-  getMarcaNombre(idMarca: number | undefined): string {
-    const marca = this.marcas.find(m => m.id_marca === idMarca);
-    return marca ? marca.nombre : 'Desconocida';
+  getMarcaNombre(): string {
+    return this.paquete?.paqueteBase?.marca?.nombre ?? 'Desconocida';
   }
 
-  getCategoriaNombre(idCategoria: number | undefined): string {
-    const categoria = this.categorias.find(c => c.id_categoria === idCategoria);
-    return categoria ? categoria.nombre : 'Desconocida';
+  getCategoriaNombre(): string {
+    return this.paquete?.paqueteBase?.categoria?.nombre ?? 'Desconocida';
   }
 
   formatPrice(price: number): string {
@@ -69,101 +66,160 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     }).format(price);
   }
 
-  getTipoPaqueteIcono(tipo?: string | TipoPaquete): TipoPaquete | '' {
-    if (!tipo) return '';
+  get porcentajeReservado(): number {
+    const total = this.paquete?.cant_productos ?? 0;
+    const reservados = this.paquete?.cant_productos_reservados ?? 0;
+    if (total === 0) return 0;
+    return Math.round((reservados / total) * 100);
+  }
+
+  get cantidadProductosUsuario(): number {
+    if (!this.productosEnPedido?.length) return 0;
+
+    return this.productosEnPedido.reduce(
+      (total: number, p: any) => total + (p.cantidad ?? 0),
+      0
+    );
+  }
+  get tiempoRestante(): string {
+    if (!this.paquete?.fecha_fin) return '—';
+
+    const ahora = new Date().getTime();
+    const fin = new Date(this.paquete.fecha_fin).getTime();
+
+    const diffMs = fin - ahora;
+
+    if (diffMs <= 0) return 'Cerrado';
+
+    const minutos = Math.floor(diffMs / 60000);
+    const horas = Math.floor(minutos / 60);
+    const dias = Math.floor(horas / 24);
+
+    if (dias > 0) return `${dias} día${dias > 1 ? 's' : ''}`;
+    if (horas > 0) return `${horas} h`;
+    return `${minutos} min`;
+  }
+
+  verProductosDisponibles(): void {
+    const idPaquete = this.paquete?.id_paquete_publicado;
+
+    if (!idPaquete) return;
+
+    console.log('🧭 Navegando a paquete:', idPaquete);
+
+    this.router.navigate(['/productos-del-paquete', idPaquete]);
+  }
+
+  getTipoPaqueteIcono(tipo?: string | TipoPaquete) {
+    if (!tipo) tipo = this.paquete?.tipoPaquete;
+
     const t = String(tipo).toLowerCase();
+
     if (t.includes('sin')) return TipoPaquete.SINERGICO;
     if (t.includes('ener')) return TipoPaquete.ENERGICO;
+
     return TipoPaquete.POR_DEFINIR;
+  }
+
+  obtenerTextoTipo(tipo?: string | TipoPaquete): string {
+    if (!tipo) tipo = this.paquete?.tipoPaquete;
+
+    const t = String(tipo).toLowerCase();
+
+    if (t.includes('sin')) return 'Sinérgico';
+    if (t.includes('ener')) return 'Energético';
+
+    return 'Por definir';
+  }
+
+  get puedeEditarCantidades(): boolean {
+    const estado = this.pedido?.estado?.nombre?.toLowerCase();
+    return estado === 'pendiente';
   }
 
   getEstadoClass(estado?: string): string {
     if (!estado) return 'text-gray-600 bg-gray-100 border-gray-200';
-    const e = String(estado).toLowerCase();
-    const clases: Record<string, string> = {
-      'abierto': 'text-green-700 bg-green-50 border-green-200',
-      'activo': 'text-green-700 bg-green-50 border-green-200',
+    const e = estado.toLowerCase();
+
+    const estilos = {
+      'confirmado': 'text-blue-700 bg-blue-50 border-blue-200',
       'pendiente': 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      'cerrado': 'text-red-700 bg-red-50 border-red-200',
-      'finalizado': 'text-red-700 bg-red-50 border-red-200',
-      'completo': 'text-blue-700 bg-blue-50 border-blue-200'
+      'pagado': 'text-green-700 bg-green-50 border-green-200',
+      'enviado': 'text-purple-700 bg-purple-50 border-purple-200',
+      'activo': 'text-green-700 bg-green-50 border-green-200'
     };
-    for (const [key, value] of Object.entries(clases)) {
-      if (e.includes(key)) return value;
-    }
-    return 'text-gray-700 bg-gray-50 border-gray-200';
-  }
 
-  // Helpers para el card colapsado
-  stockDisponible(): number {
-    const total = this.paquete.cant_productos || 0;
-    const reservado = this.paquete.cant_productos_reservados || 0;
-    return Math.max(0, total - reservado);
-  }
-
-  porcentajeDisponible(): number {
-    const total = this.paquete.cant_productos || 0;
-    if (total === 0) return 0;
-    return (this.stockDisponible() / total) * 100;
-  }
-
-  obtenerColorBarra(): string {
-    const porcentaje = this.porcentajeDisponible();
-    if (porcentaje > 50) return 'bg-green-500';
-    if (porcentaje > 20) return 'bg-yellow-500';
-    return 'bg-red-500';
+    return Object.entries(estilos).find(([k]) => e.includes(k))?.[1]
+      ?? 'text-gray-700 bg-gray-50 border-gray-200';
   }
 
   obtenerImagenUrl(): string {
-    return this.paquete.imagen_url || 
-           this.paquete.paqueteBase?.imagen_url ||
-           '/assets/images/placeholder-product.png';
+    return (
+      this.paquete?.imagen_url ||
+      this.paquete?.paqueteBase?.imagen_url ||
+      '/assets/images/placeholder-product.png'
+    );
   }
 
-  esUrgente(): boolean {
-    if (!this.paquete.fecha_fin) return false;
-    const hoy = new Date();
-    const cierre = new Date(this.paquete.fecha_fin);
-    const diasDiferencia = (cierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
-    return diasDiferencia <= 2;
+  get esUrgente(): boolean {
+    if (!this.paquete?.fecha_fin) return false;
+
+    const ahora = Date.now();
+    const fin = new Date(this.paquete.fecha_fin).getTime();
+
+    const horasRestantes = (fin - ahora) / (1000 * 60 * 60);
+    return horasRestantes <= 24;
   }
 
-  obtenerIconoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return '⚡';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return '🔋';
-    return '📦';
-  }
 
-  obtenerTextoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return 'Energético';
-    return 'Por Definir';
-  }
-
-  // Event handlers
   onToggleExpansion(): void {
     this.toggleExpansion.emit();
   }
 
-  onAumentarCantidad(producto: ProductoEnPedido): void {
-    this.aumentarCantidad.emit(producto);
+  onAumentarCantidad(prod: any): void {
+    if (!this.puedeEditarCantidades) return;
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto
+    };
+
+    this.aumentarCantidad.emit(limpio);
   }
 
-  onDisminuirCantidad(producto: ProductoEnPedido): void {
-    this.disminuirCantidad.emit(producto);
+  onDisminuirCantidad(prod: any): void {
+    if (!this.puedeEditarCantidades) return;
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto
+    };
+
+    this.disminuirCantidad.emit(limpio);
   }
 
-  onActualizarPedido(): void {
-    this.isActualizando.set(true);
-    this.actualizarPedido.emit();
-    setTimeout(() => this.isActualizando.set(false), 1500);
+  get puedeSalirDelPaquete(): boolean {
+    const estado = this.pedido?.estado?.nombre?.toLowerCase();
+    return estado === 'pendiente'
+      || estado === 'confirmado'
+      || estado === 'pagado';
   }
 
   onSalirDelPaquete(): void {
     this.salirDelPaquete.emit();
   }
 
-  onImageError(event: Event): void {
-    this.imageError.emit(event);
+  onFinalizarCompra(): void {
+    this.finalizarCompra.emit();
+  }
+
+  onEliminarProducto(prod: any): void {
+    this.eliminarProducto.emit({
+      id_producto: prod.productoId ?? prod.id_producto
+    });
+  }
+
+  onImageError(ev: Event): void {
+    this.imageError.emit(ev);
   }
 }

@@ -10,7 +10,7 @@ export const serverRoutes: ServerRoute[] = [
 
   // 👤 Rutas de usuario (solo client-side)
   { path: 'perfil', renderMode: RenderMode.Client },
-  { path: 'mis-paquetes', renderMode: RenderMode.Client },
+  { path: 'mis-pedidos', renderMode: RenderMode.Client },
 
   // 🧑‍💻 Rutas de administrador (base + hijos)
   { path: 'admin', renderMode: RenderMode.Client },

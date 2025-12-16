@@ -1,9 +1,9 @@
-import { 
-  Component, 
-  Input, 
-  Output, 
-  EventEmitter, 
-  forwardRef, 
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  forwardRef,
   signal,
   computed,
   DestroyRef,
@@ -14,9 +14,9 @@ import {
   OnInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { 
-  ControlValueAccessor, 
-  NG_VALUE_ACCESSOR, 
+import {
+  ControlValueAccessor,
+  NG_VALUE_ACCESSOR,
   FormsModule,
   NgControl
 } from '@angular/forms';
@@ -44,8 +44,8 @@ export type InputSize = 'sm' | 'md' | 'lg';
 export class InputComponent implements ControlValueAccessor, OnInit {
   // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
-  private injector = inject(Injector); 
-  public ngControl?: NgControl|null = null ; 
+  private injector = inject(Injector);
+  public ngControl?: NgControl | null = null;
 
   // 🎨 Configuración visual - Signals
   label = signal<string>('');
@@ -82,7 +82,7 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   isDisabled = signal<boolean>(false);
   isTouched = signal<boolean>(false);
   isFocused = signal<boolean>(false);
-  
+
   // 📤 Eventos
   @Output() valueChange = new EventEmitter<any>();
   @Output() onBlur = new EventEmitter<FocusEvent>();
@@ -91,10 +91,10 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   // 🧠 Control interno
   internalValue: any = '';
   private valueChanges$ = new Subject<any>();
-  
+
   // Control de formulario
-  private onChange: (value: any) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: any) => void = () => { };
+  private onTouched: () => void = () => { };
 
   // 🎨 Computed Signals
   characterCount = computed(() => {
@@ -107,7 +107,7 @@ export class InputComponent implements ControlValueAccessor, OnInit {
     }
 
     const control = this.ngControl.control;
-    
+
     // Si hay errorMessage manual, usarlo
     if (this.errorMessage()) {
       return this.errorMessage();
@@ -131,14 +131,14 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   });
 
   hasError = computed(() => !!this.currentError());
-  
+
   hasHelperOrError = computed(() => {
     return !!(this.helperText() || this.currentError() || this.successMessage());
   });
 
   inputClasses = computed(() => {
     const base = 'w-full border-2 rounded-lg font-body focus:outline-none transition-all placeholder:text-gray-400';
-    
+
     const sizes = {
       sm: 'px-3 py-2 text-sm',
       md: 'px-4 py-3 text-base',
@@ -147,17 +147,17 @@ export class InputComponent implements ControlValueAccessor, OnInit {
 
     const leftPadding = this.prefix() ? 'pl-10' : '';
     const rightPadding = (this.suffix() || this.clearable()) ? 'pr-10' : '';
-    
+
     const state = this.currentError()
       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
       : this.successMessage()
-      ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
-      : this.isFocused()
-      ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
-      : 'border-gray-300 hover:border-gray-400';
+        ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+        : this.isFocused()
+          ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
+          : 'border-gray-300 hover:border-gray-400';
 
-    const disabledClass = this.isDisabled() 
-      ? 'bg-gray-100 cursor-not-allowed opacity-60' 
+    const disabledClass = this.isDisabled()
+      ? 'bg-gray-100 cursor-not-allowed opacity-60'
       : 'bg-white';
 
     return `${base} ${sizes[this.size()]} ${leftPadding} ${rightPadding} ${state} ${disabledClass}`;
@@ -170,12 +170,23 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   }[this.size()]));
 
   prefixClass = computed(() => {
-    return this.type() === 'number' || this.prefix() === '$' 
-      ? 'text-gray-600 font-semibold' 
+    return this.type() === 'number' || this.prefix() === '$'
+      ? 'text-gray-600 font-semibold'
       : 'text-gray-500';
   });
 
   suffixClass = computed(() => 'text-gray-500 text-sm');
+  // 🎯 Effect para sincronizar con el FormControl
+  statusEffect = effect(() => {
+    const control = this.ngControl?.control;
+    if (!control) return;
+
+    control.statusChanges
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // Trigger change detection cuando cambia el estado del control
+      });
+  });
 
   // 🎯 ngOnInit - Obtener NgControl de forma segura
   ngOnInit(): void {
@@ -202,17 +213,6 @@ export class InputComponent implements ControlValueAccessor, OnInit {
         this.onChange(value);
         this.valueChange.emit(value);
       });
-
-    // 🎯 Effect para sincronizar con el FormControl
-    effect(() => {
-      if (this.ngControl?.control) {
-        this.ngControl.control.statusChanges
-          ?.pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(() => {
-            // Trigger change detection cuando cambia el estado del control
-          });
-      }
-    });
   }
 
   // 🎨 Setters para Inputs (mantener compatibilidad con property binding)

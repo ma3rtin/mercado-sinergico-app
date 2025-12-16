@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ZonaService } from '@app/services/zona/zona.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 @Component({
   selector: 'app-publicar-paquete',

@@ -22,7 +22,7 @@ export class Header {
   private authService = inject(AuthService);
 
   isLoggedIn = this.authService.isAuthenticated;
-  
+
   get profileLink(): string {
     const role = this.authService.getUserRole();
     return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
@@ -37,6 +37,27 @@ export class Header {
 
   toggleDrawer() {
     this.drawerOpen = !this.drawerOpen;
+  }
+
+  profileMenuOpen = false;
+
+  toggleProfileMenu() {
+    if (!this.isLoggedIn()) {
+      window.location.href = '/login';
+      return;
+    }
+    this.profileMenuOpen = !this.profileMenuOpen;
+  }
+
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+
+    // Si clickea fuera del menú y del botón
+    if (!target.closest('.profile-menu-area')) {
+      this.profileMenuOpen = false;
+    }
   }
 
   openSearch() {
