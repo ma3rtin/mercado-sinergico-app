@@ -5,6 +5,7 @@ import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
 
 @Component({
   selector: 'app-paquete-usuario-card',
@@ -22,7 +23,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() toggleExpansion = new EventEmitter<void>();
   @Output() aumentarCantidad = new EventEmitter<any>();
   @Output() disminuirCantidad = new EventEmitter<any>();
-  @Output() eliminarProducto = new EventEmitter<any>();
+  @Output() eliminarProducto = new EventEmitter<ProductoEnPedido>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
   @Output() imageError = new EventEmitter<Event>();
@@ -213,9 +214,10 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     this.finalizarCompra.emit();
   }
 
-  onEliminarProducto(prod: any): void {
+  onEliminarProducto(prod: ProductoEnPedido): void {
     this.eliminarProducto.emit({
-      id_producto: prod.productoId ?? prod.id_producto
+      ...prod,
+      id_producto: prod.id_producto ?? prod.id_producto
     });
   }
 
