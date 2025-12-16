@@ -70,7 +70,7 @@ export interface ConfigFiltros{
   imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
   templateUrl: './filtros.html',
 })
-export class FiltrosComponent<T = any> {
+export class FiltrosComponent {
 
   // 🎯 SIGNAL INPUTS
   config = input.required<ConfigFiltros>();
