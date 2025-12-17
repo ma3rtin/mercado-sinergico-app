@@ -3,6 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, timeout, map } from 'rxjs/operators';
 import { PaqueteBase } from '@app/models/PaquetesInterfaces/PaqueteBase';
 import { ApiService } from '../api.service';
+import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
 @Injectable({ providedIn: 'root' })
 export class PaqueteBaseService extends ApiService {
@@ -62,6 +63,16 @@ export class PaqueteBaseService extends ApiService {
       timeout(60000),
       catchError((error) => {
         console.error('Error en PaqueteBaseService.getPaquetes:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getProductosByPaqueteBase(paqueteBaseId: number): Observable<Producto[]> {
+    return this.get<Producto[]>(`paquetes-base/${paqueteBaseId}/productos`).pipe(
+      timeout(60000),
+      catchError((error) => {
+        console.error('❌ Error en PaqueteBaseService.getProductosByPaquete:', error);
         return throwError(() => error);
       })
     );

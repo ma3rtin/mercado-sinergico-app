@@ -8,11 +8,12 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'productos', renderMode: RenderMode.Prerender },
   { path: 'paquetes-publicados', renderMode: RenderMode.Prerender },
 
-  // 👤 Rutas de usuario (no prerender, porque requieren autenticación)
+  // 👤 Rutas de usuario (solo client-side)
   { path: 'perfil', renderMode: RenderMode.Client },
-  { path: 'mis-paquetes', renderMode: RenderMode.Client },
+  { path: 'mis-pedidos', renderMode: RenderMode.Client },
 
-  // 🧑‍💻 Rutas de administrador (no prerender, solo client-side)
+  // 🧑‍💻 Rutas de administrador (base + hijos)
+  { path: 'admin', renderMode: RenderMode.Client },
   { path: 'admin/perfil', renderMode: RenderMode.Client },
   { path: 'admin/crear-producto', renderMode: RenderMode.Client },
   { path: 'admin/crear-paquete', renderMode: RenderMode.Client },
@@ -23,8 +24,8 @@ export const serverRoutes: ServerRoute[] = [
 
   // 🧩 Rutas dinámicas (renderizadas en el servidor)
   { path: 'detalleSeleccionProducto/:id', renderMode: RenderMode.Server },
-  { path: 'detalleProductoSumarse/:id', renderMode: RenderMode.Server },
+  { path: 'detalleProductoSumarse/:productoId/:paqueteId', renderMode: RenderMode.Server },
 
-  // ⚙️ Fallback
-  { path: '**', renderMode: RenderMode.Prerender },
+  // 🌍 Fallback
+  { path: '**', renderMode: RenderMode.Client },
 ];

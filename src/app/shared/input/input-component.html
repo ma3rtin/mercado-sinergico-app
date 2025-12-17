@@ -1,0 +1,88 @@
+<div class="w-full flex flex-col">
+    <!-- Label -->
+    @if (label()) {
+    <label [for]="inputId()" [class]="'block font-medium mb-2 ' + labelSizeClass()">
+        {{ label() }}
+        @if (required()) {
+        <span class="text-red-500 ml-1">*</span>
+        }
+    </label>
+    }
+
+    <!-- Input Container -->
+    <div class="relative">
+        <!-- Prefix Icon/Text -->
+        @if (prefix()) {
+        <span [class]="'absolute left-3 top-1/2 transform -translate-y-1/2 ' + prefixClass()">
+            {{ prefix() }}
+        </span>
+        }
+
+        <!-- Input -->
+        <input [id]="inputId()" [type]="type()" [placeholder]="placeholder()" [disabled]="isDisabled()"
+            [readonly]="readonly()" [attr.min]="min()" [attr.max]="max()" [attr.step]="step()"
+            [attr.maxlength]="maxLength() || null" [attr.pattern]="pattern() || null"
+            [attr.autocomplete]="autocomplete()" [attr.aria-label]="ariaLabel() || label()"
+            [attr.aria-describedby]="hasHelperOrError() ? inputId() + '-helper' : null" [attr.aria-invalid]="hasError()"
+            [(ngModel)]="internalValue" (ngModelChange)="onValueChange($event)" (blur)="handleBlur()"
+            (focus)="handleFocus($event)" [class]="inputClasses()" />
+
+        <!-- Suffix Icon/Text -->
+        @if (suffix() && !clearable()) {
+        <span [class]="'absolute right-3 top-1/2 transform -translate-y-1/2 ' + suffixClass()">
+            {{ suffix() }}
+        </span>
+        }
+
+        <!-- Clear Button -->
+        @if (clearable() && internalValue && !isDisabled()) {
+        <button type="button" (click)="clearValue()" [attr.aria-label]="'Limpiar ' + (label() || 'campo')"
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/30 rounded">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        }
+    </div>
+
+    <!-- Helper Text / Error / Success -->
+    @if (hasHelperOrError()) {
+    <div [id]="inputId() + '-helper'" class="mt-1">
+        <!-- Helper Text -->
+        @if (helperText() && !currentError() && !successMessage()) {
+        <p class="text-sm text-gray-500">{{ helperText() }}</p>
+        }
+
+        <!-- Error Message -->
+        @if (currentError()) {
+        <p class="text-sm text-red-600 flex items-start gap-1">
+            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+            </svg>
+            {{ currentError() }}
+        </p>
+        }
+
+        <!-- Success Message -->
+        @if (successMessage() && !currentError()) {
+        <p class="text-sm text-green-600 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+            </svg>
+            {{ successMessage() }}
+        </p>
+        }
+    </div>
+    }
+
+    <!-- Character Counter -->
+    @if (maxLength() && showCounter() && !isDisabled()) {
+    <p class="text-sm text-gray-500 mt-1 text-right" [attr.aria-live]="'polite'">
+        {{ characterCount() }} / {{ maxLength() }}
+    </p>
+    }
+</div>

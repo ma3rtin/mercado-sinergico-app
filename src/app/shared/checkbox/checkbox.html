@@ -1,0 +1,161 @@
+<div class="w-full">
+  <!-- ===================================== -->
+  <!-- VARIANTE: DEFAULT (Checkbox tradicional) -->
+  <!-- ===================================== -->
+  @if (variant() === 'default') {
+  <div [class]="containerClasses()">
+    <input
+      type="checkbox"
+      [id]="checkboxId()"
+      [checked]="isChecked()"
+      [disabled]="isDisabled()"
+      [required]="required()"
+      [attr.aria-label]="ariaLabel() || label()"
+      [attr.aria-invalid]="hasError()"
+      [class]="checkboxClasses()"
+      (change)="onCheckboxChange($event)"
+    />
+
+    <div class="flex-1">
+      @if (label()) {
+      <label [for]="checkboxId()" [class]="labelClasses()">
+        {{ label() }}
+        @if (required()) {
+        <span class="text-red-500 ml-1">*</span>
+        }
+      </label>
+      }
+
+      @if (description()) {
+      <p class="text-sm text-gray-600 mt-1">{{ description() }}</p>
+      }
+
+      @if (helperText() && !currentError()) {
+      <p class="text-sm text-gray-500 mt-1">{{ helperText() }}</p>
+      }
+
+      @if (currentError()) {
+      <p class="text-sm text-red-600 mt-1 flex items-start gap-1">
+        <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        {{ currentError() }}
+      </p>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- ===================================== -->
+  <!-- VARIANTE: CHIP (Para atributos de plantilla) -->
+  <!-- ===================================== -->
+  @if (variant() === 'chip') {
+  <label [class]="containerClasses()" (click)="toggle()">
+    <input type="checkbox" [checked]="isChecked()" [disabled]="isDisabled()" class="sr-only" />
+
+    @if (isChecked()) {
+    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+        clip-rule="evenodd"
+      ></path>
+    </svg>
+    }
+
+    <span [class]="labelClasses()">{{ label() }}</span>
+  </label>
+  }
+
+  <!-- ===================================== -->
+  <!-- VARIANTE: SWITCH (Toggle moderno) -->
+  <!-- ===================================== -->
+  @if (variant() === 'switch') {
+  <div [class]="containerClasses()">
+    <div class="flex-1">
+      @if (label()) {
+      <label [for]="checkboxId()" [class]="labelClasses()">
+        {{ label() }}
+        @if (required()) {
+        <span class="text-red-500 ml-1">*</span>
+        }
+      </label>
+      }
+
+      @if (description()) {
+      <p class="text-sm text-gray-600 mt-1">{{ description() }}</p>
+      }
+    </div>
+
+    <button
+      type="button"
+      [id]="checkboxId()"
+      role="switch"
+      [attr.aria-checked]="isChecked()"
+      [attr.aria-label]="ariaLabel() || label()"
+      [disabled]="isDisabled()"
+      [class]="switchClasses()"
+      (click)="toggle()"
+    >
+      <span [class]="'inline-block h-4 w-4 rounded-full transition-transform ' + switchToggleClasses()"></span>
+    </button>
+  </div>
+
+  @if (currentError()) {
+  <p class="text-sm text-red-600 mt-1">{{ currentError() }}</p>
+  }
+  }
+
+  <!-- ===================================== -->
+  <!-- VARIANTE: CARD (Tarjeta seleccionable) -->
+  <!-- ===================================== -->
+  @if (variant() === 'card') {
+  <div [class]="containerClasses()" (click)="toggle()">
+    <input
+      type="checkbox"
+      [id]="checkboxId()"
+      [checked]="isChecked()"
+      [disabled]="isDisabled()"
+      [required]="required()"
+      [attr.aria-label]="ariaLabel() || label()"
+      [class]="checkboxClasses()"
+      (change)="$event.stopPropagation()"
+    />
+
+    <div class="flex-1">
+      @if (label()) {
+      <label [for]="checkboxId()" [class]="labelClasses()">
+        {{ label() }}
+        @if (required()) {
+        <span class="text-red-500 ml-1">*</span>
+        }
+      </label>
+      }
+
+      @if (description()) {
+      <p class="text-sm text-gray-600 mt-1">{{ description() }}</p>
+      }
+    </div>
+
+    @if (isChecked()) {
+    <div class="flex-shrink-0">
+      <svg class="w-6 h-6 text-secondary-dark" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clip-rule="evenodd"
+        ></path>
+      </svg>
+    </div>
+    }
+  </div>
+
+  @if (currentError()) {
+  <p class="text-sm text-red-600 mt-1">{{ currentError() }}</p>
+  }
+  }
+</div>

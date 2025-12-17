@@ -1,0 +1,49 @@
+<!-- Breadcrumb Container -->
+<nav class="bg-white border-b border-gray-200 py-3 px-4 sm:px-6 lg:px-8 font-body">
+  <div class="container mx-auto max-w-7xl">
+    <ol class="flex items-center space-x-2 text-sm">
+      
+      <!-- Migas navegables (todas menos la última) -->
+      @for (item of navigableBreadcrumbs(); track item.url; let isLast = $last) {
+        <li class="flex items-center">
+          <!-- Link navegable -->
+          <button
+            (click)="goBack()"
+            class="text-secondary hover:text-secondary-dark hover:underline transition-colors font-medium cursor-pointer"
+            [attr.aria-label]="'Volver a ' + item.label"
+          >
+            {{ item.label }}
+          </button>
+          
+          <!-- Separador -->
+          <svg 
+            class="w-4 h-4 mx-2 text-gray-400" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              stroke-width="2" 
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </li>
+      }
+
+      <!-- Miga activa (última) -->
+      @if (activeBreadcrumb(); as active) {
+        <li class="flex items-center">
+          <span 
+            class="text-gray-700 font-semibold"
+            [attr.aria-current]="'page'"
+          >
+            {{ active.label }}
+          </span>
+        </li>
+      }
+
+    </ol>
+  </div>
+</nav>

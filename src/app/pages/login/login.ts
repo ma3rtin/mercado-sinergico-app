@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { ButtonComponent } from './../../shared/botones-component/buttonComponent';
+import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({

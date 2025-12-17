@@ -2,24 +2,22 @@
     <div class="max-w-7xl mx-auto px-4 md:px-6">
         <ul class="flex items-center justify-center gap-12 py-3 text-black">
             <li>
-                <a routerLink="/paquetes-publicados" class="hover:text-secondary transition-colors duration-200">Paquetes</a>
+                <a routerLink="/mis-pedidos"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <app-icon name="ShoppingBag" class="color-secondary"></app-icon>Mis pedidos</a>
             </li>
             <li>
-                <a routerLink="/faq" class="hover:text-secondary transition-colors duration-200">Preguntas
-                    frecuentes</a>
+                <a routerLink="/productos"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <app-icon name="box" class="color-secondary"></app-icon>Productos
+                </a>
             </li>
             <li>
-                <a routerLink="/contacto" class="hover:text-secondary transition-colors duration-200">Contacto</a>
+                <a routerLink="/paquetes-publicados"
+                    class="hover:text-secondary transition-colors duration-200 flex justify-center items-center gap-2 ">
+                    <app-icon name="Package" class="color-secondary"></app-icon>
+                    Paquetes</a>
             </li>
-
-            @if (isLoggedIn()) {
-            <li>
-                <button (click)="signOut()"
-                    class="text-red-600 font-semibold hover:text-red-700 transition-colors duration-200">
-                    Cerrar sesión
-                </button>
-            </li>
-            }
         </ul>
     </div>
 </nav>

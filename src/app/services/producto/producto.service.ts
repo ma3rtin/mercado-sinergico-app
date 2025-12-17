@@ -3,6 +3,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, timeout, catchError, retry, shareReplay } from 'rxjs/operators';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ApiService } from '../api.service';
+import { ProductoDetalleDTO } from '@app/models/DTOs/Producto/productoDetalleDTO';
 
 @Injectable({ providedIn: 'root' })
 export class ProductosService extends ApiService {
@@ -40,15 +41,18 @@ export class ProductosService extends ApiService {
     this.productosCache$ = undefined;
   }
 
-  getProductoById(id: number): Observable<Producto> {
-    return this.get<Producto>(`productos/${id}`).pipe(
-      timeout(10000),
-      catchError(err => {
-        console.error('❌ Error obteniendo producto:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+  getProductoById(id: number) {
+  return this.get<any>(`productos/${id}`).pipe(
+    map(res => {
+      console.log('📦 RESPUESTA REAL BACKEND:', res);
+      return res.producto ?? res;
+    })
+  );
+}
+
+  getProductoDetalle(id: number): Observable<ProductoDetalleDTO> {
+  return this.get<ProductoDetalleDTO>(`productos/${id}`);
+}
 
   createProduct(data: FormData): Observable<Producto> {
     return this.post<Producto>('productos', data).pipe(

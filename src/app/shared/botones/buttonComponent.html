@@ -1,0 +1,120 @@
+<!-- Botón base -->
+<button
+  [type]="type()"
+  [class]="buttonClasses()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-label]="getAriaLabel()"
+  [attr.aria-describedby]="ariaDescribedBy()"
+  [attr.aria-pressed]="selected()"
+  [attr.aria-busy]="loading()"
+  (click)="onButtonClick()"
+  class="relative"
+>
+  <!-- 🌈 Efecto hover (brillo/onda) - Opcional -->
+  <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity rounded-lg"></span>
+
+  <!-- 📦 Contenedor flex para alineación -->
+  <span [class]="'flex items-center justify-center ' + spacerClasses()" [ngClass]="{ 'flex-col': iconOnly() }">
+
+    <!-- 🎨 Icono inicial (si existe) -->
+    @if (iconStart() && !iconOnly()) {
+      <app-icon
+        [name]="iconStart()!"
+        [class]="iconClasses() + ' transition-transform group-hover:scale-110'"
+      />
+    }
+
+    <!-- 📝 Contenido del botón -->
+    @if (!loading()) {
+      <!-- Si hay label -->
+      @if (label()) {
+        <span class="whitespace-nowrap">{{ label() }}</span>
+      }
+      <!-- Si no hay label, usa ng-content -->
+      @else if (!iconOnly()) {
+        <ng-content />
+      }
+
+      <!-- Icono único (si solo es icono) -->
+      @if (iconOnly() && iconStart()) {
+        <app-icon
+          [name]="iconStart()!"
+          [class]="iconClasses()"
+        />
+      }
+    }
+    <!-- 🔄 Loading spinner -->
+    @else {
+      <span class="animate-spin">
+        <app-icon
+          name="loader"
+          [class]="iconClasses()"
+        />
+      </span>
+    }
+
+    <!-- 🎨 Icono final (si existe y no está cargando) -->
+    @if (iconEnd() && !loading() && !iconOnly()) {
+      <app-icon
+        [name]="iconEnd()!"
+        [class]="iconClasses() + ' transition-transform group-hover:translate-x-1'"
+      />
+    }
+  </span>
+
+  <!-- 🔴 Badge (notificación) -->
+  @if (shouldShowBadge()) {
+    <span
+      [class]="'absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ' + badgeColor()"
+    >
+      {{ badge()! > 99 ? '99+' : badge() }}
+    </span>
+  }
+</button>
+
+<!--
+  ════════════════════════════════════════════════════════════
+  EJEMPLOS DE USO:
+  ════════════════════════════════════════════════════════════
+
+  1️⃣ Botón simple
+  <app-button label="Click me" />
+
+  2️⃣ Botón con icono
+  <app-button label="Guardar" [iconStart]="'save'" variant="primary" />
+
+  3️⃣ Botón con icono al final
+  <app-button label="Siguiente" [iconEnd]="'arrowRight'" />
+
+  4️⃣ Botón solo icono
+  <app-button [iconStart]="'settings'" [iconOnly]="true" variant="ghost" />
+
+  5️⃣ Botón grande y ancho
+  <app-button label="Comprar ahora" size="lg" [fullWidth]="true" variant="primary" />
+
+  6️⃣ Botón con carga
+  <app-button label="Enviando..." [loading]="true" />
+
+  7️⃣ Botón con badge
+  <app-button label="Notificaciones" [badge]="5" />
+
+  8️⃣ Botón deshabilitado
+  <app-button label="Deshabilitado" [disabled]="true" />
+
+  9️⃣ Botón peligroso
+  <app-button label="Eliminar" variant="danger" [iconStart]="'trash'" />
+
+  🔟 Botón pequeño y compacto
+  <app-button label="Ver" size="sm" variant="ghost" />
+
+  1️⃣1️⃣ Botón flotante circular
+  <app-button [iconStart]="'plus'" shape="circle" size="lg" variant="primary" [iconOnly]="true" />
+
+  1️⃣2️⃣ Botón con contenido personalizado
+  <app-button>
+    <span class="flex items-center gap-2">
+      <app-icon name="heart" />
+      Me gusta
+    </span>
+  </app-button>
+-->

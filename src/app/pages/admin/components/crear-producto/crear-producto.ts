@@ -1,17 +1,26 @@
 import { Router } from '@angular/router';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+// Interfaces
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
+
+// Services
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+
+// Components
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { InputComponent } from '@app/shared/input/input-component'; // 👈 NUEVO
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
+
 import Swal from 'sweetalert2';
 
 interface ImageSlot {
@@ -27,50 +36,50 @@ interface ImageSlot {
     FormsModule,
     ReactiveFormsModule,
     ButtonComponent,
+    InputComponent, // 👈 NUEVO - Agregar aquí
     CrearPlantillaModalComponent
   ],
   standalone: true
 })
-
 export class CrearProductoComponent implements OnInit {
-  productForm!: FormGroup;
+  // 🧩 Inyecciones modernas
+  private fb = inject(FormBuilder);
   private toastr = inject(ToastrService);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef); // 👈 NUEVO
+  private plantillaService = inject(PlantillaService);
+  private marcaService = inject(MarcaService);
+  private categoriaService = inject(CategoriaService);
+  private productoService = inject(ProductosService);
 
+  // 📝 Form
+  productForm!: FormGroup;
+
+  // 🎯 Signals
   plantillas = signal<Plantilla[]>([]);
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
-
   selectedTemplate = signal<Plantilla | null>(null);
   selectedAttributes = signal<{ [key: string]: string[] }>({});
   selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
-
   imageSlots = signal<ImageSlot[]>(
     Array(8).fill(null).map(() => ({ file: null, preview: null }))
   );
-
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
 
-  shouldCreateTemplate = 'false';
+  // 🎭 Estados
   draggedIndex: number | null = null;
   plantillaToEdit?: Plantilla;
-
-  constructor(
-    private fb: FormBuilder,
-    private plantillaService: PlantillaService,
-    private marcaService: MarcaService,
-    private categoriaService: CategoriaService,
-    private productoService: ProductosService
-  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
     this.loadInitialData();
+    this.setupFormListeners(); // 👈 NUEVO
   }
 
-  initializeForm(): void {
+  private initializeForm(): void {
     this.productForm = this.fb.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       descripcion: [''],
@@ -86,39 +95,64 @@ export class CrearProductoComponent implements OnInit {
     });
   }
 
-  loadInitialData(): void {
-    this.plantillaService.getPlantillas().subscribe({
-      next: (plantillas) => {
-        this.plantillas.set(plantillas);
-        console.log('✅ Plantillas cargadas:', plantillas);
-      },
-      error: (err) => {
-        console.error('❌ Error plantillas:', err);
-        this.toastr.error('Error cargando plantillas');
-      }
-    });
+  // 👂 Escuchar cambios del formulario con DestroyRef
+  private setupFormListeners(): void {
+    // Validación automática del precio (no negativo)
+    this.productForm.get('precio')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(precio => {
+        if (precio < 0) {
+          this.productForm.patchValue({ precio: 0 }, { emitEvent: false });
+        }
+      });
 
-    this.marcaService.getMarcas().subscribe({
-      next: (marcas) => {
-        this.marcas.set(marcas);
-        console.log('✅ Marcas cargadas:', marcas);
-      },
-      error: (err) => {
-        console.error('❌ Error marcas:', err);
-        this.toastr.error('Error cargando marcas');
-      }
-    });
+    // Log de cambios (solo para debug)
+    this.productForm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        // console.log('Form changed:', values);
+      });
+  }
 
-    this.categoriaService.getCategorias().subscribe({
-      next: (categorias) => {
-        this.categorias.set(categorias);
-        console.log('✅ Categorías cargadas:', categorias);
-      },
-      error: (err) => {
-        console.error('❌ Error categorías:', err);
-        this.toastr.error('Error cargando categorías');
-      }
-    });
+  private loadInitialData(): void {
+    this.plantillaService.getPlantillas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (plantillas) => {
+          this.plantillas.set(plantillas);
+          console.log('✅ Plantillas cargadas:', plantillas.length);
+        },
+        error: (err) => {
+          console.error('❌ Error plantillas:', err);
+          this.toastr.error('Error cargando plantillas');
+        }
+      });
+
+    this.marcaService.getMarcas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (marcas) => {
+          this.marcas.set(marcas);
+          console.log('✅ Marcas cargadas:', marcas.length);
+        },
+        error: (err) => {
+          console.error('❌ Error marcas:', err);
+          this.toastr.error('Error cargando marcas');
+        }
+      });
+
+    this.categoriaService.getCategorias()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (categorias) => {
+          this.categorias.set(categorias);
+          console.log('✅ Categorías cargadas:', categorias.length);
+        },
+        error: (err) => {
+          console.error('❌ Error categorías:', err);
+          this.toastr.error('Error cargando categorías');
+        }
+      });
   }
 
   // 🎨 Selección de plantilla
@@ -128,9 +162,7 @@ export class CrearProductoComponent implements OnInit {
       this.selectedAttributes.set({});
       this.selectedAttributesTouched.set({});
     }
-    this.productForm.patchValue({
-      plantillaId: template.id
-    });
+    this.productForm.patchValue({ plantillaId: template.id });
   }
 
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
@@ -141,7 +173,6 @@ export class CrearProductoComponent implements OnInit {
 
     this.selectedAttributes.update(current => {
       const updated = { ...current };
-
       if (!updated[attributeName]) {
         updated[attributeName] = [];
       }
@@ -165,6 +196,7 @@ export class CrearProductoComponent implements OnInit {
     return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
+  // 📸 Manejo de imágenes
   onFileSelected(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -197,7 +229,6 @@ export class CrearProductoComponent implements OnInit {
       reader.readAsDataURL(file);
     }
 
-    // Resetear el input
     input.value = '';
   }
 
@@ -220,6 +251,7 @@ export class CrearProductoComponent implements OnInit {
     return this.imageSlots()[0].file !== null;
   }
 
+  // 🎯 Drag & Drop
   onDragStart(index: number, event: DragEvent) {
     this.draggedIndex = index;
     if (event.dataTransfer) {
@@ -242,7 +274,6 @@ export class CrearProductoComponent implements OnInit {
       return;
     }
 
-    // Intercambiar los slots
     this.imageSlots.update(slots => {
       const newSlots = [...slots];
       const temp = newSlots[this.draggedIndex!];
@@ -258,6 +289,7 @@ export class CrearProductoComponent implements OnInit {
     this.draggedIndex = null;
   }
 
+  // 🚀 Submit
   onSubmit() {
     this.formSubmitted.set(true);
 
@@ -282,31 +314,31 @@ export class CrearProductoComponent implements OnInit {
       }
     });
 
-    // Agregar imagen principal (icono)
     const slots = this.imageSlots();
     if (slots[0].file) {
       formData.append('icono', slots[0].file);
     }
 
-    // Agregar imágenes adicionales
     for (let i = 1; i < slots.length; i++) {
       if (slots[i].file) {
         formData.append('imagenes', slots[i].file as Blob);
       }
     }
 
-    this.productoService.createProduct(formData).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.toastr.success('Producto creado exitosamente 🚀');
-        this.resetForm();
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        console.error('Error creando producto', err);
-        this.toastr.error(err.error?.message || 'Error creando producto');
-      }
-    });
+    this.productoService.createProduct(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.toastr.success('Producto creado exitosamente 🚀');
+          this.resetForm();
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error('Error creando producto', err);
+          this.toastr.error(err.error?.message || 'Error creando producto');
+        }
+      });
   }
 
   public resetForm(): void {
@@ -315,7 +347,6 @@ export class CrearProductoComponent implements OnInit {
     this.selectedAttributes.set({});
     this.selectedAttributesTouched.set({});
     this.imageSlots.set(Array(8).fill(null).map(() => ({ file: null, preview: null })));
-    this.shouldCreateTemplate = 'false';
     this.formSubmitted.set(false);
     this.router.navigate(['/admin/administrar-productos']);
   }
@@ -337,6 +368,7 @@ export class CrearProductoComponent implements OnInit {
     this.closeCreateModal();
   }
 
+  // 🧹 Helpers para validación (ya no son necesarios con InputComponent, pero los dejamos por compatibilidad)
   isFieldInvalid(fieldName: string): boolean {
     const control = this.productForm.get(fieldName);
     return !!(control && control.invalid && (control.touched || this.formSubmitted()));
@@ -378,39 +410,6 @@ export class CrearProductoComponent implements OnInit {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
-  }
-
-  logFormStatus(): void {
-    console.log('Form Status:', this.productForm.status);
-    console.log('Form Values:', this.productForm.value);
-    console.log('Form Errors:', this.getFormErrors());
-    console.log('Selected Template:', this.selectedTemplate());
-    console.log('Selected Attributes:', this.selectedAttributes());
-    console.log('Image Slots:', this.imageSlots());
-  }
-
-  private getFormErrors(): any {
-    const errors: any = {};
-    Object.keys(this.productForm.controls).forEach(key => {
-      const controlErrors = this.productForm.get(key)?.errors;
-      if (controlErrors) {
-        errors[key] = controlErrors;
-      }
-    });
-    return errors;
-  }
-
-  loadTestData(): void {
-    this.productForm.patchValue({
-      nombre: 'Casco de Prueba',
-      descripcion: 'Descripción de prueba para el casco',
-      precio: 1500,
-      stock: 10,
-      altura: 15,
-      ancho: 20,
-      profundidad: 25,
-      peso: 1.5
-    });
   }
 
   deseleccionarPlantilla(): void {

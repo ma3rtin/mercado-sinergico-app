@@ -26,10 +26,10 @@
 
             <!-- Botones Crear -->
             <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
-                <app-button (click)="crearProducto()" class="btn-yellow">
+                <app-button (click)="crearProducto()" class="btn-yellow" size="md" [fullWidth]="true">
                     Crear producto
                 </app-button>
-                <app-button (click)="crearPaquete()" class="btn-yellow">
+                <app-button (click)="crearPaquete()" class="btn-yellow" size="md" [fullWidth]="true">
                     Crear paquete
                 </app-button>
             </div>
@@ -37,12 +37,12 @@
 
         <!-- 🔧 Paneles de administración -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary">Administrar productos</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminProducts()" class="btn-secondary" size="lg" [fullWidth]="true">Administrar productos</app-button>
             <!-- <app-button variant="tertiary" (click)="navigateToAdminUsers()" class="btn-secondary">Administrar usuarios</app-button> -->
             <!-- <app-button variant="tertiary" (click)="navigateToMetrics()" class="btn-secondary">Ver métricas</app-button> -->
             <!-- <app-button variant="tertiary" (click)="navigateToAdminPackages()" class="btn-secondary">Administrar paquetes</app-button> -->
-            <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" class="btn-secondary">Publicar paquete</app-button>
-            <app-button variant="tertiary" (click)="navigateToAdminTemplates()" class="btn-secondary">Administrar plantillas</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" class="btn-secondary" size="lg" [fullWidth]="true">Publicar paquete</app-button>
+            <app-button variant="tertiary" (click)="navigateToAdminTemplates()" class="btn-secondary" size="lg" [fullWidth]="true">Administrar plantillas</app-button>
         </div>
 
         <!-- 📦 Paquetes -->

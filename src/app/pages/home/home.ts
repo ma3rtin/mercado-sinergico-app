@@ -1,3 +1,6 @@
+// ============================================
+// HOME COMPONENT - Mapeo Correcto de Datos
+// ============================================
 import {
   Component,
   OnInit,
@@ -8,12 +11,11 @@ import {
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { Carrusel } from '@app/components/carrusel/carrusel';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
-import { PaqueteCardView } from '@app/models/PaquetesInterfaces/PaqueteCardView';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 @Component({
@@ -24,61 +26,61 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
   styleUrls: ['./home.css'],
 })
 export class Home implements OnInit {
-  paquetesPorCerrarse = signal<PaqueteCardView[]>([]);
+  // 📦 Signal que almacena los paquetes directamente (sin mapeo)
+  paquetesPorCerrarse = signal<PaquetePublicado[]>([]);
   isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   private dataLoaded = false;
   private destroyRef = inject(DestroyRef);
 
-  constructor(private paquetePublicadoService: PaquetePublicadoService) {
-    console.log('🚀 Home constructor');
-  }
+  constructor(private paquetePublicadoService: PaquetePublicadoService) {}
 
   ngOnInit(): void {
-    console.log('🚀 Home ngOnInit');
     if (!this.dataLoaded) {
       this.dataLoaded = true;
       this.cargarPaquetesPorCerrarse();
     }
   }
 
-  ngOnDestroy(): void {
-    console.log('🚀 Home ngOnDestroy');
-  }
-
-  cargarPaquetesPorCerrarse(): void {
+  // 🔍 Obtener datos del backend
+  private cargarPaquetesPorCerrarse(): void {
     console.log('🔍 cargarPaquetesPorCerrarse() llamado');
-
     this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.paquetePublicadoService
-      .getPaquetesPorCerrarse()
+      .getPaquetesPorCerrarse() // Llamamos al endpoint
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        map((paquetes: PaquetePublicado[]) =>
-          paquetes.map((p) => this.mapToCardView(p))
-        ),
+        // ✅ NO mapeamos, pasamos directo los datos de PaquetePublicado
         catchError((err) => {
           console.error('❌ Error al obtener paquetes:', err);
+          this.errorMessage.set('Error al cargar paquetes. Intenta de nuevo más tarde.');
           this.isLoading.set(false);
-          return of([] as PaqueteCardView[]);
+          return of([] as PaquetePublicado[]);
         })
       )
-      .subscribe((cards) => {
-        console.log('📦 Paquetes mapeados:', cards);
-        this.paquetesPorCerrarse.set(cards);
+      .subscribe((paquetes) => {
+        console.log('📦 Paquetes recibidos:', paquetes);
+        console.log('📊 Cantidad:', paquetes.length);
+
+        // Debug: mostrar primer paquete
+        if (paquetes.length > 0) {
+          console.log('🔍 Primer paquete:', paquetes[0]);
+          console.log('  - Nombre:', paquetes[0].paqueteBase?.nombre);
+          console.log('  - Marca:', paquetes[0].paqueteBase?.marca?.nombre);
+          console.log('  - Categoría:', paquetes[0].paqueteBase?.categoria?.nombre);
+          console.log('  - Imagen:', paquetes[0].imagen_url);
+        }
+
+        this.paquetesPorCerrarse.set(paquetes);
         this.isLoading.set(false);
       });
   }
 
-  private mapToCardView(p: PaquetePublicado): PaqueteCardView {
-    return {
-      id: p.id_paquete_publicado ?? 0,
-      nombre: p.paqueteBase?.nombre || 'Sin nombre',
-      imagen: p.imagen_url || 'https://placehold.co/300x200?text=Sin+imagen',
-      estado: p.estado?.nombre || 'Desconocido',
-      cantidadActual: p.cant_productos_reservados ?? 0,
-      cantidadMaxima: p.cant_productos ?? 0,
-    };
+  // 🔄 Método público para recargar
+  recargarPaquetes(): void {
+    this.cargarPaquetesPorCerrarse();
   }
 }

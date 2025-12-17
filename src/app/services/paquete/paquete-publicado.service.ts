@@ -2,14 +2,19 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { Observable } from 'rxjs';
 import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
+
 @Injectable({ providedIn: 'root' })
 export class PaquetePublicadoService extends ApiService {
     private apiUrl = 'paquetes-publicados';
+
     constructor() {
     super();
     }
     getPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
+    }
+    getPaqueteById(id: number): Observable<PaquetePublicado> {
+        return this.get<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
     createPaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
         return this.post<PaquetePublicado>(this.apiUrl, paquete);
@@ -22,5 +27,8 @@ export class PaquetePublicadoService extends ApiService {
     }
     getPaquetesPorCerrarse(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
+    }
+    getPaquetesDelUsuario(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/mis-pedidos`);
     }
 }

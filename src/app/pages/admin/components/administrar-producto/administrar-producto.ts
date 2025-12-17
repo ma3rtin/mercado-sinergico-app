@@ -11,7 +11,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ProductosService } from '@app/services/producto/producto.service';
 
 // Components
-import { ButtonComponent } from '@app/shared/botones-component/buttonComponent';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 @Component({
   selector: 'app-administrar-productos',

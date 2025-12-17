@@ -1,302 +1,170 @@
-<div class="min-h-screen overflow-x-hidden font-body bg-gray-50">
-    <div class="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 max-w-7xl py-6">
+<div class="min-h-screen bg-gray-50 font-body">
+  <div class="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 max-w-[1920px] py-6 sm:py-8 lg:py-12">
 
-        <!-- 🎯 Título Principal -->
-        <div class="mb-8">
-            <h1 class="font-display text-3xl md:text-4xl lg:text-5xl text-gray-800 text-center">
-                Paquetes
-            </h1>
+    <!-- 🎯 Header Section -->
+    <div class="mb-6 sm:mb-8 lg:mb-12">
+      <div class="text-center mb-6 sm:mb-8">
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4">
+          Paquetes Disponibles
+        </h1>
+        <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+          Descubrí nuestros paquetes especiales con productos seleccionados
+        </p>
+      </div>
+
+      <!-- 🔍 Buscador -->
+      <div class="max-w-3xl mx-auto mb-6 sm:mb-8">
+        <app-buscador
+          [config]="configBuscador()"
+          [etiqueta]="'Buscar paquetes'"
+          [marcador]="'Buscar por nombre, marca, categoría, zona...'"
+          [buscable]="true"
+          [limpiable]="true"
+          [textAyuda]="'Buscá entre ' + totalPaquetes() + ' paquetes disponibles'"
+          [textoCargando]="'Cargando paquetes...'"
+          [textoVacio]="'No se encontraron paquetes'"
+          (seleccionado)="alSeleccionarPaquete($event)"
+          (cambioValor)="limpiarBusqueda()"
+        />
+      </div>
+
+      <!-- 📊 Estadísticas -->
+      @if (!isLoading() && !errorMessage()) {
+        <div class="flex items-center justify-between max-w-3xl mx-auto px-4 text-sm text-gray-600">
+          <span>
+            Mostrando <strong class="text-gray-900">{{ paquetesMostrados() }}</strong> 
+            de <strong class="text-gray-900">{{ totalPaquetes() }}</strong> paquetes
+          </span>
+          
+          @if (paqueteSeleccionado()) {
+            <button
+              (click)="limpiarBusqueda()"
+              class="text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              Limpiar búsqueda
+            </button>
+          }
         </div>
-
-        <!-- 📱 Filtros móviles -->
-        <div class="block lg:hidden mb-6">
-            <div class="bg-white rounded-xl shadow-md p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="font-display text-lg">Filtros</h2>
-                    <button (click)="limpiarFiltros()"
-                        class="text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer">
-                        Limpiar
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Categoría -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                        <select [ngModel]="categoriaSeleccionada()"
-                            (ngModelChange)="categoriaSeleccionada.set($event); aplicarFiltros()"
-                            class="w-full p-2 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-400">
-                            <option value="">Todas</option>
-                            @for (cat of categorias(); track cat.id_categoria) {
-                            <option [value]="cat.nombre">{{ cat.nombre }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    <!-- Marca -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                        <select [ngModel]="marcaSeleccionada()"
-                            (ngModelChange)="marcaSeleccionada.set($event); aplicarFiltros()"
-                            class="w-full p-2 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-400">
-                            <option value="">Todas</option>
-                            @for (marca of marcas(); track marca.id_marca) {
-                            <option [value]="marca.nombre">{{ marca.nombre }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    <!-- Ordenar -->
-                    <div class="sm:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar</label>
-                        <select [ngModel]="ordenSeleccionado()"
-                            (ngModelChange)="ordenSeleccionado.set($event); aplicarFiltros()"
-                            class="w-full p-2 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-400">
-                            <option value="recientes">Más recientes</option>
-                            <option value="a-z">A-Z</option>
-                            <option value="z-a">Z-A</option>
-                            <option value="recien-abiertos">Recién abiertos</option>
-                            <option value="por-cerrar">Por cerrar primero</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 📐 Layout principal -->
-        <div class="flex flex-col lg:flex-row gap-6">
-
-            <!-- 🎨 Filtros desktop -->
-            <aside class="hidden lg:block w-72 flex-shrink-0">
-                <div class="sticky top-4 bg-white rounded-xl shadow-md p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="font-display text-xl font-bold text-gray-800">Filtros</h2>
-                        <button (click)="limpiarFiltros()"
-                            class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                            Limpiar
-                        </button>
-                    </div>
-
-                    <div class="space-y-6">
-                        <!-- Categorías -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Categorías</label>
-                            <select [ngModel]="categoriaSeleccionada()"
-                                (ngModelChange)="categoriaSeleccionada.set($event); aplicarFiltros()"
-                                class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-400">
-                                <option value="">Todas las categorías</option>
-                                @for (cat of categorias(); track cat.id_categoria) {
-                                <option [value]="cat.nombre">{{ cat.nombre }}</option>
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Marcas -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Marcas</label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto">
-                                @for (marca of marcas(); track marca.id_marca) {
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                    <input type="radio" name="marca" [value]="marca.nombre"
-                                        [ngModel]="marcaSeleccionada()"
-                                        (ngModelChange)="marcaSeleccionada.set($event); aplicarFiltros()"
-                                        class="text-blue-500 focus:ring-2 focus:ring-blue-400">
-                                    <span class="text-sm text-gray-700">{{ marca.nombre }}</span>
-                                </label>
-                                }
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                    <input type="radio" name="marca" value="" [ngModel]="marcaSeleccionada()"
-                                        (ngModelChange)="marcaSeleccionada.set($event); aplicarFiltros()"
-                                        class="text-blue-500 focus:ring-2 focus:ring-blue-400">
-                                    <span class="text-sm text-gray-700">Todas</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Tipo de paquete -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de paquete</label>
-                            <div class="space-y-2">
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-3 rounded-lg border-2 border-gray-200">
-                                    <input type="checkbox"
-                                        (change)="toggleTipoPaquete(TipoPaquete.SINERGICO, $any($event.target).checked)"
-                                        class="text-blue-500 focus:ring-2 focus:ring-blue-400">
-                                    <span class="text-sm font-medium">Sinérgico</span>
-                                </label>
-
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-3 rounded-lg border-2 border-gray-200">
-                                    <input type="checkbox"
-                                        (change)="toggleTipoPaquete(TipoPaquete.ENERGICO, $any($event.target).checked)"
-                                        class="text-yellow-500 focus:ring-2 focus:ring-yellow-400">
-                                    <span class="text-sm font-medium">Energético</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Ordenar -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
-                            <select [ngModel]="ordenSeleccionado()"
-                                (ngModelChange)="ordenSeleccionado.set($event); aplicarFiltros()"
-                                class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-blue-400">
-                                <option value="recientes">Más recientes</option>
-                                <option value="a-z">A-Z</option>
-                                <option value="z-a">Z-A</option>
-                                <option value="recien-abiertos">Recién abiertos</option>
-                                <option value="por-cerrar">Por cerrar primero</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- 📦 Grid de paquetes -->
-            <main class="flex-1 min-w-0">
-
-                <!-- 🔄 Loading -->
-                @if (isLoading()) {
-                <div class="flex flex-col items-center justify-center py-20">
-                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4">
-                    </div>
-                    <p class="text-gray-600 text-lg">Cargando paquetes...</p>
-                </div>
-                }
-                @else if (errorMessage()) {
-                <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-                    <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">Error al cargar paquetes</h3>
-                    <p class="text-gray-600 mb-6 text-center max-w-md">{{ errorMessage() }}</p>
-                    <button (click)="recargarPaquetes()"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                        Intentar de nuevo
-                    </button>
-                </div>
-                }
-                @else {
-                <div class="mb-4 text-sm text-gray-600">
-                    Mostrando <strong>{{ paquetesFiltrados().length }}</strong> de <strong>{{ paquetes().length
-                        }}</strong> paquetes
-                </div>
-
-                <div
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
-                    @for (paquete of paquetesFiltrados(); track paquete.id_paquete_publicado) {
-                    <article (click)="navegarAPaquete(paquete.id_paquete_publicado)"
-                        class="group bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer">
-
-                        <!-- 🖼️ Imagen -->
-                        <div class="relative h-48 bg-gray-100 overflow-hidden">
-                            @if (paquete.paqueteBase?.imagen_url) {
-                            <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre"
-                                class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                                (error)="onImageError($event)" loading="lazy">
-                            }
-                            @else {
-                            <div class="w-full h-full flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M20 7l-8-4-8 4v10l8 4V11l8-4z" />
-                                </svg>
-                            </div>
-                            }
-
-                            <!-- 🏷️ Badge Marca -->
-                            <div
-                                class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-3 py-1.5 font-medium rounded-full shadow-lg">
-                                {{ getMarcaTag(paquete) }}
-                            </div>
-
-                            <!-- Tipo de paquete icon -->
-                            @if (getTipoPaqueteIcono(paquete.tipoPaquete)) {
-                            <div class="absolute top-3 right-3 bg-white rounded-full p-2 shadow-lg">
-                                @if (getTipoPaqueteIcono(paquete.tipoPaquete) === TipoPaquete.SINERGICO) {
-                                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 16 16">
-                                    <path
-                                        d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5z" />
-                                </svg>
-                                }
-                                @else {
-                                <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 16 16">
-                                    <path
-                                        d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5z" />
-                                </svg>
-                                }
-                            </div>
-                            }
-                        </div>
-
-                        <!-- 📝 Contenido -->
-                        <div class="p-4">
-                            <h3 class="font-display text-lg text-gray-900 mb-2 line-clamp-1">
-                                {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-                            </h3>
-
-                            <div class="mb-3">
-                                <span
-                                    [class]="'inline-block py-1 rounded-full text-sm ' + getEstadoTextoClass(paquete.estado.nombre)">
-                                    {{ paquete.estado.nombre || 'Pendiente' }}
-                                </span>
-                            </div>
-
-                            <div
-                                class="flex items-center justify-between text-sm text-gray-600 pt-3 border-t border-gray-100">
-                                <div class="flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M7 14s-1 0-1-1 1-4 5-4..."></path>
-                                    </svg>
-                                    <span>{{ getParticipantes(paquete) }}</span>
-                                </div>
-
-                                <div class="flex items-center gap-1">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                                        <path fill="currentColor" d="M224 0v64c0 8.8 7.2 16 16 16h32..." />
-                                    </svg>
-                                    <span>{{ getProductos(paquete) }}</span>
-                                </div>
-
-                                @if (paquete.zona?.nombre) {
-                                <span class="text-xs" [title]="paquete.zona?.nombre">
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 0a5.53 5.53 0 0 0-5.5 5.5..." />
-                                        </svg>
-                                        {{ paquete.zona?.nombre }}
-                                    </div>
-                                </span>
-                                }
-                            </div>
-                        </div>
-                    </article>
-                    }
-                    @empty {
-                    <div class="col-span-full">
-                        <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-                            <svg class="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M20 13V6a2 2 0 00-2-2H6a2..." />
-                            </svg>
-                            <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay paquetes disponibles</h3>
-                            <p class="text-sm text-gray-500 text-center max-w-md mb-4">
-                                No se encontraron paquetes con los filtros seleccionados.
-                            </p>
-                            <button (click)="limpiarFiltros()" class="text-blue-600 hover:text-blue-700 font-medium">
-                                Limpiar filtros
-                            </button>
-                        </div>
-                    </div>
-                    }
-                </div>
-                }
-            </main>
-        </div>
+      }
     </div>
+
+    <!-- 📐 Layout: Filtros + Grid -->
+    <div class="flex flex-col lg:flex-row gap-6">
+      
+      <!-- 🎨 FILTROS (Izquierda) -->
+      <app-filtros
+        [config]="configFiltrosPaquetes()"
+        [titulo]="'Filtrar Paquetes'"
+        (filtrosAplicados)="aplicarFiltros($event)"
+        (filtrosLimpiados)="limpiarFiltros()"
+      />
+
+      <!-- 📦 GRID DE PAQUETES (Derecha) -->
+      <div class="flex-1 min-w-0">
+
+        <!-- 🔄 Estado de Carga -->
+        @if (isLoading()) {
+          <div class="flex flex-col items-center justify-center py-20 sm:py-32">
+            <div class="relative">
+              <div class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                </svg>
+              </div>
+            </div>
+            <p class="text-gray-600 text-base sm:text-lg font-medium mt-6">Cargando paquetes...</p>
+            <p class="text-gray-500 text-sm mt-2">Esto puede tardar unos segundos</p>
+          </div>
+        }
+
+        <!-- ❌ Estado de Error -->
+        @else if (errorMessage()) {
+          <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+              <svg class="w-10 h-10 sm:w-12 sm:h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+              Error al cargar paquetes
+            </h3>
+            <p class="text-gray-600 text-center mb-6 sm:mb-8 max-w-md px-4">
+              {{ errorMessage() }}
+            </p>
+            <button
+              (click)="recargarPaquetes()"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Intentar nuevamente
+            </button>
+          </div>
+        }
+
+        <!-- ✅ Grid de Paquetes -->
+        @else {
+          @if (paqueteSeleccionado()) {
+            <!-- Mostrar solo el paquete seleccionado del buscador -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              <div class="flex">
+                <app-paquete-card
+                  [paquete]="paqueteSeleccionado()!"
+                  (cardClick)="navegarAPaqueteDetalle($event)"
+                  class="w-full"
+                />
+              </div>
+            </div>
+          } @else {
+            <!-- Mostrar grid completo filtrado -->
+            <div class="grid grid-cols-1
+                        sm:grid-cols-2
+                        lg:grid-cols-2
+                        xl:grid-cols-3
+                        2xl:grid-cols-4
+                        gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
+                        auto-rows-fr">
+              
+              @for (paquete of paquetesFiltrados(); track paquete.id_paquete_publicado) {
+                <div class="flex">
+                  <app-paquete-card
+                    [paquete]="paquete"
+                    (cardClick)="navegarAPaqueteDetalle($event)"
+                    class="w-full"
+                  />
+                </div>
+              }
+
+              <!-- 🚫 Estado Vacío -->
+              @empty {
+                <div class="col-span-full">
+                  <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                      <svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                      </svg>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+                      No hay paquetes disponibles
+                    </h3>
+                    <p class="text-gray-600 text-center mb-6 max-w-md px-4">
+                      No se encontraron paquetes con los filtros seleccionados.
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+      </div>
+    </div>
+
+  </div>
 </div>
