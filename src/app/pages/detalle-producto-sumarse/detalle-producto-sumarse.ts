@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
@@ -16,16 +16,19 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { FormsModule } from '@angular/forms';
 import { PedidoService } from '@app/services/pedido/pedido.service';
+import { IconComponent } from '@app/shared/icono/icono';
+import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
   imports: [
-    CurrencyPipe,
     CommonModule,
     FormsModule,
     BreadcrumbComponent,
-    VisorImagenesComponent
-  ],
+    VisorImagenesComponent,
+    IconComponent,
+    PaqueteCard
+],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
@@ -95,6 +98,7 @@ export class DetalleProductoSumarse implements OnInit {
       year: '2-digit'
     });
   });
+
   ngOnInit(): void {
     const productoId = Number(this.route.snapshot.paramMap.get('productoId'));
     const paqueteId = Number(this.route.snapshot.paramMap.get('paqueteId'));
@@ -124,10 +128,7 @@ export class DetalleProductoSumarse implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('🟢 PRODUCTO DETALLE RECIBIDO:', response);
-
-          // ⚠️ IMPORTANTE: el producto viene dentro de response
           this.producto.set(response.producto);
-
           this.productoCargado.set(true);
           this.finalizarCarga();
         },
@@ -176,7 +177,7 @@ export class DetalleProductoSumarse implements OnInit {
             p => p.estado?.nombre?.toLowerCase() === 'abierto' ||
               p.estado?.nombre?.toLowerCase() === 'activo'
           );
-          this.paquetesRelacionados.set(paquetesAbiertos.slice(0, 4)); // Solo 4
+          this.paquetesRelacionados.set(paquetesAbiertos.slice(0, 4));
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes relacionados:', error);
@@ -229,7 +230,7 @@ export class DetalleProductoSumarse implements OnInit {
     }
 
     const body = {
-      productoId: producto.id_producto, // ✅ ahora es number seguro
+      productoId: producto.id_producto,
       cantidad: this.quantity(),
       variante: this.selectedSize()
     };
@@ -248,7 +249,7 @@ export class DetalleProductoSumarse implements OnInit {
         }
       });
   }
-  
+
   goBack(): void {
     const paqueteId = this.paqueteSeleccionado()?.id_paquete_publicado;
 
@@ -259,19 +260,10 @@ export class DetalleProductoSumarse implements OnInit {
     }
   }
 
-  navegarAPaquete(paqueteId?: number): void {
-    if (!paqueteId) {
-      console.error('❌ ID de paquete inválido');
-      return;
-    }
-
-    const productoId = this.producto()?.id_producto;
-
-    if (productoId) {
-      this.toastr.info('Página en construcción. Pronto podrás ver los detalles del paquete <3.');
-      // Recargar datos
-      this.loadPaqueteSeleccionado(paqueteId);
-    }
+  // 🎯 NUEVO: Navegación a productos del paquete
+  onPaqueteClick(paqueteId: number): void {
+    console.log('🔗 Navegando a paquete:', paqueteId);
+    this.router.navigate(['productos-del-paquete', paqueteId]);
   }
 
   toggleDescription(): void {
