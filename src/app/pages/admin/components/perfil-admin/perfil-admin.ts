@@ -34,7 +34,7 @@ export class PerfilAdmin implements OnInit {
 
   ngOnInit() {
     this.loadPerfil();
-    this.loadPaquetes();
+    this.loadPaquetesPorCerrarse();
   }
 
   loadPerfil() {
@@ -50,48 +50,73 @@ export class PerfilAdmin implements OnInit {
     });
   }
 
-  loadPaquetes() {
+  // 🔥 NUEVO: Cargar paquetes por cerrarse usando el endpoint específico
+  loadPaquetesPorCerrarse() {
     this.loading.set(true);
     this.error.set(null);
 
-    this.paquetePublicadoService.getPaquetes().subscribe({
+    this.paquetePublicadoService.getPaquetesPorCerrarse().subscribe({
       next: (paquetes) => {
+        console.log('📦 Paquetes por cerrarse:', paquetes);
         this.paquetes.set(paquetes);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error loading packages:', err);
+        console.error('❌ Error loading packages:', err);
         this.error.set('Ocurrió un error al cargar los paquetes.');
         this.loading.set(false);
       },
     });
   }
 
-  getStatusColor(estado: EstadoPaquetePublicado): string {
-    switch (estado.nombre) {
-      case 'Pendiente':
+  getStatusColor(estado?: EstadoPaquetePublicado): string {
+    if (!estado) return 'text-gray-600';
+
+    switch (estado.nombre.toLowerCase()) {
+      case 'pendiente':
         return 'text-yellow-600';
-      case 'Abierto':
+      case 'abierto':
+      case 'activo':
         return 'text-green-600';
-      case 'Cerrado':
+      case 'cerrado':
         return 'text-blue-600';
-      case 'Completo':
+      case 'completo':
         return 'text-gray-600';
       default:
         return 'text-gray-600';
     }
   }
 
+  // 📅 Calcular días restantes hasta el cierre
+  getDiasRestantes(fechaFin?: Date): number {
+    if (!fechaFin) return 0;
+    const hoy = new Date();
+    const cierre = new Date(fechaFin);
+    const diferencia = cierre.getTime() - hoy.getTime();
+    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+  }
+
+  // 🎨 Color según urgencia
+  getUrgenciaColor(dias: number): string {
+    if (dias <= 1) return 'text-red-600 font-bold';
+    if (dias <= 3) return 'text-orange-600 font-semibold';
+    if (dias <= 5) return 'text-yellow-600';
+    return 'text-gray-600';
+  }
+
   // 🧭 Navegaciones
   navigateToAdminProducts() {
     this.router.navigate(['/admin/administrar-productos']);
   }
+
   navigateToAdminUsers() {
     console.log('Por implementar');
   }
+
   navigateToMetrics() {
     console.log('Por implementar');
   }
+
   navigateToAdminPackages() {
     this.router.navigate(['/admin/administrar-paquetes']);
   }
@@ -104,14 +129,30 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/publicar-paquete']);
   }
 
-  editPackage(paquete: PaquetePublicado) {
-    this.router.navigate(['/admin/paquetes/edit', paquete.id_paquete_publicado]);
+  // 🎯 Editar paquete (clickeando la card o el botón)
+  editPackage(paquete: PaquetePublicado, event?: Event) {
+    if (event) {
+      event.stopPropagation(); // Evitar doble navegación si se clickea el botón
+    }
+    console.log('✏️ Editando paquete:', paquete.id_paquete_publicado);
+    this.router.navigate(['/admin/paquetes/editar', paquete.id_paquete_publicado]);
   }
 
   crearProducto() {
     this.router.navigate(['/admin/crear-producto']);
   }
+
   crearPaquete() {
     this.router.navigate(['/admin/crear-paquete']);
+  }
+
+  // 📊 Formatear fecha
+  formatearFecha(fecha?: Date): string {
+    if (!fecha) return 'N/A';
+    return new Date(fecha).toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 }

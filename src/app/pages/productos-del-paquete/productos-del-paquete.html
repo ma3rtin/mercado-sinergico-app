@@ -1,22 +1,11 @@
 <div class="min-h-screen bg-gray-50 font-body">
   <app-breadcrumb />
-  
+
   <div class="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 max-w-[1920px] py-6 sm:py-8 lg:py-12">
 
     <!-- 🎯 Header Section -->
     <div class="mb-6 sm:mb-8 lg:mb-12">
-      
-      <!-- Botón volver -->
-      <div class="mb-4">
-        <button
-          (click)="volverAPaquetes()"
-          class="inline-flex items-center gap-2 text-secondary-dark hover:secondary-dark font-medium transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-          Volver a Paquetes
-        </button>
-      </div>
+
 
       <!-- Información del Paquete -->
       @if (paquete()) {
@@ -31,22 +20,22 @@
                 (error)="onImageError($event)"
               />
             }
-            
+
             <!-- Info del paquete -->
             <div class="flex-1">
               <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 {{ paquete()?.paqueteBase?.nombre || 'Paquete' }}
               </h1>
-              
+
               <div class="flex flex-wrap items-center gap-3 mb-3">
-                
+
                 <!-- Badge Estado -->
                 @if (paquete()?.estado?.nombre) {
                   <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     {{ paquete()?.estado?.nombre }}
                   </span>
                 }
-                
+
                 <!-- Badge Zona -->
                 @if (paquete()?.zona?.nombre) {
                   <span class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
@@ -98,10 +87,10 @@
       @if (!isLoading() && !errorMessage()) {
         <div class="flex items-center justify-between max-w-3xl mx-auto px-4 text-sm text-gray-600">
           <span>
-            Mostrando <strong class="text-gray-900">{{ productosMostrados() }}</strong> 
+            Mostrando <strong class="text-gray-900">{{ productosMostrados() }}</strong>
             de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
           </span>
-          
+
           @if (productoSeleccionado()) {
             <button
               (click)="limpiarBusqueda()"
@@ -118,7 +107,7 @@
 
     <!-- 📐 Layout: Filtros + Grid -->
     <div class="flex flex-col lg:flex-row gap-6">
-      
+
       <!-- 🎨 FILTROS (Izquierda) -->
       <app-filtros
         [config]="configFiltrosProductos()"
@@ -195,7 +184,7 @@
                         2xl:grid-cols-4
                         gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
                         auto-rows-fr">
-              
+
               @for (producto of productosFiltrados(); track producto.id_producto) {
   <div class="flex">
     <app-producto-card
