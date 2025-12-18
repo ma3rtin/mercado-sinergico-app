@@ -7,22 +7,46 @@
     </div>
 
     <!-- Body -->
-    <div class="p-6 max-h-[60vh] overflow-y-auto">
+    <div class="p-6">
       @if (isLoading) {
         <div class="flex justify-center py-8">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       } @else {
-        <div class="grid gap-3">
-          @for (loc of localidades; track loc.id_localidad) {
+        <div class="space-y-6">
+            <div class="relative">
+                <label for="location-select" class="block mb-2 text-sm font-medium text-gray-700">Selecciona tu zona</label>
+                <div class="relative">
+                    <select 
+                        id="location-select"
+                        [(ngModel)]="selectedLocalidadId"
+                        class="w-full appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-xl focus:ring-primary focus:border-primary block p-3 pr-10 outline-none transition-all cursor-pointer hover:bg-gray-100"
+                    >
+                        <option [ngValue]="null" disabled selected>Elige una localidad...</option>
+                        @for (loc of localidades; track loc.id_localidad) {
+                            <option [value]="loc.id_localidad">
+                                {{ loc.nombre }}
+                            </option>
+                        }
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                        <svg class="h-5 w-5 fill-current" viewBox="0 0 20 20">
+                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
             <button 
-              (click)="selectLocation(loc)"
-              class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all duration-200 group flex items-center justify-between"
+                (click)="confirmSelection()"
+                [disabled]="!selectedLocalidadId"
+                class="w-full bg-primary text-white font-bold py-3.5 px-4 rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none disabled:shadow-none flex items-center justify-center gap-2"
             >
-              <span class="font-medium text-gray-700 group-hover:text-primary">{{ loc.nombre }}</span>
-              <span class="text-sm text-gray-400 group-hover:text-primary/70">CP {{ loc.codigo_postal }}</span>
+                <span>Confirmar Ubicación</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
             </button>
-          }
         </div>
       }
     </div>
