@@ -20,6 +20,7 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
+import { PagoSuccessComponent } from './components/pago-success/pago-success';
 
 export const routes: Routes = [
   {
@@ -153,6 +154,11 @@ export const routes: Routes = [
       },
     ]
   },
+
+{
+  path: 'pago/success',
+  component: PagoSuccessComponent
+},
 
   // 🌍 Fallback
   {
