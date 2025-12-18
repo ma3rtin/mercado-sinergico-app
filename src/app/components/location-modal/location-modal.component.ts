@@ -26,8 +26,10 @@ export class LocationModalComponent implements OnInit {
     loadLocalidades() {
         this.localidadService.getAll().subscribe({
             next: (data) => {
-                this.localidades = data;
-                this.isLoading = false;
+                setTimeout(() => {
+                    this.localidades = data;
+                    this.isLoading = false;
+                });
             },
             error: (err) => {
                 console.error('Error loading localidades', err);
