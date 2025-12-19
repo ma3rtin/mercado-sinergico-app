@@ -35,11 +35,7 @@
 <div class="bg-gray-50 text-white py-2 px-4">
     <div class="container mx-auto flex justify-end align-middle">
         <span style="background-image: var(--color-tag)" class="mr-3 px-3 py-1 rounded-lg text-sm">
-            <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                viewBox="0 0 24 24">
-                <path fill="currentColor"
-                    d="M12 11.5A2.5 2.5 0 0 1 9.5 9A2.5 2.5 0 0 1 12 6.5A2.5 2.5 0 0 1 14.5 9a2.5 2.5 0 0 1-2.5 2.5M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7" />
-            </svg>
+            <app-icon name="MapPin" size="16" class="color-secondary"></app-icon>
             {{ zonaDelPaquete() }}
         </span>
     </div>
@@ -55,17 +51,11 @@
             </app-visor-imagenes>
         </div>
 
-
         <!-- Información del producto -->
         <div class="space-y-6">
             <h1 class="text-2xl lg:text-3xl text-gray-800 font-display">
                 {{ producto()!.nombre }}
             </h1>
-
-            <div class="text-3xl lg:text-4xl font-bold text-gray-900">
-                {{ producto()!.precio | currency:'ARS':'symbol':'1.0-0' }}
-                <span class="text-sm text-gray-600 font-normal">(Ver medios de pago)</span>
-            </div>
 
             <!-- Descripción corta -->
             @if (producto()!.descripcion) {
@@ -91,11 +81,6 @@
                     class="bg-yellow-400 shadow-md hover:bg-yellow-500 px-8 py-3 rounded-lg font-semibold text-gray-800 transition-colors">
                     Sumarse
                 </button>
-            </div>
-
-            <div class="text-sm text-gray-600 space-y-1">
-                <div>Compra mínima de {{ minQuantity() }} producto(s)</div>
-                <div>Compra máxima de {{ maxQuantity() }} productos</div>
             </div>
 
             <!-- Volver al paquete -->
@@ -177,26 +162,6 @@
         </div>
     </div>
 
-    <!-- Descripción del producto -->
-    <div class="mt-12 bg-white rounded-lg shadow-md p-6">
-        <h3 class="text-xl font-semibold text-gray-800 mb-4">Descripción</h3>
-        <div class="text-gray-600 mb-6">
-            @if (producto()!.descripcion) {
-            <p class="mb-4">{{ producto()!.descripcion }}</p>
-            }
-
-            <button (click)="toggleDescription()" class="text-secondary cursor-pointer text-sm mt-3">
-                {{ showFullDescription() ? 'Ver menos' : 'Ver más' }}
-                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24">
-                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2.5"
-                        [attr.d]="showFullDescription() ? 'm17 14l-5-5m0 0l-5 5' : 'm7 10l5 5m0 0l5-5'" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
     @if (!hasPaqueteSeleccionado()) {
     <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
         No se pudo cargar la información del paquete.
@@ -206,58 +171,23 @@
 
     <!-- Paquetes relacionados -->
     @if (paquetesRelacionados().length > 0) {
-    <div class="mt-12">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Paquetes relacionados</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <section class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 font-display">
+                Otros paquetes disponibles
+            </h2>
+        </div>
+
+        <!-- Grid de paquetes -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @for (paquete of paquetesRelacionados(); track paquete.id_paquete_publicado) {
-            <div (click)="navegarAPaquete(paquete.id_paquete_publicado)"
-                class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div class="relative">
-                    <span style="background-image: var(--color-tag)"
-                        class="absolute top-2 text-white left-2 mr-3 px-2 py-1 rounded-lg text-sm">
-                        <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                            viewBox="0 0 24 24">
-                            <path fill="currentColor"
-                                d="M12 11.5A2.5 2.5 0 0 1 9.5 9A2.5 2.5 0 0 1 12 6.5A2.5 2.5 0 0 1 14.5 9a2.5 2.5 0 0 1-2.5 2.5M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7" />
-                        </svg>
-                        {{ paquete.zona?.nombre || 'Sin zona' }}
-                    </span>
-
-                    @if (paquete.paqueteBase?.imagen_url) {
-                    <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre || 'Paquete'"
-                        class="w-full h-40 object-cover" (error)="onImageError($event)">
-                    } @else {
-                    <div class="w-full h-40 bg-gray-100 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                    </div>
-                    }
-                </div>
-
-                <div class="p-4">
-                    <h4 class="font-semibold text-gray-800 mb-2">
-                        {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-                    </h4>
-                    <p [class]="'font-semibold text-sm mb-3 ' + getEstadoClass(paquete.estado.nombre)">
-                        {{ paquete.estado.nombre || 'Sin estado' }}
-                    </p>
-                    <div class="flex justify-between text-sm text-gray-600">
-                        <span>
-                            <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 32 32">
-                                <path fill="currentColor"
-                                    d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
-                            </svg>
-                            {{ paquete.cant_usuarios_registrados || 0 }}/{{ paquete.cant_productos || 0 }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+            <app-paquete-card
+                [paquete]="paquete"
+                (cardClick)="onPaqueteClick($event)"
+            ></app-paquete-card>
             }
         </div>
-    </div>
+    </section>
     }
 </div>
 }

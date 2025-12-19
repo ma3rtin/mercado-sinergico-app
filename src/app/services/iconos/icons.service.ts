@@ -102,7 +102,7 @@ import {
   providedIn: 'root'
 })
 export class IconsService {
-  
+
   // 📋 Mapeo centralizado de iconos
   // Facilita cambiar un icono en un solo lugar
   public readonly icons = {
@@ -208,7 +208,8 @@ export class IconsService {
     Loader: featherLoader,
     Calendar: featherCalendar,
     LogOut: featherLogOut,
-    
+    MapPin: featherMapPin
+
   };
 
   /**
