@@ -43,6 +43,13 @@ export class PaqueteCard implements OnInit {
     return 0;
   });
 
+  porcentajeReservado = computed(() => {
+    const total = this.paquete.cant_productos || 0;
+    const reservados = this.paquete.cant_productos_reservados || 0;
+    if (total === 0) return 0;
+    return (reservados / total) * 100;
+  });
+
   constructor(private router: Router) { }
 
   ngOnInit(): void {
@@ -62,9 +69,10 @@ export class PaqueteCard implements OnInit {
 
   // 🎨 Métodos helper
   obtenerColorBarra(): string {
-    const porcentaje = this.porcentajeDisponible();
-    if (porcentaje > 50) return 'bg-green-500';
-    if (porcentaje > 20) return 'bg-yellow-500';
+    const porcentaje = this.porcentajeReservado();
+
+    if (porcentaje < 50) return 'bg-green-500';
+    if (porcentaje < 80) return 'bg-yellow-500';
     return 'bg-red-500';
   }
 

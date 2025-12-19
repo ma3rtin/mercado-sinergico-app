@@ -1,133 +1,128 @@
-  <!-- paquete-card.html -->
-  <!-- Card más cuadrada, imagen simple y datos principales -->
+<!-- paquete-card.html -->
+<!-- Card más cuadrada, imagen simple y datos principales -->
 
-<article (click)="onCardClick()" 
-  class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden 
+<article (click)="onCardClick()" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden 
          border border-gray-200 hover:border-blue-400 cursor-pointer
          flex flex-col h-full hover:scale-105 active:scale-100 max-w-sm">
 
-    <!-- TAGS -->
-    <div class="px-3 pt-2 pb-2">
-      <div class="flex flex-wrap items-center gap-1.5">
+  <!-- TAGS -->
+  <div class="px-3 pt-2 pb-2">
+    <div class="flex flex-wrap items-center gap-1.5">
 
-        <!-- Marca -->
-        @if (paquete.paqueteBase?.marca?.nombre) {
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary text-white rounded-full text-xs font-semibold">
-            {{ paquete.paqueteBase?.marca?.nombre }}
-          </span>
-        }
-
-        <!-- Categoría -->
-        @if (paquete.paqueteBase?.categoria?.nombre) {
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full text-xs font-semibold">
-            {{ paquete.paqueteBase?.categoria?.nombre }}
-          </span>
-        }
-
-        <!-- Tipo -->
-        @if (obtenerIconoTipo()) {
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border text-gray-700 rounded-full text-xs font-semibold">
-            {{ obtenerIconoTipo() }} {{ obtenerTextoTipo() }}
-          </span>
-        }
-
-        <!-- Estado -->
-        @if (paquete.estado.nombre) {
-          <span 
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
-            [class]="getEstadoClass(paquete.estado.nombre)"
-          >
-            {{ paquete.estado.nombre }}
-          </span>
-        }
-
-      </div>
-    </div>
-
-    <!-- IMAGEN -->
-    <div class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 1 / 1;">
-      <img 
-        [src]="obtenerImagenUrl()"
-        [alt]="paquete.paqueteBase?.nombre"
-        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        loading="lazy"
-      />
-
-      @if (esUrgente()) {
-        <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
-          ⚠️ {{ getTiempoRestante(paquete.fecha_fin) }}
-        </div>
+      <!-- Marca -->
+      @if (paquete.paqueteBase?.marca?.nombre) {
+      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary text-white rounded-full text-xs font-semibold">
+        {{ paquete.paqueteBase?.marca?.nombre }}
+      </span>
       }
+
+      <!-- Categoría -->
+      @if (paquete.paqueteBase?.categoria?.nombre) {
+      <span
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full text-xs font-semibold">
+        {{ paquete.paqueteBase?.categoria?.nombre }}
+      </span>
+      }
+
+      <!-- Tipo -->
+      @if (obtenerIconoTipo()) {
+      <span
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border text-gray-700 rounded-full text-xs font-semibold">
+        {{ obtenerIconoTipo() }} {{ obtenerTextoTipo() }}
+      </span>
+      }
+
+      <!-- Estado -->
+      @if (paquete.estado.nombre) {
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
+        [class]="getEstadoClass(paquete.estado.nombre)">
+        {{ paquete.estado.nombre }}
+      </span>
+      }
+
+    </div>
+  </div>
+
+  <!-- IMAGEN -->
+  <div class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 1 / 1;">
+    <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre"
+      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+
+    @if (esUrgente()) {
+    <div
+      class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
+      ⚠️ {{ getTiempoRestante(paquete.fecha_fin) }}
+    </div>
+    }
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="px-4 py-3 space-y-2 flex flex-col flex-grow">
+
+    <!-- Nombre -->
+    <h3 class="font-display text-base font-bold text-gray-900 line-clamp-2 group-hover:text-secondary-dark">
+      {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+    </h3>
+
+    <!-- STOCK -->
+    <div class="flex items-baseline gap-1 text-sm">
+      <span class="text-gray-600">Quedan</span>
+      <span class="font-bold text-secondary-dark">{{ stockDisponible() }}</span>
+      <span class="text-gray-600">de <strong>{{ paquete.cant_productos || 0 }}</strong></span>
     </div>
 
-    <!-- CONTENIDO -->
-    <div class="px-4 py-3 space-y-2 flex flex-col flex-grow">
-
-      <!-- Nombre -->
-      <h3 class="font-display text-base font-bold text-gray-900 line-clamp-2 group-hover:text-secondary-dark">
-        {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-      </h3>
-
-      <!-- STOCK -->
-      <div class="flex items-baseline gap-1 text-sm">
-        <span class="text-gray-600">Quedan</span>
-        <span class="font-bold text-secondary-dark">{{ stockDisponible() }}</span>
-        <span class="text-gray-600">de <strong>{{ paquete.cant_productos || 0 }}</strong></span>
+    <!-- Barra -->
+    <div class="space-y-1">
+      <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+        <div class="h-full rounded-full transition-all duration-300" [style.width.%]="porcentajeReservado()"
+          [ngClass]="obtenerColorBarra()"></div>
       </div>
 
-      <!-- Barra -->
-      <div class="space-y-1">
-        <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-          <div 
-            class="h-full rounded-full transition-all duration-300"
-            [style.width.%]="porcentajeDisponible()"
-            [ngClass]="obtenerColorBarra()"
-          ></div>
-        </div>
-
-        <div class="text-xs text-gray-500 text-right">
-          {{ porcentajeDisponible().toFixed(0) }}% disponible
-        </div>
+      <div class="text-xs text-gray-500 text-right">
+        {{ porcentajeReservado().toFixed(0) }}% reservado
       </div>
 
-      <!-- Información inferior -->
-      <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-gray-200">
+    </div>
 
-        <!-- Compradores -->
-        <div class="flex items-center gap-1">
-          <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 
+    <!-- Información inferior -->
+    <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-gray-200">
+
+      <!-- Compradores -->
+      <div class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 
             0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-          </svg>
-          <div>
-            <p class="text-gray-500">Compradores</p>
-            <p class="font-bold text-gray-900">{{ paquete.cant_usuarios_registrados || 0 }}</p>
-          </div>
+        </svg>
+        <div>
+          <p class="text-gray-500">Compradores</p>
+          <p class="font-bold text-gray-900">{{ paquete.cant_usuarios_registrados || 0 }}</p>
         </div>
+      </div>
 
-        <!-- Tiempo -->
-        <div class="flex items-center gap-1">
-          <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 
+      <!-- Tiempo -->
+      <div class="flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 
             9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div>
-            <p class="text-gray-500">Cierra</p>
-            <p class="font-bold text-gray-900">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
-          </div>
+        </svg>
+        <div>
+          <p class="text-gray-500">Cierra</p>
+          <p class="font-bold text-gray-900">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
         </div>
-
       </div>
 
     </div>
 
-    <!-- FOOTER -->
-    <div class="px-4 py-2 bg-gray-50 flex items-center justify-center gap-2 text-secondary font-semibold text-sm 
+  </div>
+
+  <!-- FOOTER -->
+  <div class="px-4 py-2 bg-gray-50 flex items-center justify-center gap-2 text-secondary font-semibold text-sm 
                 group-hover:text-secondary-dark transition-colors">
-      <span>Ver detalles</span>
-      <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
-    </div>
+    <span>Ver detalles</span>
+    <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
+      viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+  </div>
 
 </article>
