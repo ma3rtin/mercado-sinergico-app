@@ -8,7 +8,7 @@ export class PaquetePublicadoService extends ApiService {
     private apiUrl = 'paquetes-publicados';
 
     constructor() {
-    super();
+        super();
     }
     getPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
@@ -28,6 +28,11 @@ export class PaquetePublicadoService extends ApiService {
     getPaquetesPorCerrarse(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
     }
+
+    getRelacionados(id: number): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/relacionados/${id}`);
+    }
+
     getPaquetesDelUsuario(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/mis-pedidos`);
     }

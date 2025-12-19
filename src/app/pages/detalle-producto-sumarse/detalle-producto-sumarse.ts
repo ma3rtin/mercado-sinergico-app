@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
@@ -28,7 +28,7 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
     VisorImagenesComponent,
     IconComponent,
     PaqueteCard
-],
+  ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
@@ -165,19 +165,17 @@ export class DetalleProductoSumarse implements OnInit {
   }
 
   private loadPaquetesRelacionados(): void {
-    console.log('🔄 Cargando paquetes relacionados...');
+    const paqueteId = Number(this.route.snapshot.paramMap.get('paqueteId'));
+    if (!paqueteId) return;
 
-    this.paquetePublicadoService.getPaquetes()
+    console.log('🔄 Cargando paquetes relacionados desde backend...');
+
+    this.paquetePublicadoService.getRelacionados(paqueteId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (paquetes) => {
           console.log('✅ Paquetes relacionados cargados:', paquetes.length);
-          // Filtrar solo paquetes abiertos
-          const paquetesAbiertos = paquetes.filter(
-            p => p.estado?.nombre?.toLowerCase() === 'abierto' ||
-              p.estado?.nombre?.toLowerCase() === 'activo'
-          );
-          this.paquetesRelacionados.set(paquetesAbiertos.slice(0, 4));
+          this.paquetesRelacionados.set(paquetes);
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes relacionados:', error);
