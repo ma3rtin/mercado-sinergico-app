@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { RenderMode } from '@angular/ssr';
-
 import { Home } from './pages/home/home';
 import { LoginComponent } from './pages/login/login';
 import { RegistrarseComponent } from './pages/registrarse/registrarse';
@@ -20,7 +19,6 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
-import { PagoResultadoComponent } from './components/pago-resultado/pago-resultado';
 
 export const routes: Routes = [
   {
@@ -153,19 +151,6 @@ export const routes: Routes = [
         },
       },
     ],
-  },
-
-  {
-    path: 'pago/success',
-    component: PagoResultadoComponent,
-  },
-  {
-    path: 'pago/failure',
-    component: PagoResultadoComponent,
-  },
-  {
-    path: 'pago/pending',
-    component: PagoResultadoComponent,
   },
 
   // 🌍 Fallback
