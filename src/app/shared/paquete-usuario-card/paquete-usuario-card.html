@@ -410,12 +410,12 @@
           <!-- BOTONES -->
           <div class="flex flex-col sm:flex-row gap-3 pt-4 justify-end">
             @if (puedeSalirDelPaquete) {
-            <app-button variant="warning" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
+            <app-button variant="danger" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
             </app-button>
             }
 
             @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-            <app-button variant="primary" label="Finalizar compra" (buttonClick)="onFinalizarCompra()">
+            <app-button variant="secondary" label="Comprar" (buttonClick)="onFinalizarCompra()">
             </app-button>
             }
           </div>
