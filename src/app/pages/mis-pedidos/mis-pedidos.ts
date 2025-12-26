@@ -415,10 +415,31 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
-  finalizarCompra(p: PedidoDelUsuario) {
-    console.log('Finalizar compra:', p.id_pedido);
+  finalizarCompra(pedido: PedidoDelUsuario) {
+  const pedidoId = pedido.id_pedido;
+
+  if (!pedidoId) {
+    this.toastr.error('Error: ID de pedido no válido');
+    return;
   }
 
+  // Opcional: Guardar en localStorage para verificar después
+  localStorage.setItem('pedido_en_pago', pedidoId.toString());
+
+  // Llamar al servicio para obtener la preferencia
+  this.pedidoService.iniciarCheckout(pedidoId)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (response) => {
+        // Redirigir a MercadoPago
+        window.location.href = response.checkoutUrl.checkoutUrl;
+      },
+      error: (err) => {
+        this.toastr.error('No se pudo iniciar el pago');
+        console.error('Error al crear preferencia:', err);
+      }
+    });
+}
   // ------------------------------
   // HELPERS
   // ------------------------------
