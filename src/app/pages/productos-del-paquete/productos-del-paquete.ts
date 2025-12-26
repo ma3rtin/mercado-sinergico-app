@@ -10,12 +10,11 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, map } from 'rxjs';
+import { map } from 'rxjs';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { ConfigBuscador } from '@app/shared/buscador/buscador';
 import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
 import { TipoPaquete } from '@app/models/Enums';
 
@@ -27,7 +26,6 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 
 // Components
-import { BuscadorComponent } from '@app/shared/buscador/buscador';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
@@ -37,7 +35,6 @@ import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component
   standalone: true,
   imports: [
     CommonModule,
-    BuscadorComponent,
     FiltrosComponent,
     ProductoCard,
     BreadcrumbComponent
@@ -57,29 +54,6 @@ export class ProductosDelPaquete implements OnInit {
   errorMessage = signal<string>('');
   idPaquete = signal<number>(0); // ✅ Inicializado en 0
 
-  // 🔍 Configuración del buscador
-  configBuscador = computed<ConfigBuscador<Producto>>(() => ({
-    obtenerDatos: (): Observable<Producto[]> =>
-      new Observable(obs => {
-        obs.next(this.productosOriginales());
-        obs.complete();
-      }),
-
-    filtrar: (datos, termino) =>
-      datos.filter(p =>
-        p.nombre?.toLowerCase().includes(termino.toLowerCase()) ||
-        p.marca?.nombre?.toLowerCase().includes(termino.toLowerCase()) ||
-        p.categoria?.nombre?.toLowerCase().includes(termino.toLowerCase())
-      ),
-
-    mapear: (producto) => ({
-      id: producto.id_producto!,
-      etiqueta: producto.nombre,
-      grupo: producto.categoria?.nombre || 'Sin categoría'
-    }),
-
-    debounceMs: 300
-  }));
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS DEL PAQUETE
   configFiltrosProductos = computed<ConfigFiltros>(() => ({
@@ -293,14 +267,7 @@ export class ProductosDelPaquete implements OnInit {
     this.cargarProductosDelPaquete();
   }
 
-  alSeleccionarProducto(producto: Producto): void {
-    console.log('🔍 Producto seleccionado:', producto);
-    this.productoSeleccionado.set(producto);
-  }
 
-  limpiarBusqueda(): void {
-    this.productoSeleccionado.set(null);
-  }
 
   // 🧭 Navegar al detalle del producto para sumarse
   // ✅ Nota: El ProductoCard ahora se encarga de la navegación

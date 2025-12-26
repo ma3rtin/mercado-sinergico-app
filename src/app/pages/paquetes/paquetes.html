@@ -12,47 +12,20 @@
         </p>
       </div>
 
-      <!-- 🔍 Buscador -->
-      <div class="max-w-3xl mx-auto mb-6 sm:mb-8">
-        <app-buscador
-          [config]="configBuscador()"
-          [etiqueta]="'Buscar paquetes'"
-          [marcador]="'Buscar por nombre, marca, categoría, zona...'"
-          [buscable]="true"
-          [limpiable]="true"
-          [textAyuda]="'Buscá entre ' + totalPaquetes() + ' paquetes disponibles'"
-          [textoCargando]="'Cargando paquetes...'"
-          [textoVacio]="'No se encontraron paquetes'"
-          (seleccionado)="alSeleccionarPaquete($event)"
-          (cambioValor)="limpiarBusqueda()"
-        />
-      </div>
-
       <!-- 📊 Estadísticas -->
       @if (!isLoading() && !errorMessage()) {
-        <div class="flex items-center justify-between max-w-3xl mx-auto px-4 text-sm text-gray-600">
+        <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
           <span>
-            Mostrando <strong class="text-gray-900">{{ paquetesMostrados() }}</strong> 
+            Mostrando <strong class="text-gray-900">{{ paquetesMostrados() }}</strong>
             de <strong class="text-gray-900">{{ totalPaquetes() }}</strong> paquetes
           </span>
-          
-          @if (paqueteSeleccionado()) {
-            <button
-              (click)="limpiarBusqueda()"
-              class="text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-              Limpiar búsqueda
-            </button>
-          }
         </div>
       }
     </div>
 
     <!-- 📐 Layout: Filtros + Grid -->
     <div class="flex flex-col lg:flex-row gap-6">
-      
+
       <!-- 🎨 FILTROS (Izquierda) -->
       <app-filtros
         [config]="configFiltrosPaquetes()"
@@ -109,58 +82,44 @@
 
         <!-- ✅ Grid de Paquetes -->
         @else {
-          @if (paqueteSeleccionado()) {
-            <!-- Mostrar solo el paquete seleccionado del buscador -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+          <div class="grid grid-cols-1
+                      sm:grid-cols-2
+                      lg:grid-cols-2
+                      xl:grid-cols-3
+                      2xl:grid-cols-4
+                      gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
+                      auto-rows-fr">
+
+            @for (paquete of paquetesFiltrados(); track paquete.id_paquete_publicado) {
               <div class="flex">
                 <app-paquete-card
-                  [paquete]="paqueteSeleccionado()!"
+                  [paquete]="paquete"
                   (cardClick)="navegarAPaqueteDetalle($event)"
                   class="w-full"
                 />
               </div>
-            </div>
-          } @else {
-            <!-- Mostrar grid completo filtrado -->
-            <div class="grid grid-cols-1
-                        sm:grid-cols-2
-                        lg:grid-cols-2
-                        xl:grid-cols-3
-                        2xl:grid-cols-4
-                        gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
-                        auto-rows-fr">
-              
-              @for (paquete of paquetesFiltrados(); track paquete.id_paquete_publicado) {
-                <div class="flex">
-                  <app-paquete-card
-                    [paquete]="paquete"
-                    (cardClick)="navegarAPaqueteDetalle($event)"
-                    class="w-full"
-                  />
-                </div>
-              }
+            }
 
-              <!-- 🚫 Estado Vacío -->
-              @empty {
-                <div class="col-span-full">
-                  <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md">
-                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                      <svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                      </svg>
-                    </div>
-                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
-                      No hay paquetes disponibles
-                    </h3>
-                    <p class="text-gray-600 text-center mb-6 max-w-md px-4">
-                      No se encontraron paquetes con los filtros seleccionados.
-                    </p>
+            <!-- 🚫 Estado Vacío -->
+            @empty {
+              <div class="col-span-full">
+                <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md">
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                    </svg>
                   </div>
+                  <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+                    No hay paquetes disponibles
+                  </h3>
+                  <p class="text-gray-600 text-center mb-6 max-w-md px-4">
+                    No se encontraron paquetes con los filtros seleccionados.
+                  </p>
                 </div>
-              }
-            </div>
-          }
+              </div>
+            }
+          </div>
         }
 
       </div>
