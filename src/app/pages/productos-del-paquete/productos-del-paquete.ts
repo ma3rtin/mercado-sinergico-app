@@ -30,7 +30,6 @@ import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { BuscadorComponent } from '@app/shared/buscador/buscador';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 
 @Component({
   selector: 'app-productos-del-paquete',
@@ -40,7 +39,6 @@ import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component
     BuscadorComponent,
     FiltrosComponent,
     ProductoCard,
-    BreadcrumbComponent
   ],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css'
@@ -310,7 +308,7 @@ export class ProductosDelPaquete implements OnInit {
   }
 
   volverAPaquetes(): void {
-    this.router.navigate(['/paquetes-publicados']);
+    this.router.navigate(['/paquetes']);
   }
 
   onImageError(event: Event): void {

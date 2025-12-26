@@ -27,8 +27,8 @@ export type ProductoCardContexto =
  * Tipo de navegación esperada
  */
 export type ProductoCardNavegacion = 
-  | 'detalle-seleccion'        // Va a /detalleSeleccionProducto/:id (usuario elige paquete)
-  | 'detalle-sumarse';         // Va a /detalleProductoSumarse/:productoId/:paqueteId (usuario se suma)
+  | 'detalle-seleccion'        // Va a /producto/:id (usuario elige paquete)
+  | 'detalle-sumarse';         // Va a /paquete/:paqueteId/producto/:productoId (usuario se suma)
 
 /**
  * Configuración de descuento para el producto
@@ -171,7 +171,7 @@ export class ProductoCard {
     
     // ✅ TIPO 1: Ir a detalle-seleccion (usuario elige paquete)
     if (nav === 'detalle-seleccion') {
-      this.router.navigate(['/detalleSeleccionProducto', productoId]);
+      this.router.navigate(['/producto', productoId]);
     }
     // ✅ TIPO 2: Ir a detalle-sumarse (usuario se suma a paquete)
     else if (nav === 'detalle-sumarse') {
@@ -180,7 +180,7 @@ export class ProductoCard {
         console.warn('⚠️ PaqueteId requerido para detalle-sumarse');
         return;
       }
-      this.router.navigate(['/detalleProductoSumarse', productoId, paqId]);
+      this.router.navigate(['/paquete/', paqId, 'producto', productoId]);
     }
   }
   

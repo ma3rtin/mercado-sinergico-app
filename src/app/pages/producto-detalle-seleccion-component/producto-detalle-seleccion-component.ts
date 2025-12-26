@@ -12,7 +12,6 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 // Components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
@@ -23,7 +22,6 @@ import { IconComponent } from '@app/shared/icono/icono';
   standalone: true,
   imports: [
     CommonModule,
-    BreadcrumbComponent,
     ProductoCard,
     PaqueteCard,
     ButtonComponent,
@@ -61,11 +59,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   // Hay paquetes disponibles
   hayPaquetesDisponibles = computed(() =>
     this.paquetesDelProducto().length > 0
-  );
-
-  // Nombre del producto para breadcrumb
-  nombreProductoBreadcrumb = computed(() =>
-    this.productoSeleccionado()?.nombre || 'Producto'
   );
 
   ngOnInit(): void {
@@ -184,7 +177,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     console.log('🧭 Navegando a sumarse:', { productoId, paqueteId });
 
     // Navegar a la vista de "sumarse" con ambos IDs
-    this.router.navigate(['detalleProductoSumarse/', productoId, paqueteId], {
+    this.router.navigate(['paquete/', paqueteId, 'producto', productoId], {
       queryParams: { productoId, paqueteId },
     });
   }

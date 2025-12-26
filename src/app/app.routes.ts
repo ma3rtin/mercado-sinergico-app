@@ -46,30 +46,25 @@ export const routes: Routes = [
   },
 
   {
-    //producto/:id
-    path: 'detalleSeleccionProducto/:id',
+    path: 'producto/:id',
     component: ProductoDetalleSeleccionComponent,
     data: {
-      renderMode: RenderMode.Server
+      renderMode: RenderMode.Server,
     },
   },
   {
-    //paquete/:paqueteId/productos
-    path: 'productos-del-paquete/:paqueteId',
-    component: ProductosDelPaquete
+    path: 'paquete/:paqueteId/productos',
+    component: ProductosDelPaquete,
   },
   {
-    //paquete/:paqueteId/producto/:productoId
-    path: 'detalleProductoSumarse/:productoId/:paqueteId',
+    path: 'paquete/:paqueteId/producto/:productoId',
     component: DetalleProductoSumarse,
     data: {
-      renderMode: RenderMode.Server
+      renderMode: RenderMode.Server,
     },
   },
-
   {
-    //paquetes
-    path: 'paquetes-publicados',
+    path: 'paquetes',
     component: PaquetesPublicosComponent
   },
 

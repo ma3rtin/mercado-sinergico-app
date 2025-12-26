@@ -22,7 +22,6 @@ import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastrService } from 'ngx-toastr';
 
 // Shared components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import {
   BuscadorComponent,
   ConfigBuscador,
@@ -58,7 +57,6 @@ interface PedidoDelUsuario extends Pedido {
   imports: [
     CommonModule,
     FormsModule,
-    BreadcrumbComponent,
     BuscadorComponent,
     PaqueteUsuarioCardComponent
   ],
