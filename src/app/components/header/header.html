@@ -2,304 +2,138 @@
   <!-- Top bar -->
   <div class="bg-primary">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
-
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- MOBILE -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="md:hidden grid grid-cols-[auto_1fr_auto] items-center gap-3">
-
         <!-- Hamburguesa -->
         <button
           (click)="toggleDrawer()"
           class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
           aria-label="Abrir menú"
         >
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <app-icon name="Menu" class="w-5 h-5"></app-icon>
         </button>
 
         <!-- Logo + Texto -->
-        <div class="min-w-0 flex items-center justify-center gap-2 cursor-pointer" (click)="navigateToHome()">
+        <div
+          class="min-w-0 flex items-center justify-center gap-2 cursor-pointer"
+          (click)="navigateToHome()"
+        >
           <img
             src="/assets/images/Logo2.png"
             alt="Mercado Sinérgico"
             class="h-10 w-auto"
           />
-          <span class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden">
+          <span
+            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden"
+          >
             Mercado Sinérgico
           </span>
         </div>
 
-        <!-- Usuario -->
-        <button
-          (click)="toggleProfileMenu()"
-          class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-          aria-label="Mi perfil"
-        >
-          <svg class="w-6 h-6" viewBox="0 0 448 512" fill="currentColor">
-            <path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8 16 482.3 16 498.7 29.3 512 45.7 512h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3h-59.4z" />
-          </svg>
-        </button>
+        <!-- Usuario MÓVIL -->
+        <div class="relative profile-menu-area">
+          <button
+            (click)="toggleProfileMenu()"
+            class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+            aria-label="Mi perfil"
+          >
+            <app-icon name="User" class="w-8 h-8"></app-icon>
+          </button>
+
+          <!-- ✅ MENÚ MÓVIL -->
+          @if (profileMenuOpen() && isLoggedIn()) {
+          <div
+            class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="z-index: 9999 !important"
+          >
+            <a
+              [routerLink]="profileLink"
+              (click)="profileMenuOpen.set(false)"
+              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
+            >
+              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
+            </a>
+            <button
+              (click)="signOut()"
+              type="button"
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
+            >
+              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+            </button>
+          </div>
+          }
+        </div>
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- DESKTOP -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6">
-
+      <div
+        class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6"
+      >
         <!-- Logo -->
         <a [routerLink]="'/home'" class="shrink-0 inline-flex items-center">
-          <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
+          <img
+            src="/assets/images/Logo2.png"
+            alt="Mercado Sinérgico"
+            class="h-10 w-auto"
+          />
         </a>
 
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- BUSCADOR INLINE CON DROPDOWN (DESKTOP) -->
-        <!-- ══════════════════════════════════════════════════════════════ -->
-        <div class="flex justify-center min-w-0">
-          <div class="w-full max-w-2xl relative" #searchContainer>
-            <div class="relative">
-              <input
-                #searchInput
-                type="text"
-                [value]="searchTerm()"
-                (input)="onSearchChange($any($event.target).value)"
-                (focus)="onSearchFocus()"
-                (click)="onInputClick($event)"
-                placeholder="Buscar productos, paquetes, categorías..."
-                class="w-full px-4 py-2.5 pl-11 pr-4 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md"
-                aria-label="Buscar en Mercado Sinérgico"
-                autocomplete="off"
-              />
-              <svg
-                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            <!-- ═══════════════════════════════════════════════════════════ -->
-            <!-- DROPDOWN DE RESULTADOS (DESKTOP) -->
-            <!-- ═══════════════════════════════════════════════════════════ -->
-            @if (searchOpen()) {
-              <div class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 max-h-[70vh] overflow-y-auto z-50 animate-[slideDown_0.2s_ease-out]">
-
-                <!-- Filtros dentro del dropdown -->
-                <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2 z-10">
-                  <button
-                    (click)="cambiarTipoBusqueda('todo')"
-                    [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                      (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-                  >
-                    Todo
-                  </button>
-                  <button
-                    (click)="cambiarTipoBusqueda('productos')"
-                    [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                      (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-                  >
-                    Productos
-                  </button>
-                  <button
-                    (click)="cambiarTipoBusqueda('paquetes')"
-                    [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                      (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-                  >
-                    Paquetes
-                  </button>
-                </div>
-
-                <!-- Loading -->
-                @if (resultados().cargando) {
-                  <div class="flex items-center justify-center py-8">
-                    <svg class="animate-spin w-8 h-8 text-primary mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-gray-600">Buscando...</span>
-                  </div>
-                }
-
-                <!-- Estado inicial (sin búsqueda) -->
-                @else if (!searchTerm().trim()) {
-                  <div class="text-center py-8 px-4">
-                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <p class="text-gray-600 font-medium">¿Qué estás buscando?</p>
-                    <p class="text-gray-500 text-sm mt-1">Escribí para buscar productos o paquetes</p>
-                  </div>
-                }
-
-                <!-- Sin resultados -->
-                @else if (!hayResultados()) {
-                  <div class="text-center py-8 px-4">
-                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-gray-600 font-medium">No encontramos resultados</p>
-                    <p class="text-gray-500 text-sm mt-1">Intenta con otros términos</p>
-                  </div>
-                }
-
-                <!-- Resultados -->
-                @else {
-                  <div class="p-4">
-
-                    <!-- PRODUCTOS -->
-                    @if (mostrarProductos() && resultados().productos.length > 0) {
-                      <div class="mb-4">
-                        <h3 class="text-sm font-bold text-gray-900 mb-3 px-2">
-                          Productos ({{ resultados().productos.length }})
-                        </h3>
-                        <div class="space-y-1">
-                          @for (producto of resultados().productos; track producto.id_producto) {
-                            <button
-                              (click)="verProducto(producto)"
-                              class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
-                            >
-                              <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                                <img
-                                  [src]="obtenerImagenProducto(producto)"
-                                  [alt]="producto.nombre"
-                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                              <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
-                                  {{ producto.nombre }}
-                                </p>
-                                <p class="text-xs text-gray-500">{{ producto.marca.nombre || 'Sin marca' }}</p>
-                                <p class="text-sm font-bold text-primary mt-1">
-                                  {{ formatearPrecio(producto.precio) }}
-                                </p>
-                              </div>
-                              <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          }
-                        </div>
-                      </div>
-                    }
-
-                    <!-- PAQUETES -->
-                    @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
-                      <div>
-                        <h3 class="text-sm font-bold text-gray-900 mb-3 px-2">
-                          Paquetes ({{ resultados().paquetes.length }})
-                        </h3>
-                        <div class="space-y-1">
-                          @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
-                            <button
-                              (click)="verPaquete(paquete)"
-                              class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
-                            >
-                              <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                                <img
-                                  [src]="obtenerImagenPaquete(paquete)"
-                                  [alt]="paquete.paqueteBase?.nombre"
-                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                />
-                              </div>
-                              <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                  <span class="inline-flex items-center px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                                    Paquete
-                                  </span>
-                                  <span class="text-xs text-gray-500">{{ paquete.estado.nombre || 'Sin estado' }}</span>
-                                </div>
-                                <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
-                                  {{ paquete.paqueteBase?.nombre }}
-                                </p>
-                                <p class="text-xs text-gray-500">{{ paquete.cant_productos }} productos</p>
-                              </div>
-                              <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          }
-                        </div>
-                      </div>
-                    }
-
-                    <!-- Ver todos -->
-                    @if (hayResultados() && totalResultados() > 6) {
-                      <button
-                        (click)="verTodosResultados()"
-                        class="w-full mt-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
-                      >
-                        Ver todos los resultados ({{ totalResultados() }})
-                      </button>
-                    }
-                  </div>
-                }
-              </div>
-            }
-          </div>
+        <!-- ✅ BUSCADOR DESKTOP (Componente) -->
+        <div
+          class="flex justify-center items-center min-w-0 flex-1 max-w-2xl mx-auto w-full"
+        >
+          <app-buscador-header variant="desktop" class="w-full" />
         </div>
 
-        <!-- Perfil (Desktop) -->
+        <!-- Perfil DESKTOP -->
         <div class="relative profile-menu-area">
           <button
             (click)="toggleProfileMenu()"
             class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-            aria-label="Menú de perfil"
+            aria-label="Mi perfil"
           >
-            <svg class="w-6 h-6" viewBox="0 0 448 512" fill="currentColor">
-              <path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8 16 482.3 16 498.7 29.3 512 45.7 512h356.6c16.4 0 29.7-13.3 29.7-29.7 0-98.5-79.8-178.3-178.3-178.3h-59.4z" />
-            </svg>
+            <app-icon name="User" class="w-7 h-7 translate-y-[1px]"></app-icon>
           </button>
 
-          <!-- Menú desplegable de perfil -->
+          <!-- ✅ MENÚ DESKTOP -->
           @if (profileMenuOpen() && isLoggedIn()) {
-            <div class="absolute right-0 mt-2 w-44 bg-white text-black rounded-md shadow-lg border border-gray-200 z-50 opacity-0 animate-[fadeIn_0.2s_ease-out_forwards]">
-              <a
-                [routerLink]="profileLink"
-                class="block px-4 py-2 hover:bg-gray-100 transition-colors duration-150 rounded-t-md"
-              >
-                Mi perfil
-              </a>
-              <button
-                (click)="signOut()"
-                class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-md"
-              >
-                Cerrar sesión
-              </button>
-            </div>
+          <div
+            class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="
+              z-index: 9999 !important;
+              position: absolute;
+              top: 100%;
+              right: 0;
+            "
+          >
+            <a
+              [routerLink]="profileLink"
+              (click)="profileMenuOpen.set(false)"
+              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
+            >
+              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
+            </a>
+            <button
+              (click)="signOut()"
+              type="button"
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
+            >
+              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+            </button>
+          </div>
           }
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- BARRA DE BÚSQUEDA MÓVIL CON OVERLAY -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ✅ BUSCADOR MÓVIL (barra debajo del header) -->
   <div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
-    <div class="relative">
-      <input
-        type="text"
-        [value]="searchTerm()"
-        (input)="onSearchChange($any($event.target).value)"
-        (focus)="openSearchMobile()"
-        placeholder="Buscar productos, paquetes..."
-        class="w-full px-4 py-2.5 pl-11 pr-4 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-        aria-label="Buscar"
-        readonly
-      />
-      <svg
-        class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    </div>
+    <app-buscador-header variant="mobile" />
   </div>
 
   <!-- NAVBAR (desktop) -->
@@ -307,230 +141,18 @@
 
   <!-- DRAWER (mobile) -->
   @if (drawerOpen()) {
-    <app-drawer
-      [isLoggedIn]="isLoggedIn()"
-      (closeDrawer)="toggleDrawer()"
-      (openSearch)="openSearchMobile()"
-      (signOut)="signOut()"
-    ></app-drawer>
-  }
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- OVERLAY MOBILE FULLSCREEN -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  @if (mobileSearchOpen()) {
-    <div class="fixed inset-0 z-50 bg-white md:hidden">
-      <div class="flex flex-col h-full">
-
-        <!-- Header del overlay móvil -->
-        <div class="bg-white border-b border-gray-200 px-4 py-3">
-          <div class="flex items-center gap-3">
-            <button
-              (click)="closeSearchMobile()"
-              class="flex-shrink-0 p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              aria-label="Volver"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            <div class="flex-1 relative">
-              <input
-                #mobileSearchInput
-                type="text"
-                [value]="searchTerm()"
-                (input)="onSearchChange($any($event.target).value)"
-                placeholder="¿Qué estás buscando?"
-                class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                autocomplete="off"
-              />
-              <svg
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Filtros móvil -->
-          <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
-            <button
-              (click)="cambiarTipoBusqueda('todo')"
-              [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              Todo
-            </button>
-            <button
-              (click)="cambiarTipoBusqueda('productos')"
-              [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              Productos
-            </button>
-            <button
-              (click)="cambiarTipoBusqueda('paquetes')"
-              [class]="'px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              Paquetes
-            </button>
-          </div>
-        </div>
-
-        <!-- Contenido móvil -->
-        <div class="flex-1 overflow-y-auto">
-          @if (!searchTerm().trim()) {
-            <div class="text-center py-16 px-4">
-              <svg class="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <h3 class="text-lg font-semibold text-gray-700 mb-2">¿Qué estás buscando?</h3>
-              <p class="text-gray-500 text-sm">Escribí para buscar productos o paquetes</p>
-            </div>
-          }
-
-          @else if (resultados().cargando) {
-            <div class="flex items-center justify-center py-16">
-              <svg class="animate-spin w-10 h-10 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-gray-600">Buscando...</span>
-            </div>
-          }
-
-          @else if (!hayResultados()) {
-            <div class="text-center py-16 px-4">
-              <svg class="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 class="text-lg font-semibold text-gray-700 mb-2">No encontramos resultados</h3>
-              <p class="text-gray-500 text-sm">Intenta con otros términos</p>
-            </div>
-          }
-
-          @else {
-            <div class="p-4">
-              <!-- Productos móvil -->
-              @if (mostrarProductos() && resultados().productos.length > 0) {
-                <div class="mb-6">
-                  <h3 class="text-sm font-bold text-gray-900 mb-3">Productos ({{ resultados().productos.length }})</h3>
-                  <div class="space-y-2">
-                    @for (producto of resultados().productos; track producto.id_producto) {
-                      <button
-                        (click)="verProducto(producto)"
-                        class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left"
-                      >
-                        <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            [src]="obtenerImagenProducto(producto)"
-                            [alt]="producto.nombre"
-                            class="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                            {{ producto.nombre }}
-                          </p>
-                          <p class="text-xs text-gray-500 mb-2">{{ producto.marca.nombre || 'Sin marca' }}</p>
-                          <p class="text-base font-bold text-primary">
-                            {{ formatearPrecio(producto.precio) }}
-                          </p>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Paquetes móvil -->
-              @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
-                <div>
-                  <h3 class="text-sm font-bold text-gray-900 mb-3">Paquetes ({{ resultados().paquetes.length }})</h3>
-                  <div class="space-y-2">
-                    @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
-                      <button
-                        (click)="verPaquete(paquete)"
-                        class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left"
-                      >
-                        <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            [src]="obtenerImagenPaquete(paquete)"
-                            [alt]="paquete.paqueteBase?.nombre"
-                            class="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="flex items-center gap-2 mb-1">
-                            <span class="inline-flex items-center px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                              Paquete
-                            </span>
-                          </div>
-                          <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                            {{ paquete.paqueteBase?.nombre }}
-                          </p>
-                          <p class="text-xs text-gray-500">{{ paquete.cant_productos }} productos</p>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                </div>
-              }
-
-              @if (hayResultados() && totalResultados() > 6) {
-                <button
-                  (click)="verTodosResultados()"
-                  class="w-full mt-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
-                >
-                  Ver todos los resultados ({{ totalResultados() }})
-                </button>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
+  <app-drawer
+    [isLoggedIn]="isLoggedIn()"
+    (closeDrawer)="toggleDrawer()"
+    (signOut)="signOut()"
+  ></app-drawer>
   }
 </header>
 
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!-- ESTILOS INLINE NECESARIOS (solo animaciones) -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <style>
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+  /* Asegurar que nada bloquee el menú */
+  .profile-menu-area {
+    position: relative;
+    z-index: 1000;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
 </style>

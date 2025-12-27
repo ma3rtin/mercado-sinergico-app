@@ -25,6 +25,7 @@ import { MarcaService } from '@app/services/producto/marca.service';
 // Components
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-paquetes-publicos',
@@ -32,8 +33,9 @@ import { FiltrosComponent } from '@app/shared/filtros/filtros';
   imports: [
     CommonModule,
     PaqueteCard,
-    FiltrosComponent
-  ],
+    FiltrosComponent,
+    IconComponent
+],
   templateUrl: './paquetes.html',
 })
 export class PaquetesPublicosComponent implements OnInit {
@@ -73,25 +75,70 @@ export class PaquetesPublicosComponent implements OnInit {
     mostrarEstados: true,
 
     // 📋 Opciones de Tipo de Paquete
-    opcionesTipoPaquete: [
-      { id: 1, nombre: '⚡ Sinérgico', valor: TipoPaquete.SINERGICO },
-      { id: 2, nombre: '🔋 Energético', valor: TipoPaquete.ENERGICO },
-    ],
+  opcionesTipoPaquete: [
+  {
+    id: 1,
+    nombre: 'Sinérgico',
+    icon: 'zap',
+    valor: TipoPaquete.SINERGICO
+  },
+  {
+    id: 2,
+    nombre: 'Energético',
+    icon: 'trendingUp',
+    valor: TipoPaquete.ENERGICO
+  },
+],
 
-    // 📋 Opciones de Ordenamiento
-    opcionesOrdenamiento: [
-      { id: 1, nombre: 'Más recientes', valor: 'recientes' },
-      { id: 2, nombre: 'A-Z', valor: 'a-z' },
-      { id: 3, nombre: 'Z-A', valor: 'z-a' },
-      { id: 4, nombre: 'Más participantes', valor: 'mas-participantes' },
-    ],
+opcionesOrdenamiento: [
+  {
+    id: 1,
+    nombre: 'Más recientes',
+    icon: 'calendar',
+    valor: 'recientes'
+  },
+  {
+    id: 2,
+    nombre: 'A-Z',
+    icon: 'arrowDown',
+    valor: 'a-z'
+  },
+  {
+    id: 3,
+    nombre: 'Z-A',
+    icon: 'arrowUp',
+    valor: 'z-a'
+  },
+  {
+    id: 4,
+    nombre: 'Más participantes',
+    icon: 'users',
+    valor: 'mas-participantes'
+  },
+],
 
-    // 📋 Opciones de Estados
-    opcionesEstados: [
-      { id: 1, nombre: '⏰ Por cerrar pronto', valor: 'por-cerrar' },
-      { id: 2, nombre: '✨ Recién abiertos', valor: 'recien-abiertos' },
-      { id: 3, nombre: '🔥 Más populares', valor: 'populares' },
-    ],
+
+opcionesEstados: [
+  {
+    id: 1,
+    nombre: 'Por cerrar pronto',
+    icon: 'clock',
+    valor: 'por-cerrar'
+  },
+  {
+    id: 2,
+    nombre: 'Recién abiertos',
+    icon: 'calendar',
+    valor: 'recien-abiertos'
+  },
+  {
+    id: 3,
+    nombre: 'Más populares',
+    icon: 'star',
+    valor: 'populares'
+  },
+],
+
 
     // 🎯 Textos personalizados
     tituloCategoria: 'Categorías',

@@ -15,11 +15,12 @@ import { CommonModule } from '@angular/common';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Router } from '@angular/router';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-carrusel',
   standalone: true,
-  imports: [CommonModule, PaqueteCard],
+  imports: [CommonModule, PaqueteCard, IconComponent],
   templateUrl: './carrusel.html',
   styleUrl: './carrusel.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

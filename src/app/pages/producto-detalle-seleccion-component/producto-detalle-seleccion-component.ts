@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, signal, computed, DestroyRef, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  computed,
+  DestroyRef,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,8 +35,8 @@ import { IconComponent } from '@app/shared/icono/icono';
     ProductoCard,
     PaqueteCard,
     ButtonComponent,
-    IconComponent
-],
+    IconComponent,
+  ],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
@@ -39,6 +47,8 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
+  productoIdActual = signal<number | null>(null);
+
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -54,45 +64,52 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   paquetesDelProducto = computed(() => this.todosLosPaquetes());
 
   // Loading general
-  isLoading = computed(() =>
-    this.isLoadingProducto() || this.isLoadingPaquetes()
+  isLoading = computed(
+    () => this.isLoadingProducto() || this.isLoadingPaquetes()
   );
 
   // Hay paquetes disponibles
-  hayPaquetesDisponibles = computed(() =>
-    this.paquetesDelProducto().length > 0
+  hayPaquetesDisponibles = computed(
+    () => this.paquetesDelProducto().length > 0
   );
 
   // Nombre del producto para breadcrumb
-  nombreProductoBreadcrumb = computed(() =>
-    this.productoSeleccionado()?.nombre || 'Producto'
+  nombreProductoBreadcrumb = computed(
+    () => this.productoSeleccionado()?.nombre || 'Producto'
   );
 
   ngOnInit(): void {
-    if (this.isBrowser) {
-      this.cargarDatos();
-    }
+    if (!this.isBrowser) return;
+
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const productoId = Number(params.get('id'));
+
+
+        console.log('🔄 Cambio de ruta detectado, producto ID:', productoId);
+
+        if (!productoId || isNaN(productoId)) {
+          this.errorMessage.set('ID de producto inválido');
+          this.isLoadingProducto.set(false);
+          this.isLoadingPaquetes.set(false);
+          return;
+        }
+        this.productoIdActual.set(productoId);
+        this.cargarDatos(productoId);
+      });
   }
 
   // 📥 CARGA DE DATOS
-  private cargarDatos(): void {
-    // Obtener el ID del producto de la URL
-    const productoId = Number(this.route.snapshot.paramMap.get('id'));
-
+  private cargarDatos(productoId: number): void {
+    this.productoSeleccionado.set(null);
+    this.todosLosPaquetes.set([]);
     console.log('🚀 Cargando datos para producto ID:', productoId);
 
-    if (!productoId || isNaN(productoId)) {
-      console.error('❌ ID de producto inválido:', productoId);
-      this.errorMessage.set('ID de producto inválido');
-      this.isLoadingProducto.set(false);
-      this.isLoadingPaquetes.set(false);
-      return;
-    }
+    this.errorMessage.set('');
+    this.productoSeleccionado.set(null);
 
-    // Cargar producto
     this.cargarProducto(productoId);
-
-    // Cargar paquetes
     this.cargarPaquetes();
   }
 
@@ -122,7 +139,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
           }
 
           this.errorMessage.set(mensaje);
-        }
+        },
       });
   }
 
@@ -153,16 +170,24 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
           this.errorMessage.set(mensaje);
           this.todosLosPaquetes.set([]);
-        }
+        },
       });
   }
 
   // 🔄 Recargar datos
-  recargarDatos(): void {
-    console.log('🔄 Recargando datos...');
-    this.errorMessage.set('');
-    this.cargarDatos();
+recargarDatos(): void {
+  const productoId = this.productoIdActual();
+
+  if (!productoId) {
+    console.error('❌ No hay productoId para recargar');
+    return;
   }
+
+  console.log('🔄 Recargando datos para producto ID:', productoId);
+  this.errorMessage.set('');
+  this.cargarDatos(productoId);
+}
+
 
   // 🧭 NAVEGACIÓN
 

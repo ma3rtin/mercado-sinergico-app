@@ -1,372 +1,332 @@
 import {
   Component,
-  input,
-  output,
-  signal,
-  computed,
-  OnInit,
-  ViewChild,
   ElementRef,
   HostListener,
-  effect,
+  ViewChild,
+  inject,
+  signal,
+  computed,
+  input,
+  output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject, combineLatest } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+  finalize,
+  take,
+  tap,
+} from 'rxjs/operators';
+import { of } from 'rxjs';
 
-export interface OpcionSelect {
-  id: string | number;
-  etiqueta: string;
-  deshabilitado?: boolean;
-  grupo?: string;
-  [key: string]: any;
+// Services
+import { ProductosService } from '@app/services/producto/producto.service';
+import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+
+// Models
+import { Producto } from '@app/models/ProductosInterfaces/Producto';
+import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { IconComponent } from '@app/shared/icono/icono';
+
+// Tipos
+type TipoBusqueda = 'todo' | 'productos' | 'paquetes';
+
+interface ResultadoBusqueda {
+  productos: Producto[];
+  paquetes: PaquetePublicado[];
+  cargando: boolean;
+  error: string | null;
 }
 
 /**
- * Configuración genérica para buscar datos
- * T = tipo de datos que retorna el servicio (ej: PaquetePublicado, Producto)
+ * 🔍 Componente de búsqueda para el header
+ *
+ * Características:
+ * - Búsqueda en tiempo real con debounce
+ * - Filtros por tipo (productos/paquetes)
+ * - Versiones desktop y móvil
+ * - Navegación directa a resultados
+ *
+ * @example
+ * // Desktop
+ * <app-buscador-header variant="desktop" />
+ *
+ * // Móvil
+ * <app-buscador-header variant="mobile" />
  */
-export interface ConfigBuscador<T = any> {
-  obtenerDatos: () => Observable<T[]>;
-  filtrar: (datos: T[], termino: string) => T[];
-  mapear: (item: T) => OpcionSelect;
-  campoTexto?: string;
-  debounceMs?: number;
-}
-
 @Component({
-  selector: 'app-buscador',
+  selector: 'app-buscador-header',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './buscador.html',
 })
-export class BuscadorComponent<T = any> implements OnInit {
-  @ViewChild('contenedorDropdown') contenedorDropdown!: ElementRef;
-  @ViewChild('inputBusqueda') inputBusqueda!: ElementRef;
+export class BuscadorComponent {
+  // 🔧 Servicios
+  private productosService = inject(ProductosService);
+  private paquetesService = inject(PaquetePublicadoService);
+  private router = inject(Router);
 
-  // 🎯 SIGNAL INPUTS - La forma moderna de Angular 17+
-  // Estos SÍ aceptan valores directos desde el template
-  etiqueta = input<string>('');
-  marcador = input<string>('Seleccionar opción');
-  requerido = input<boolean>(false);
-  deshabilitado = input<boolean>(false);
-  limpiable = input<boolean>(true);
-  buscable = input<boolean>(true);
-  multiSeleccion = input<boolean>(false);
-  maxSelecciones = input<number>(0);
-  textAyuda = input<string>('');
-  mensajeError = input<string>('');
-  mensajeExito = input<string>('');
-  tamañoEtiqueta = input<'sm' | 'md' | 'lg'>('md');
-  tamaño = input<'sm' | 'md' | 'lg'>('md');
-  textoCargando = input<string>('Cargando opciones...');
-  textoVacio = input<string>('No se encontraron opciones');
-  textoErrorCarga = input<string>('Error al cargar opciones');
+  // 📌 ViewChild
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('searchContainer') searchContainer?: ElementRef<HTMLDivElement>;
 
-  // Config también puede ser signal input
-  config = input<ConfigBuscador<T> | null>(null);
+  // 🎯 Inputs
+  variant = input<'desktop' | 'mobile'>('desktop');
 
-  // 📤 OUTPUTS modernos
-  cambioValor = output<OpcionSelect | OpcionSelect[] | null>();
-  cambioApertura = output<boolean>();
-  datosCargados = output<OpcionSelect[]>();
-  errorDatos = output<Error>();
-  seleccionado = output<any>(); // Emite el dato original T
+  // 📤 Outputs
+  resultadoSeleccionado = output<void>();
 
-  // 🎨 Estado interno (signals normales)
-  valorSeleccionado = signal<OpcionSelect | OpcionSelect[] | null>(null);
-  idsSeleccionados = signal<(string | number)[]>([]);
-  terminoBusqueda = signal<string>('');
-  abierto = signal<boolean>(false);
-  enfocado = signal<boolean>(false);
-  cargando = signal<boolean>(false);
-  errorCarga = signal<string | null>(null);
-  idEntrada = signal<string>(`select-${Math.random().toString(36).substr(2, 9)}`);
+  // 🔍 Estado de búsqueda
+  searchOpen = signal(false);
+  searchTerm = signal('');
+  tipoBusqueda = signal<TipoBusqueda>('todo');
 
-  // Datos internos
-  private datosOriginales: T[] = [];
-  private opcionesInternas = signal<OpcionSelect[]>([]);
-
-  // Propiedades accesibles en el template
-  ObjectKeys = Object.keys;
-
-  // 📊 COMPUTED - Ahora usando signal inputs directamente
-  todasOpciones = computed(() => this.opcionesInternas());
-
-  opcionesFiltradas = computed(() => {
-    const termino = this.terminoBusqueda().toLowerCase();
-    if (!termino) return this.todasOpciones();
-
-    return this.todasOpciones().filter((opt) =>
-      opt.etiqueta.toLowerCase().includes(termino)
-    );
+  resultados = signal<ResultadoBusqueda>({
+    productos: [],
+    paquetes: [],
+    cargando: false,
+    error: null,
   });
 
-  opcionesAgrupadas = computed(() => {
-    const opts = this.opcionesFiltradas();
-    const agrupadas: { [key: string]: OpcionSelect[] } = {};
-
-    opts.forEach((opt) => {
-      const grupo = opt.grupo || 'Sin grupo';
-      if (!agrupadas[grupo]) agrupadas[grupo] = [];
-      agrupadas[grupo].push(opt);
-    });
-
-    return agrupadas;
+  // 📊 Computed
+  hayResultados = computed(() => {
+    const res = this.resultados();
+    return res.productos.length > 0 || res.paquetes.length > 0;
   });
 
-  etiquetaMostrada = computed(() => {
-    const seleccionado = this.valorSeleccionado();
-    if (!seleccionado) return '';
-
-    if (Array.isArray(seleccionado)) {
-      return seleccionado.map((s) => s.etiqueta).join(', ');
-    }
-    return seleccionado.etiqueta;
+  totalResultados = computed(() => {
+    const res = this.resultados();
+    return res.productos.length + res.paquetes.length;
   });
 
-  conteoSeleccionados = computed(() => {
-    const seleccionado = this.valorSeleccionado();
-    if (Array.isArray(seleccionado)) return seleccionado.length;
-    return seleccionado ? 1 : 0;
+  mostrarProductos = computed(() => {
+    const tipo = this.tipoBusqueda();
+    return tipo === 'todo' || tipo === 'productos';
   });
 
-  errorActual = computed(() => {
-    if (this.errorCarga()) return this.errorCarga();
-    if (!this.enfocado() && this.requerido() && !this.valorSeleccionado()) {
-      return 'Este campo es requerido';
-    }
-    return this.mensajeError();
+  mostrarPaquetes = computed(() => {
+    const tipo = this.tipoBusqueda();
+    return tipo === 'todo' || tipo === 'paquetes';
   });
 
-  tieneError = computed(() => !!this.errorActual());
+  esMobile = computed(() => this.variant() === 'mobile');
 
-  claseEtiqueta = computed(() => {
-    const tamaños: { [key: string]: string } = {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg font-semibold',
-    };
-    return tamaños[this.tamañoEtiqueta()];
-  });
+  // 🔍 Subject para búsqueda reactiva
+  private searchSubject = new Subject<string>();
 
-  clasesEntrada = computed(() => {
-    const base =
-      'w-full px-4 py-2.5 border rounded-full transition-all focus:outline-none focus:ring-2 cursor-pointer';
-    const tamaños: { [key: string]: string } = {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
-    };
-
-    const bordes = this.tieneError()
-      ? 'border-red-500 focus:ring-red-300 focus:border-red-500 bg-red-50'
-      : this.enfocado() || this.abierto()
-        ? 'border-secondary focus:ring-secondary/30 focus:border-secondary bg-white'
-        : 'border-gray-300 hover:border-gray-400 bg-white';
-
-    const deshabilitadoClase = this.deshabilitado() ? 'opacity-50 cursor-not-allowed' : '';
-
-    return `${base} ${tamaños[this.tamaño()]} ${bordes} ${deshabilitadoClase}`;
-  });
-
-  tieneAyudaOError = computed(
-    () =>
-      !!this.textAyuda() ||
-      !!this.errorActual() ||
-      !!this.mensajeExito()
-  );
-
-  // 🎯 EFFECT - Reemplaza OnChanges para signal inputs
   constructor() {
-    // Effect para cargar datos cuando cambia la config
-    effect(() => {
-      const cfg = this.config();
-      if (cfg) {
-        this.cargarDatos();
-      }
-    });
+    this.setupSearch();
   }
 
-  ngOnInit(): void {
-    // Ya no necesitas OnInit para esto, el effect lo maneja
-  }
-
-  // 📥 Cargar datos usando la configuración
-  private async cargarDatos(): Promise<void> {
-    const cfg = this.config();
-    if (!cfg) return;
-
-    try {
-      this.cargando.set(true);
-      this.errorCarga.set(null);
-
-      const datos = await new Promise<T[]>((resolve, reject) => {
-        let suscripcion: any;
-
-        suscripcion = cfg.obtenerDatos()
-          .pipe(
-            debounceTime(cfg.debounceMs || 300),
-            distinctUntilChanged()
-          )
-          .subscribe({
-            next: (valor) => resolve(valor),
-            error: reject,
+  // 🔧 Configuración de búsqueda con debounce
+private setupSearch(): void {
+  this.searchSubject
+    .pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term.trim()) {
+          this.resultados.set({
+            productos: [],
+            paquetes: [],
+            cargando: false,
+            error: null,
           });
+          return of(null);
+        }
 
-        // 🔐 Esto garantiza que siempre se desuscriba
-        suscripcion.add(() => {
-          suscripcion = null;
-        });
+        this.resultados.update(prev => ({
+          ...prev,
+          cargando: true,
+          error: null,
+        }));
+
+        return combineLatest({
+          productos: this.productosService.getProductos().pipe(
+             take(1), // 🔑 CLAVE
+            catchError(err => {
+              console.error('❌ Error productos', err);
+              return of([]);
+            })
+          ),
+          paquetes: this.paquetesService.getPaquetes().pipe(
+             take(1), // 🔑 CLAVE
+            catchError(err => {
+              console.error('❌ Error paquetes', err);
+              return of([]);
+            })
+          ),
+        }).pipe(
+          finalize(() => {
+            // 🔑 SIEMPRE se apaga el loading
+            this.resultados.update(prev => ({
+              ...prev,
+              cargando: false,
+            }));
+          })
+        );
+      })
+    )
+    .subscribe(data => {
+      if (!data) return;
+
+      const term = this.searchTerm().toLowerCase();
+
+      const productosFiltrados = data.productos.filter(p =>
+        p.nombre?.toLowerCase().includes(term) ||
+        p.descripcion?.toLowerCase().includes(term) ||
+        p.marca?.nombre?.toLowerCase().includes(term) ||
+        p.categoria?.nombre?.toLowerCase().includes(term)
+      );
+
+      const paquetesFiltrados = data.paquetes.filter(paq =>
+        paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
+        paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
+        paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||
+        paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
+      );
+
+      this.resultados.set({
+        productos: productosFiltrados.slice(0, 6),
+        paquetes: paquetesFiltrados.slice(0, 6),
+        cargando: false,
+        error: null,
       });
 
-      // Guardar datos
-      this.datosOriginales = datos;
+    });
+      tap(() => console.log('🟡 loading true')),
+finalize(() => console.log('🟢 finalize ejecutado'));
+}
 
-      const opcionesMapeadas = datos.map((item) => cfg.mapear(item));
-      this.opcionesInternas.set(opcionesMapeadas);
-      this.datosCargados.emit(opcionesMapeadas);
 
-    } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      this.errorCarga.set(err.message);
-      this.errorDatos.emit(err);
+  // 🔍 Métodos de búsqueda
+  onSearchChange(term: string): void {
+    this.searchTerm.set(term);
+    this.searchSubject.next(term);
 
-    } finally {
-      this.cargando.set(false);
+    if (!this.searchOpen()) {
+      this.searchOpen.set(true);
     }
   }
 
-  // Métodos públicos
-  alternarDropdown(): void {
-    if (this.deshabilitado() || this.cargando()) return;
+  onSearchFocus(): void {
+    this.searchOpen.set(true);
+  }
 
-    this.abierto.update((v) => !v);
-    this.cambioApertura.emit(this.abierto());
+  onInputClick(event: Event): void {
+    event.stopPropagation();
+    this.searchOpen.set(true);
+  }
 
-    if (this.abierto() && this.buscable()) {
-      setTimeout(() => this.inputBusqueda?.nativeElement?.focus());
+  openSearch(): void {
+    this.searchOpen.set(true);
+    setTimeout(() => this.searchInput?.nativeElement?.focus(), 100);
+  }
+
+  closeSearch(): void {
+    this.searchOpen.set(false);
+  }
+
+  limpiarBusqueda(): void {
+    this.searchTerm.set('');
+    this.resultados.set({
+      productos: [],
+      paquetes: [],
+      cargando: false,
+      error: null,
+    });
+  }
+
+  // 🎯 Cambiar filtro
+  cambiarTipoBusqueda(tipo: TipoBusqueda, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.tipoBusqueda.set(tipo);
+  }
+
+  // 📍 Navegación
+  verProducto(producto: Producto): void {
+    if (producto.id_producto) {
+      this.closeSearch();
+      this.limpiarBusqueda();
+      this.resultadoSeleccionado.emit();
+      this.router.navigate(['/detalleSeleccionProducto', producto.id_producto]);
     }
   }
 
-  seleccionarOpcion(opcion: OpcionSelect): void {
-    if (opcion.deshabilitado) return;
+  verPaquete(paquete: PaquetePublicado): void {
+    if (paquete.id_paquete_publicado) {
+      this.closeSearch();
+      this.limpiarBusqueda();
+      this.resultadoSeleccionado.emit();
+      this.router.navigate(['/productos-del-paquete', paquete.id_paquete_publicado]);
+    }
+  }
 
-    const cfg = this.config();
-    if (!cfg) return;
+  verTodosResultados(): void {
+    const term = this.searchTerm();
+    if (term.trim()) {
+      this.closeSearch();
+      this.limpiarBusqueda();
+      this.resultadoSeleccionado.emit();
+      this.router.navigate(['/buscar'], {
+        queryParams: { q: term, tipo: this.tipoBusqueda() },
+      });
+    }
+  }
 
-    // Encontrar el dato original
-    const datosOriginal = this.datosOriginales.find(
-      (d) => cfg.mapear(d).id === opcion.id
+  // 🎨 Helpers
+  obtenerImagenProducto(producto: Producto): string {
+    return producto.imagen_url || '/assets/images/placeholder-product.png';
+  }
+
+  obtenerImagenPaquete(paquete: PaquetePublicado): string {
+    return (
+      paquete.imagen_url ||
+      paquete.paqueteBase?.imagen_url ||
+      '/assets/images/placeholder-product.png'
     );
-
-    if (this.multiSeleccion()) {
-      this.manejarMultiSeleccion(opcion);
-    } else {
-      this.valorSeleccionado.set(opcion);
-      this.idsSeleccionados.set([opcion.id]);
-      this.abierto.set(false);
-      this.terminoBusqueda.set('');
-      this.cambioValor.emit(opcion);
-      this.seleccionado.emit(datosOriginal); // Emitir dato original
-    }
   }
 
-  private manejarMultiSeleccion(opcion: OpcionSelect): void {
-    const actual = Array.isArray(this.valorSeleccionado())
-      ? this.valorSeleccionado()
-      : [];
-    const ids = this.idsSeleccionados();
-
-    const seleccionado = ids.includes(opcion.id);
-
-    if (seleccionado) {
-      const actualizado = (actual as OpcionSelect[]).filter((o) => o.id !== opcion.id);
-      this.valorSeleccionado.set(actualizado.length > 0 ? actualizado : null);
-      this.idsSeleccionados.set(actualizado.map((o) => o.id));
-    } else {
-      if (this.maxSelecciones() && ids.length >= this.maxSelecciones()) {
-        return;
-      }
-
-      const actualizado = [...actual as OpcionSelect[], opcion];
-      this.valorSeleccionado.set(actualizado);
-      this.idsSeleccionados.set(actualizado.map((o) => o.id));
-    }
-
-    this.cambioValor.emit(this.valorSeleccionado());
+  formatearPrecio(precio?: number | null): string {
+    if (!precio) return 'Consultar';
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+    }).format(precio);
   }
 
-  esOpcionSeleccionada(opcion: OpcionSelect): boolean {
-    return this.idsSeleccionados().includes(opcion.id);
+  truncarTexto(texto: string, maxLength: number): string {
+    if (texto.length <= maxLength) return texto;
+    return texto.substring(0, maxLength) + '...';
   }
 
-  limpiarValor(): void {
-    this.valorSeleccionado.set(null);
-    this.idsSeleccionados.set([]);
-    this.terminoBusqueda.set('');
-    this.abierto.set(false);
-    this.cambioValor.emit(null);
-  }
-
-  eliminarSeleccion(opcion: OpcionSelect, evento?: Event): void {
-    if (evento) evento.stopPropagation();
-
-    if (this.multiSeleccion()) {
-      const actual = Array.isArray(this.valorSeleccionado()) ? this.valorSeleccionado() : [];
-      const actualizado = (actual as OpcionSelect[]).filter((o) => o.id !== opcion.id);
-      this.valorSeleccionado.set(actualizado.length > 0 ? actualizado : null);
-      this.idsSeleccionados.set(actualizado.map((o) => o.id));
-      this.cambioValor.emit(this.valorSeleccionado());
-    }
-  }
-
-  manejarDesenfoque(): void {
-    this.enfocado.set(false);
-  }
-
-  manejarEnfoque(): void {
-    this.enfocado.set(true);
-  }
-
-  alCambiarBusqueda(termino: string): void {
-    this.terminoBusqueda.set(termino);
-  }
-
-  recargarDatos(): void {
-    this.cargarDatos();
-  }
-
+  // 🎧 Host Listeners
   @HostListener('document:click', ['$event'])
-  alHacerClickDocumento(evento: MouseEvent): void {
+  onClickOutside(event: Event): void {
+    const target = event.target as HTMLElement;
+    const searchContainer = this.searchContainer?.nativeElement;
+
     if (
-      !this.contenedorDropdown?.nativeElement?.contains(evento.target) &&
-      this.abierto()
+      this.searchOpen() &&
+      searchContainer &&
+      !searchContainer.contains(target)
     ) {
-      this.abierto.set(false);
-      this.cambioApertura.emit(false);
+      this.searchOpen.set(false);
     }
   }
 
-  get valorMostrado(): string {
-    return this.etiquetaMostrada();
-  }
-
-  esArray(valor: any): boolean {
-    return Array.isArray(valor);
-  }
-
-  getGroupKeys(): string[] {
-    return Object.keys(this.opcionesAgrupadas());
-  }
-
-  getGroupOptions(grupo: string): OpcionSelect[] {
-    return this.opcionesAgrupadas()[grupo] || [];
-  }
-
-  getSeleccionados(): OpcionSelect[] {
-    const valor = this.valorSeleccionado();
-    return Array.isArray(valor) ? valor : [];
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    if (this.searchOpen()) {
+      this.closeSearch();
+    }
   }
 }

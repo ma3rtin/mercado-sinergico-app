@@ -10,7 +10,7 @@ import { LocationStateService } from './services/localidad/location-state.servic
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, WhatsAppButton, Header, Footer],
+  imports: [RouterOutlet, WhatsAppButton, Header, Footer, LocationModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -1,13 +1,13 @@
 <!-- Contenedor de Filtros - Desktop -->
 <div class="hidden lg:block w-64 xl:w-72 flex-shrink-0">
   <div class="sticky top-4 bg-white rounded-xl shadow-md p-4 xl:p-6">
-    
+
     <!-- 🎯 Header -->
     <div class="flex items-center justify-between mb-4">
       <h2 class="font-display text-lg xl:text-xl font-bold text-gray-800">
         {{ titulo() }}
       </h2>
-      
+
       @if (tieneFiltrosActivos()) {
         <button
           (click)="limpiarFiltros()"
@@ -63,7 +63,8 @@
                     [checked]="esCategoriaSeleccionada(categoria.id)"
                     (change)="toggleCategoria(categoria.id)"
                     class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                  <span class="text-sm text-gray-700 group-hover:text-gray-900">
+
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900">
                     {{ categoria.nombre }}
                   </span>
                 </label>
@@ -110,8 +111,8 @@
               @for (tipo of obtenerOpciones('TipoPaquete'); track tipo.id) {
                 <label
                   [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
-                    (esTipoPaqueteSeleccionado(tipo.valor) 
-                      ? 'border-blue-500 bg-blue-50' 
+                    (esTipoPaqueteSeleccionado(tipo.valor)
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
                   <input
                     type="checkbox"
@@ -186,8 +187,8 @@
               @for (estado of obtenerOpciones('Estados'); track estado.id) {
                 <label
                   [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
-                    (esEstadoSeleccionado(estado.valor) 
-                      ? 'border-green-500 bg-green-50' 
+                    (esEstadoSeleccionado(estado.valor)
+                      ? 'border-green-500 bg-green-50'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
                   <input
                     type="checkbox"
