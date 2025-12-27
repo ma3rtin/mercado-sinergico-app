@@ -1,7 +1,7 @@
 <!-- paquete-card.html -->
 <!-- Card más cuadrada, imagen simple y datos principales -->
 
-<article (click)="onCardClick()" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden 
+<article (click)="onCardClick()" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden
          border border-gray-200 hover:border-blue-400 cursor-pointer
          flex flex-col h-full hover:scale-105 active:scale-100 max-w-sm">
 
@@ -89,10 +89,7 @@
 
       <!-- Compradores -->
       <div class="flex items-center gap-1">
-        <svg class="w-3.5 h-3.5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 
-            0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-        </svg>
+        <app-icon name="users" size="16" ></app-icon>
         <div>
           <p class="text-gray-500">Compradores</p>
           <p class="font-bold text-gray-900">{{ paquete.cant_usuarios_registrados || 0 }}</p>
@@ -101,10 +98,7 @@
 
       <!-- Tiempo -->
       <div class="flex items-center gap-1">
-        <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 
-            9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <app-icon name="Clock" size="16" ></app-icon>
         <div>
           <p class="text-gray-500">Cierra</p>
           <p class="font-bold text-gray-900">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
@@ -116,13 +110,10 @@
   </div>
 
   <!-- FOOTER -->
-  <div class="px-4 py-2 bg-gray-50 flex items-center justify-center gap-2 text-secondary font-semibold text-sm 
+  <div class="px-4 py-2 bg-gray-50 flex items-center justify-center gap-2 text-secondary font-semibold text-sm
                 group-hover:text-secondary-dark transition-colors">
     <span>Ver detalles</span>
-    <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
-      viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-    </svg>
+    <app-icon name="ArrowRight" size="16" class="w-7 h-7 translate-y-[7px]"></app-icon>
   </div>
 
 </article>

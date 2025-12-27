@@ -1,24 +1,22 @@
 <!-- carrusel.html - VERSIÓN FINAL -->
 <section class="py-12 relative overflow-hidden bg-gradient-to-b from-white to-gray-50">
-  
+
   <!-- Título -->
   <div class="max-w-7xl mx-auto px-4 mb-8">
     <h2 class="font-display text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 text-gray-900">
-      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" class="text-gray-800">
-        <path fill="currentColor" d="M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm2-4h5v-2H7zm1-4l4-2l4 2V5H8z"/>
-      </svg>
+      <app-icon name="Package"  size="40"></app-icon>
       {{ tipo() === "paquete" ? "Paquetes por cerrarse" : "⭐ Productos destacados" }}
     </h2>
   </div>
 
   <!-- Carrusel Container -->
   <div class="relative flex items-center justify-center px-4">
-    
+
     <!-- Flecha izquierda -->
     <button
       (click)="scrollLeft()"
       [disabled]="translateX === 0"
-      class="absolute left-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl 
+      class="absolute left-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl
              transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
              hover:bg-gray-50"
     >
@@ -37,7 +35,7 @@
         <!-- Cards -->
         @for (item of items(); track item.id_paquete_publicado) {
           <div class="flex-shrink-0" [style.width.px]="320">
-            <app-paquete-card 
+            <app-paquete-card
               [paquete]="item"
               (cardClick)="onPaqueteClick($event)"
             ></app-paquete-card>
@@ -46,7 +44,7 @@
           <!-- Empty State -->
           <div class="w-full flex flex-col items-center justify-center py-20 text-gray-500">
             <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
               </path>
             </svg>
@@ -63,7 +61,7 @@
     <button
       (click)="scrollRight()"
       [disabled]="translateX === maxScroll"
-      class="absolute right-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl 
+      class="absolute right-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl
             transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
             hover:bg-gray-50"
     >

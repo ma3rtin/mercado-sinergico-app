@@ -1,101 +1,158 @@
-<header class="w-full font-body">
-    <!-- Top bar -->
-    <div class="bg-primary">
-        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
-            <!-- MOBILE: hamburguesa | logo + texto | usuario -->
-            <div class="md:hidden grid grid-cols-[auto_1fr_auto] items-center">
-                <!-- Trigger del drawer -->
-                <button (click)="toggleDrawer()"
-                    class="justify-self-start inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition"
-                    aria-label="Abrir menú">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+<header class="w-full font-body relative z-40">
+  <!-- Top bar -->
+  <div class="bg-primary">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- MOBILE -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="md:hidden grid grid-cols-[auto_1fr_auto] items-center gap-3">
+        <!-- Hamburguesa -->
+        <button
+          (click)="toggleDrawer()"
+          class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+          aria-label="Abrir menú"
+        >
+          <app-icon name="Menu" class="w-5 h-5"></app-icon>
+        </button>
 
-                <!-- Logo + texto -->
-                <div class="min-w-0 flex items-center justify-center gap-2">
-                    <img [routerLink]="'/home'" src="/assets/images/Logo2.png" alt="Mercado Sinérgico"
-                        class="h-10 w-auto" />
-                    <span [routerLink]="'/home'" class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw]
-                     leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden">
-                        Mercado Sinérgico
-                    </span>
-                </div>
-
-                <!-- Usuario -->
-                <div class="flex items-center gap-2 justify-self-end">
-                    <a [routerLink]="profileLink"
-                        class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition"
-                        aria-label="Mi perfil">
-                        <svg class="w-6 h-6" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
-                            <path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8
-                                16 482.3 16 498.7 29.3 512 45.7 512h356.6c16.4 0 29.7-13.3
-                                29.7-29.7 0-98.5-79.8-178.3-178.3-178.3h-59.4z" />
-                        </svg>
-                    </a>
-
-                </div>
-            </div>
-
-            <!-- DESKTOP -->
-            <div class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-0">
-                <a [routerLink]="'/home'" class="shrink-0 inline-flex items-center">
-                    <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
-                </a>
-
-                <div class="flex justify-center min-w-0">
-                    <div class="w-full md:max-w-lg lg:max-w-xl xl:max-w-2xl">
-                        <app-buscador>
-                            <input type="text" placeholder="Buscar productos, categorías, marcas..."
-                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
-                        </app-buscador>
-                    </div>
-                </div>
-
-                <!-- Ícono de perfil (desktop y mobile) -->
-                <div class="relative profile-menu-area">
-                    <button (click)="toggleProfileMenu()"
-                        class="cursor-pointer inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition"
-                        aria-label="Menú de perfil">
-                        <svg class="w-6 h-6" viewBox="0 0 448 512" fill="currentColor" aria-hidden="true">
-                            <path d="M224 248a120 120 0 1 0 0-240 120 120 0 1 0 0 240zm-29.7 56C95.8 304 16 383.8
-                16 482.3 16 498.7 29.3 512 45.7 512h356.6c16.4 0 29.7-13.3
-                29.7-29.7 0-98.5-79.8-178.3-178.3-178.3h-59.4z" />
-                        </svg>
-                    </button>
-
-                    <!-- MENÚ DE PERFIL -->
-                    @if (profileMenuOpen && isLoggedIn()) {
-                    <div
-                        class="absolute right-0 mt-2 w-44 bg-white text-black rounded-md shadow-lg border border-gray-200 z-50 animate-fadeIn">
-
-                        <a [routerLink]="profileLink" class="block px-4 py-2 hover:bg-gray-100 transition">
-                            Mi perfil
-                        </a>
-
-                        <button (click)="signOut()"
-                            class="cursor-pointer w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition">
-                            Cerrar sesión
-                        </button>
-                    </div>
-                    }
-                </div>
-
-            </div>
+        <!-- Logo + Texto -->
+        <div
+          class="min-w-0 flex items-center justify-center gap-2 cursor-pointer"
+          (click)="navigateToHome()"
+        >
+          <img
+            src="/assets/images/Logo2.png"
+            alt="Mercado Sinérgico"
+            class="h-10 w-auto"
+          />
+          <span
+            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden"
+          >
+            Mercado Sinérgico
+          </span>
         </div>
+
+        <!-- Usuario MÓVIL -->
+        <div class="relative profile-menu-area">
+          <button
+            (click)="toggleProfileMenu()"
+            class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+            aria-label="Mi perfil"
+          >
+            <app-icon name="User" class="w-8 h-8"></app-icon>
+          </button>
+
+          <!-- ✅ MENÚ MÓVIL -->
+          @if (profileMenuOpen() && isLoggedIn()) {
+          <div
+            class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="z-index: 9999 !important"
+          >
+            <a
+              [routerLink]="profileLink"
+              (click)="profileMenuOpen.set(false)"
+              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
+            >
+              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
+            </a>
+            <button
+              (click)="signOut()"
+              type="button"
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
+            >
+              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- DESKTOP -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div
+        class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6"
+      >
+        <!-- Logo -->
+        <a [routerLink]="'/home'" class="shrink-0 inline-flex items-center">
+          <img
+            src="/assets/images/Logo2.png"
+            alt="Mercado Sinérgico"
+            class="h-10 w-auto"
+          />
+        </a>
+
+        <!-- ✅ BUSCADOR DESKTOP (Componente) -->
+        <div
+          class="flex justify-center items-center min-w-0 flex-1 max-w-2xl mx-auto w-full"
+        >
+          <app-buscador-header variant="desktop" class="w-full" />
+        </div>
+
+        <!-- Perfil DESKTOP -->
+        <div class="relative profile-menu-area">
+          <button
+            (click)="toggleProfileMenu()"
+            class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+            aria-label="Mi perfil"
+          >
+            <app-icon name="User" class="w-7 h-7 translate-y-[1px]"></app-icon>
+          </button>
+
+          <!-- ✅ MENÚ DESKTOP -->
+          @if (profileMenuOpen() && isLoggedIn()) {
+          <div
+            class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="
+              z-index: 9999 !important;
+              position: absolute;
+              top: 100%;
+              right: 0;
+            "
+          >
+            <a
+              [routerLink]="profileLink"
+              (click)="profileMenuOpen.set(false)"
+              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
+            >
+              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
+            </a>
+            <button
+              (click)="signOut()"
+              type="button"
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
+            >
+              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+            </button>
+          </div>
+          }
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- NAVBAR (desktop) -->
-    <app-navbar></app-navbar>
+  <!-- ✅ BUSCADOR MÓVIL (barra debajo del header) -->
+  <div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
+    <app-buscador-header variant="mobile" />
+  </div>
 
-    <!-- DRAWER (mobile) -->
-    @if (drawerOpen) {
-    <app-drawer [isLoggedIn]="isLoggedIn()" (closeDrawer)="toggleDrawer()" (openSearch)="openSearch()"
-        (signOut)="signOut()"></app-drawer>
-    }
+  <!-- NAVBAR (desktop) -->
+  <app-navbar></app-navbar>
 
-    <!-- OVERLAY DE BÚSQUEDA -->
-    @if (searchOpen) {
-    }
+  <!-- DRAWER (mobile) -->
+  @if (drawerOpen()) {
+  <app-drawer
+    [isLoggedIn]="isLoggedIn()"
+    (closeDrawer)="toggleDrawer()"
+    (signOut)="signOut()"
+  ></app-drawer>
+  }
 </header>
+
+<style>
+  /* Asegurar que nada bloquee el menú */
+  .profile-menu-area {
+    position: relative;
+    z-index: 1000;
+  }
+</style>

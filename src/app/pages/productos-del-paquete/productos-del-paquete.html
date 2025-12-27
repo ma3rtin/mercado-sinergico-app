@@ -67,42 +67,16 @@
         </p>
       </div>
 
-      <!-- 🔍 Buscador -->
-      <div class="max-w-3xl mx-auto mb-6 sm:mb-8">
-        <app-buscador
-          [config]="configBuscador()"
-          [etiqueta]="'Buscar productos'"
-          [marcador]="'Buscar por nombre, marca, categoría...'"
-          [buscable]="true"
-          [limpiable]="true"
-          [textAyuda]="'Buscá entre ' + totalProductos() + ' productos disponibles'"
-          [textoCargando]="'Cargando productos...'"
-          [textoVacio]="'No se encontraron productos'"
-          (seleccionado)="alSeleccionarProducto($event)"
-          (cambioValor)="limpiarBusqueda()"
-        />
-      </div>
 
       <!-- 📊 Estadísticas -->
-      @if (!isLoading() && !errorMessage()) {
-        <div class="flex items-center justify-between max-w-3xl mx-auto px-4 text-sm text-gray-600">
-          <span>
-            Mostrando <strong class="text-gray-900">{{ productosMostrados() }}</strong>
-            de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
-          </span>
-
-          @if (productoSeleccionado()) {
-            <button
-              (click)="limpiarBusqueda()"
-              class="text-blue-600 hover:secondary-dark font-medium transition-colors flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-              Limpiar búsqueda
-            </button>
-          }
-        </div>
-      }
+@if (!isLoading() && !errorMessage()) {
+  <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
+    <span>
+      Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
+      de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
+    </span>
+  </div>
+}
     </div>
 
     <!-- 📐 Layout: Filtros + Grid -->
