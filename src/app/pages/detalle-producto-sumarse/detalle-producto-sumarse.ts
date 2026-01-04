@@ -3,21 +3,22 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
+import { FormsModule } from '@angular/forms';
+
+// Components
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
-
 import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
-
-// Models
+import { IconComponent } from '@app/shared/icono/icono';
+import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
+import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes'; // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
-import { FormsModule } from '@angular/forms';
 import { PedidoService } from '@app/services/pedido/pedido.service';
-import { IconComponent } from '@app/shared/icono/icono';
-import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
+
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
@@ -27,8 +28,9 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
     BreadcrumbComponent,
     VisorImagenesComponent,
     IconComponent,
-    PaqueteCard
-  ],
+    PaqueteCard,
+    SelectorVariantesComponent // 🆕
+],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
@@ -51,10 +53,15 @@ export class DetalleProductoSumarse implements OnInit {
   isLoading = signal(true);
   errorMessage = signal('');
   currentImageIndex = signal(0);
-  selectedSize = signal('S');
-  selectedColor = signal('Rojo');
   quantity = signal(1);
   showFullDescription = signal(false);
+
+  // 🆕 NUEVO: Signals para variantes
+  variantesSeleccionadas = signal<VariantesSeleccionadas>({});
+  variantesValidas = signal(false);
+
+  private productoCargado = signal(false);
+  private paqueteCargado = signal(false);
 
   // 🧩 Computed signals
   hasProducto = computed(() => !!this.producto());
@@ -62,8 +69,22 @@ export class DetalleProductoSumarse implements OnInit {
   maxQuantity = computed(() => 25);
   minQuantity = computed(() => 1);
 
-  private productoCargado = signal(false);
-  private paqueteCargado = signal(false);
+  // 🆕 NUEVO: Computed para verificar si el producto tiene variantes
+  productoTieneVariantes = computed(() => {
+    const prod = this.producto();
+    return !!(prod?.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+  });
+
+  // 🆕 NUEVO: Computed para habilitar/deshabilitar botón de sumarse
+  puedeAgregarAlCarrito = computed(() => {
+    // Si el producto no tiene variantes, siempre puede agregar
+    if (!this.productoTieneVariantes()) {
+      return true;
+    }
+
+    // Si tiene variantes, debe tener todas las variantes seleccionadas
+    return this.variantesValidas();
+  });
 
   // Información del paquete seleccionado
   participantesActuales = computed(() => {
@@ -184,21 +205,15 @@ export class DetalleProductoSumarse implements OnInit {
       });
   }
 
-  // 🎨 MÉTODOS DE SELECCIÓN
-  selectSize(size: string): void {
-    this.selectedSize.set(size);
+  // 🆕 NUEVO: Handlers para eventos del selector de variantes
+  onVariantesChange(variantes: VariantesSeleccionadas): void {
+    console.log('🎨 Variantes seleccionadas:', variantes);
+    this.variantesSeleccionadas.set(variantes);
   }
 
-  selectColor(color: string): void {
-    this.selectedColor.set(color);
-  }
-
-  isSizeSelected(size: string): boolean {
-    return this.selectedSize() === size;
-  }
-
-  isColorSelected(color: string): boolean {
-    return this.selectedColor() === color;
+  onVariantesValidoChange(valido: boolean): void {
+    console.log('✅ Variantes válidas:', valido);
+    this.variantesValidas.set(valido);
   }
 
   // 🔢 MÉTODOS DE CANTIDAD
@@ -212,7 +227,7 @@ export class DetalleProductoSumarse implements OnInit {
     }
   }
 
-  // 🛒 ACCIONES
+  // 🛒 ACCIÓN PRINCIPAL: Sumarse al paquete
   addToCart(): void {
     const producto = this.producto();
     const paquete = this.paqueteSeleccionado();
@@ -227,12 +242,26 @@ export class DetalleProductoSumarse implements OnInit {
       return;
     }
 
+    // 🆕 VALIDAR VARIANTES
+    if (this.productoTieneVariantes() && !this.variantesValidas()) {
+      this.toastr.error('Debes seleccionar todas las variantes del producto');
+      return;
+    }
+
+    // 🆕 CONSTRUIR BODY CON VARIANTES
     const body = {
       productoId: producto.id_producto,
       cantidad: this.quantity(),
-      variante: this.selectedSize()
+      variantes: this.productoTieneVariantes()
+        ? this.variantesSeleccionadas()
+        : undefined // Si no tiene variantes, no enviar el campo
     };
 
+    console.log('🛒 Body del pedido:', body);
+
+    // 🚨 TODO: BACKEND - Conectar con el endpoint real
+    // El backend debe aceptar el campo "variantes" en el body
+    // Endpoint esperado: POST /api/pedidos/sumarse-paquete
     this.pedidoService
       .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -243,7 +272,7 @@ export class DetalleProductoSumarse implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error al sumarse:', err);
-          this.toastr.error('No se pudo crear el pedido');
+          this.toastr.error(err.error?.message || 'No se pudo crear el pedido');
         }
       });
   }
@@ -258,7 +287,7 @@ export class DetalleProductoSumarse implements OnInit {
     }
   }
 
-  // 🎯 NUEVO: Navegación a productos del paquete
+  // 🎯 Navegación a productos del paquete
   onPaqueteClick(paqueteId: number): void {
     console.log('🔗 Navegando a paquete:', paqueteId);
     this.router.navigate(['productos-del-paquete', paqueteId]);
@@ -269,20 +298,6 @@ export class DetalleProductoSumarse implements OnInit {
   }
 
   // 🎨 MÉTODOS DE ESTILO
-  getSizeButtonClass(size: string): string {
-    return `px-4 py-2 border-2 rounded-lg hover:shadow-secondary-dark hover:bg-white transition-all ${this.isSizeSelected(size)
-      ? 'border-secondary-dark text-secondary-dark shadow-md shadow-secondary-dark'
-      : 'border-gray-300 text-gray-700 hover:text-secondary-dark'
-      }`;
-  }
-
-  getColorButtonClass(color: string): string {
-    return `border-2 rounded-lg hover:shadow-secondary-dark transition-colors ${this.isColorSelected(color)
-      ? 'border-secondary-dark shadow-md shadow-secondary-dark'
-      : 'border-gray-300'
-      }`;
-  }
-
   getEstadoClass(estado?: string): string {
     if (!estado) return 'text-gray-600';
 

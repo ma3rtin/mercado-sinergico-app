@@ -6,7 +6,7 @@
 <!-- Loading State -->
 @if (isLoading()) {
 <div class="flex flex-col items-center justify-center py-20">
-    <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4"></div>
+    <app-icon name="Loader" class="w-16 h-16 text-blue-500 mb-4 animate-spin" />
     <p class="text-gray-600 text-lg">Cargando...</p>
 </div>
 }
@@ -15,10 +15,7 @@
 @else if (errorMessage()) {
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-        <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
+        <app-icon name="AlertCircle" class="w-20 h-20 text-red-400 mb-4" />
         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
         <button (click)="goBack()"
             class="mt-4 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium transition-colors">
@@ -64,34 +61,60 @@
             </div>
             }
 
+            <!-- 🆕 SELECTOR DE VARIANTES -->
+            @if (productoTieneVariantes()) {
+            <app-selector-variantes
+                [producto]="producto()!"
+                (variantesChange)="onVariantesChange($event)"
+                (valido)="onVariantesValidoChange($event)"
+            ></app-selector-variantes>
+            }
+
             <!-- Cantidad -->
             <div class="flex items-center gap-4">
                 <button (click)="changeQuantity(-1)"
-                    class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold transition-colors"
+                    class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold transition-colors"
                     [disabled]="quantity() <= minQuantity()">
                     -
                 </button>
                 <span class="text-xl font-semibold px-4">{{ quantity() }}</span>
                 <button (click)="changeQuantity(1)"
-                    class="w-7 h-7 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-xl font-bold transition-colors"
+                    class="w-10 h-10 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-xl font-bold transition-colors"
                     [disabled]="quantity() >= maxQuantity()">
                     +
                 </button>
-                <button (click)="addToCart()"
-                    class="bg-yellow-400 shadow-md hover:bg-yellow-500 px-8 py-3 rounded-lg font-semibold text-gray-800 transition-colors">
-                    Sumarse
+
+                <!-- Botón Sumarse -->
+                <button
+                    (click)="addToCart()"
+                    [disabled]="!puedeAgregarAlCarrito()"
+                    [class]="'px-8 py-3 rounded-lg font-semibold transition-all ' +
+                             (puedeAgregarAlCarrito()
+                              ? 'bg-yellow-400 shadow-md hover:bg-yellow-500 text-gray-800 cursor-pointer'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60')">
+                    @if (productoTieneVariantes() && !variantesValidas()) {
+                        Elegí todas las opciones
+                    } @else {
+                        Sumarse
+                    }
                 </button>
             </div>
 
+            <!-- 🆕 AYUDA CONTEXTUAL (si tiene variantes y no están todas seleccionadas) -->
+            @if (productoTieneVariantes() && !variantesValidas()) {
+            <div class="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <app-icon name="Info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p class="text-sm text-blue-800">
+                    Seleccioná todas las opciones del producto (color, talle, etc.) para poder continuar
+                </p>
+            </div>
+            }
+
             <!-- Volver al paquete -->
             <button (click)="goBack()"
-                class="shadow-md w-full border-2 border-secondary text-secondary py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+                class="shadow-md w-full border-2 border-secondary text-secondary py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
                 Volver al paquete
-                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                    viewBox="0 0 24 24">
-                    <path fill="currentColor"
-                        d="m15.06 5.283l5.657 5.657a1.5 1.5 0 0 1 0 2.12l-5.656 5.658a1.5 1.5 0 0 1-2.122-2.122l3.096-3.096H4.5a1.5 1.5 0 0 1 0-3h11.535L12.94 7.404a1.5 1.5 0 0 1 2.122-2.121Z" />
-                </svg>
+                <app-icon name="ArrowRight" class="w-5 h-5" />
             </button>
 
             <!-- Información del paquete -->
@@ -102,12 +125,8 @@
                     <div>
                         <div class="text-sm text-gray-600">Productos ya comprados</div>
                         <div class="flex items-center gap-2">
-                            <span class="text-lg font-semibold">
-                                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 32 32">
-                                    <path fill="currentColor"
-                                        d="M17.615 2.55a4.5 4.5 0 0 0-3.23 0L11.3 3.736l13 5l4.485-1.725a3.3 3.3 0 0 0-.868-.499zm3.9 7.258l-13.001-5l-4.43 1.704q-.481.186-.87.5L16 11.928zM2 9.545q0-.422.105-.818L15 13.687v15.95a4.5 4.5 0 0 1-.615-.187L4.083 25.488A3.25 3.25 0 0 1 2 22.455zM17.615 29.45q-.302.117-.615.188V13.687l12.895-4.96q.104.396.105.818v12.91a3.25 3.25 0 0 1-2.083 3.033z" />
-                                </svg>
+                            <span class="text-lg font-semibold flex items-center gap-1">
+                                <app-icon name="Package" class="w-5 h-5 text-gray-600" />
                                 {{ participantesActuales() }}/{{ maxParticipantes() }}
                             </span>
                             <span class="text-sm text-gray-500">
@@ -119,11 +138,7 @@
                     <div>
                         <div class="text-sm text-gray-600">Estado del paquete</div>
                         <div class="flex items-center gap-2">
-                            <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24">
-                                <path fill="currentColor"
-                                    d="M6 8h9V6q0-1.25-.875-2.125T12 3t-2.125.875T9 6H7q0-2.075 1.463-3.537T12 1t3.538 1.463T17 6v2h1q.825 0 1.413.588T20 10v10q0 .825-.587 1.413T18 22H6q-.825 0-1.412-.587T4 20V10q0-.825.588-1.412T6 8m6 9q.825 0 1.413-.587T14 15t-.587-1.412T12 13t-1.412.588T10 15t.588 1.413T12 17" />
-                            </svg>
+                            <app-icon name="lock" class="w-5 h-5 text-gray-600" />
                             <span [class]="'font-semibold ' + getEstadoClass(estadoDelPaquete())">
                                 {{ estadoDelPaquete() }}
                             </span>
@@ -133,12 +148,8 @@
                     <div>
                         <div class="text-sm text-gray-600">El paquete cierra el</div>
                         <div class="flex items-center gap-2">
-                            <span class="font-semibold">
-                                <svg class="inline align-middle mr-1 mb-1" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                        d="M6 22q-.825 0-1.412-.587T4 20V10q0-.825.588-1.412T6 8h1V6q0-2.075 1.463-3.537T12 1t3.538 1.463T17 6v2h1q.825 0 1.413.588T20 10v10q0 .825-.587 1.413T18 22zm6-5q.825 0 1.413-.587T14 15t-.587-1.412T12 13t-1.412.588T10 15t.588 1.413T12 17M9 8h6V6q0-1.25-.875-2.125T12 3t-2.125.875T9 6z" />
-                                </svg>
+                            <span class="font-semibold flex items-center gap-1">
+                                <app-icon name="Calendar" class="w-5 h-5 text-gray-600" />
                                 {{ fechaCierre() }}
                             </span>
                         </div>
@@ -147,12 +158,8 @@
                     <div>
                         <div class="text-sm text-gray-600">Compradores involucrados</div>
                         <div class="flex items-center gap-2">
-                            <span class="text-lg">
-                                <svg class="inline align-middle" xmlns="http://www.w3.org/2000/svg" width="24"
-                                    height="24" viewBox="0 0 24 24">
-                                    <path fill="currentColor"
-                                        d="M16 17v2H2v-2s0-4 7-4s7 4 7 4m-3.5-9.5A3.5 3.5 0 1 0 9 11a3.5 3.5 0 0 0 3.5-3.5m3.44 5.5A5.32 5.32 0 0 1 18 17v2h4v-2s0-3.63-6.06-4M15 4a3.4 3.4 0 0 0-1.93.59a5 5 0 0 1 0 5.82A3.4 3.4 0 0 0 15 11a3.5 3.5 0 0 0 0-7" />
-                                </svg>
+                            <span class="text-lg flex items-center gap-1">
+                                <app-icon name="Users" class="w-5 h-5 text-gray-600" />
                             </span>
                             <span class="font-semibold">{{ participantesActuales() }}</span>
                         </div>
@@ -191,3 +198,27 @@
     }
 </div>
 }
+
+<!-- ============================================ -->
+<!-- NOTAS PARA CONECTAR CON BACKEND -->
+<!-- ============================================ -->
+<!--
+  🚨 TODO: Conectar con backend cuando esté listo
+
+  1️⃣ PedidoService.sumarseAlPaquete() debe aceptar:
+     {
+       productoId: number,
+       cantidad: number,
+       variantes?: { [caracteristicaId: number]: opcionId: number }
+     }
+
+  2️⃣ Backend debe:
+     - Buscar la variante que coincide con las opciones
+     - Validar stock si el paquete es ENERGETICO
+     - Crear PedidoDetalle con varianteId
+     - Crear PedidoDetalleOpcion para cada característica
+
+  3️⃣ Si el producto NO tiene variantes:
+     - No enviar campo "variantes" en el body
+     - Backend crea pedido normal sin variantes
+-->
