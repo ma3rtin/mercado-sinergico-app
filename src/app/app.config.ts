@@ -83,6 +83,8 @@ import {
   featherZap,
   featherTag,
   featherLayers,
+  featherAward,
+  featherClipboard,
 
 } from '@ng-icons/feather-icons';
 //import { L } from 'vitest/dist/chunks/reporters.d.BFLkQcL6';
@@ -202,6 +204,8 @@ export const appConfig: ApplicationConfig = {
         featherMail,
         featherBell,
         featherZap,
+        featherAward,
+        featherClipboard
 
       })
     ),
