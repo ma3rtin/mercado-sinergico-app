@@ -6,11 +6,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-paquete-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   templateUrl: './paquete-card.html',
 })
 export class PaqueteCard implements OnInit {

@@ -10,13 +10,16 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, map } from 'rxjs';
+import { map } from 'rxjs';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { ConfigBuscador } from '@app/shared/buscador/buscador';
-import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
+import {
+  ConfigFiltros,
+  FiltrosAplicados,
+  OpcionFiltro,
+} from '@app/shared/filtros/filtros';
 import { TipoPaquete } from '@app/models/Enums';
 
 // Services
@@ -27,21 +30,15 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 
 // Components
-import { BuscadorComponent } from '@app/shared/buscador/buscador';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 
 @Component({
   selector: 'app-productos-del-paquete',
   standalone: true,
-  imports: [
-    CommonModule,
-    BuscadorComponent,
-    FiltrosComponent,
-    ProductoCard,
-  ],
+  imports: [CommonModule, FiltrosComponent, ProductoCard],
   templateUrl: './productos-del-paquete.html',
-  styleUrl: './productos-del-paquete.css'
+  styleUrl: './productos-del-paquete.css',
 })
 export class ProductosDelPaquete implements OnInit {
   private isBrowser: boolean;
@@ -54,48 +51,37 @@ export class ProductosDelPaquete implements OnInit {
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
   idPaquete = signal<number>(0); // ✅ Inicializado en 0
-
-  // 🔍 Configuración del buscador
-  configBuscador = computed<ConfigBuscador<Producto>>(() => ({
-    obtenerDatos: (): Observable<Producto[]> =>
-      new Observable(obs => {
-        obs.next(this.productosOriginales());
-        obs.complete();
-      }),
-
-    filtrar: (datos, termino) =>
-      datos.filter(p =>
-        p.nombre?.toLowerCase().includes(termino.toLowerCase()) ||
-        p.marca?.nombre?.toLowerCase().includes(termino.toLowerCase()) ||
-        p.categoria?.nombre?.toLowerCase().includes(termino.toLowerCase())
-      ),
-
-    mapear: (producto) => ({
-      id: producto.id_producto!,
-      etiqueta: producto.nombre,
-      grupo: producto.categoria?.nombre || 'Sin categoría'
-    }),
-
-    debounceMs: 300
-  }));
+  paqueteIdActual = signal<number | null>(null);
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS DEL PAQUETE
   configFiltrosProductos = computed<ConfigFiltros>(() => ({
-    obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
-      map(categorias => categorias.map(cat => ({
-        id: cat.id_categoria,
-        nombre: cat.nombre,
-        valor: cat.id_categoria
-      } as OpcionFiltro)))
-    ),
+    obtenerCategorias: () =>
+      this.categoriaService.getCategorias().pipe(
+        map((categorias) =>
+          categorias.map(
+            (cat) =>
+              ({
+                id: cat.id_categoria,
+                nombre: cat.nombre,
+                valor: cat.id_categoria,
+              } as OpcionFiltro)
+          )
+        )
+      ),
 
-    obtenerMarcas: () => this.marcaService.getMarcas().pipe(
-      map(marcas => marcas.map(marca => ({
-        id: marca.id_marca,
-        nombre: marca.nombre,
-        valor: marca.id_marca
-      } as OpcionFiltro)))
-    ),
+    obtenerMarcas: () =>
+      this.marcaService.getMarcas().pipe(
+        map((marcas) =>
+          marcas.map(
+            (marca) =>
+              ({
+                id: marca.id_marca,
+                nombre: marca.nombre,
+                valor: marca.id_marca,
+              } as OpcionFiltro)
+          )
+        )
+      ),
 
     mostrarCategoria: true,
     mostrarMarca: true,
@@ -137,7 +123,7 @@ export class ProductosDelPaquete implements OnInit {
     return {
       porcentaje,
       aplicado: false,
-      nombrePaquete: p.paqueteBase?.nombre || 'Paquete'
+      nombrePaquete: p.paqueteBase?.nombre || 'Paquete',
     };
   });
 
@@ -163,26 +149,41 @@ export class ProductosDelPaquete implements OnInit {
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
-    const id = this.route.snapshot.paramMap.get('paqueteId');
-    if (!id) {
-      this.errorMessage.set('No se proporcionó un ID de paquete válido');
-      this.isLoading.set(false);
-      return;
-    }
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const paqueteId = Number(params.get('paqueteId'));
 
-    const paqueteId = Number(id);
-    this.idPaquete.set(paqueteId);
-    this.cargarPaquete(paqueteId);
+        console.log('🔄 Cambio de ruta detectado, paquete ID:', paqueteId);
+
+        if (!paqueteId || isNaN(paqueteId)) {
+          this.errorMessage.set('No se proporcionó un ID de paquete válido');
+          this.isLoading.set(false);
+          return;
+        }
+
+        this.paqueteIdActual.set(paqueteId);
+        this.idPaquete.set(paqueteId);
+
+        this.cargarPaquete(paqueteId);
+      });
   }
 
   // 📥 Cargar paquete publicado
   private cargarPaquete(id: number): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.paquete.set(null);
+    this.productosOriginales.set([]);
+    this.productosFiltrados.set([]);
     this.paquetePublicadoService
       .getPaquetes()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (paquetes) => {
-          const encontrado = paquetes.find(p => p.id_paquete_publicado === id);
+          const encontrado = paquetes.find(
+            (p) => p.id_paquete_publicado === id
+          );
 
           if (!encontrado) {
             this.errorMessage.set('Paquete no encontrado');
@@ -199,7 +200,7 @@ export class ProductosDelPaquete implements OnInit {
         error: () => {
           this.errorMessage.set('Error al cargar el paquete');
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
@@ -231,7 +232,7 @@ export class ProductosDelPaquete implements OnInit {
           this.productosOriginales.set([]);
           this.productosFiltrados.set([]);
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
@@ -242,22 +243,20 @@ export class ProductosDelPaquete implements OnInit {
     let resultado = [...this.productosOriginales()];
 
     if (filtros.categorias.length > 0) {
-      resultado = resultado.filter(p =>
+      resultado = resultado.filter((p) =>
         filtros.categorias.includes(p.categoria_id)
       );
     }
 
     if (filtros.marcas.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.marcas.includes(p.marca_id)
-      );
+      resultado = resultado.filter((p) => filtros.marcas.includes(p.marca_id));
     }
 
     if (filtros.rangoPrecio.min !== null) {
-      resultado = resultado.filter(p => p.precio >= filtros.rangoPrecio.min!);
+      resultado = resultado.filter((p) => p.precio >= filtros.rangoPrecio.min!);
     }
     if (filtros.rangoPrecio.max !== null) {
-      resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
+      resultado = resultado.filter((p) => p.precio <= filtros.rangoPrecio.max!);
     }
 
     if (filtros.ordenamiento) {
@@ -286,19 +285,19 @@ export class ProductosDelPaquete implements OnInit {
     this.productosFiltrados.set(this.productosOriginales());
   }
 
-  recargarProductos(): void {
-    this.productoSeleccionado.set(null);
-    this.cargarProductosDelPaquete();
+recargarProductos(): void {
+  const paqueteId = this.paqueteIdActual();
+
+  if (!paqueteId) {
+    console.error('❌ No hay paqueteId para recargar');
+    return;
   }
 
-  alSeleccionarProducto(producto: Producto): void {
-    console.log('🔍 Producto seleccionado:', producto);
-    this.productoSeleccionado.set(producto);
-  }
+  console.log('🔄 Recargando productos del paquete:', paqueteId);
+  this.productoSeleccionado.set(null);
+  this.cargarPaquete(paqueteId);
+}
 
-  limpiarBusqueda(): void {
-    this.productoSeleccionado.set(null);
-  }
 
   // 🧭 Navegar al detalle del producto para sumarse
   // ✅ Nota: El ProductoCard ahora se encarga de la navegación

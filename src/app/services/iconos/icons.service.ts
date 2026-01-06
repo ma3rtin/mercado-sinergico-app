@@ -65,7 +65,6 @@ import {
   featherFilePlus,
   featherFileMinus,
 
-
   // ⏰ Tiempo
   featherClock,
   featherCalendar,
@@ -96,7 +95,13 @@ import {
   featherBell,
   featherZap,
   featherLayers,
-} from '@ng-icons/feather-icons';;
+
+  // 🆕 NUEVOS para buscador
+  featherMeh,
+  featherFrown,
+  featherSmile,
+  featherTag,
+} from '@ng-icons/feather-icons';
 
 @Injectable({
   providedIn: 'root'
@@ -104,7 +109,6 @@ import {
 export class IconsService {
 
   // 📋 Mapeo centralizado de iconos
-  // Facilita cambiar un icono en un solo lugar
   public readonly icons = {
     // ➕ Navegación
     chevronRight: featherChevronRight,
@@ -126,6 +130,7 @@ export class IconsService {
     dollar: featherDollarSign,
     cart: featherShoppingCart,
     bag: featherShoppingBag,
+    shoppingBag: featherShoppingBag,
     trendingUp: featherTrendingUp,
     trendingDown: featherTrendingDown,
 
@@ -150,6 +155,7 @@ export class IconsService {
     gift: featherGift,
     star: featherStar,
     heart: featherHeart,
+    tag: featherTag,
 
     // 🗺️ Ubicación
     mapPin: featherMapPin,
@@ -190,15 +196,20 @@ export class IconsService {
     mail: featherMail,
     bell: featherBell,
     zap: featherZap,
+    layers: featherLayers,
 
     // 📋 Documentos
     file: featherFile,
     fileText: featherFileText,
     filePlus: featherFilePlus,
     fileMinus: featherFileMinus,
-    layers: featherLayers,
 
-    //Otros
+    // 😊 Emociones
+    meh: featherMeh,
+    frown: featherFrown,
+    smile: featherSmile,
+
+    // 🔤 Aliases con mayúsculas (para compatibilidad)
     Box: featherBox,
     TrendingUp: featherTrendingUpIcon,
     X: featherXIcon,
@@ -207,15 +218,21 @@ export class IconsService {
     Map: featherMap,
     Loader: featherLoader,
     Calendar: featherCalendar,
-    LogOut: featherLogOut,
-    MapPin: featherMapPin
-
+    Logout: featherLogOut,
+    MapPin: featherMapPin,
+    Search: featherSearch,
+    ShoppingBag: featherShoppingBag,
+    Package: featherPackage,
+    ChevronRight: featherChevronRight,
+    ChevronLeft: featherChevronLeft,
+    AlertCircle: featherAlertCircle,
+    Meh: featherMeh,
+    Frown: featherFrown,
+    Tag: featherTag,
   };
 
   /**
    * Obtener un icono por su nombre
-   * @param name - Nombre del icono del mapeo
-   * @returns El icono de feather o undefined
    */
   getIcon(name: keyof typeof this.icons) {
     return this.icons[name];
@@ -229,5 +246,5 @@ export class IconsService {
   }
 }
 
-// 📌 EXPORTAR los módulos necesarios para usar en componentes
+// 📌 EXPORTAR los módulos necesarios
 export { NgIconsModule };

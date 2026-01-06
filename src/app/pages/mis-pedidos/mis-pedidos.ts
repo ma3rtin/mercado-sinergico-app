@@ -5,14 +5,14 @@ import {
   signal,
   computed,
   DestroyRef,
-  ViewChild
+
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { of } from 'rxjs';
+
 
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
@@ -22,11 +22,7 @@ import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastrService } from 'ngx-toastr';
 
 // Shared components
-import {
-  BuscadorComponent,
-  ConfigBuscador,
-  OpcionSelect
-} from '@app/shared/buscador/buscador';
+import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
 
 // ------------------------------
@@ -57,7 +53,7 @@ interface PedidoDelUsuario extends Pedido {
   imports: [
     CommonModule,
     FormsModule,
-    BuscadorComponent,
+    BreadcrumbComponent,
     PaqueteUsuarioCardComponent
   ],
   templateUrl: './mis-pedidos.html'
@@ -93,21 +89,9 @@ export class MisPedidosComponent implements OnInit {
     );
   });
 
-  @ViewChild(BuscadorComponent) buscador!: BuscadorComponent<any>;
 
-  // ------------------------------
-  // CONFIG BUSCADOR
-  // ------------------------------
-  configBuscador: ConfigBuscador<PedidoDelUsuario> = {
-    obtenerDatos: () => of(this.pedidos()),
-    filtrar: () => [], // ya no filtra aquí — ahora filtramos con computed
-    mapear: (p: PedidoDelUsuario): OpcionSelect => ({
-      id: p.id_pedido!,
-      etiqueta: `Pedido #${p.id_pedido} (${p.estado?.nombre})`,
-      grupo: p.estado?.nombre ?? 'Estado'
-    }),
-    debounceMs: 300
-  };
+
+
 
   // ------------------------------
   // INIT
@@ -129,8 +113,6 @@ export class MisPedidosComponent implements OnInit {
           const enriched = await Promise.all(pedidos.map(p => this.mapPedido(p)));
 
           this.pedidos.set(enriched);
-
-          queueMicrotask(() => this.buscador?.recargarDatos());
 
           this.isLoading.set(false);
         },
@@ -179,18 +161,6 @@ export class MisPedidosComponent implements OnInit {
     };
   }
 
-
-  // ------------------------------
-  // BUSCADOR
-  // ------------------------------
-  onBuscadorCambio(opcion: OpcionSelect | OpcionSelect[] | null) {
-    if (!opcion) {
-      this.terminoBusqueda.set('');
-      return;
-    }
-    const selected = Array.isArray(opcion) ? opcion[0] : opcion;
-    this.terminoBusqueda.set(selected.etiqueta ?? '');
-  }
 
   // ------------------------------
   // CÁLCULOS

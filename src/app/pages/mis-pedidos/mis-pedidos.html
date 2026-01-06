@@ -11,14 +11,6 @@
             </p>
         </div>
 
-        <!-- 🔍 Buscador -->
-        <div class="mb-6">
-            <app-buscador
-                #buscador
-                [config]="configBuscador"
-                (cambioValor)="onBuscadorCambio($event)">
-            </app-buscador>
-        </div>
 
         <!-- Estados de carga -->
         @if (isLoading()) {
