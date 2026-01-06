@@ -108,7 +108,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     console.log('🧭 Navegando a paquete:', idPaquete);
 
-    this.router.navigate(['/productos-del-paquete', idPaquete]);
+    this.router.navigate(['/paquete', idPaquete, 'productos']);
   }
 
   getTipoPaqueteIcono(tipo?: string | TipoPaquete) {

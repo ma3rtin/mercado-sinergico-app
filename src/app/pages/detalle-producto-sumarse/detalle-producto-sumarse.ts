@@ -5,8 +5,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
 
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
-
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
@@ -24,7 +22,6 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
   imports: [
     CommonModule,
     FormsModule,
-    BreadcrumbComponent,
     VisorImagenesComponent,
     IconComponent,
     PaqueteCard
@@ -252,7 +249,7 @@ export class DetalleProductoSumarse implements OnInit {
     const paqueteId = this.paqueteSeleccionado()?.id_paquete_publicado;
 
     if (paqueteId) {
-      this.router.navigate(['detalleSeleccionProducto', this.producto()?.id_producto]);
+      this.router.navigate(['producto', this.producto()?.id_producto]);
     } else {
       this.router.navigate(['paquetes']);
     }
@@ -261,7 +258,7 @@ export class DetalleProductoSumarse implements OnInit {
   // 🎯 NUEVO: Navegación a productos del paquete
   onPaqueteClick(paqueteId: number): void {
     console.log('🔗 Navegando a paquete:', paqueteId);
-    this.router.navigate(['productos-del-paquete', paqueteId]);
+    this.router.navigate(['paquete/', paqueteId, 'productos']);
   }
 
   toggleDescription(): void {

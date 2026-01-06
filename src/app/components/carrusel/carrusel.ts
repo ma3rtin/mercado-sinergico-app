@@ -90,6 +90,6 @@ export class Carrusel implements AfterViewInit {
   onPaqueteClick(id: number): void {
     console.log('🔗 Paquete clickeado:', id);
     this.paqueteSelected.emit(id);
-    this.router.navigate(['/productos-del-paquete', id]);
+    this.router.navigate(['/paquete/', id, '/productos']);
   }
 }

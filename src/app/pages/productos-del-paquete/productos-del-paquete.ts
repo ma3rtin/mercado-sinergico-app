@@ -32,12 +32,11 @@ import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 // Components
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 
 @Component({
   selector: 'app-productos-del-paquete',
   standalone: true,
-  imports: [CommonModule, FiltrosComponent, ProductoCard, BreadcrumbComponent],
+  imports: [CommonModule, FiltrosComponent, ProductoCard],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css',
 })
@@ -308,7 +307,7 @@ recargarProductos(): void {
   }
 
   volverAPaquetes(): void {
-    this.router.navigate(['/paquetes-publicados']);
+    this.router.navigate(['/paquetes']);
   }
 
   onImageError(event: Event): void {
