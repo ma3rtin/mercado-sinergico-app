@@ -71,11 +71,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     () => this.paquetesDelProducto().length > 0
   );
 
-  // Nombre del producto para breadcrumb
-  nombreProductoBreadcrumb = computed(
-    () => this.productoSeleccionado()?.nombre || 'Producto'
-  );
-
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
