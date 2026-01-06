@@ -178,7 +178,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
     // Navegar a la vista de "sumarse" con ambos IDs
     this.router.navigate(['paquete/', paqueteId, 'producto', productoId], {
-      queryParams: { productoId, paqueteId },
     });
   }
 
