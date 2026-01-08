@@ -12,7 +12,6 @@ import {
   withEventReplay,
 } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideToastr } from 'ngx-toastr';
 import {
   provideHttpClient,
   withFetch,
@@ -20,6 +19,7 @@ import {
 } from '@angular/common/http';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthService } from './services/auth/auth.service';
+
 // 🎨 ngicons
 import { NgIconsModule } from '@ng-icons/core';
 import {
@@ -85,26 +85,14 @@ import {
   featherLayers,
   featherAward,
   featherClipboard,
-
 } from '@ng-icons/feather-icons';
-//import { L } from 'vitest/dist/chunks/reporters.d.BFLkQcL6';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideAnimations(),
+    provideAnimations(), // ✅ Necesario para ngx-sonner
 
-    provideToastr({
-      positionClass: 'toast-top-right',
-      timeOut: 3000,
-      progressBar: true,
-      closeButton: true,
-      preventDuplicates: true,
-      toastClass:
-        'text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2',
-      titleClass: 'text-black-400 font-bold',
-      messageClass: 'text-sm text-gray-200',
-    }),
+    // 🔥 YA NO NECESITAS provideToastr - eliminalo
 
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 
@@ -116,10 +104,9 @@ export const appConfig: ApplicationConfig = {
       return authService.restoreSession();
     }),
 
-    // ⭐️ Agregamos NgIcons correctamente
+    // ⭐️ NgIcons
     importProvidersFrom(
       NgIconsModule.withIcons({
-        // ➕ Navegación
         featherChevronRight,
         featherChevronLeft,
         featherChevronDown,
@@ -131,82 +118,57 @@ export const appConfig: ApplicationConfig = {
         featherHome,
         featherTag,
         featherLayers,
-
-        // 🔍 Búsqueda
         featherSearch,
         featherFilter,
         featherSliders,
-
-        // 💰 Precios
         featherDollarSign,
         featherShoppingCart,
         featherShoppingBag,
         featherTrendingUp,
         featherTrendingDown,
-
-        // ✅ Estados
         featherCheck,
         featherCheckCircle,
         featherAlertCircle,
         featherAlertTriangle,
         featherInfo,
-
-        // 👤 Usuario
         featherUser,
         featherUsers,
         featherUserCheck,
         featherLogOut,
         featherLogIn,
-
-        // 📦 Productos
         featherBox,
         featherPackage,
         featherGift,
         featherStar,
         featherHeart,
-
-        // 🗺️ Ubicación
         featherMapPin,
         featherMap,
         featherNavigation,
-
-        // ⚙️ Configuración
         featherSettings,
         featherEdit,
         featherEdit2,
         featherTrash,
         featherTrash2,
         featherCopy,
-
-        // ⏰ Tiempo
         featherClock,
         featherCalendar,
-
-        // 📊 Datos
         featherBarChart2,
         featherPieChart,
-
-        // 🔗 Links
         featherLink,
         featherExternalLink,
         featherDownload,
         featherUpload,
         featherShare2,
-
-        // 🎨 UI
         featherEye,
         featherEyeOff,
         featherLoader,
         featherRefreshCw,
-
-        // 📱 Misc
         featherPhone,
         featherMail,
         featherBell,
         featherZap,
         featherAward,
-        featherClipboard
-
+        featherClipboard,
       })
     ),
   ],
