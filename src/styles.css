@@ -91,3 +91,26 @@ p {
     border: 1px solid #1B3A58 !important;
 }
 
+.page-container {
+    @apply min-h-screen bg-gray-50 font-body;
+}
+
+.page-content {
+    @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+.page-header {
+    @apply text-center mb-8 sm:mb-10 lg:mb-12;
+}
+
+.page-title {
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4;
+}
+
+.page-subtitle {
+    @apply text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4;
+}
+
+.page-layout {
+    @apply flex flex-col lg:flex-row gap-6;
+}

@@ -1,32 +1,20 @@
-<div class="min-h-screen bg-gray-50 font-body">
-  <div class="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 max-w-[1920px] py-6 sm:py-8 lg:py-12">
+<div class="page-container">
+  <div class="page-content">
 
-    <!-- 🎯 Header Section -->
-    <div class="mb-6 sm:mb-8 lg:mb-12">
-      <div class="text-center mb-6 sm:mb-8">
-        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4">
-          Paquetes Disponibles
-        </h1>
-        <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-          Descubrí nuestros paquetes especiales con productos seleccionados
-        </p>
-      </div>
-
-      <!-- 📊 Estadísticas -->
-      @if (!isLoading() && !errorMessage()) {
-        <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
-          <span>
-            Mostrando <strong class="text-gray-900">{{ paquetesMostrados() }}</strong>
-            de <strong class="text-gray-900">{{ totalPaquetes() }}</strong> paquetes
-          </span>
-        </div>
-      }
-    </div>
+    <!-- 🎯 Header -->
+    <header class="page-header">
+      <h1 class="page-title">
+        Paquetes Disponibles
+      </h1>
+      <p class="page-subtitle">
+        Descubrí nuestros paquetes especiales con productos seleccionados
+      </p>
+    </header>
 
     <!-- 📐 Layout: Filtros + Grid -->
-    <div class="flex flex-col lg:flex-row gap-6">
+    <section class="page-layout">
 
-      <!-- 🎨 FILTROS (Izquierda) -->
+      <!-- 🎨 Filtros -->
       <app-filtros
         [config]="configFiltrosPaquetes()"
         [titulo]="'Filtrar Paquetes'"
@@ -34,45 +22,59 @@
         (filtrosLimpiados)="limpiarFiltros()"
       />
 
-      <!-- 📦 GRID DE PAQUETES (Derecha) -->
+      <!-- 📦 Contenido -->
       <div class="flex-1 min-w-0">
 
-        <!-- 🔄 Estado de Carga -->
+        <!-- 🔄 Loading -->
         @if (isLoading()) {
           <div class="flex flex-col items-center justify-center py-20 sm:py-32">
             <div class="relative">
-              <div class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500"></div>
+              <div
+                class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500">
+              </div>
               <div class="absolute inset-0 flex items-center justify-center">
                 <app-icon name="Loader" class="w-10 h-10 text-blue-600"></app-icon>
               </div>
             </div>
-            <p class="text-gray-600 text-base sm:text-lg font-medium mt-6">Cargando paquetes...</p>
-            <p class="text-gray-500 text-sm mt-2">Esto puede tardar unos segundos</p>
+            <p class="text-gray-600 text-base sm:text-lg font-medium mt-6">
+              Cargando paquetes...
+            </p>
+            <p class="text-gray-500 text-sm mt-2">
+              Esto puede tardar unos segundos
+            </p>
           </div>
         }
 
-        <!-- ❌ Estado de Error -->
+        <!-- ❌ Error -->
         @else if (errorMessage()) {
-          <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
+          <div
+            class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
+
+            <div
+              class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
               <app-icon name="Error" class="w-10 h-10 sm:w-12 sm:h-12 text-red-400"></app-icon>
             </div>
+
             <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
               Error al cargar paquetes
             </h3>
+
             <p class="text-gray-600 text-center mb-6 sm:mb-8 max-w-md px-4">
               {{ errorMessage() }}
             </p>
+
             <button
               (click)="recargarPaquetes()"
-              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700
+                     text-white px-6 py-3 rounded-lg font-medium transition-all
+                     shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
               <app-icon name="Loader" class="w-5 h-5"></app-icon>
               Intentar nuevamente
             </button>
           </div>
         }
 
-        <!-- ✅ Grid de Paquetes -->
+        <!-- ✅ Grid -->
         @else {
           <div class="grid grid-cols-1
                       sm:grid-cols-2
@@ -92,27 +94,34 @@
               </div>
             }
 
-            <!-- 🚫 Estado Vacío -->
             @empty {
               <div class="col-span-full">
-                <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md">
-                  <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <div
+                  class="flex flex-col items-center justify-center py-16 sm:py-24
+                         bg-white rounded-xl shadow-md">
+
+                  <div
+                    class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full
+                           flex items-center justify-center mb-6">
                     <app-icon name="Empty" class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400"></app-icon>
                   </div>
+
                   <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
                     No hay paquetes disponibles
                   </h3>
+
                   <p class="text-gray-600 text-center mb-6 max-w-md px-4">
                     No se encontraron paquetes con los filtros seleccionados.
                   </p>
                 </div>
               </div>
             }
+
           </div>
         }
 
       </div>
-    </div>
+    </section>
 
   </div>
 </div>
