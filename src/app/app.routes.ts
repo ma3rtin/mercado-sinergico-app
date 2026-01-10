@@ -31,7 +31,6 @@ export const routes: Routes = [
       {
         path: '',
         component: Home,
-        outlet: 'full',
         data: { renderMode: RenderMode.Client }
       },
 

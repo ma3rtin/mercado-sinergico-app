@@ -2,15 +2,12 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
-import { WhatsAppButton } from '@app/shared/whatsapp-button/whatsapp-button';
-import { Header } from './components/header/header';
-import { Footer } from './components/footer/footer';
 import { LocationModalComponent } from './components/location-modal/location-modal.component';
 import { LocationStateService } from './services/localidad/location-state.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, WhatsAppButton, Header, Footer, LocationModalComponent],
+  imports: [RouterOutlet, LocationModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
