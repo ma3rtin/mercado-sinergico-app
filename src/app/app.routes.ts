@@ -19,118 +19,94 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
+import { MainLayout } from './layouts/main-layout/main-layout';
 
 export const routes: Routes = [
+
   {
     path: '',
-    component: Home,
-    data: {
-      renderMode: RenderMode.Client
-    },
+    component: MainLayout,
+    children: [
+
+      {
+        path: '',
+        component: Home,
+        outlet: 'full',
+        data: { renderMode: RenderMode.Client }
+      },
+
+      {
+        path: 'productos',
+        component: ProductosComponent
+      },
+
+      {
+        path: 'producto/:id',
+        component: ProductoDetalleSeleccionComponent,
+        data: { renderMode: RenderMode.Server }
+      },
+
+      {
+        path: 'paquetes',
+        component: PaquetesPublicosComponent
+      },
+
+      {
+        path: 'paquete/:paqueteId/productos',
+        component: ProductosDelPaquete
+      },
+
+      {
+        path: 'paquete/:paqueteId/producto/:productoId',
+        component: DetalleProductoSumarse,
+        data: { renderMode: RenderMode.Server }
+      },
+
+      {
+        path: 'perfil',
+        component: Perfil,
+        canActivate: [authGuard]
+      },
+
+      {
+        path: 'mis-pedidos',
+        component: MisPedidosComponent,
+        canActivate: [authGuard]
+      },
+    ]
   },
 
   {
     path: 'login',
     component: LoginComponent
   },
-
   {
     path: 'registrarse',
     component: RegistrarseComponent
   },
 
-  // 🛍️ Flujo de compra: Home > Productos > Detalle > Sumarse > Mis Paquetes
-  {
-    path: 'productos',
-    component: ProductosComponent
-  },
-
-  {
-    path: 'producto/:id',
-    component: ProductoDetalleSeleccionComponent,
-    data: {
-      renderMode: RenderMode.Server,
-    },
-  },
-  {
-    path: 'paquete/:paqueteId/productos',
-    component: ProductosDelPaquete,
-  },
-  {
-    path: 'paquete/:paqueteId/producto/:productoId',
-    component: DetalleProductoSumarse,
-    data: {
-      renderMode: RenderMode.Server,
-    },
-  },
-  {
-    path: 'paquetes',
-    component: PaquetesPublicosComponent
-  },
-
-  // 👤 Rutas usuario (con login)
-  {
-    path: 'perfil',
-    component: Perfil,
-    canActivate: [authGuard]
-  },
-
-  {
-    path: 'mis-pedidos',
-    component: MisPedidosComponent,
-    canActivate: [authGuard]
-  },
-
-  // 🧑‍💻 Rutas de admin
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    data: {
-      renderMode: RenderMode.Client
-    },
     children: [
-      {
-        path: '',
-        redirectTo: 'perfil',
-        pathMatch: 'full',
-      },
-      {
-        path: 'perfil',
-        component: PerfilAdmin
-      },
-      {
-        path: 'crear-producto',
-        component: CrearProductoComponent
-      },
-      {
-        path: 'crear-paquete',
-        component: CrearPaqueteComponent
-      },
-      {
-        path: 'publicar-paquete',
-        component: PublicarPaqueteComponent
-      },
-      {
-        path: 'administrar-plantillas',
-        component: AdministrarPlantillasComponent
-      },
-      {
-        path: 'administrar-productos',
-        component: AdministrarProductosComponent
-      },
+      { path: '', redirectTo: 'perfil', pathMatch: 'full' },
+      { path: 'perfil', component: PerfilAdmin },
+      { path: 'crear-producto', component: CrearProductoComponent },
+      { path: 'crear-paquete', component: CrearPaqueteComponent },
+      { path: 'publicar-paquete', component: PublicarPaqueteComponent },
+      { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
+      { path: 'administrar-productos', component: AdministrarProductosComponent },
       {
         path: 'editar-producto/:id',
         component: EditarProductoComponent,
-        data: {
-          renderMode: RenderMode.Client
-        },
+        data: { renderMode: RenderMode.Client }
       },
-    ],
+    ]
   },
 
   // 🌍 Fallback
   {
     path: '**',
-    component: Home
-  },
+    redirectTo: ''
+  }
 ];

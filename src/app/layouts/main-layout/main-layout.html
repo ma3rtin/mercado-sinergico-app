@@ -1,0 +1,21 @@
+<div class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Header -->
+    <app-header />
+
+    <!-- Body -->
+    <div class="min-h-screen bg-gray-50">
+
+        <!-- FULL WIDTH SLOT -->
+        <router-outlet name="full" />
+
+        <!-- CONTENED SLOT -->
+        <main class="mx-auto max-w-7xl px-4 py-8">
+            <router-outlet />
+        </main>
+
+        <!-- WhatsApp Button -->
+        <app-whatsapp-button />
+
+        <!-- Footer -->
+        <app-footer />
+    </div>
