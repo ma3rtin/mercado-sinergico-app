@@ -28,78 +28,65 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
 
+      // 🏠 Home
       {
         path: '',
         component: Home,
         data: { renderMode: RenderMode.Client }
       },
 
-      {
-        path: 'productos',
-        component: ProductosComponent
-      },
+      // 🛍️ Público
+      { path: 'productos', component: ProductosComponent },
+      { path: 'paquetes', component: PaquetesPublicosComponent },
 
+      // 📦 Detalles
       {
         path: 'producto/:id',
         component: ProductoDetalleSeleccionComponent,
         data: { renderMode: RenderMode.Server }
       },
-
-      {
-        path: 'paquetes',
-        component: PaquetesPublicosComponent
-      },
-
-      {
-        path: 'paquete/:paqueteId/productos',
-        component: ProductosDelPaquete
-      },
-
+      { path: 'paquete/:paqueteId/productos', component: ProductosDelPaquete },
       {
         path: 'paquete/:paqueteId/producto/:productoId',
         component: DetalleProductoSumarse,
         data: { renderMode: RenderMode.Server }
       },
 
+      // 👤 Usuario
       {
         path: 'perfil',
         component: Perfil,
         canActivate: [authGuard]
       },
-
       {
         path: 'mis-pedidos',
         component: MisPedidosComponent,
         canActivate: [authGuard]
       },
-    ]
-  },
 
-  {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'registrarse',
-    component: RegistrarseComponent
-  },
+      // 🔐 Auth
+      { path: 'login', component: LoginComponent },
+      { path: 'registrarse', component: RegistrarseComponent },
 
-  {
-    path: 'admin',
-    canActivate: [authGuard, adminGuard],
-    children: [
-      { path: '', redirectTo: 'perfil', pathMatch: 'full' },
-      { path: 'perfil', component: PerfilAdmin },
-      { path: 'crear-producto', component: CrearProductoComponent },
-      { path: 'crear-paquete', component: CrearPaqueteComponent },
-      { path: 'publicar-paquete', component: PublicarPaqueteComponent },
-      { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
-      { path: 'administrar-productos', component: AdministrarProductosComponent },
+      // 🧑‍💻 Admin
       {
-        path: 'editar-producto/:id',
-        component: EditarProductoComponent,
-        data: { renderMode: RenderMode.Client }
-      },
+        path: 'admin',
+        canActivate: [authGuard, adminGuard],
+        children: [
+          { path: '', redirectTo: 'perfil', pathMatch: 'full' },
+          { path: 'perfil', component: PerfilAdmin },
+          { path: 'crear-producto', component: CrearProductoComponent },
+          { path: 'crear-paquete', component: CrearPaqueteComponent },
+          { path: 'publicar-paquete', component: PublicarPaqueteComponent },
+          { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
+          { path: 'administrar-productos', component: AdministrarProductosComponent },
+          {
+            path: 'editar-producto/:id',
+            component: EditarProductoComponent,
+            data: { renderMode: RenderMode.Client }
+          },
+        ]
+      }
     ]
   },
 
