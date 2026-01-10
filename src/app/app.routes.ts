@@ -25,77 +25,60 @@ export const routes: Routes = [
     path: '',
     component: Home,
     data: {
-      renderMode: RenderMode.Client,
-      breadcrumb: '', // Vacío porque "Home" es la raíz
+      renderMode: RenderMode.Client
     },
   },
 
   {
     path: 'login',
-    component: LoginComponent,
-    data: { breadcrumb: 'Iniciar Sesión' },
+    component: LoginComponent
   },
 
   {
     path: 'registrarse',
-    component: RegistrarseComponent,
-    data: { breadcrumb: 'Registrarse' },
+    component: RegistrarseComponent
   },
 
   // 🛍️ Flujo de compra: Home > Productos > Detalle > Sumarse > Mis Paquetes
   {
     path: 'productos',
-    component: ProductosComponent,
-    data: { breadcrumb: 'Productos' },
+    component: ProductosComponent
   },
 
   {
-    //producto/:id
-    path: 'detalleSeleccionProducto/:id',
+    path: 'producto/:id',
     component: ProductoDetalleSeleccionComponent,
     data: {
       renderMode: RenderMode.Server,
-      breadcrumb: 'Detalle',
     },
   },
   {
-    //paquete/:paqueteId/productos
-    path: 'productos-del-paquete/:paqueteId',
+    path: 'paquete/:paqueteId/productos',
     component: ProductosDelPaquete,
-    data: {
-      breadcrumb: 'Productos del Paquete',
-    },
   },
   {
-    //paquete/:paqueteId/producto/:productoId
-    path: 'detalleProductoSumarse/:productoId/:paqueteId',
+    path: 'paquete/:paqueteId/producto/:productoId',
     component: DetalleProductoSumarse,
     data: {
       renderMode: RenderMode.Server,
-      breadcrumb: 'Sumarse',
     },
   },
-
   {
-    //paquetes
-    path: 'paquetes-publicados',
-    component: PaquetesPublicosComponent,
-    data: { breadcrumb: 'Paquetes Publicados' },
+    path: 'paquetes',
+    component: PaquetesPublicosComponent
   },
 
   // 👤 Rutas usuario (con login)
   {
     path: 'perfil',
     component: Perfil,
-    canActivate: [authGuard],
-    data: { breadcrumb: 'Mi Perfil' },
+    canActivate: [authGuard]
   },
 
   {
     path: 'mis-pedidos',
     component: MisPedidosComponent,
-    canActivate: [authGuard],
-    data: { breadcrumb: 'Mis pedidos' },
+    canActivate: [authGuard]
   },
 
   // 🧑‍💻 Rutas de admin
@@ -103,8 +86,7 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     data: {
-      renderMode: RenderMode.Client,
-      breadcrumb: 'Administración',
+      renderMode: RenderMode.Client
     },
     children: [
       {
@@ -114,40 +96,33 @@ export const routes: Routes = [
       },
       {
         path: 'perfil',
-        component: PerfilAdmin,
-        data: { breadcrumb: 'Perfil Admin' },
+        component: PerfilAdmin
       },
       {
         path: 'crear-producto',
-        component: CrearProductoComponent,
-        data: { breadcrumb: 'Crear Producto' },
+        component: CrearProductoComponent
       },
       {
         path: 'crear-paquete',
-        component: CrearPaqueteComponent,
-        data: { breadcrumb: 'Crear Paquete' },
+        component: CrearPaqueteComponent
       },
       {
         path: 'publicar-paquete',
-        component: PublicarPaqueteComponent,
-        data: { breadcrumb: 'Publicar Paquete' },
+        component: PublicarPaqueteComponent
       },
       {
         path: 'administrar-plantillas',
-        component: AdministrarPlantillasComponent,
-        data: { breadcrumb: 'Administrar Plantillas' },
+        component: AdministrarPlantillasComponent
       },
       {
         path: 'administrar-productos',
-        component: AdministrarProductosComponent,
-        data: { breadcrumb: 'Administrar Productos' },
+        component: AdministrarProductosComponent
       },
       {
         path: 'editar-producto/:id',
         component: EditarProductoComponent,
         data: {
-          renderMode: RenderMode.Client,
-          breadcrumb: 'Editar Producto',
+          renderMode: RenderMode.Client
         },
       },
     ],
@@ -156,7 +131,6 @@ export const routes: Routes = [
   // 🌍 Fallback
   {
     path: '**',
-    component: Home,
-    data: { breadcrumb: 'Página no encontrada' },
+    component: Home
   },
 ];

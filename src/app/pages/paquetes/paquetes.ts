@@ -315,7 +315,7 @@ opcionesEstados: [
   // 🧭 Navegar al detalle del paquete
   navegarAPaqueteDetalle(idPaquete: number): void {
     console.log('🧭 Navegando a paquete:', idPaquete);
-    this.router.navigate(['/productos-del-paquete', idPaquete]);
+    this.router.navigate(['/paquete/', idPaquete, 'productos']);
   }
 
   // 🖼️ Imagen fallback

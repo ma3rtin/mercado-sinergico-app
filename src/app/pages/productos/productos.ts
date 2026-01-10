@@ -14,7 +14,6 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
 
 // Components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 
@@ -23,7 +22,6 @@ import { ProductoCard } from '@app/shared/producto-card/producto-card';
   standalone: true,
   imports: [
     CommonModule,
-    BreadcrumbComponent,
     FiltrosComponent,
     ProductoCard
   ],
@@ -208,7 +206,7 @@ export class ProductosComponent implements OnInit {
       console.error('❌ ID de producto inválido');
       return;
     }
-    this.router.navigate(['detalleSeleccionProducto', id]);
+    this.router.navigate(['producto', id]);
   }
 
   // 🎨 HELPERS VISUALES

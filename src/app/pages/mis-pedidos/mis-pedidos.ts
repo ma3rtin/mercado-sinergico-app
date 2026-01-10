@@ -22,7 +22,6 @@ import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
 
 // Shared components
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
 
 
@@ -54,7 +53,6 @@ interface PedidoDelUsuario extends Pedido {
   imports: [
     CommonModule,
     FormsModule,
-    BreadcrumbComponent,
     PaqueteUsuarioCardComponent
   ],
   templateUrl: './mis-pedidos.html'

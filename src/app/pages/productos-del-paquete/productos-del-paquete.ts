@@ -309,7 +309,7 @@ recargarProductos(): void {
   }
 
   volverAPaquetes(): void {
-    this.router.navigate(['/paquetes-publicados']);
+    this.router.navigate(['/paquetes']);
   }
 
   onImageError(event: Event): void {

@@ -25,7 +25,6 @@ import { ToastService } from '@app/services/toast/toast.service';
   imports: [
     CommonModule,
     FormsModule,
-    BreadcrumbComponent,
     VisorImagenesComponent,
     IconComponent,
     PaqueteCard,
@@ -281,7 +280,7 @@ export class DetalleProductoSumarse implements OnInit {
     const paqueteId = this.paqueteSeleccionado()?.id_paquete_publicado;
 
     if (paqueteId) {
-      this.router.navigate(['detalleSeleccionProducto', this.producto()?.id_producto]);
+      this.router.navigate(['producto', this.producto()?.id_producto]);
     } else {
       this.router.navigate(['paquetes']);
     }
@@ -290,7 +289,7 @@ export class DetalleProductoSumarse implements OnInit {
   // 🎯 Navegación a productos del paquete
   onPaqueteClick(paqueteId: number): void {
     console.log('🔗 Navegando a paquete:', paqueteId);
-    this.router.navigate(['productos-del-paquete', paqueteId]);
+    this.router.navigate(['paquete/', paqueteId, 'productos']);
   }
 
   toggleDescription(): void {

@@ -6,7 +6,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'login', renderMode: RenderMode.Prerender },
   { path: 'registrarse', renderMode: RenderMode.Prerender },
   { path: 'productos', renderMode: RenderMode.Prerender },
-  { path: 'paquetes-publicados', renderMode: RenderMode.Prerender },
+  { path: 'paquetes', renderMode: RenderMode.Prerender },
 
   // 👤 Rutas de usuario (solo client-side)
   { path: 'perfil', renderMode: RenderMode.Client },
@@ -23,8 +23,8 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'admin/editar-producto/:id', renderMode: RenderMode.Client },
 
   // 🧩 Rutas dinámicas (renderizadas en el servidor)
-  { path: 'detalleSeleccionProducto/:id', renderMode: RenderMode.Server },
-  { path: 'detalleProductoSumarse/:productoId/:paqueteId', renderMode: RenderMode.Server },
+  { path: 'producto/:id', renderMode: RenderMode.Server },
+  { path: 'paquete/:paqueteId/producto/:productoId', renderMode: RenderMode.Server },
 
   // 🌍 Fallback
   { path: '**', renderMode: RenderMode.Client },
