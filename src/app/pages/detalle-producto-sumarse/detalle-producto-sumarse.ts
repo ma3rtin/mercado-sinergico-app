@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
 
 // Components
@@ -18,6 +17,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
+import { ToastService } from '@app/services/toast/toast.service';
 
 
 @Component({
@@ -42,7 +42,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly pedidoService = inject(PedidoService);
-  private toastr = inject(ToastrService);
+    private toast = inject(ToastService);
 
   // 🚀 Signals - Datos principales
   producto = signal<Producto | undefined>(undefined);
@@ -233,18 +233,18 @@ export class DetalleProductoSumarse implements OnInit {
     const paquete = this.paqueteSeleccionado();
 
     if (!producto || !paquete) {
-      this.toastr.error('Producto o paquete no disponible');
+      this.toast.error('Producto o paquete no disponible');
       return;
     }
 
     if (!producto.id_producto) {
-      this.toastr.error('Producto inválido');
+      this.toast.error('Producto inválido');
       return;
     }
 
     // 🆕 VALIDAR VARIANTES
     if (this.productoTieneVariantes() && !this.variantesValidas()) {
-      this.toastr.error('Debes seleccionar todas las variantes del producto');
+      this.toast.error('Debes seleccionar todas las variantes del producto');
       return;
     }
 
@@ -267,12 +267,12 @@ export class DetalleProductoSumarse implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toastr.success('Te sumaste al paquete con éxito');
+          this.toast.success('Te sumaste al paquete con éxito');
           this.router.navigate(['mis-pedidos']);
         },
         error: (err) => {
           console.error('❌ Error al sumarse:', err);
-          this.toastr.error(err.error?.message || 'No se pudo crear el pedido');
+          this.toast.error(err.error?.message || 'No se pudo crear el pedido');
         }
       });
   }

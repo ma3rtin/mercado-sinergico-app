@@ -19,11 +19,12 @@ import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '@app/services/toast/toast.service';
 
 // Shared components
 import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
+
 
 // ------------------------------
 // MODELOS INTERNOS
@@ -64,7 +65,7 @@ export class MisPedidosComponent implements OnInit {
   // INYECCIONES
   // ------------------------------
   private readonly pedidoService = inject(PedidoService);
-  private readonly toastr = inject(ToastrService);
+  private toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
   // ------------------------------
@@ -218,7 +219,7 @@ export class MisPedidosComponent implements OnInit {
         );
 
         this.recalcularPedido(pedido);
-        this.toastr.error('No se pudo aumentar la cantidad.');
+        this.toast.error('No se pudo aumentar la cantidad.');
       }
     });
   }
@@ -256,7 +257,7 @@ export class MisPedidosComponent implements OnInit {
         );
 
         this.recalcularPedido(pedido);
-        this.toastr.error('No se pudo disminuir la cantidad.');
+        this.toast.error('No se pudo disminuir la cantidad.');
       }
     });
   }
@@ -289,7 +290,7 @@ export class MisPedidosComponent implements OnInit {
       const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
 
       if (!paqueteId) {
-        this.toastr.error('No se pudo identificar el paquete.');
+        this.toast.error('No se pudo identificar el paquete.');
         return;
       }
 
@@ -302,10 +303,10 @@ export class MisPedidosComponent implements OnInit {
             this.pedidos.set(
               this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
             );
-            this.toastr.success('Pedido eliminado y salida del paquete confirmada.');
+            this.toast.success('Pedido eliminado y salida del paquete confirmada.');
           },
           error: () => {
-            this.toastr.error('No se pudo eliminar el pedido.');
+            this.toast.error('No se pudo eliminar el pedido.');
           }
         });
     });
@@ -334,10 +335,10 @@ export class MisPedidosComponent implements OnInit {
             );
 
           this.recalcularPedido(pedido);
-          this.toastr.success('Producto eliminado.');
+          this.toast.success('Producto eliminado.');
         },
         error: () => {
-          this.toastr.error('No se pudo eliminar el producto.');
+          this.toast.error('No se pudo eliminar el producto.');
         }
       });
   });
@@ -352,7 +353,7 @@ export class MisPedidosComponent implements OnInit {
     const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
 
     if (!paqueteId) {
-      this.toastr.error('No se pudo identificar el paquete.');
+      this.toast.error('No se pudo identificar el paquete.');
       return;
     }
 
@@ -374,10 +375,10 @@ export class MisPedidosComponent implements OnInit {
             this.pedidos.set(
               this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
             );
-            this.toastr.success('Saliste del paquete.');
+            this.toast.success('Saliste del paquete.');
           },
           error: () => {
-            this.toastr.error('No se pudo salir del paquete.');
+            this.toast.error('No se pudo salir del paquete.');
           }
         });
     });
@@ -387,7 +388,7 @@ export class MisPedidosComponent implements OnInit {
   const pedidoId = pedido.id_pedido;
 
   if (!pedidoId) {
-    this.toastr.error('Error: ID de pedido no válido');
+    this.toast.error('Error: ID de pedido no válido');
     return;
   }
 
@@ -403,7 +404,7 @@ export class MisPedidosComponent implements OnInit {
         window.location.href = response.checkoutUrl.checkoutUrl;
       },
       error: (err) => {
-        this.toastr.error('No se pudo iniciar el pago');
+        this.toast.error('No se pudo iniciar el pago');
         console.error('Error al crear preferencia:', err);
       }
     });

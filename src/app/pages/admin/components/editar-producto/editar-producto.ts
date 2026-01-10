@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
@@ -16,6 +15,7 @@ import { CategoriaService } from '@app/services/producto/categoria.service';
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
+import { ToastService } from '@app/services/toast/toast.service';
 
 interface ImageSlot {
   file: File | null;
@@ -39,13 +39,14 @@ interface ImageSlot {
 export class EditarProductoComponent implements OnInit {
   // Injections
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private plantillaService = inject(PlantillaService);
   private marcaService = inject(MarcaService);
   private categoriaService = inject(CategoriaService);
   private productoService = inject(ProductosService);
+    private toast = inject(ToastService);
 
   // Form
   productForm!: FormGroup;
@@ -121,7 +122,7 @@ export class EditarProductoComponent implements OnInit {
       next: (plantillas) => this.plantillas.set(plantillas),
       error: (error) => {
         console.error('Error cargando plantillas:', error);
-        this.toastr.error('Error al cargar plantillas');
+        this.toast.error('Error al cargar plantillas');
       }
     });
 
@@ -129,7 +130,7 @@ export class EditarProductoComponent implements OnInit {
       next: (marcas) => this.marcas.set(marcas),
       error: (error) => {
         console.error('Error cargando marcas:', error);
-        this.toastr.error('Error al cargar marcas');
+        this.toast.error('Error al cargar marcas');
       }
     });
 
@@ -137,7 +138,7 @@ export class EditarProductoComponent implements OnInit {
       next: (categorias) => this.categorias.set(categorias),
       error: (error) => {
         console.error('Error cargando categorías:', error);
-        this.toastr.error('Error al cargar categorías');
+        this.toast.error('Error al cargar categorías');
       }
     });
   }
@@ -145,7 +146,7 @@ export class EditarProductoComponent implements OnInit {
   loadProductoToEdit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.toastr.error('ID de producto no encontrado');
+      this.toast.error('ID de producto no encontrado');
       this.router.navigate(['admin/administrar-productos']);
       return;
     }
@@ -161,7 +162,7 @@ export class EditarProductoComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error cargando producto:', error);
-        this.toastr.error('Error al cargar el producto');
+        this.toast.error('Error al cargar el producto');
         this.router.navigate(['admin/administrar-productos']);
         this.isLoading.set(false);
       }
@@ -279,12 +280,12 @@ export class EditarProductoComponent implements OnInit {
       const file = input.files[0];
 
       if (!file.type.startsWith('image/')) {
-        this.toastr.error('Solo se permiten archivos de imagen');
+        this.toast.error('Solo se permiten archivos de imagen');
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        this.toastr.error('La imagen no puede superar los 5MB');
+        this.toast.error('La imagen no puede superar los 5MB');
         return;
       }
 
@@ -360,19 +361,19 @@ export class EditarProductoComponent implements OnInit {
     this.formSubmitted.set(true);
 
     if (this.productForm.invalid) {
-      this.toastr.error('Por favor completá todos los campos requeridos');
+      this.toast.error('Por favor completá todos los campos requeridos');
       this.scrollToFirstError();
       return;
     }
 
     if (!this.hasMainImage()) {
-      this.toastr.error('Debés tener al menos la imagen principal del producto');
+      this.toast.error('Debés tener al menos la imagen principal del producto');
       return;
     }
 
     const id = this.productoId();
     if (!id) {
-      this.toastr.error('ID de producto no encontrado');
+      this.toast.error('ID de producto no encontrado');
       return;
     }
 
@@ -382,13 +383,13 @@ export class EditarProductoComponent implements OnInit {
     this.productoService.updateProducto(id, formData).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.toastr.success('Producto actualizado exitosamente 🎉');
+        this.toast.success('Producto actualizado exitosamente 🎉');
         this.router.navigate(['admin/administrar-productos']);
       },
       error: (err) => {
         this.isLoading.set(false);
         console.error('Error actualizando producto', err);
-        this.toastr.error(err.error?.message || 'Error actualizando producto');
+        this.toast.error(err.error?.message || 'Error actualizando producto');
       }
     });
   }

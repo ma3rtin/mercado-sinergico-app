@@ -9,13 +9,13 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
 import { PLATFORM_ID } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
+import { ToastService } from '@app/services/toast/toast.service';
 
 @Component({
   selector: 'app-registrarse',
@@ -40,7 +40,7 @@ export class RegistrarseComponent implements OnInit {
 
   // 🧩 Inyecciones
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toast = inject(ToastService);
   private platformId = inject(PLATFORM_ID);
   private usuarioService = inject(UsuarioService);
   private authService = inject(AuthService);
@@ -153,10 +153,10 @@ export class RegistrarseComponent implements OnInit {
 
   // 🧾 Toasts
   mostrarExito(msg: string): void {
-    this.toastr.success(msg, 'Éxito');
+    this.toast.success(msg, 'Éxito');
   }
 
   mostrarError(msg: string): void {
-    this.toastr.error(msg, 'Error');
+    this.toast.error(msg, 'Error');
   }
 }
