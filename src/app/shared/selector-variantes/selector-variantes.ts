@@ -6,9 +6,8 @@ import { IconComponent } from '@app/shared/icono/icono';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
-import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Caracteristica } from '@app/models/PlantillaInterfaces/Caracteristica';
-import { Opcion } from '@app/models/PlantillaInterfaces/Opcion';
+
 
 /**
  * Interface para las variantes seleccionadas
