@@ -1,0 +1,182 @@
+<!-- paginacion.html -->
+@if (shouldShow()) {
+  <div class="flex flex-col md:flex-row gap-4 items-center justify-between mt-8 mb-4 px-4">
+
+    <!-- 📊 Información de items mostrados -->
+    <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm text-gray-700 font-body">
+      <p>
+        Mostrando
+        <span class="font-semibold text-secondary-dark">{{ showingFrom() }}</span>
+        -
+        <span class="font-semibold text-secondary-dark">{{ showingTo() }}</span>
+        de
+        <span class="font-semibold text-secondary-dark">{{ totalItems() }}</span>
+        productos
+      </p>
+
+      <!-- Selector de items por página (opcional) -->
+      @if (showItemsPerPage()) {
+        <div class="flex items-center gap-2 ml-0 md:ml-4">
+          <label for="items-per-page" class="text-sm text-gray-700 whitespace-nowrap">
+            Mostrar:
+          </label>
+          <select
+            id="items-per-page"
+            [value]="itemsPerPage()"
+            (change)="onItemsPerPageChanged($event)"
+            class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm
+                   focus:ring-2 focus:ring-primary focus:border-primary
+                   bg-white cursor-pointer transition-colors
+                   hover:border-primary-dark">
+            @for (option of itemsPerPageOptions(); track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    <!-- 🎯 Controles de paginación -->
+    <div class="w-full md:w-auto">
+      <pagination-controls
+        [id]="'paquete-pagination'"
+        [maxSize]="getMaxSizeResponsive()"
+        [directionLinks]="directionLinks()"
+        [autoHide]="false"
+        [responsive]="responsive()"
+        [previousLabel]="previousLabel()"
+        [nextLabel]="nextLabel()"
+        (pageChange)="onPageChanged($event)"
+        class="pagination-custom"
+      >
+      </pagination-controls>
+    </div>
+
+  </div>
+}
+
+<!--
+  ════════════════════════════════════════════════════════════
+  🎨 ESTILOS INLINE CON TAILWIND (ngx-pagination)
+  ════════════════════════════════════════════════════════════
+
+  Los estilos para ngx-pagination se deben aplicar en el
+  archivo global styles.css usando ::ng-deep o en un archivo
+  de estilos del componente.
+
+  Ver abajo las clases necesarias.
+-->
+
+<style>
+/* Estilos para ngx-pagination con TailwindCSS */
+::ng-deep .pagination-custom .ngx-pagination {
+  @apply flex items-center justify-center gap-1 flex-wrap;
+  font-family: var(--font-body);
+}
+
+::ng-deep .pagination-custom .ngx-pagination li {
+  @apply list-none;
+}
+
+::ng-deep .pagination-custom .ngx-pagination a,
+::ng-deep .pagination-custom .ngx-pagination button {
+  @apply px-3 py-2 min-w-[2.5rem] text-sm font-medium
+         border border-gray-300 bg-white text-gray-700
+         rounded-lg transition-all duration-200
+         hover:bg-primary-light hover:border-primary hover:text-primary-dark
+         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
+         cursor-pointer;
+}
+
+/* Mobile: botones más pequeños */
+@media (max-width: 640px) {
+  ::ng-deep .pagination-custom .ngx-pagination a,
+  ::ng-deep .pagination-custom .ngx-pagination button {
+    @apply px-2 py-1.5 min-w-[2rem] text-xs;
+  }
+}
+
+/* 🎯 Página actual */
+::ng-deep .pagination-custom .ngx-pagination .current {
+  @apply bg-secondary text-white border-secondary
+         shadow-md font-bold
+         hover:bg-secondary-dark hover:border-secondary-dark;
+}
+
+/* ⬅️ Botones Anterior/Siguiente */
+::ng-deep .pagination-custom .ngx-pagination .pagination-previous a,
+::ng-deep .pagination-custom .ngx-pagination .pagination-next a {
+  @apply font-semibold bg-primary text-gray-900
+         hover:bg-accent-dark hover:shadow-lg
+         border-primary;
+}
+
+::ng-deep .pagination-custom .ngx-pagination .pagination-previous.disabled a,
+::ng-deep .pagination-custom .ngx-pagination .pagination-next.disabled a {
+  @apply opacity-40 cursor-not-allowed bg-gray-200 text-gray-500
+         hover:bg-gray-200 hover:shadow-none border-gray-300;
+  pointer-events: none;
+}
+
+/* ... Ellipsis */
+::ng-deep .pagination-custom .ngx-pagination .ellipsis {
+  @apply px-3 py-2 text-gray-500 select-none;
+}
+
+/* 🎨 Hover effects */
+::ng-deep .pagination-custom .ngx-pagination a:hover:not(.disabled a),
+::ng-deep .pagination-custom .ngx-pagination button:hover:not(.disabled button) {
+  @apply transform scale-105;
+}
+
+::ng-deep .pagination-custom .ngx-pagination .current {
+  @apply transform scale-110;
+}
+
+/* ✨ Animaciones */
+::ng-deep .pagination-custom .ngx-pagination a,
+::ng-deep .pagination-custom .ngx-pagination button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 📱 Responsive: ocultar texto en mobile, solo flechas */
+@media (max-width: 640px) {
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a::before {
+    content: '←';
+    margin-right: 0;
+  }
+
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a::after {
+    content: '→';
+    margin-left: 0;
+  }
+
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a,
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a {
+    font-size: 0;
+    padding: 0.5rem;
+    min-width: 2rem;
+  }
+
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a::before,
+  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a::after {
+    font-size: 1rem;
+  }
+}
+
+/* ♿ Accesibilidad - Focus visible */
+::ng-deep .pagination-custom .ngx-pagination a:focus-visible,
+::ng-deep .pagination-custom .ngx-pagination button:focus-visible {
+  @apply ring-4 ring-primary ring-offset-2 outline-none;
+}
+
+/* Tamaños mínimos touch (44x44px) */
+@media (max-width: 768px) {
+  ::ng-deep .pagination-custom .ngx-pagination a,
+  ::ng-deep .pagination-custom .ngx-pagination button {
+    min-width: 44px;
+    min-height: 44px;
+    @apply flex items-center justify-center;
+  }
+}
+</style>

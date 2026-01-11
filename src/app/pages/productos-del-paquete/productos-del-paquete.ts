@@ -32,13 +32,19 @@ import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 // Components
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
-
 import { PaqueteBannerComponent } from '@app/shared/paquete-banner/paquete-banner';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
 
 @Component({
   selector: 'app-productos-del-paquete',
   standalone: true,
-  imports: [CommonModule, FiltrosComponent, ProductoCard, PaqueteBannerComponent],
+  imports: [
+    CommonModule,
+    FiltrosComponent,
+    ProductoCard,
+    PaqueteBannerComponent,
+    PaginationComponent // ✅ AGREGAR AQUÍ
+  ],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css',
 })
@@ -52,8 +58,39 @@ export class ProductosDelPaquete implements OnInit {
   productoSeleccionado = signal<Producto | null>(null);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
-  idPaquete = signal<number>(0); // ✅ Inicializado en 0
+  idPaquete = signal<number>(0);
   paqueteIdActual = signal<number | null>(null);
+
+  // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(12); // 12 productos por página (óptimo)
+
+  // 📊 COMPUTED: Productos paginados
+  productosPaginados = computed(() => {
+    const seleccionado = this.productoSeleccionado();
+
+    // Si hay un producto seleccionado, mostrar solo ese
+    if (seleccionado) {
+      return [seleccionado];
+    }
+
+    // Si no, paginar los filtrados
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.productosFiltrados();
+
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+
+    return filtrados.slice(start, end);
+  });
+
+  // 📊 COMPUTED: Total de items para la paginación
+  totalItemsPaginacion = computed(() => {
+    const seleccionado = this.productoSeleccionado();
+    if (seleccionado) return 1;
+    return this.productosFiltrados().length;
+  });
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS DEL PAQUETE
   configFiltrosProductos = computed<ConfigFiltros>(() => ({
@@ -178,6 +215,8 @@ export class ProductosDelPaquete implements OnInit {
     this.paquete.set(null);
     this.productosOriginales.set([]);
     this.productosFiltrados.set([]);
+    this.paginaActual.set(1); // ✅ Resetear página al cargar nuevo paquete
+
     this.paquetePublicadoService
       .getPaquetes()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -196,7 +235,6 @@ export class ProductosDelPaquete implements OnInit {
           this.paquete.set(encontrado);
           console.log('✅ Paquete cargado:', encontrado);
 
-          // 🔥 AHORA que tengo el paquete → cargo productos
           this.cargarProductosDelPaquete();
         },
         error: () => {
@@ -227,6 +265,7 @@ export class ProductosDelPaquete implements OnInit {
           console.log('✅ Productos del paquete:', productos);
           this.productosOriginales.set(productos);
           this.productosFiltrados.set(productos);
+          this.paginaActual.set(1); // ✅ Resetear a página 1
           this.isLoading.set(false);
         },
         error: () => {
@@ -266,6 +305,7 @@ export class ProductosDelPaquete implements OnInit {
     }
 
     this.productosFiltrados.set(resultado);
+    this.paginaActual.set(1); // ✅ Resetear a página 1 al filtrar
   }
 
   private ordenarProductos(productos: Producto[], orden: string): Producto[] {
@@ -285,27 +325,33 @@ export class ProductosDelPaquete implements OnInit {
 
   limpiarFiltros(): void {
     this.productosFiltrados.set(this.productosOriginales());
+    this.paginaActual.set(1); // ✅ Resetear a página 1 al limpiar
   }
 
-recargarProductos(): void {
-  const paqueteId = this.paqueteIdActual();
+  recargarProductos(): void {
+    const paqueteId = this.paqueteIdActual();
 
-  if (!paqueteId) {
-    console.error('❌ No hay paqueteId para recargar');
-    return;
+    if (!paqueteId) {
+      console.error('❌ No hay paqueteId para recargar');
+      return;
+    }
+
+    console.log('🔄 Recargando productos del paquete:', paqueteId);
+    this.productoSeleccionado.set(null);
+    this.paginaActual.set(1); // ✅ Resetear página
+    this.cargarPaquete(paqueteId);
   }
 
-  console.log('🔄 Recargando productos del paquete:', paqueteId);
-  this.productoSeleccionado.set(null);
-  this.cargarPaquete(paqueteId);
-}
+  // 📄 MÉTODOS DE PAGINACIÓN
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+    console.log(`📄 Cambiando a página ${page}`);
+  }
 
-
-  // 🧭 Navegar al detalle del producto para sumarse
-  // ✅ Nota: El ProductoCard ahora se encarga de la navegación
-  navegarAProductoDetalleSumarse(idProducto: number): void {
-    console.log('🧭 ProductoCard emitió click:', idProducto);
-    // Ya no necesitamos hacer nada aquí porque ProductoCard se encarga
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.itemsPorPagina.set(itemsPerPage);
+    this.paginaActual.set(1); // Resetear a página 1
+    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
 
   volverAPaquetes(): void {

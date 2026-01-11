@@ -16,6 +16,7 @@ import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtr
 // Components
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-productos',
@@ -23,12 +24,14 @@ import { ProductoCard } from '@app/shared/producto-card/producto-card';
   imports: [
     CommonModule,
     FiltrosComponent,
-    ProductoCard
-  ],
+    ProductoCard,
+    PaginationComponent
+],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
 export class ProductosComponent implements OnInit {
+
   // 🔧 Services
   private readonly productosService = inject(ProductosService);
   private readonly categoriaService = inject(CategoriaService);
@@ -40,8 +43,39 @@ export class ProductosComponent implements OnInit {
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
   productosFiltrados = signal<Producto[]>([]);
+  productoSeleccionado = signal<Producto | null>(null);
   isLoading = signal(true);
   errorMessage = signal('');
+   // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(4); // 12 productos por página (óptimo)
+
+  // 📊 COMPUTED: Productos paginados
+  productosPaginados = computed(() => {
+    const seleccionado = this.productoSeleccionado();
+
+    // Si hay un producto seleccionado, mostrar solo ese
+    if (seleccionado) {
+      return [seleccionado];
+    }
+
+    // Si no, paginar los filtrados
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.productosFiltrados();
+
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+
+    return filtrados.slice(start, end);
+  });
+
+  // 📊 COMPUTED: Total de items para la paginación
+  totalItemsPaginacion = computed(() => {
+    const seleccionado = this.productoSeleccionado();
+    if (seleccionado) return 1;
+    return this.productosFiltrados().length;
+  });
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -231,4 +265,18 @@ export class ProductosComponent implements OnInit {
     if (target.src.includes('placeholder')) return;
     target.src = '/assets/images/placeholder-product.png';
   }
+
+
+ // 📄 MÉTODOS DE PAGINACIÓN
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+    console.log(`📄 Cambiando a página ${page}`);
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.itemsPorPagina.set(itemsPerPage);
+    this.paginaActual.set(1); // Resetear a página 1
+    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
+  }
+
 }
