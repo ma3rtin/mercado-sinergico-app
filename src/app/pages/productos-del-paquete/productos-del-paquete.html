@@ -3,22 +3,21 @@
 
     <!-- 🎯 Header Section -->
     <div class="mb-6 sm:mb-8 lg:mb-12">
-
-
-      <!-- Información del Paquete -->
-      @if (paquete()) {
-        <app-paquete-banner [paquete]="paquete()!" />
-      }
-
       <!-- Título y Buscador -->
       <div class="text-center mb-6 sm:mb-8">
         <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
           Productos del Paquete
         </h2>
         <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-          Elegí los productos que querés incluir en tu paquete
+          Elegí los productos que querés incluir en <strong class="text-primary" >tu paquete</strong>
         </p>
       </div>
+
+      <!-- Información del Paquete -->
+      @if (paquete()) {
+        <app-paquete-banner [paquete]="paquete()!" />
+      }
+
 
 
       <!-- 📊 Estadísticas -->
