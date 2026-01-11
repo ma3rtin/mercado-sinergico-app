@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 
 // Components
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
-import { BreadcrumbComponent } from '@app/shared/breadcrumb/breadcrumb-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes'; // Models
