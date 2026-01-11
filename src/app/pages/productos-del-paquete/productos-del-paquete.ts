@@ -33,10 +33,12 @@ import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 
+import { PaqueteBannerComponent } from '@app/shared/paquete-banner/paquete-banner';
+
 @Component({
   selector: 'app-productos-del-paquete',
   standalone: true,
-  imports: [CommonModule, FiltrosComponent, ProductoCard],
+  imports: [CommonModule, FiltrosComponent, ProductoCard, PaqueteBannerComponent],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css',
 })

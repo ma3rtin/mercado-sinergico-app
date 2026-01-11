@@ -1,7 +1,7 @@
-
 import { Component, signal, inject, effect } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
+import { NgxSonnerToaster } from 'ngx-sonner'; // ⬅️ NUEVA LÍNEA
 import { WhatsAppButton } from '@app/shared/whatsapp-button/whatsapp-button';
 import { Header } from './components/header/header';
 import { Footer } from './components/footer/footer';
@@ -10,7 +10,14 @@ import { LocationStateService } from './services/localidad/location-state.servic
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, WhatsAppButton, Header, Footer, LocationModalComponent],
+  imports: [
+    RouterOutlet,
+    WhatsAppButton,
+    Header,
+    Footer,
+    LocationModalComponent,
+    NgxSonnerToaster // ⬅️ NUEVA LÍNEA
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

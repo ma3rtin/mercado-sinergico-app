@@ -35,7 +35,7 @@
             [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
               (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
           >
-            <app-icon name="Layers" class="w-4 h-4" />
+            <app-icon name="Layers" size="24" />
             Todo
           </button>
           <button
@@ -43,7 +43,7 @@
             [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
               (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
           >
-            <app-icon name="ShoppingBag" class="w-4 h-4" />
+            <app-icon name="Box" size="24" />
             Productos
           </button>
           <button
@@ -51,7 +51,7 @@
             [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
               (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
           >
-            <app-icon name="Package" class="w-4 h-4" />
+            <app-icon name="Package" size="24"/>
             Paquetes
           </button>
         </div>
@@ -90,7 +90,7 @@
             @if (mostrarProductos() && resultados().productos.length > 0) {
               <div class="mb-4">
                 <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-                  <app-icon name="ShoppingBag" class="w-4 h-4 text-primary" />
+                  <app-icon name="Box" class="text-primary" size="24" />
                   Productos ({{ resultados().productos.length }})
                 </h3>
                 <div class="space-y-1">
@@ -111,11 +111,11 @@
                           {{ producto.nombre }}
                         </p>
                         <p class="text-xs text-gray-500 flex items-center gap-1">
-                          <app-icon name="Tag" class="w-3 h-3" />
+                          <app-icon name="Tag" size="12" class="flex-shrink-0" />
                           {{ producto.marca.nombre || 'Sin marca' }}
                         </p>
                         <p class="text-sm font-bold text-primary mt-1 flex items-center gap-1">
-                          <app-icon name="dollar" class="w-3 h-3" />
+                          <app-icon name="dollar" size="12"  />
                           {{ formatearPrecio(producto.precio) }}
                         </p>
                       </div>
@@ -149,7 +149,7 @@
                       <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                           <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                            <app-icon name="Package" class="w-3 h-3" />
+                            <app-icon name="Package" size="12" class="flex-shrink-0" />
                             Paquete
                           </span>
                           <span class="text-xs text-gray-500">{{ paquete.estado.nombre || 'Sin estado' }}</span>
@@ -158,7 +158,7 @@
                           {{ paquete.paqueteBase?.nombre }}
                         </p>
                         <p class="text-xs text-gray-500 flex items-center gap-1">
-                          <app-icon name="Box" class="w-3 h-3" />
+                          <app-icon name="Box" size="12" />
                           {{ paquete.cant_productos }} productos
                         </p>
                       </div>
@@ -176,7 +176,7 @@
                 class="w-full mt-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
               >
                 Ver todos los resultados ({{ totalResultados() }})
-                <app-icon name="arrowRight" class="w-4 h-4" />
+                <app-icon name="arrowRight" size="24" />
               </button>
             }
           </div>
@@ -240,7 +240,7 @@
               [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
                 (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
             >
-              <app-icon name="Layers" class="w-4 h-4" />
+              <app-icon name="Layers" size="24" />
               Todo
             </button>
             <button
@@ -248,7 +248,7 @@
               [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
                 (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
             >
-              <app-icon name="ShoppingBag" class="w-4 h-4" />
+              <app-icon name="Box" size="24" />
               Productos
             </button>
             <button
@@ -256,7 +256,7 @@
               [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
                 (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
             >
-              <app-icon name="Package" class="w-4 h-4" />
+              <app-icon name="Package" size="24" />
               Paquetes
             </button>
           </div>
@@ -293,7 +293,7 @@
               @if (mostrarProductos() && resultados().productos.length > 0) {
                 <div class="mb-6">
                   <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <app-icon name="ShoppingBag" class="w-4 h-4 text-primary" />
+                    <app-icon name="Box" class=" text-primary" size="24" />
                     Productos ({{ resultados().productos.length }})
                   </h3>
                   <div class="space-y-2">
@@ -314,11 +314,11 @@
                             {{ producto.nombre }}
                           </p>
                           <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
-                            <app-icon name="Tag" class="w-3 h-3" />
+                            <app-icon name="Tag" size="12" />
                             {{ producto.marca.nombre || 'Sin marca' }}
                           </p>
                           <p class="text-base font-bold text-primary flex items-center gap-1">
-                            <app-icon name="dollar" class="w-3 h-3" />
+                            <app-icon name="dollar" size="12" />
                             {{ formatearPrecio(producto.precio) }}
                           </p>
                         </div>
@@ -332,7 +332,7 @@
               @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
                 <div>
                   <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <app-icon name="Package" class="w-4 h-4 text-primary" />
+                    <app-icon name="Package" class=" text-primary" size="24" />
                     Paquetes ({{ resultados().paquetes.length }})
                   </h3>
                   <div class="space-y-2">
@@ -351,7 +351,7 @@
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center gap-2 mb-1">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                              <app-icon name="Package" class="w-3 h-3" />
+                              <app-icon name="Package" size="12" />
                               Paquete
                             </span>
                           </div>
@@ -359,7 +359,7 @@
                             {{ paquete.paqueteBase?.nombre }}
                           </p>
                           <p class="text-xs text-gray-500 flex items-center gap-1">
-                            <app-icon name="Box" class="w-3 h-3" />
+                            <app-icon name="Box" size="12" />
                             {{ paquete.cant_productos }} productos
                           </p>
                         </div>
@@ -375,7 +375,7 @@
                   class="w-full mt-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
                 >
                   Ver todos los resultados ({{ totalResultados() }})
-                  <app-icon name="arrowRight" class="w-4 h-4" />
+                  <app-icon name="arrowRight" size="24" />
                 </button>
               }
             </div>

@@ -2,7 +2,7 @@ import { Router } from '@angular/router';
 import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Interfaces
@@ -22,6 +22,7 @@ import { InputComponent } from '@app/shared/input/input-component'; // 👈 NUEV
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 
 import Swal from 'sweetalert2';
+import { ToastService } from '@app/services/toast/toast.service';
 
 interface ImageSlot {
   file: File | null;
@@ -44,13 +45,13 @@ interface ImageSlot {
 export class CrearProductoComponent implements OnInit {
   // 🧩 Inyecciones modernas
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef); // 👈 NUEVO
   private plantillaService = inject(PlantillaService);
   private marcaService = inject(MarcaService);
   private categoriaService = inject(CategoriaService);
   private productoService = inject(ProductosService);
+    private toast = inject(ToastService);
 
   // 📝 Form
   productForm!: FormGroup;
@@ -124,7 +125,7 @@ export class CrearProductoComponent implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error plantillas:', err);
-          this.toastr.error('Error cargando plantillas');
+          this.toast.error('Error cargando plantillas');
         }
       });
 
@@ -137,7 +138,7 @@ export class CrearProductoComponent implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error marcas:', err);
-          this.toastr.error('Error cargando marcas');
+          this.toast.error('Error cargando marcas');
         }
       });
 
@@ -150,7 +151,7 @@ export class CrearProductoComponent implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error categorías:', err);
-          this.toastr.error('Error cargando categorías');
+          this.toast.error('Error cargando categorías');
         }
       });
   }
@@ -203,12 +204,12 @@ export class CrearProductoComponent implements OnInit {
       const file = input.files[0];
 
       if (!file.type.startsWith('image/')) {
-        this.toastr.error('Solo se permiten archivos de imagen');
+        this.toast.error('Solo se permiten archivos de imagen');
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        this.toastr.error('La imagen no puede superar los 5MB');
+        this.toast.error('La imagen no puede superar los 5MB');
         return;
       }
 
@@ -294,13 +295,13 @@ export class CrearProductoComponent implements OnInit {
     this.formSubmitted.set(true);
 
     if (this.productForm.invalid) {
-      this.toastr.error('Por favor completá todos los campos requeridos');
+      this.toast.error('Por favor completá todos los campos requeridos');
       this.scrollToFirstError();
       return;
     }
 
     if (!this.hasMainImage()) {
-      this.toastr.error('Debés cargar al menos la imagen principal del producto');
+      this.toast.error('Debés cargar al menos la imagen principal del producto');
       return;
     }
 
@@ -330,13 +331,13 @@ export class CrearProductoComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isLoading.set(false);
-          this.toastr.success('Producto creado exitosamente 🚀');
+          this.toast.success('Producto creado exitosamente 🚀');
           this.resetForm();
         },
         error: (err) => {
           this.isLoading.set(false);
           console.error('Error creando producto', err);
-          this.toastr.error(err.error?.message || 'Error creando producto');
+          this.toast.error(err.error?.message || 'Error creando producto');
         }
       });
   }
@@ -428,7 +429,7 @@ export class CrearProductoComponent implements OnInit {
         this.selectedAttributes.set({});
         this.selectedAttributesTouched.set({});
         this.productForm.patchValue({ plantillaId: null });
-        this.toastr.info('Plantilla deseleccionada');
+        this.toast.info('Plantilla deseleccionada');
       }
     });
   }

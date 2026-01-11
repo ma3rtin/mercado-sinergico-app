@@ -7,14 +7,15 @@ import {
   DestroyRef,
   effect,
   signal,
+  inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ToastrService } from 'ngx-toastr';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ZonaService } from '@app/services/zona/zona.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { ToastService } from '@app/services/toast/toast.service';
 
 @Component({
   selector: 'app-publicar-paquete',
@@ -41,6 +42,7 @@ export class PublicarPaqueteComponent implements OnInit {
   mostrandoResultados = signal<boolean>(false);
   busqueda = signal<string>('');
 
+
   estados = [
     { id_estado: 1, nombre: 'Pendiente' },
     { id_estado: 2, nombre: 'Activo' },
@@ -51,8 +53,8 @@ export class PublicarPaqueteComponent implements OnInit {
   @ViewChild('inputBusqueda') inputBusqueda!: ElementRef<HTMLInputElement>;
   @ViewChild('scrollContainer') scrollContainer?: ElementRef<HTMLElement>;
 
+  private toast = inject(ToastService);
   constructor(
-    private toastr: ToastrService,
     private paqueteBaseService: PaqueteBaseService,
     private zonaService: ZonaService,
     private paquetePublicadoService: PaquetePublicadoService,
@@ -88,7 +90,7 @@ export class PublicarPaqueteComponent implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error al obtener paquetes base:', err);
-          this.toastr.error('Error al cargar los paquetes base.', 'Error');
+          this.toast.error('Error al cargar los paquetes base.', 'Error');
           this.cargando.set(false);
         },
       });
@@ -103,7 +105,7 @@ export class PublicarPaqueteComponent implements OnInit {
         next: (data) => this.zonas.set(data),
         error: (err) => {
           console.error('❌ Error al obtener zonas:', err);
-          this.toastr.error('Error al cargar las zonas.', 'Error');
+          this.toast.error('Error al cargar las zonas.', 'Error');
         },
       });
   }
@@ -167,19 +169,19 @@ export class PublicarPaqueteComponent implements OnInit {
   // --- Publicar paquete ---
   publicarPaquete(): void {
     if (!this.paqueteBaseSeleccionado()) {
-      this.toastr.error('Debés seleccionar un paquete base.', 'Error de validación');
+      this.toast.error('Debés seleccionar un paquete base.', 'Error de validación');
       return;
     }
     if (!this.zonaSeleccionada()) {
-      this.toastr.error('Debés seleccionar una zona.', 'Error de validación');
+      this.toast.error('Debés seleccionar una zona.', 'Error de validación');
       return;
     }
     if (!this.estadoSeleccionado()) {
-      this.toastr.error('Debés seleccionar un estado.', 'Error de validación');
+      this.toast.error('Debés seleccionar un estado.', 'Error de validación');
       return;
     }
     if (!this.fechaInicio() || !this.fechaFin()) {
-      this.toastr.error('Debés ingresar las fechas de inicio y fin.', 'Error de validación');
+      this.toast.error('Debés ingresar las fechas de inicio y fin.', 'Error de validación');
       return;
     }
 
@@ -199,13 +201,13 @@ export class PublicarPaqueteComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toastr.success('Paquete publicado correctamente 🎉', 'Éxito');
+          this.toast.success('Paquete publicado correctamente 🎉', 'Éxito');
           this.reiniciarFormulario();
         },
         error: (err) => {
           console.error('Error al publicar paquete:', err);
           const msg = err.error?.message || 'Ocurrió un error al publicar el paquete.';
-          this.toastr.error(msg, 'Fallo');
+          this.toast.error(msg, 'Fallo');
         },
       });
   }

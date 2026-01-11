@@ -1,0 +1,191 @@
+<!-- ============================================ -->
+<!-- SELECTOR DE VARIANTES - DISEÑO MERCADO LIBRE -->
+<!-- ============================================ -->
+
+<!-- Si el producto no tiene variantes, no mostrar nada -->
+@if (!tieneVariantes()) {
+  <!-- No renderizar nada -->
+}
+
+<!-- Si tiene variantes, mostrar selector -->
+@else {
+  <div class="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 space-y-6">
+
+    <!-- 📌 HEADER -->
+    <div class="flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900">
+        Elegí las opciones
+      </h3>
+
+      <!-- Badge de progreso (solo mobile) -->
+      @if (caracteristicasFaltantes() > 0) {
+        <span class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+          <app-icon name="AlertTriangle" class="w-4 h-4" />
+          Faltan {{ caracteristicasFaltantes() }}
+        </span>
+      }
+      @else {
+        <span class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+          <app-icon name="CheckCircle" class="w-4 h-4" />
+          Completo
+        </span>
+      }
+    </div>
+
+    <!-- 📊 RESUMEN DE SELECCIÓN (Desktop) -->
+    @if (todasSeleccionadas()) {
+      <div class="hidden sm:flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <app-icon name="CheckCircle" class="w-5 h-5 text-green-600 flex-shrink-0" />
+        <span class="text-sm font-medium text-green-800">
+          Seleccionaste: {{ textoVariantesSeleccionadas() }}
+        </span>
+      </div>
+    }
+
+    <!-- 🎨 CARACTERÍSTICAS -->
+    <div class="space-y-6">
+      @for (caracteristica of caracteristicas(); track caracteristica.id) {
+        <div
+          [class]="getClasesContenedorCaracteristica(caracteristica)"
+          (mouseenter)="onMouseEnterCaracteristica(caracteristica.id!)"
+          (mouseleave)="onMouseLeaveCaracteristica()">
+
+          <!-- Título de la característica -->
+          <div class="mb-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-base font-medium text-gray-900 capitalize">
+                {{ caracteristica.nombre }}
+              </h4>
+
+              <!-- Opción seleccionada (si existe) -->
+              @if (getOpcionSeleccionada(caracteristica); as opcionSeleccionada) {
+                <span class="text-sm font-semibold text-secondary-dark">
+                  {{ opcionSeleccionada }}
+                </span>
+              }
+              @else {
+                <span class="text-sm text-gray-500 italic">
+                  Sin seleccionar
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Grid de opciones -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+            @for (opcion of caracteristica.opciones; track opcion.id) {
+              <button
+                type="button"
+                [class]="getClasesBotonOpcion(caracteristica.id!, opcion.id!)"
+                (click)="seleccionarOpcion(caracteristica.id!, opcion.id!)"
+                [attr.aria-label]="'Seleccionar ' + caracteristica.nombre + ' ' + opcion.nombre"
+                [attr.aria-pressed]="estaSeleccionada(caracteristica.id!, opcion.id!)">
+
+                <!-- Contenido del botón -->
+                <div class="flex items-center justify-center gap-2">
+                  <!-- Texto de la opción -->
+                  <span class="text-sm sm:text-base truncate">
+                    {{ opcion.nombre }}
+                  </span>
+
+                  <!-- Check icon (solo si está seleccionada) -->
+                  @if (mostrarCheckIcon(caracteristica.id!, opcion.id!)) {
+                    <app-icon name="CheckCircle" class="w-4 h-4 sm:w-5 sm:h-5 text-secondary-dark flex-shrink-0" />
+                  }
+                </div>
+
+                <!-- Indicador de selección (borde animado) -->
+                @if (estaSeleccionada(caracteristica.id!, opcion.id!)) {
+                  <div class="absolute inset-0 rounded-lg border-2 border-secondary-dark animate-pulse"></div>
+                }
+              </button>
+            }
+          </div>
+
+          <!-- Ayuda contextual (solo mobile, si no tiene selección) -->
+          @if (!tieneSeleccion(caracteristica.id!)) {
+            <p class="mt-2 text-xs text-gray-500 sm:hidden flex items-center gap-1">
+              <app-icon name="Info" class="w-3.5 h-3.5" />
+              Tocá una opción para seleccionar
+            </p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ⚠️ ADVERTENCIA SI FALTAN SELECCIONES -->
+    @if (!todasSeleccionadas()) {
+      <div class="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <app-icon name="AlertTriangle" class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+        <div class="flex-1">
+          <p class="text-sm font-medium text-yellow-800">
+            Seleccioná todas las opciones para continuar
+          </p>
+          <p class="mt-1 text-xs text-yellow-700">
+            @if (caracteristicasFaltantes() === 1) {
+              Falta elegir {{ caracteristicasFaltantes() }} opción
+            }
+            @else {
+              Faltan elegir {{ caracteristicasFaltantes() }} opciones
+            }
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- ✅ CONFIRMACIÓN (opcional, decorativo) -->
+    @if (todasSeleccionadas()) {
+      <div class="hidden sm:block">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <app-icon name="Check" class="w-4 h-4 text-green-500" />
+          <span>
+            Todas las opciones seleccionadas. Podés continuar con tu compra.
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- ============================================ -->
+<!-- NOTAS DE DESARROLLO -->
+<!-- ============================================ -->
+<!--
+  🎨 CARACTERÍSTICAS DEL DISEÑO:
+
+  ✅ Responsive completo:
+     - Mobile: 2 columnas
+     - Tablet: 3 columnas
+     - Desktop: 4-5 columnas
+
+  ✅ Feedback visual:
+     - Borde y fondo amarillo en opción seleccionada
+     - Icono de check animado
+     - Borde pulsante en opción activa
+     - Hover suave en todas las opciones
+
+  ✅ Accesibilidad:
+     - aria-label descriptivo
+     - aria-pressed para estado
+     - Contraste adecuado
+     - Navegación por teclado
+
+  ✅ UX avanzada:
+     - Progress badge en mobile
+     - Resumen de selección en desktop
+     - Advertencia si faltan opciones
+     - Confirmación visual al completar
+     - Ayuda contextual en mobile
+
+  ✅ Paleta de colores:
+     - primary: #71A8D9 (azul claro)
+     - secondary: #2E608C (azul oscuro)
+     - secondary-dark: #D28509 (naranja/amarillo oscuro)
+     - accent: #FFD562 (amarillo)
+
+  🔗 INTEGRACIÓN:
+     - Se integra directamente en detalle-producto-sumarse.component.html
+     - Emite eventos: variantesChange y valido
+     - No requiere servicios externos
+     - Totalmente autocontenido
+-->

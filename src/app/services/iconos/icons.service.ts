@@ -101,6 +101,9 @@ import {
   featherFrown,
   featherSmile,
   featherTag,
+  featherArchive,
+  featherClipboard,
+  featherAward
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -229,6 +232,10 @@ export class IconsService {
     Meh: featherMeh,
     Frown: featherFrown,
     Tag: featherTag,
+    Archive: featherArchive,
+    Clipboard: featherClipboard,
+    Award: featherAward
+
   };
 
   /**
