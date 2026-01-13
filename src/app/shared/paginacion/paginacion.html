@@ -1,4 +1,15 @@
 <!-- paginacion.html -->
+<!--
+  ════════════════════════════════════════════════════════════
+  ⚠️ IMPORTANTE: Este componente NO usa el pipe de ngx-pagination
+
+  Usamos paginación manual (slice en el componente padre) porque:
+  1. Ya tenemos la lógica de paginación en el TS (productosPaginados, paquetesPaginados)
+  2. Solo necesitamos los controles visuales de ngx-pagination
+  3. Es más flexible para nuestro caso de uso
+  ════════════════════════════════════════════════════════════
+-->
+
 @if (shouldShow()) {
   <div class="flex flex-col md:flex-row gap-4 items-center justify-between mt-8 mb-4 px-4">
 
@@ -36,144 +47,86 @@
       }
     </div>
 
-    <!-- 🎯 Controles de paginación -->
+    <!-- 🎯 Controles de paginación MANUALES -->
     <div class="w-full md:w-auto">
-      <pagination-controls
-        [id]="'paquete-pagination'"
-        [maxSize]="getMaxSizeResponsive()"
-        [directionLinks]="directionLinks()"
-        [autoHide]="false"
-        [responsive]="responsive()"
-        [previousLabel]="previousLabel()"
-        [nextLabel]="nextLabel()"
-        (pageChange)="onPageChanged($event)"
-        class="pagination-custom"
-      >
-      </pagination-controls>
+      <nav class="flex items-center justify-center gap-1 flex-wrap font-body" role="navigation" aria-label="Pagination">
+
+        <!-- Botón Anterior -->
+        <button
+          type="button"
+          [disabled]="currentPage() === 1"
+          (click)="onPageChanged(currentPage() - 1)"
+          [class]="getButtonClass(false, currentPage() === 1)"
+          aria-label="Página anterior">
+          {{ previousLabel() }}
+        </button>
+
+        <!-- Números de página -->
+        @for (page of getPageNumbers(); track page) {
+          @if (page === 100) {
+            <span class="px-3 py-2 text-gray-500 select-none">...</span>
+          } @else {
+            <button
+              type="button"
+              [class]="getButtonClass(page === currentPage(), false)"
+              (click)="onPageChanged(page)"
+              [attr.aria-label]="'Página ' + page"
+              [attr.aria-current]="page === currentPage() ? 'page' : null">
+              {{ page }}
+            </button>
+          }
+        }
+
+        <!-- Botón Siguiente -->
+        <button
+          type="button"
+          [disabled]="currentPage() === totalPages()"
+          (click)="onPageChanged(currentPage() + 1)"
+          [class]="getButtonClass(false, currentPage() === totalPages())"
+          aria-label="Página siguiente">
+          {{ nextLabel() }}
+        </button>
+
+      </nav>
     </div>
 
   </div>
 }
 
-<!--
-  ════════════════════════════════════════════════════════════
-  🎨 ESTILOS INLINE CON TAILWIND (ngx-pagination)
-  ════════════════════════════════════════════════════════════
-
-  Los estilos para ngx-pagination se deben aplicar en el
-  archivo global styles.css usando ::ng-deep o en un archivo
-  de estilos del componente.
-
-  Ver abajo las clases necesarias.
--->
-
 <style>
-/* Estilos para ngx-pagination con TailwindCSS */
-::ng-deep .pagination-custom .ngx-pagination {
-  @apply flex items-center justify-center gap-1 flex-wrap;
-  font-family: var(--font-body);
-}
-
-::ng-deep .pagination-custom .ngx-pagination li {
-  @apply list-none;
-}
-
-::ng-deep .pagination-custom .ngx-pagination a,
-::ng-deep .pagination-custom .ngx-pagination button {
-  @apply px-3 py-2 min-w-[2.5rem] text-sm font-medium
-         border border-gray-300 bg-white text-gray-700
-         rounded-lg transition-all duration-200
-         hover:bg-primary-light hover:border-primary hover:text-primary-dark
-         focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1
-         cursor-pointer;
-}
-
-/* Mobile: botones más pequeños */
+/* 🎨 Estilos responsive para mobile */
 @media (max-width: 640px) {
-  ::ng-deep .pagination-custom .ngx-pagination a,
-  ::ng-deep .pagination-custom .ngx-pagination button {
-    @apply px-2 py-1.5 min-w-[2rem] text-xs;
-  }
-}
-
-/* 🎯 Página actual */
-::ng-deep .pagination-custom .ngx-pagination .current {
-  @apply bg-secondary text-white border-secondary
-         shadow-md font-bold
-         hover:bg-secondary-dark hover:border-secondary-dark;
-}
-
-/* ⬅️ Botones Anterior/Siguiente */
-::ng-deep .pagination-custom .ngx-pagination .pagination-previous a,
-::ng-deep .pagination-custom .ngx-pagination .pagination-next a {
-  @apply font-semibold bg-primary text-gray-900
-         hover:bg-accent-dark hover:shadow-lg
-         border-primary;
-}
-
-::ng-deep .pagination-custom .ngx-pagination .pagination-previous.disabled a,
-::ng-deep .pagination-custom .ngx-pagination .pagination-next.disabled a {
-  @apply opacity-40 cursor-not-allowed bg-gray-200 text-gray-500
-         hover:bg-gray-200 hover:shadow-none border-gray-300;
-  pointer-events: none;
-}
-
-/* ... Ellipsis */
-::ng-deep .pagination-custom .ngx-pagination .ellipsis {
-  @apply px-3 py-2 text-gray-500 select-none;
-}
-
-/* 🎨 Hover effects */
-::ng-deep .pagination-custom .ngx-pagination a:hover:not(.disabled a),
-::ng-deep .pagination-custom .ngx-pagination button:hover:not(.disabled button) {
-  @apply transform scale-105;
-}
-
-::ng-deep .pagination-custom .ngx-pagination .current {
-  @apply transform scale-110;
-}
-
-/* ✨ Animaciones */
-::ng-deep .pagination-custom .ngx-pagination a,
-::ng-deep .pagination-custom .ngx-pagination button {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 📱 Responsive: ocultar texto en mobile, solo flechas */
-@media (max-width: 640px) {
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a::before {
+  button[aria-label="Página anterior"]::before {
     content: '←';
     margin-right: 0;
   }
 
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a::after {
+  button[aria-label="Página siguiente"]::after {
     content: '→';
     margin-left: 0;
   }
 
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a,
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a {
+  button[aria-label="Página anterior"],
+  button[aria-label="Página siguiente"] {
     font-size: 0;
     padding: 0.5rem;
     min-width: 2rem;
   }
 
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-previous a::before,
-  ::ng-deep .pagination-custom .ngx-pagination .pagination-next a::after {
+  button[aria-label="Página anterior"]::before,
+  button[aria-label="Página siguiente"]::after {
     font-size: 1rem;
   }
 }
 
 /* ♿ Accesibilidad - Focus visible */
-::ng-deep .pagination-custom .ngx-pagination a:focus-visible,
-::ng-deep .pagination-custom .ngx-pagination button:focus-visible {
+button:focus-visible {
   @apply ring-4 ring-primary ring-offset-2 outline-none;
 }
 
 /* Tamaños mínimos touch (44x44px) */
 @media (max-width: 768px) {
-  ::ng-deep .pagination-custom .ngx-pagination a,
-  ::ng-deep .pagination-custom .ngx-pagination button {
+  button {
     min-width: 44px;
     min-height: 44px;
     @apply flex items-center justify-center;
