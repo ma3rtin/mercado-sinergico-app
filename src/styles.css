@@ -1,6 +1,6 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 @import "tailwindcss";
-@import 'ngx-toastr/toastr';
+/* ❌ Ya no necesitas esto: @import 'ngx-toastr/toastr'; */
 
 @font-face {
     font-family: 'Righteous';
@@ -37,7 +37,6 @@
     /*azul claro*/
     --color-secondary-light: #E6F0F8;
 
-
     --color-accent: #FFD562;
     --color-accent-dark: #FFB800;
 
@@ -57,38 +56,32 @@ p {
     --color-d28509: #D28509;
 }
 
-/* ✅ Toast de éxito */
-.toast-success {
-    background-color: #4CAF50 !important;
-    /* verde esmeralda */
-    color: white !important;
-    border: 1px solid #2E7D32 !important;
-    /* verde más oscuro para contraste */
+/* ✅ Estilos personalizados para ngx-sonner (opcionales) */
+/* Puedes agregar estilos adicionales aquí si lo necesitas */
+
+/* Personalización de los toasts de Sonner */
+[data-sonner-toaster] {
+    font-family: var(--font-body);
 }
 
-/* ✅ Toast de error */
-.toast-error {
-    font-size: 1.2rem !important;
-    background-color: #B92905 !important;
-    background-image: none !important;
-    color: black !important;
-    border: 1px solid black !important;
+[data-sonner-toast] {
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ Toast de warning */
-.toast-warning {
-    background-color: #D28509 !important;
-    background-image: none !important;
-    color: black !important;
-    border: 1px solid #A66A07 !important;
+/* Success toast */
+[data-sonner-toast][data-type="success"] {
+    background-color: #f0fdf4 !important;
+    border: 1px solid #86efac !important;
+    color: #166534 !important;
 }
 
-/* ✅ Toast de info */
-.toast-info {
-    background-color: #2E608C !important;
-    background-image: none !important;
-    color: white !important;
-    border: 1px solid #1B3A58 !important;
+/* Error toast */
+[data-sonner-toast][data-type="error"] {
+    background-color: #fef2f2 !important;
+    border: 1px solid #fca5a5 !important;
+    color: #991b1b !important;
 }
 
 .page-container {
@@ -113,4 +106,25 @@ p {
 
 .page-layout {
     @apply flex flex-col lg:flex-row gap-6;
+}
+
+/* Warning toast */
+[data-sonner-toast][data-type="warning"] {
+    background-color: #fefce8 !important;
+    border: 1px solid #fde047 !important;
+    color: #854d0e !important;
+}
+
+/* Info toast */
+[data-sonner-toast][data-type="info"] {
+    background-color: #eff6ff !important;
+    border: 1px solid #93c5fd !important;
+    color: #1e40af !important;
+}
+
+/* Loading toast */
+[data-sonner-toast][data-type="loading"] {
+    background-color: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
 }

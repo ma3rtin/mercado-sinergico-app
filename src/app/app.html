@@ -2,6 +2,12 @@
 
 <router-outlet />
 
+<ngx-sonner-toaster
+  position="top-right"
+  [richColors]="true"
+  [closeButton]="true"
+  [expand]="true"
+/>
 @if (showLocationModal()) {
   <app-location-modal></app-location-modal>
 }

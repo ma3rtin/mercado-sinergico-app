@@ -4,7 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '@app/services/toast/toast.service';
+
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ export class LoginComponent {
   private usuarioService = inject(UsuarioService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private toastr = inject(ToastrService);
+  private toast = inject(ToastService);
 
   // 🧠 Signals
   email = signal('');
@@ -47,7 +48,7 @@ export class LoginComponent {
         console.log('✅ Token recibido:', response.token);
         this.authService.setJwtToken(response.token);
         this.loading.set(false);
-        this.toastr.success('Sesión iniciada correctamente', 'Éxito');
+        this.toast.success('Sesión iniciada correctamente', 'Éxito');
         this.router.navigate(['/perfil']);
       },
       error: (err) => {
@@ -73,7 +74,7 @@ export class LoginComponent {
       this.usuarioService.loginWithFirebase(firebaseToken).subscribe({
         next: (response) => {
           console.log('✅ Usuario sincronizado con el backend:', response.usuario);
-          this.toastr.success('Inicio de sesión con Google exitoso', 'Éxito');
+          this.toast.success('Inicio de sesión con Google exitoso', 'Éxito');
           this.router.navigate(['/perfil']);
           this.loading.set(false);
         },

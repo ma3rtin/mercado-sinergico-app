@@ -1,13 +1,13 @@
-
 import { Component, signal, inject, effect } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { LocationModalComponent } from './components/location-modal/location-modal.component';
 import { LocationStateService } from './services/localidad/location-state.service';
+import { NgxSonnerToaster } from 'ngx-sonner';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LocationModalComponent],
+  imports: [RouterOutlet, LocationModalComponent, NgxSonnerToaster],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

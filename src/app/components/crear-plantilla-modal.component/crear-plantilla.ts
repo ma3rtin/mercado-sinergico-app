@@ -1,14 +1,19 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, OnDestroy, inject, Inject, DOCUMENT } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
+
+// Models
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Caracteristica } from '@app/models/PlantillaInterfaces/Caracteristica';
 import { Opcion } from '@app/models/PlantillaInterfaces/Opcion';
-import { PlantillaService } from '@app/services/plantilla/plantilla.service';
-import { ToastrService } from 'ngx-toastr';
-import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-import Swal from 'sweetalert2';
-import { Router } from '@angular/router';
 
+// Services
+import { PlantillaService } from '@app/services/plantilla/plantilla.service';
+import { ToastService } from '@app/services/toast/toast.service'; // ✅ NUEVO
+
+// Components
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 @Component({
   selector: 'app-crear-plantilla-modal',
@@ -22,8 +27,9 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
   @Output() close = new EventEmitter<void>();
   @Output() plantillaCreated = new EventEmitter<Plantilla>();
   @Input() plantillaToEdit?: Plantilla;
+
   isEditMode: boolean = false;
-  private toastr = inject(ToastrService);
+  private toast = inject(ToastService); // ✅ CAMBIADO
 
   plantilla: Plantilla = {
     nombre: '',
@@ -38,15 +44,14 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
   maxOptions = 10;
   maxCaracteristicas = 10;
 
-  // En el constructor, agregá:
   constructor(
     private plantillaService: PlantillaService,
     @Inject(DOCUMENT) private document: Document,
-    private router: Router // 
+    private router: Router
   ) { }
 
   ngOnInit(): void {
-
+    // Inicialización si es necesaria
   }
 
   ngOnChanges() {
@@ -60,8 +65,7 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
         this.resetForm();
       }
     } else {
-      // si se cierra (click backdrop o cambio de isOpen desde padre),
-      // resetear estado para evitar quedarse en editMode
+      // Si se cierra, resetear estado
       this.document.body.classList.remove('overflow-hidden');
       this.isEditMode = false;
       this.plantillaToEdit = undefined;
@@ -120,7 +124,6 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
     this.plantilla.caracteristicas.splice(index, 1);
   }
 
-
   addOption(caracIndex: number): void {
     const caracteristica = this.plantilla.caracteristicas[caracIndex];
     if (caracteristica.opciones.length < this.maxOptions) {
@@ -133,82 +136,112 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
   }
 
   guardarPlantilla(): void {
+    // ✅ Validación: Nombre de plantilla
     if (this.plantilla.nombre.trim() === '') {
-      this.toastr.error('Por favor ingresa el nombre de la plantilla');
+      this.toast.error('Por favor ingresa el nombre de la plantilla');
       return;
     }
 
+    // ✅ Validación: Al menos una característica
     if (this.plantilla.caracteristicas.length === 0) {
-      this.toastr.warning('Por favor agrega al menos una característica');
+      this.toast.warning('Por favor agrega al menos una característica');
       return;
     }
 
+    // ✅ Validar cada característica
     for (const caracteristica of this.plantilla.caracteristicas) {
+      // Nombre de característica vacío
       if (caracteristica.nombre.trim() === '') {
-        this.toastr.warning('Por favor ingresa el nombre de la característica 🚨');
+        this.toast.warning('Por favor ingresa el nombre de la característica 🚨');
         return;
       }
+
+      // Característica duplicada
       const existingCharacteristic = this.plantilla.caracteristicas.find(
         (c) => c.nombre.trim() === caracteristica.nombre.trim()
       );
       if (existingCharacteristic && existingCharacteristic !== caracteristica) {
-        this.toastr.warning(`La característica ${caracteristica.nombre} ya existe`);
+        this.toast.warning(`La característica "${caracteristica.nombre}" ya existe`);
         return;
       }
 
+      // Opciones vacías
       if (
         caracteristica.opciones.length === 0 ||
         caracteristica.opciones.some(opcion => opcion.nombre.trim() === '')
       ) {
-        this.toastr.warning(//emoji warning
-          `Por favor ingresa el nombre de las opciones de la característica: ${caracteristica.nombre || '(sin nombre)' + '🚨'}`
+        this.toast.warning(
+          `Por favor ingresa el nombre de las opciones de la característica: ${caracteristica.nombre || '(sin nombre)'} 🚨`
         );
         return;
       }
+
+      // Al menos 2 opciones por característica
+      if (caracteristica.opciones.length < 2) {
+        this.toast.warning(
+          `Por favor ingresa al menos 2 opciones para: ${caracteristica.nombre || '(sin nombre)'} 🚨`
+        );
+        return;
+      }
+
+      // Opciones duplicadas
       for (const opcion of caracteristica.opciones) {
         const existingOption = caracteristica.opciones.find(
           (o) => o.nombre.trim() === opcion.nombre.trim()
         );
         if (existingOption && existingOption !== opcion) {
-          this.toastr.warning(`La opcion ${opcion.nombre} ya existe`);
-          return;
-        }
-        //Validar que haya al menos 2 opciones por caracteristica
-        if (caracteristica.opciones.length < 2) {
-          this.toastr.warning(
-            `Por favor ingresa al menos 2 opciones de la característica: ${caracteristica.nombre || '(sin nombre)' + '🚨'}`
-          );
+          this.toast.warning(`La opción "${opcion.nombre}" ya existe en ${caracteristica.nombre}`);
           return;
         }
       }
     }
 
-    // Crear o actualizar
+    // ✅ Crear o actualizar con loading
     if (this.isEditMode && this.plantilla.id) {
+      const loading = this.toast.loading('Actualizando plantilla...');
+
       this.plantillaService.actualizarPlantilla(this.plantilla).subscribe({
         next: (actualizada) => {
+          this.toast.dismiss(loading);
+          this.toast.success(`Plantilla "${this.plantilla.nombre}" actualizada exitosamente 🎉`);
           this.plantillaCreated.emit(actualizada);
-          this.toastr.success(`Plantilla ${this.plantilla.nombre} actualizada exitosamente`);
           this.closeModal();
         },
-        error: (err) => console.error('Error al actualizar plantilla:', err)
+        error: (err) => {
+          this.toast.dismiss(loading);
+          console.error('Error al actualizar plantilla:', err);
+          this.toast.error('Error al actualizar la plantilla. Intenta nuevamente.');
+        }
       });
     } else {
+      const loading = this.toast.loading('Creando plantilla...');
+
       this.plantillaService.crearPlantilla(this.plantilla).subscribe({
         next: (nueva) => {
+          this.toast.dismiss(loading);
+          this.toast.success(`Plantilla "${this.plantilla.nombre}" creada exitosamente 🎉`);
           this.plantillaCreated.emit(nueva);
-          this.toastr.success(`Plantilla ${this.plantilla.nombre} creada exitosamente` + '🎉');
           this.closeModal();
         },
-        error: (err) => console.error('Error al crear plantilla:', err)
+        error: (err) => {
+          this.toast.dismiss(loading);
+          console.error('Error al crear plantilla:', err);
+
+          // Manejo de error más específico
+          if (err.status === 409) {
+            this.toast.error('Ya existe una plantilla con ese nombre');
+          } else {
+            this.toast.error('Error al crear la plantilla. Intenta nuevamente.');
+          }
+        }
       });
     }
   }
 
-
   canAddMoreCaracteristicas(): boolean {
     return this.plantilla.caracteristicas.length < this.maxCaracteristicas;
   }
+
   cancelarYVolver(): void {
     const hasChanges = this.plantilla.nombre.trim() !== '' ||
       this.plantilla.caracteristicas.length > 0;

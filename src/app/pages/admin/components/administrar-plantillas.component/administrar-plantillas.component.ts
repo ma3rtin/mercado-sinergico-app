@@ -2,10 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
-import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { ToastService } from '@app/services/toast/toast.service';
 
 @Component({
   selector: 'app-administrar-plantillas',
@@ -22,7 +22,7 @@ export class AdministrarPlantillasComponent implements OnInit {
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
 
   private plantillaService = inject(PlantillaService);
-  private toastr = inject(ToastrService);
+  private toast = inject(ToastService);
 
   // ✅ computed: filtra y ordena automáticamente
   filteredPlantillas = computed(() => {
@@ -75,10 +75,10 @@ export class AdministrarPlantillasComponent implements OnInit {
       this.plantillas.update(prev =>
         prev.map(p => (p.id === plantilla.id ? plantilla : p))
       );
-      this.toastr.success('Plantilla actualizada correctamente');
+      this.toast.success('Plantilla actualizada correctamente');
     } else {
       this.plantillas.update(prev => [...prev, plantilla]);
-      this.toastr.success('Plantilla creada correctamente');
+      this.toast.success('Plantilla creada correctamente');
     }
 
     this.plantillaToEdit.set(undefined);
@@ -105,11 +105,11 @@ export class AdministrarPlantillasComponent implements OnInit {
         this.plantillaService.crearPlantilla(copia).subscribe({
           next: (response) => {
             this.plantillas.update(prev => [...prev, response]);
-            this.toastr.success('Plantilla duplicada correctamente');
+            this.toast.success('Plantilla duplicada correctamente');
           },
           error: (error) => {
             console.error('Error duplicando plantilla:', error);
-            this.toastr.error('No se pudo duplicar la plantilla');
+            this.toast.error('No se pudo duplicar la plantilla');
           }
         });
       }
@@ -133,11 +133,11 @@ export class AdministrarPlantillasComponent implements OnInit {
             this.plantillas.update(prev =>
               prev.filter(p => p.id !== plantilla.id)
             );
-            this.toastr.success('Plantilla eliminada correctamente');
+            this.toast.success('Plantilla eliminada correctamente');
           },
           error: (err) => {
             console.error('Error eliminando plantilla:', err);
-            this.toastr.error('No se pudo eliminar la plantilla');
+            this.toast.error('No se pudo eliminar la plantilla');
           },
         });
       }

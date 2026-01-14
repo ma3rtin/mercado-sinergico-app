@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 
 // Models
@@ -12,6 +11,7 @@ import { ProductosService } from '@app/services/producto/producto.service';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { ToastService } from '@app/services/toast/toast.service';
 
 @Component({
   selector: 'app-administrar-productos',
@@ -21,7 +21,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 })
 export class AdministrarProductosComponent {
   private productosService = inject(ProductosService);
-  private toastr = inject(ToastrService);
+  private toast = inject(ToastService);
   private router = inject(Router);
 
   productos = signal<Producto[]>([]);
@@ -79,7 +79,7 @@ export class AdministrarProductosComponent {
       },
       error: (error) => {
         console.error('Error cargando productos:', error);
-        this.toastr.error('Error al cargar los productos');
+        this.toast.error('Error al cargar los productos');
         this.isLoading.set(false);
       }
     });
@@ -130,12 +130,12 @@ duplicateProducto(producto: Producto): void {
       this.productosService.duplicateProduct(producto.id_producto!).subscribe({
         next: (response) => {
           this.productos.update((prev) => [...prev, response]);
-          this.toastr.success('Producto duplicado correctamente');
+          this.toast.success('Producto duplicado correctamente');
           this.loadProductos();
         },
         error: (error) => {
           console.error('Error duplicando producto:', error);
-          this.toastr.error('No se pudo duplicar el producto');
+          this.toast.error('No se pudo duplicar el producto');
         }
       });
     }
@@ -157,11 +157,11 @@ duplicateProducto(producto: Producto): void {
       if (result.isConfirmed) {
         this.productosService.deleteProducto(producto.id_producto??0).subscribe({
           next: () => {
-            this.toastr.success('Producto eliminado correctamente');
+            this.toast.success('Producto eliminado correctamente');
             this.loadProductos();
           },
           error: () => {
-            this.toastr.error('Error al eliminar producto');
+            this.toast.error('Error al eliminar producto');
           }
         });
       }

@@ -3,78 +3,30 @@
 
     <!-- 🎯 Header Section -->
     <div class="mb-6 sm:mb-8 lg:mb-12">
-
-
-      <!-- Información del Paquete -->
-      @if (paquete()) {
-        <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6 sm:mb-8">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <!-- Imagen del paquete -->
-            @if (paquete()?.paqueteBase?.imagen_url) {
-              <img
-                [src]="paquete()?.paqueteBase?.imagen_url"
-                [alt]="paquete()?.paqueteBase?.nombre"
-                class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg"
-                (error)="onImageError($event)"
-              />
-            }
-
-            <!-- Info del paquete -->
-            <div class="flex-1">
-              <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                {{ paquete()?.paqueteBase?.nombre || 'Paquete' }}
-              </h1>
-
-              <div class="flex flex-wrap items-center gap-3 mb-3">
-
-                <!-- Badge Estado -->
-                @if (paquete()?.estado?.nombre) {
-                  <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                    {{ paquete()?.estado?.nombre }}
-                  </span>
-                }
-
-                <!-- Badge Zona -->
-                @if (paquete()?.zona?.nombre) {
-                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-                    </svg>
-                    {{ paquete()?.zona?.nombre }}
-                  </span>
-                }
-              </div>
-
-              @if (paquete()?.paqueteBase?.descripcion) {
-                <p class="text-gray-600 text-sm sm:text-base">
-                  {{ paquete()?.paqueteBase?.descripcion }}
-                </p>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
       <!-- Título y Buscador -->
       <div class="text-center mb-6 sm:mb-8">
         <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
           Productos del Paquete
         </h2>
         <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-          Elegí los productos que querés incluir en tu paquete
+          Elegí los productos que querés incluir en <strong class="text-primary">tu paquete</strong>
         </p>
       </div>
 
+      <!-- Información del Paquete -->
+      @if (paquete()) {
+        <app-paquete-banner [paquete]="paquete()!" />
+      }
 
       <!-- 📊 Estadísticas -->
-@if (!isLoading() && !errorMessage()) {
-  <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
-    <span>
-      Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
-      de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
-    </span>
-  </div>
-}
+      @if (!isLoading() && !errorMessage()) {
+        <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
+          <span>
+            Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
+            de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
+          </span>
+        </div>
+      }
     </div>
 
     <!-- 📐 Layout: Filtros + Grid -->
@@ -123,7 +75,7 @@
             </p>
             <button
               (click)="recargarProductos()"
-              class="inline-flex items-center gap-2 bg-blue-600 hover:secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -135,20 +87,21 @@
 
         <!-- ✅ Grid de Productos -->
         @else {
-@if (productoSeleccionado()) {
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-    <app-producto-card
-      [producto]="productoSeleccionado()!"
-      [contexto]="'paquete-detalle'"
-      [tipoPaquete]="tipoPaquete()"
-      [descuento]="descuentoPaquete()"
-      [paqueteId]="idPaquete()"
-      [navegacion]="'detalle-sumarse'"
-      [mostrarDescripcion]="true"
-    />
-  </div>
-} @else {
-            <!-- Mostrar grid completo filtrado -->
+          @if (productoSeleccionado()) {
+            <!-- Si hay un producto seleccionado, mostrar solo ese -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              <app-producto-card
+                [producto]="productoSeleccionado()!"
+                [contexto]="'paquete-detalle'"
+                [tipoPaquete]="tipoPaquete()"
+                [descuento]="descuentoPaquete()"
+                [paqueteId]="idPaquete()"
+                [navegacion]="'detalle-sumarse'"
+                [mostrarDescripcion]="true"
+              />
+            </div>
+          } @else {
+            <!-- Grid completo con productos paginados -->
             <div class="grid grid-cols-1
                         sm:grid-cols-2
                         lg:grid-cols-2
@@ -157,20 +110,20 @@
                         gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
                         auto-rows-fr">
 
-              @for (producto of productosFiltrados(); track producto.id_producto) {
-  <div class="flex">
-    <app-producto-card
-      [producto]="producto"
-      [contexto]="'paquete-detalle'"
-      [tipoPaquete]="tipoPaquete()"
-      [descuento]="descuentoPaquete()"
-      [paqueteId]="idPaquete()"
-      [navegacion]="'detalle-sumarse'"
-      [mostrarDescripcion]="true"
-      class="w-full"
-    />
-  </div>
-}
+              @for (producto of productosPaginados(); track producto.id_producto) {
+                <div class="flex">
+                  <app-producto-card
+                    [producto]="producto"
+                    [contexto]="'paquete-detalle'"
+                    [tipoPaquete]="tipoPaquete()"
+                    [descuento]="descuentoPaquete()"
+                    [paqueteId]="idPaquete()"
+                    [navegacion]="'detalle-sumarse'"
+                    [mostrarDescripcion]="true"
+                    class="w-full"
+                  />
+                </div>
+              }
 
               <!-- 🚫 Estado Vacío -->
               @empty {
@@ -190,13 +143,26 @@
                     </p>
                     <button
                       (click)="limpiarFiltros()"
-                      class="text-blue-600 hover:secondary-dark font-medium transition-colors">
+                      class="text-blue-600 hover:text-secondary-dark font-medium transition-colors">
                       Limpiar filtros
                     </button>
                   </div>
                 </div>
               }
             </div>
+
+            <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
+            @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
+              <app-pagination
+                [totalItems]="totalItemsPaginacion()"
+                [itemsPerPage]="itemsPorPagina()"
+                [currentPage]="paginaActual()"
+                [showItemsPerPage]="true"
+                [itemsPerPageOptions]="[12, 24, 36, 48]"
+                (pageChange)="onPageChange($event)"
+                (itemsPerPageChange)="onItemsPerPageChange($event)"
+              />
+            }
           }
         }
 

@@ -8,11 +8,12 @@ import {
   DestroyRef,
   effect,
   signal,
+  inject,
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ToastrService } from 'ngx-toastr';
+
 import { Router } from '@angular/router';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
@@ -21,6 +22,8 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
+import { ToastService } from '@app/services/toast/toast.service';
+
 
 @Component({
   selector: 'app-crear-paquete',
@@ -59,9 +62,9 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
   private observer?: IntersectionObserver;
   private lazyInitialized = false;
+   private toast = inject(ToastService);
 
   constructor(
-    private toastr: ToastrService,
     private paqueteBaseService: PaqueteBaseService,
     private marcaService: MarcaService,
     private categoriaService: CategoriaService,
@@ -157,7 +160,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
         error: (err) => {
           console.error('Error al buscar productos:', err);
           this.cargando.set(false);
-          this.toastr.error('Error al buscar productos: ' + (err.error?.message || 'Error de red'));
+          this.toast.error('Error al buscar productos: ' + (err.error?.message || 'Error de red'));
         },
       });
   }
@@ -213,23 +216,23 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   // 🧾 Crear paquete
   crearPaquete(): void {
     if (!this.nombre() || this.nombre().trim().length < 3) {
-      this.toastr.error('El nombre debe tener al menos 3 caracteres.', 'Error de Validación');
+      this.toast.error('El nombre debe tener al menos 3 caracteres.', 'Error de Validación');
       return;
     }
     if (!this.descripcion() || this.descripcion().trim().length === 0) {
-      this.toastr.error('La descripción es obligatoria.', 'Error de Validación');
+      this.toast.error('La descripción es obligatoria.', 'Error de Validación');
       return;
     }
     if (!this.categoriaSeleccionada()) {
-      this.toastr.error('Debés seleccionar una categoría.', 'Error de Validación');
+      this.toast.error('Debés seleccionar una categoría.', 'Error de Validación');
       return;
     }
     if (this.productosSeleccionados().length === 0) {
-      this.toastr.error('Debés agregar al menos un producto al paquete.', 'Error de Validación');
+      this.toast.error('Debés agregar al menos un producto al paquete.', 'Error de Validación');
       return;
     }
     if (!this.imagenSeleccionada()) {
-      this.toastr.error('La imagen de portada es obligatoria.', 'Error de Validación');
+      this.toast.error('La imagen de portada es obligatoria.', 'Error de Validación');
       return;
     }
 
@@ -249,12 +252,12 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toastr.success('Paquete base creado con éxito!', 'Éxito');
+          this.toast.success('Paquete base creado con éxito!', 'Éxito');
           this.resetForm();
           this.router.navigate(['admin/perfil']);
         },
         error: (err) => {
-          this.toastr.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');
+          this.toast.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');
           console.error('Error del servidor al crear paquete:', err);
         },
         complete: () => this.creandoPaquete.set(false),

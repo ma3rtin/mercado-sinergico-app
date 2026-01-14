@@ -1,0 +1,215 @@
+import { Component, input, output, signal, computed, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+// Components
+import { IconComponent } from '@app/shared/icono/icono';
+
+// Interfaces
+import { Producto } from '@app/models/ProductosInterfaces/Producto';
+import { Caracteristica } from '@app/models/PlantillaInterfaces/Caracteristica';
+
+
+/**
+ * Interface para las variantes seleccionadas
+ * Key: caracteristicaId, Value: opcionId
+ */
+export interface VariantesSeleccionadas {
+  [caracteristicaId: number]: number;
+}
+
+/**
+ * Componente para seleccionar variantes de un producto
+ * Diseño inspirado en Mercado Libre
+ *
+ * @example
+ * <app-selector-variantes
+ *   [producto]="producto()"
+ *   (variantesChange)="onVariantesChange($event)"
+ *   (valido)="onValidoChange($event)"
+ * />
+ */
+@Component({
+  selector: 'app-selector-variantes',
+  standalone: true,
+  imports: [CommonModule, IconComponent],
+  templateUrl: './selector-variantes.html',
+})
+export class SelectorVariantesComponent {
+
+  // 🎯 INPUTS
+  producto = input.required<Producto>();
+
+  // 📤 OUTPUTS
+  variantesChange = output<VariantesSeleccionadas>();
+  valido = output<boolean>();
+
+  // 🎨 SIGNALS - Estado interno
+  seleccionadas = signal<VariantesSeleccionadas>({});
+  caracteristicaEnHover = signal<number | null>(null);
+
+  // 🧩 COMPUTED - Datos derivados
+
+  /**
+   * Verifica si el producto tiene plantilla con variantes
+   */
+  tieneVariantes = computed(() => {
+    const prod = this.producto();
+    return !!(prod.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+  });
+
+  /**
+   * Obtiene las características de la plantilla
+   */
+  caracteristicas = computed(() => {
+    return this.producto().plantilla?.caracteristicas || [];
+  });
+
+  /**
+   * Verifica si todas las características requeridas están seleccionadas
+   */
+  todasSeleccionadas = computed(() => {
+    const caracteristicas = this.caracteristicas();
+    const seleccionadas = this.seleccionadas();
+
+    if (caracteristicas.length === 0) return true;
+
+    return caracteristicas.every(carac => {
+      return seleccionadas[carac.id!] !== undefined;
+    });
+  });
+
+  /**
+   * Obtiene el texto descriptivo de las variantes seleccionadas
+   * Ejemplo: "Rojo, Talle M"
+   */
+  textoVariantesSeleccionadas = computed(() => {
+    const caracteristicas = this.caracteristicas();
+    const seleccionadas = this.seleccionadas();
+
+    const textos = caracteristicas
+      .map(carac => {
+        const opcionId = seleccionadas[carac.id!];
+        if (!opcionId) return null;
+
+        const opcion = carac.opciones?.find(o => o.id === opcionId);
+        return opcion?.nombre;
+      })
+      .filter(Boolean);
+
+    return textos.length > 0 ? textos.join(', ') : 'Seleccionar variantes';
+  });
+
+  /**
+   * Cuenta cuántas características faltan seleccionar
+   */
+  caracteristicasFaltantes = computed(() => {
+    const caracteristicas = this.caracteristicas();
+    const seleccionadas = this.seleccionadas();
+
+    return caracteristicas.filter(carac =>
+      seleccionadas[carac.id!] === undefined
+    ).length;
+  });
+
+  constructor() {
+    // Effect: Emitir cambios cuando se actualizan las variantes
+    effect(() => {
+      const seleccionadas = this.seleccionadas();
+      this.variantesChange.emit(seleccionadas);
+      this.valido.emit(this.todasSeleccionadas());
+    }, { allowSignalWrites: true });
+  }
+
+  // 🎯 MÉTODOS - Selección de variantes
+
+  /**
+   * Selecciona una opción para una característica
+   */
+  seleccionarOpcion(caracteristicaId: number, opcionId: number): void {
+    this.seleccionadas.update(current => ({
+      ...current,
+      [caracteristicaId]: opcionId
+    }));
+  }
+
+  /**
+   * Verifica si una opción está seleccionada
+   */
+  estaSeleccionada(caracteristicaId: number, opcionId: number): boolean {
+    return this.seleccionadas()[caracteristicaId] === opcionId;
+  }
+
+  /**
+   * Verifica si una característica tiene alguna opción seleccionada
+   */
+  tieneSeleccion(caracteristicaId: number): boolean {
+    return this.seleccionadas()[caracteristicaId] !== undefined;
+  }
+
+  /**
+   * Obtiene el nombre de la opción seleccionada para una característica
+   */
+  getOpcionSeleccionada(caracteristica: Caracteristica): string | null {
+    const opcionId = this.seleccionadas()[caracteristica.id!];
+    if (!opcionId) return null;
+
+    const opcion = caracteristica.opciones?.find(o => o.id === opcionId);
+    return opcion?.nombre || null;
+  }
+
+  /**
+   * Resetea todas las selecciones
+   */
+  resetear(): void {
+    this.seleccionadas.set({});
+  }
+
+  // 🎨 MÉTODOS - Estilos y clases CSS
+
+  /**
+   * Obtiene las clases CSS para el botón de opción
+   */
+  getClasesBotonOpcion(caracteristicaId: number, opcionId: number): string {
+    const base = 'relative px-4 py-3 border-2 rounded-lg font-medium transition-all duration-200 cursor-pointer';
+    const hover = 'hover:border-secondary hover:shadow-sm';
+
+    const seleccionada = this.estaSeleccionada(caracteristicaId, opcionId);
+
+    if (seleccionada) {
+      return `${base} border-secondary-dark bg-yellow-50 text-secondary-dark shadow-md`;
+    }
+
+    return `${base} ${hover} border-gray-300 text-gray-700 bg-white`;
+  }
+
+  /**
+   * Obtiene las clases CSS para el contenedor de característica
+   */
+  getClasesContenedorCaracteristica(caracteristica: Caracteristica): string {
+    const base = 'pb-6 border-b border-gray-200 last:border-b-0 last:pb-0';
+    const tieneSeleccion = this.tieneSeleccion(caracteristica.id!);
+
+    if (tieneSeleccion) {
+      return `${base} opacity-100`;
+    }
+
+    return `${base} opacity-90`;
+  }
+
+  /**
+   * Obtiene el ícono de check para opciones seleccionadas
+   */
+  mostrarCheckIcon(caracteristicaId: number, opcionId: number): boolean {
+    return this.estaSeleccionada(caracteristicaId, opcionId);
+  }
+
+  // 🎯 MÉTODOS - Eventos
+
+  onMouseEnterCaracteristica(caracteristicaId: number): void {
+    this.caracteristicaEnHover.set(caracteristicaId);
+  }
+
+  onMouseLeaveCaracteristica(): void {
+    this.caracteristicaEnHover.set(null);
+  }
+}
