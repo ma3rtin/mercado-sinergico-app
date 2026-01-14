@@ -57,7 +57,7 @@
                   2xl:grid-cols-4
                   gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-8">
 
-            @for (p of productosFiltrados(); track p.id_producto) {
+            @for (p of productosPaginados(); track p.id_producto) {
               <!-- 🎯 Producto Card Component -->
               <app-producto-card
                 [producto]="p"
@@ -91,5 +91,17 @@
         }
       </div>
     </div>
+                <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
+            @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
+              <app-pagination
+                [totalItems]="totalItemsPaginacion()"
+                [itemsPerPage]="itemsPorPagina()"
+                [currentPage]="paginaActual()"
+                [showItemsPerPage]="true"
+                [itemsPerPageOptions]="[12, 24, 36, 48]"
+                (pageChange)="onPageChange($event)"
+                (itemsPerPageChange)="onItemsPerPageChange($event)"
+              />
+            }
   </div>
 </div>

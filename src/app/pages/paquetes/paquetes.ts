@@ -26,6 +26,7 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { IconComponent } from '@app/shared/icono/icono';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
 
 @Component({
   selector: 'app-paquetes-publicos',
@@ -34,8 +35,9 @@ import { IconComponent } from '@app/shared/icono/icono';
     CommonModule,
     PaqueteCard,
     FiltrosComponent,
-    IconComponent
-],
+    IconComponent,
+    PaginationComponent
+  ],
   templateUrl: './paquetes.html',
 })
 export class PaquetesPublicosComponent implements OnInit {
@@ -46,6 +48,27 @@ export class PaquetesPublicosComponent implements OnInit {
   paquetesFiltrados = signal<PaquetePublicado[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
+
+  // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(4); // 12 paquetes por página (óptimo para e-commerce)
+
+  // 📊 COMPUTED: Paquetes paginados
+  paquetesPaginados = computed(() => {
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.paquetesFiltrados();
+
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+
+    return filtrados.slice(start, end);
+  });
+
+  // 📊 COMPUTED: Total de items para la paginación
+  totalItemsPaginacion = computed(() => {
+    return this.paquetesFiltrados().length;
+  });
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PAQUETES
   configFiltrosPaquetes = computed<ConfigFiltros>(() => ({
@@ -75,70 +98,68 @@ export class PaquetesPublicosComponent implements OnInit {
     mostrarEstados: true,
 
     // 📋 Opciones de Tipo de Paquete
-  opcionesTipoPaquete: [
-  {
-    id: 1,
-    nombre: 'Sinérgico',
-    icon: 'zap',
-    valor: TipoPaquete.SINERGICO
-  },
-  {
-    id: 2,
-    nombre: 'Energético',
-    icon: 'trendingUp',
-    valor: TipoPaquete.ENERGICO
-  },
-],
+    opcionesTipoPaquete: [
+      {
+        id: 1,
+        nombre: 'Sinérgico',
+        icon: 'zap',
+        valor: TipoPaquete.SINERGICO
+      },
+      {
+        id: 2,
+        nombre: 'Energético',
+        icon: 'trendingUp',
+        valor: TipoPaquete.ENERGICO
+      },
+    ],
 
-opcionesOrdenamiento: [
-  {
-    id: 1,
-    nombre: 'Más recientes',
-    icon: 'calendar',
-    valor: 'recientes'
-  },
-  {
-    id: 2,
-    nombre: 'A-Z',
-    icon: 'arrowDown',
-    valor: 'a-z'
-  },
-  {
-    id: 3,
-    nombre: 'Z-A',
-    icon: 'arrowUp',
-    valor: 'z-a'
-  },
-  {
-    id: 4,
-    nombre: 'Más participantes',
-    icon: 'users',
-    valor: 'mas-participantes'
-  },
-],
+    opcionesOrdenamiento: [
+      {
+        id: 1,
+        nombre: 'Más recientes',
+        icon: 'calendar',
+        valor: 'recientes'
+      },
+      {
+        id: 2,
+        nombre: 'A-Z',
+        icon: 'arrowDown',
+        valor: 'a-z'
+      },
+      {
+        id: 3,
+        nombre: 'Z-A',
+        icon: 'arrowUp',
+        valor: 'z-a'
+      },
+      {
+        id: 4,
+        nombre: 'Más participantes',
+        icon: 'users',
+        valor: 'mas-participantes'
+      },
+    ],
 
-
-opcionesEstados: [
-  {
-    id: 1,
-    nombre: 'Por cerrar pronto',
-    icon: 'clock',
-    valor: 'por-cerrar'
-  },
-  {
-    id: 2,
-    nombre: 'Recién abiertos',
-    icon: 'calendar',
-    valor: 'recien-abiertos'
-  },
-  {
-    id: 3,
-    nombre: 'Más populares',
-    icon: 'star',
-    valor: 'populares'
-  },
-],
-
+    opcionesEstados: [
+      {
+        id: 1,
+        nombre: 'Por cerrar pronto',
+        icon: 'clock',
+        valor: 'por-cerrar'
+      },
+      {
+        id: 2,
+        nombre: 'Recién abiertos',
+        icon: 'calendar',
+        valor: 'recien-abiertos'
+      },
+      {
+        id: 3,
+        nombre: 'Más populares',
+        icon: 'star',
+        valor: 'populares'
+      },
+    ],
 
     // 🎯 Textos personalizados
     tituloCategoria: 'Categorías',
@@ -173,6 +194,7 @@ opcionesEstados: [
   private cargarPaquetes(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.paginaActual.set(1); // ✅ Resetear página al cargar
 
     this.paquetePublicadoService
       .getPaquetes()
@@ -188,6 +210,7 @@ opcionesEstados: [
 
           this.paquetesOriginales.set(paquetesActivos);
           this.paquetesFiltrados.set(paquetesActivos);
+          this.paginaActual.set(1); // ✅ Resetear a página 1
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -279,6 +302,7 @@ opcionesEstados: [
     }
 
     this.paquetesFiltrados.set(resultado);
+    this.paginaActual.set(1); // ✅ Resetear a página 1 al filtrar
   }
 
   private ordenarPaquetes(paquetes: PaquetePublicado[], orden: string): PaquetePublicado[] {
@@ -305,11 +329,25 @@ opcionesEstados: [
 
   limpiarFiltros(): void {
     this.paquetesFiltrados.set(this.paquetesOriginales());
+    this.paginaActual.set(1); // ✅ Resetear a página 1 al limpiar
   }
 
   // 🔄 Recargar paquetes
   recargarPaquetes(): void {
+    this.paginaActual.set(1); // ✅ Resetear página
     this.cargarPaquetes();
+  }
+
+  // 📄 MÉTODOS DE PAGINACIÓN
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+    console.log(`📄 Cambiando a página ${page}`);
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.itemsPorPagina.set(itemsPerPage);
+    this.paginaActual.set(1); // Resetear a página 1
+    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
 
   // 🧭 Navegar al detalle del paquete
