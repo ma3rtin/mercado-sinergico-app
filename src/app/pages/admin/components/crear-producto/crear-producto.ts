@@ -1,8 +1,8 @@
 import { Router } from '@angular/router';
-import { Component, inject, OnInit, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-
+import { TipoPaquete } from '@app/models/Enums';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Interfaces
@@ -23,6 +23,7 @@ import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-mo
 
 import Swal from 'sweetalert2';
 import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 interface ImageSlot {
   file: File | null;
@@ -38,8 +39,9 @@ interface ImageSlot {
     ReactiveFormsModule,
     ButtonComponent,
     InputComponent, // 👈 NUEVO - Agregar aquí
-    CrearPlantillaModalComponent
-  ],
+    CrearPlantillaModalComponent,
+    IconComponent
+],
   standalone: true
 })
 export class CrearProductoComponent implements OnInit {
@@ -52,6 +54,14 @@ export class CrearProductoComponent implements OnInit {
   private categoriaService = inject(CategoriaService);
   private productoService = inject(ProductosService);
     private toast = inject(ToastService);
+     readonly TipoPaquete = TipoPaquete;
+     readonly TipoPaqueteLabel: Record<TipoPaquete, string> = {
+  [TipoPaquete.SINERGICO]: 'Sinérgico',
+  [TipoPaquete.ENERGICO]: 'Enérgico',
+  [TipoPaquete.POR_DEFINIR]: 'Por Definir',
+};
+
+
 
   // 📝 Form
   productForm!: FormGroup;
@@ -69,6 +79,8 @@ export class CrearProductoComponent implements OnInit {
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+mostrarSeleccionTipo = signal<boolean>(false);
 
   // 🎭 Estados
   draggedIndex: number | null = null;
@@ -79,6 +91,11 @@ export class CrearProductoComponent implements OnInit {
     this.loadInitialData();
     this.setupFormListeners(); // 👈 NUEVO
   }
+  // 🎯 Agregar este computed
+puedeGenerarVariantes = computed(() => {
+  return this.selectedTemplate() !== null &&
+         this.tipoProducto() !== TipoPaquete.POR_DEFINIR;
+});
 
   private initializeForm(): void {
     this.productForm = this.fb.group({
@@ -92,9 +109,41 @@ export class CrearProductoComponent implements OnInit {
       ancho: [null, [Validators.min(0)]],
       profundidad: [null, [Validators.min(0)]],
       peso: [null, [Validators.min(0)]],
-      plantillaId: [null]
+      plantillaId: [null],
+      tipo: [TipoPaquete.POR_DEFINIR]
     });
   }
+  // 🎯 Método para cambiar el tipo de producto
+cambiarTipoProducto(tipo: TipoPaquete): void {
+  this.tipoProducto.set(tipo);
+  this.productForm.patchValue({ tipo });
+
+  // Si es sinérgico, el stock siempre es null
+  if (tipo === TipoPaquete.SINERGICO) {
+    this.productForm.patchValue({ stock: null });
+  }
+
+  console.log(`✅ Tipo de producto cambiado a: ${tipo}`);
+}
+
+// 🎯 Método para navegar a gestionar variantes después de crear
+navegarAGestionarVariantes(productoId: number): void {
+  this.router.navigate(['/admin/gestionar-variantes', productoId]);
+}
+  // 🎯 Computed para mostrar/ocultar campo stock
+mostrarStock = computed(() => {
+  const tipo = this.tipoProducto();
+  const tienePlantilla = !!this.selectedTemplate();
+
+  // ❌ Sinérgico → no stock
+  if (tipo === TipoPaquete.SINERGICO) return false;
+
+  // ❌ Energético + plantilla → stock por variantes
+  if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
+
+  // ✅ Energético sin plantilla
+  return true;
+});
 
   // 👂 Escuchar cambios del formulario con DestroyRef
   private setupFormListeners(): void {
@@ -159,13 +208,18 @@ export class CrearProductoComponent implements OnInit {
   // 🎨 Selección de plantilla
   selectTemplate(template: Plantilla): void {
     if (this.selectedTemplate()?.id !== template.id) {
-      this.selectedTemplate.set(template);
-      this.selectedAttributes.set({});
-      this.selectedAttributesTouched.set({});
-    }
-    this.productForm.patchValue({ plantillaId: template.id });
+    this.selectedTemplate.set(template);
+    this.selectedAttributes.set({});
+    this.selectedAttributesTouched.set({});
   }
 
+  this.productForm.patchValue({ plantillaId: template.id });
+
+  // ❌ Si es energético y tiene plantilla → stock por variantes
+  if (this.tipoProducto() === TipoPaquete.ENERGICO) {
+    this.productForm.patchValue({ stock: null });
+  }
+}
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
     this.selectedAttributesTouched.update(current => ({
       ...current,
@@ -292,55 +346,102 @@ export class CrearProductoComponent implements OnInit {
 
   // 🚀 Submit
   onSubmit() {
-    this.formSubmitted.set(true);
+  this.formSubmitted.set(true);
 
-    if (this.productForm.invalid) {
-      this.toast.error('Por favor completá todos los campos requeridos');
-      this.scrollToFirstError();
-      return;
+  if (this.productForm.invalid) {
+    this.toast.error('Por favor completá todos los campos requeridos');
+    this.scrollToFirstError();
+    return;
+  }
+
+  if (!this.hasMainImage()) {
+    this.toast.error('Debés cargar al menos la imagen principal del producto');
+    return;
+  }
+
+  // Validar tipo de producto si tiene plantilla
+  if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
+    this.toast.error('Debés seleccionar el tipo de producto (Energético o Sinérgico)');
+    this.mostrarSeleccionTipo.set(true);
+    return;
+  }
+
+  this.isLoading.set(true);
+
+  const formData = new FormData();
+
+Object.entries(this.productForm.value).forEach(([key, value]) => {
+  if (key === 'tipo') return;
+  if (value !== null && value !== undefined && value !== '') {
+    formData.append(key, value.toString());
+  }
+});
+
+// 🔁 Mapear tipo de frontend → enum backend
+const tipoMap: Record<string, string> = {
+  'Sinérgico': 'SINERGICO',
+  'Enérgico': 'ENERGETICO',
+  'Por Definir': 'POR_DEFINIR',
+};
+
+const tipoBackend = tipoMap[this.tipoProducto()];
+
+if (tipoBackend) {
+  formData.append('tipo', tipoBackend);
+}
+
+
+  const slots = this.imageSlots();
+  if (slots[0].file) {
+    formData.append('icono', slots[0].file);
+  }
+
+  for (let i = 1; i < slots.length; i++) {
+    if (slots[i].file) {
+      formData.append('imagenes', slots[i].file as Blob);
     }
+  }
 
-    if (!this.hasMainImage()) {
-      this.toast.error('Debés cargar al menos la imagen principal del producto');
-      return;
-    }
+  this.productoService.createProduct(formData)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (response) => {
+        this.isLoading.set(false);
+        this.toast.success('Producto creado exitosamente 🚀');
 
-    this.isLoading.set(true);
-
-    const formData = new FormData();
-
-    Object.entries(this.productForm.value).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        formData.append(key, value.toString());
+        // Si tiene plantilla, redirigir a gestionar variantes
+        if (this.selectedTemplate()) {
+          Swal.fire({
+            title: '¡Producto creado!',
+            html: `
+              <p class="mb-4">El producto se creó correctamente.</p>
+              <p class="text-sm text-gray-600">¿Querés configurar las variantes ahora?</p>
+            `,
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonColor: '#71A8D9',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, configurar variantes',
+            cancelButtonText: 'Más tarde'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.navegarAGestionarVariantes(response.id_producto??0);
+            } else {
+              this.router.navigate(['/admin/administrar-productos']);
+            }
+          });
+        } else {
+          // Sin plantilla, volver a la lista
+          this.router.navigate(['/admin/administrar-productos']);
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        console.error('Error creando producto', err);
+        this.toast.error(err.error?.message || 'Error creando producto');
       }
     });
-
-    const slots = this.imageSlots();
-    if (slots[0].file) {
-      formData.append('icono', slots[0].file);
-    }
-
-    for (let i = 1; i < slots.length; i++) {
-      if (slots[i].file) {
-        formData.append('imagenes', slots[i].file as Blob);
-      }
-    }
-
-    this.productoService.createProduct(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.toast.success('Producto creado exitosamente 🚀');
-          this.resetForm();
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          console.error('Error creando producto', err);
-          this.toast.error(err.error?.message || 'Error creando producto');
-        }
-      });
-  }
+}
 
   public resetForm(): void {
     this.productForm.reset();
