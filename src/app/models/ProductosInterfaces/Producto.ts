@@ -5,6 +5,7 @@ import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Imagen } from '@app/models/ProductosInterfaces/Imagenes_producto';
 export interface Producto {
     id_producto?: number; // opcional para creación
+    id?: number; // Backend compatibility fallback
     nombre: string;
     descripcion: string;
     precio: number;
