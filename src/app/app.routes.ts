@@ -19,7 +19,7 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
-import { MainLayout } from './components/main-layout/main-layout';
+import { MainLayout } from './layouts/main-layout/main-layout';
 
 export const routes: Routes = [
 
