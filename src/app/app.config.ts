@@ -85,6 +85,11 @@ import {
   featherLayers,
   featherAward,
   featherClipboard,
+  featherList,
+  featherGrid,
+  featherMinusCircle,
+  featherAlertOctagon,
+featherFilePlus
 } from '@ng-icons/feather-icons';
 
 export const appConfig: ApplicationConfig = {
@@ -169,6 +174,11 @@ export const appConfig: ApplicationConfig = {
         featherZap,
         featherAward,
         featherClipboard,
+        featherList,
+        featherGrid,
+        featherMinusCircle,
+        featherAlertOctagon,
+        featherFilePlus
       })
     ),
   ],

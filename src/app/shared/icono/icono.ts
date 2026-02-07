@@ -5,7 +5,7 @@ import { IconsService } from '@app/services/iconos/icons.service';
 
 /**
  * Componente wrapper para usar iconos de ngicons de forma simplificada
- * 
+ *
  * Ejemplo de uso:
  * <app-icon name="search" [size]="'24'" [strokeWidth]="'2'" />
  * <app-icon name="chevronRight" class="text-blue-500" />
@@ -16,11 +16,12 @@ import { IconsService } from '@app/services/iconos/icons.service';
   standalone: true,
   imports: [CommonModule, NgIconComponent, NgIconsModule],
   template: `
-    <ng-icon 
+    <ng-icon
       [name]="iconName()"
       [size]="size()"
       [strokeWidth]="strokeWidth()"
-      [class]="cssClass()"
+      [color]="color()"
+      [class]="'inline-block leading-none align-text-bottom mt-1' + cssClass()"
     />
   `,
 })
@@ -30,6 +31,7 @@ export class IconComponent {
   size = input<string>('24');
   strokeWidth = input<string>('2');
   cssClass = input<string>('');
+  color = input<string>('currentColor');
 
   // 🔧 Inyectar servicio de iconos
   iconsService = new IconsService();
@@ -37,12 +39,12 @@ export class IconComponent {
   // 📌 Computed: nombre del icono con prefijo de feather
   iconName = () => {
     const iconName = this.name();
-    
+
     // Si ya tiene el prefijo, devolverlo así
     if (iconName.startsWith('feather')) {
       return iconName;
     }
-    
+
     // Si no, agregamos el prefijo
     return `feather${iconName.charAt(0).toUpperCase()}${iconName.slice(1)}`;
   };

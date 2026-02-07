@@ -15,15 +15,16 @@ import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
+import { VarianteService } from '@app/services/variantes/variante.service';
+import { ToastService } from '@app/services/toast/toast.service';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-import { InputComponent } from '@app/shared/input/input-component'; // 👈 NUEVO
+import { InputComponent } from '@app/shared/input/input-component';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
+import { IconComponent } from '@app/shared/icono/icono';
 
 import Swal from 'sweetalert2';
-import { ToastService } from '@app/services/toast/toast.service';
-import { IconComponent } from '@app/shared/icono/icono';
 
 interface ImageSlot {
   file: File | null;
@@ -38,30 +39,30 @@ interface ImageSlot {
     FormsModule,
     ReactiveFormsModule,
     ButtonComponent,
-    InputComponent, // 👈 NUEVO - Agregar aquí
+    InputComponent,
     CrearPlantillaModalComponent,
     IconComponent
-],
+  ],
   standalone: true
 })
 export class CrearProductoComponent implements OnInit {
   // 🧩 Inyecciones modernas
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef); // 👈 NUEVO
+  private destroyRef = inject(DestroyRef);
   private plantillaService = inject(PlantillaService);
   private marcaService = inject(MarcaService);
   private categoriaService = inject(CategoriaService);
   private productoService = inject(ProductosService);
-    private toast = inject(ToastService);
-     readonly TipoPaquete = TipoPaquete;
-     readonly TipoPaqueteLabel: Record<TipoPaquete, string> = {
-  [TipoPaquete.SINERGICO]: 'Sinérgico',
-  [TipoPaquete.ENERGICO]: 'Enérgico',
-  [TipoPaquete.POR_DEFINIR]: 'Por Definir',
-};
+  private varianteService = inject(VarianteService); // 👈 NUEVO
+  private toast = inject(ToastService);
 
-
+  readonly TipoPaquete = TipoPaquete;
+  readonly TipoPaqueteLabel: Record<TipoPaquete, string> = {
+    [TipoPaquete.SINERGICO]: 'Sinérgico',
+    [TipoPaquete.ENERGICO]: 'Enérgico',
+    [TipoPaquete.POR_DEFINIR]: 'Por Definir',
+  };
 
   // 📝 Form
   productForm!: FormGroup;
@@ -80,22 +81,37 @@ export class CrearProductoComponent implements OnInit {
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
   tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
-mostrarSeleccionTipo = signal<boolean>(false);
+  mostrarSeleccionTipo = signal<boolean>(false);
 
   // 🎭 Estados
   draggedIndex: number | null = null;
   plantillaToEdit?: Plantilla;
 
+  // 📊 Computed
+  puedeGenerarVariantes = computed(() => {
+    return this.selectedTemplate() !== null &&
+           this.tipoProducto() !== TipoPaquete.POR_DEFINIR;
+  });
+
+  mostrarStock = computed(() => {
+    const tipo = this.tipoProducto();
+    const tienePlantilla = !!this.selectedTemplate();
+
+    // ❌ Sinérgico → no stock
+    if (tipo === TipoPaquete.SINERGICO) return false;
+
+    // ❌ Energético + plantilla → stock por variantes
+    if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
+
+    // ✅ Energético sin plantilla → mostrar stock
+    return true;
+  });
+
   ngOnInit(): void {
     this.initializeForm();
     this.loadInitialData();
-    this.setupFormListeners(); // 👈 NUEVO
+    this.setupFormListeners();
   }
-  // 🎯 Agregar este computed
-puedeGenerarVariantes = computed(() => {
-  return this.selectedTemplate() !== null &&
-         this.tipoProducto() !== TipoPaquete.POR_DEFINIR;
-});
 
   private initializeForm(): void {
     this.productForm = this.fb.group({
@@ -113,54 +129,33 @@ puedeGenerarVariantes = computed(() => {
       tipo: [TipoPaquete.POR_DEFINIR]
     });
   }
-  // 🎯 Método para cambiar el tipo de producto
-cambiarTipoProducto(tipo: TipoPaquete): void {
-  this.tipoProducto.set(tipo);
-  this.productForm.patchValue({ tipo });
 
-  // Si es sinérgico, el stock siempre es null
-  if (tipo === TipoPaquete.SINERGICO) {
-    this.productForm.patchValue({ stock: null });
+  // 🎯 Cambiar tipo de producto
+  cambiarTipoProducto(tipo: TipoPaquete): void {
+    this.tipoProducto.set(tipo);
+    this.productForm.patchValue({ tipo });
+
+    // Si es sinérgico, el stock siempre es null
+    if (tipo === TipoPaquete.SINERGICO) {
+      this.productForm.patchValue({ stock: null });
+    }
+
+    console.log(`✅ Tipo de producto cambiado a: ${tipo}`);
   }
 
-  console.log(`✅ Tipo de producto cambiado a: ${tipo}`);
-}
+  // 🎯 Navegar a gestionar variantes
+  navegarAGestionarVariantes(productoId: number): void {
+    this.router.navigate(['/admin/gestionar-variantes', productoId]);
+  }
 
-// 🎯 Método para navegar a gestionar variantes después de crear
-navegarAGestionarVariantes(productoId: number): void {
-  this.router.navigate(['/admin/gestionar-variantes', productoId]);
-}
-  // 🎯 Computed para mostrar/ocultar campo stock
-mostrarStock = computed(() => {
-  const tipo = this.tipoProducto();
-  const tienePlantilla = !!this.selectedTemplate();
-
-  // ❌ Sinérgico → no stock
-  if (tipo === TipoPaquete.SINERGICO) return false;
-
-  // ❌ Energético + plantilla → stock por variantes
-  if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
-
-  // ✅ Energético sin plantilla
-  return true;
-});
-
-  // 👂 Escuchar cambios del formulario con DestroyRef
+  // 👂 Escuchar cambios del formulario
   private setupFormListeners(): void {
-    // Validación automática del precio (no negativo)
     this.productForm.get('precio')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(precio => {
         if (precio < 0) {
           this.productForm.patchValue({ precio: 0 }, { emitEvent: false });
         }
-      });
-
-    // Log de cambios (solo para debug)
-    this.productForm.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        // console.log('Form changed:', values);
       });
   }
 
@@ -208,18 +203,19 @@ mostrarStock = computed(() => {
   // 🎨 Selección de plantilla
   selectTemplate(template: Plantilla): void {
     if (this.selectedTemplate()?.id !== template.id) {
-    this.selectedTemplate.set(template);
-    this.selectedAttributes.set({});
-    this.selectedAttributesTouched.set({});
+      this.selectedTemplate.set(template);
+      this.selectedAttributes.set({});
+      this.selectedAttributesTouched.set({});
+    }
+
+    this.productForm.patchValue({ plantillaId: template.id });
+
+    // ❌ Si es energético y tiene plantilla → stock por variantes
+    if (this.tipoProducto() === TipoPaquete.ENERGICO) {
+      this.productForm.patchValue({ stock: null });
+    }
   }
 
-  this.productForm.patchValue({ plantillaId: template.id });
-
-  // ❌ Si es energético y tiene plantilla → stock por variantes
-  if (this.tipoProducto() === TipoPaquete.ENERGICO) {
-    this.productForm.patchValue({ stock: null });
-  }
-}
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
     this.selectedAttributesTouched.update(current => ({
       ...current,
@@ -344,105 +340,227 @@ mostrarStock = computed(() => {
     this.draggedIndex = null;
   }
 
-  // 🚀 Submit
+  // 🚀 Submit principal
   onSubmit() {
-  this.formSubmitted.set(true);
+    this.formSubmitted.set(true);
 
-  if (this.productForm.invalid) {
-    this.toast.error('Por favor completá todos los campos requeridos');
-    this.scrollToFirstError();
-    return;
-  }
-
-  if (!this.hasMainImage()) {
-    this.toast.error('Debés cargar al menos la imagen principal del producto');
-    return;
-  }
-
-  // Validar tipo de producto si tiene plantilla
-  if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
-    this.toast.error('Debés seleccionar el tipo de producto (Energético o Sinérgico)');
-    this.mostrarSeleccionTipo.set(true);
-    return;
-  }
-
-  this.isLoading.set(true);
-
-  const formData = new FormData();
-
-Object.entries(this.productForm.value).forEach(([key, value]) => {
-  if (key === 'tipo') return;
-  if (value !== null && value !== undefined && value !== '') {
-    formData.append(key, value.toString());
-  }
-});
-
-// 🔁 Mapear tipo de frontend → enum backend
-const tipoMap: Record<string, string> = {
-  'Sinérgico': 'SINERGICO',
-  'Enérgico': 'ENERGETICO',
-  'Por Definir': 'POR_DEFINIR',
-};
-
-const tipoBackend = tipoMap[this.tipoProducto()];
-
-if (tipoBackend) {
-  formData.append('tipo', tipoBackend);
-}
-
-
-  const slots = this.imageSlots();
-  if (slots[0].file) {
-    formData.append('icono', slots[0].file);
-  }
-
-  for (let i = 1; i < slots.length; i++) {
-    if (slots[i].file) {
-      formData.append('imagenes', slots[i].file as Blob);
+    // ✅ Validar formulario
+    if (this.productForm.invalid) {
+      this.toast.error('Por favor completá todos los campos requeridos');
+      this.scrollToFirstError();
+      return;
     }
+
+    // ✅ Validar imagen principal
+    if (!this.hasMainImage()) {
+      this.toast.error('Debés cargar al menos la imagen principal del producto');
+      return;
+    }
+
+    // ✅ Validar tipo de producto si tiene plantilla
+    if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
+      this.toast.error('Debés seleccionar el tipo de producto (Energético o Sinérgico)');
+      this.mostrarSeleccionTipo.set(true);
+      return;
+    }
+
+    // ✅ Validar atributos seleccionados si hay plantilla
+    if (this.selectedTemplate()) {
+      const caracteristicas = this.selectedTemplate()!.caracteristicas;
+      const atributosSeleccionados = this.selectedAttributes();
+
+      const faltanAtributos = caracteristicas.some(car => {
+        const seleccionados = atributosSeleccionados[car.nombre] || [];
+        return seleccionados.length === 0;
+      });
+
+      if (faltanAtributos) {
+        this.toast.error('Debés seleccionar al menos una opción de cada característica');
+        return;
+      }
+    }
+
+    this.isLoading.set(true);
+
+    // 📦 Preparar FormData
+    const formData = new FormData();
+
+    Object.entries(this.productForm.value).forEach(([key, value]) => {
+      if (key === 'tipo') return;
+      if (value !== null && value !== undefined && value !== '') {
+        formData.append(key, value.toString());
+      }
+    });
+
+    // 🔁 Mapear tipo de frontend → enum backend
+    const tipoMap: Record<string, string> = {
+      'Sinérgico': 'SINERGICO',
+      'Enérgico': 'ENERGETICO',
+      'Por Definir': 'POR_DEFINIR',
+    };
+
+    const tipoBackend = tipoMap[this.tipoProducto()];
+    if (tipoBackend) {
+      formData.append('tipo', tipoBackend);
+    }
+
+    // 📸 Agregar imágenes
+    const slots = this.imageSlots();
+    if (slots[0].file) {
+      formData.append('icono', slots[0].file);
+    }
+
+    for (let i = 1; i < slots.length; i++) {
+      if (slots[i].file) {
+        formData.append('imagenes', slots[i].file as Blob);
+      }
+    }
+
+    // 🚀 Crear producto
+    this.productoService.createProduct(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const productoId = response.id_producto;
+
+          // 🎨 Si tiene plantilla, generar variantes
+          if (this.selectedTemplate() && productoId) {
+            this.generarVariantesDelProducto(productoId);
+          } else {
+            // Sin plantilla, terminar aquí
+            this.isLoading.set(false);
+            this.toast.success('Producto creado exitosamente 🚀');
+            this.router.navigate(['/admin/administrar-productos']);
+          }
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error('Error creando producto', err);
+          this.toast.error(err.error?.message || 'Error creando producto');
+        }
+      });
   }
 
-  this.productoService.createProduct(formData)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        this.isLoading.set(false);
-        this.toast.success('Producto creado exitosamente 🚀');
+  // 🎨 Generar variantes después de crear el producto
+  private generarVariantesDelProducto(productoId: number): void {
+    const atributosParaBackend = this.prepararAtributosParaBackend();
 
-        // Si tiene plantilla, redirigir a gestionar variantes
-        if (this.selectedTemplate()) {
+     console.log('🎨 Generando variantes para producto:', productoId);
+  console.log('🎨 Atributos preparados:', atributosParaBackend);
+  console.log('🎨 Tipo de datos:', typeof atributosParaBackend);
+  console.log('🎨 JSON stringify:', JSON.stringify(atributosParaBackend));
+
+    // Validar que haya atributos
+    if (Object.keys(atributosParaBackend).length === 0) {
+      this.isLoading.set(false);
+
+      this.toast.error('No se encontraron atributos para generar variantes');
+      return;
+    }
+
+    // Llamar al endpoint POST /api/productos/:id/variantes/generar
+    this.varianteService.generarVariantes({
+      productoId,
+      opcionesDisponibles: atributosParaBackend
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.isLoading.set(false);
+          console.log('✅ Variantes generadas:', response);
+
+          // Mostrar confirmación con SweetAlert
           Swal.fire({
             title: '¡Producto creado!',
             html: `
               <p class="mb-4">El producto se creó correctamente.</p>
-              <p class="text-sm text-gray-600">¿Querés configurar las variantes ahora?</p>
+              <p class="text-sm text-gray-600">
+                <strong>${response.variantes?.length || 0}</strong> variantes generadas.
+              </p>
+              <p class="text-sm text-gray-600 mt-2">¿Querés configurar el stock ahora?</p>
             `,
             icon: 'success',
             showCancelButton: true,
             confirmButtonColor: '#71A8D9',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, configurar variantes',
+            confirmButtonText: 'Sí, configurar stock',
             cancelButtonText: 'Más tarde'
           }).then((result) => {
             if (result.isConfirmed) {
-              this.navegarAGestionarVariantes(response.id_producto??0);
+              this.navegarAGestionarVariantes(productoId);
             } else {
               this.router.navigate(['/admin/administrar-productos']);
             }
           });
-        } else {
-          // Sin plantilla, volver a la lista
-          this.router.navigate(['/admin/administrar-productos']);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          console.error('❌ Error generando variantes:', err);
+              console.error('❌ Error COMPLETO:', err);
+        console.error('❌ Error message:', err.error?.message);
+        console.error('❌ Error status:', err.status);
+        console.error('❌ Error statusText:', err.statusText);
+        console.error('❌ Error body completo:', err.error);
+
+          // El producto se creó, pero las variantes fallaron
+          Swal.fire({
+            title: 'Producto creado',
+            html: `
+              <p class="mb-2">El producto se creó correctamente.</p>
+              <p class="text-sm text-red-600">
+                ⚠️ Pero hubo un error al generar las variantes:
+                <br><strong>${err.error?.message || 'Error desconocido'}</strong>
+              </p>
+              <p class="text-sm text-gray-600 mt-2">
+                Podés intentar generar las variantes manualmente más tarde.
+              </p>
+            `,
+            icon: 'warning',
+            confirmButtonColor: '#71A8D9',
+            confirmButtonText: 'Entendido'
+          }).then(() => {
+            this.router.navigate(['/admin/administrar-productos']);
+          });
         }
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        console.error('Error creando producto', err);
-        this.toast.error(err.error?.message || 'Error creando producto');
+      });
+  }
+
+  // 🎨 Preparar atributos en el formato que espera el backend
+  private prepararAtributosParaBackend(): Record<number, number[]> {
+    const plantilla = this.selectedTemplate();
+    if (!plantilla) return {};
+
+    const resultado: Record<number, number[]> = {};
+console.log('🎨 Plantilla:', plantilla);
+  console.log('🎨 Características:', plantilla.caracteristicas);
+  console.log('🎨 Selected Attributes:', this.selectedAttributes());
+    plantilla.caracteristicas.forEach(caracteristica => {
+      const opcionesSeleccionadas = this.selectedAttributes()[caracteristica.nombre] || [];
+
+      console.log(`🔍 Característica: ${caracteristica.nombre} (ID: ${caracteristica.id})`);
+    console.log('  ↳ Opciones seleccionadas:', opcionesSeleccionadas);
+    console.log('  ↳ Opciones disponibles:', caracteristica.opciones);
+      // Filtrar opciones que existen en la plantilla
+      const opcionesIds = caracteristica.opciones
+        .filter(opcion => opcionesSeleccionadas.includes(opcion.nombre))
+        .map(opcion => opcion.id)
+        .filter((id): id is number => id !== undefined);
+
+      if (opcionesIds.length > 0 && caracteristica.id !== undefined) {
+        resultado[caracteristica.id] = opcionesIds;
       }
     });
-}
 
+    console.log('🎨 Selected Template:', plantilla);
+    console.log('🎨 Selected Attributes:', this.selectedAttributes());
+    console.log('🎨 Prepared Attributes:', resultado);
+    console.log('📊 Resultado final:', resultado);
+  console.log('📊 Número de características con opciones:', Object.keys(resultado).length);
+
+    return resultado;
+  }
+
+  // 🧹 Reset formulario
   public resetForm(): void {
     this.productForm.reset();
     this.selectedTemplate.set(null);
@@ -470,7 +588,28 @@ if (tipoBackend) {
     this.closeCreateModal();
   }
 
-  // 🧹 Helpers para validación (ya no son necesarios con InputComponent, pero los dejamos por compatibilidad)
+  deseleccionarPlantilla(): void {
+    Swal.fire({
+      title: '¿Deseleccionar plantilla?',
+      text: 'El producto quedará sin plantilla asociada',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#71A8D9',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, deseleccionar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.selectedTemplate.set(null);
+        this.selectedAttributes.set({});
+        this.selectedAttributesTouched.set({});
+        this.productForm.patchValue({ plantillaId: null });
+        this.toast.info('Plantilla deseleccionada');
+      }
+    });
+  }
+
+  // 🧹 Helpers para validación
   isFieldInvalid(fieldName: string): boolean {
     const control = this.productForm.get(fieldName);
     return !!(control && control.invalid && (control.touched || this.formSubmitted()));
@@ -512,26 +651,5 @@ if (tipoBackend) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
-  }
-
-  deseleccionarPlantilla(): void {
-    Swal.fire({
-      title: '¿Deseleccionar plantilla?',
-      text: 'El producto quedará sin plantilla asociada',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, deseleccionar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.selectedTemplate.set(null);
-        this.selectedAttributes.set({});
-        this.selectedAttributesTouched.set({});
-        this.productForm.patchValue({ plantillaId: null });
-        this.toast.info('Plantilla deseleccionada');
-      }
-    });
   }
 }

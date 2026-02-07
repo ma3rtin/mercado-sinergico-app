@@ -103,7 +103,12 @@ import {
   featherTag,
   featherArchive,
   featherClipboard,
-  featherAward
+  featherAward,
+  featherGrid,
+  featherList,
+  featherMinusCircle,
+  featherAlertOctagon,
+
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -193,6 +198,7 @@ export class IconsService {
     eyeOff: featherEyeOff,
     loader: featherLoader,
     refresh: featherRefreshCw,
+    save: featherFilePlus,
 
     // 📱 Misc
     phone: featherPhone,
@@ -234,7 +240,11 @@ export class IconsService {
     Tag: featherTag,
     Archive: featherArchive,
     Clipboard: featherClipboard,
-    Award: featherAward
+    Award: featherAward,
+    Grid: featherGrid,
+    List: featherList,
+    MinusCircle: featherMinusCircle,
+    AlertOctagon: featherAlertOctagon,
 
   };
 

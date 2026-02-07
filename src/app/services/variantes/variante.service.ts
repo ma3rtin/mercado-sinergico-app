@@ -146,24 +146,40 @@ export class VarianteService extends ApiService {
    * Genera variantes automáticamente basándose en opciones seleccionadas
    * POST /api/productos/:id/variantes/generar
    */
-  generarVariantes(data: GenerarVariantesDTO): Observable<any> {
-    console.log(`🎨 VarianteService - POST generar variantes para producto ${data.productoId}`);
+  /**
+ * Genera variantes automáticamente basándose en opciones seleccionadas
+ * POST /api/productos/:id/variantes/generar
+ */
+generarVariantes(data: GenerarVariantesDTO): Observable<any> {
+  console.log(`🎨 VarianteService - POST generar variantes para producto ${data.productoId}`);
+  console.log('🎨 Opciones a enviar:', data.opcionesDisponibles);
 
-    return this.post<any>(
-      `productos/${data.productoId}/variantes/generar`,
-      { opcionesDisponibles: data.opcionesDisponibles }
-    ).pipe(
-      timeout(30000),
-      map(response => {
-        console.log('✅ Variantes generadas:', response);
-        return response;
-      }),
-      catchError(err => {
-        console.error('❌ Error generando variantes:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+  // Enviar solo el objeto que el DTO espera
+  const payload = {
+    productoId: data.productoId,
+    opcionesDisponibles: data.opcionesDisponibles
+  };
+
+  return this.post<any>(
+    `productos/${data.productoId}/generar-variantes`,
+    payload
+  ).pipe(
+    timeout(30000),
+    map(response => {
+      console.log('✅ Variantes generadas:', response);
+      return response;
+    }),
+    catchError(err => {
+      console.error('❌ Error generando variantes:', err);
+      console.error('❌ Error completo:', err);
+      console.error('❌ Status:', err.status);
+      console.error('❌ StatusText:', err.statusText);
+      console.error('❌ Error body:', err.error);
+      console.error('❌ Message:', err.message);
+      return throwError(() => err);
+    })
+  );
+}
 
   /**
    * Actualiza el stock de múltiples variantes en una sola operación

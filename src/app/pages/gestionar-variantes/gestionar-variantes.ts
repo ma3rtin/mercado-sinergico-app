@@ -1,27 +1,36 @@
 // ============================================
 // GESTIONAR-VARIANTES.COMPONENT.TS
+// Gestión completa de variantes de productos
 // ============================================
 import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ToastService } from '@app/services/toast/toast.service';
 
 // Interfaces y Services
-import { VarianteService, ProductoVariantesResponse, ProductoVariante, ActualizarStockVariantesDTO } from '@app/services/variantes/variante.service';
+import { VarianteService, ProductoVariantesResponse, ProductoVariante, ActualizarVarianteDTO } from '@app/services/variantes/variante.service';
 import { ProductosService } from '@app/services/producto/producto.service';
-import { ToastService } from '@app/services/toast/toast.service';
 import { TipoPaquete } from '@app/models/Enums';
 
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-//import { InputComponent } from '@app/shared/input/input-component';
+import { IconComponent } from '@app/shared/icono/icono';
 
 import Swal from 'sweetalert2';
 
-interface VarianteConStock extends ProductoVariante {
-  stockAnterior?: number;
+// ============================================
+// INTERFACES
+// ============================================
+interface VarianteExtendida extends ProductoVariante {
+  stockOriginal?: number;
+  precioExtraOriginal?: number;
+  activoOriginal?: boolean;
+  imagenOriginal?: string | null;
   hasChanges?: boolean;
+  imagenFile?: File | null;
+  imagenPreview?: string | null;
 }
 
 @Component({
@@ -32,28 +41,36 @@ interface VarianteConStock extends ProductoVariante {
     FormsModule,
     ReactiveFormsModule,
     ButtonComponent,
+    IconComponent
   ],
   templateUrl: './gestionar-variantes.html'
 })
 export class GestionarVariantesComponent implements OnInit {
-  // 🧩 Inyecciones
+
+  // ============================================
+  // INYECCIONES
+  // ============================================
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
   private varianteService = inject(VarianteService);
   private productoService = inject(ProductosService);
-  private toast = inject(ToastService);
+  private toastr = inject(ToastService);
 
-  // 🎯 Signals
+  // ============================================
+  // SIGNALS
+  // ============================================
   productoId = signal<number | null>(null);
   productoInfo = signal<ProductoVariantesResponse | null>(null);
-  variantes = signal<VarianteConStock[]>([]);
+  variantes = signal<VarianteExtendida[]>([]);
+  precioBaseProducto = signal<number>(0);
   isLoading = signal<boolean>(true);
   isSaving = signal<boolean>(false);
   modoEdicion = signal<'tabla' | 'tarjetas'>('tabla');
 
-  // 📊 Computed
+  // ============================================
+  // COMPUTED PROPERTIES
+  // ============================================
   esProductoEnergetico = computed(() => {
     return this.productoInfo()?.producto.tipo === TipoPaquete.ENERGICO;
   });
@@ -68,7 +85,7 @@ export class GestionarVariantesComponent implements OnInit {
 
   stockTotal = computed(() => {
     if (!this.esProductoEnergetico()) return null;
-    return this.variantes().reduce((total, v) => total + (v.stockAnterior || 0), 0);
+    return this.variantes().reduce((total, v) => total + (v.stockFisico || 0), 0);
   });
 
   hasChanges = computed(() => {
@@ -83,19 +100,48 @@ export class GestionarVariantesComponent implements OnInit {
     return this.variantes().filter(v => !v.activo);
   });
 
+  // ============================================
+  // LIFECYCLE
+  // ============================================
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
     if (!id) {
-      this.toast.error('ID de producto no proporcionado');
-      this.router.navigate(['/admin/administrar-productos']);
+      this.toastr.error('ID de producto no proporcionado');
+      this.router.navigate(['/administrar-productos']);
       return;
     }
 
     this.productoId.set(parseInt(id, 10));
+    this.cargarDatosProducto();
     this.cargarVariantes();
   }
 
+  // ============================================
+  // CARGA DE DATOS
+  // ============================================
+
+  /**
+   * Cargar datos básicos del producto (precio base)
+   */
+  private cargarDatosProducto(): void {
+    this.productoService.getProductoById(this.productoId()!)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (producto) => {
+          this.precioBaseProducto.set(producto.precio || 0);
+          console.log('✅ Precio base del producto:', producto.precio);
+        },
+        error: (err) => {
+          console.error('❌ Error cargando producto:', err);
+          this.toastr.error('Error al cargar datos del producto');
+        }
+      });
+  }
+
+  /**
+   * Cargar todas las variantes del producto
+   */
   private cargarVariantes(): void {
     this.isLoading.set(true);
 
@@ -106,10 +152,15 @@ export class GestionarVariantesComponent implements OnInit {
           this.productoInfo.set(response);
 
           // Añadir metadata para tracking de cambios
-          const variantesConMetadata: VarianteConStock[] = response.variantes.map(v => ({
+          const variantesConMetadata: VarianteExtendida[] = response.variantes.map(v => ({
             ...v,
-            stockAnterior: v.stockFisico || 0,
-            hasChanges: false
+            stockOriginal: v.stockFisico || 0,
+            precioExtraOriginal: v.precioExtra || 0,
+            activoOriginal: v.activo ?? true,
+            imagenOriginal: null, // TODO: agregar cuando el backend soporte imágenes
+            hasChanges: false,
+            imagenFile: null,
+            imagenPreview: null
           }));
 
           this.variantes.set(variantesConMetadata);
@@ -119,55 +170,180 @@ export class GestionarVariantesComponent implements OnInit {
         },
         error: (err) => {
           console.error('❌ Error cargando variantes:', err);
-          this.toast.error('Error al cargar las variantes del producto');
+          this.toastr.error('Error al cargar las variantes del producto');
           this.isLoading.set(false);
-          this.router.navigate(['/admin/administrar-productos']);
+          this.router.navigate(['/administrar-productos']);
         }
       });
   }
 
-  // 📝 Actualizar stock de una variante
-  onStockChange(varianteIndex: number, nuevoStock: number): void {
+  // ============================================
+  // EDICIÓN DE VARIANTES
+  // ============================================
+
+  /**
+   * Actualizar stock de una variante
+   */
+  onStockChange(index: number, nuevoStock: number): void {
+    if (nuevoStock < 0) {
+      nuevoStock = 0;
+    }
+
     this.variantes.update(current => {
       const updated = [...current];
-      const variante = updated[varianteIndex];
+      const variante = updated[index];
 
-      // Validar que el stock no sea negativo
-      if (nuevoStock < 0) {
-        nuevoStock = 0;
-      }
-
-      variante.stockAnterior = nuevoStock;
-      variante.hasChanges = nuevoStock !== variante.stockAnterior;
+      variante.stockFisico = nuevoStock;
+      variante.hasChanges = this.hasVarianteChanges(variante);
 
       return updated;
     });
   }
 
-  // 💰 Actualizar precio extra de una variante
-  onPrecioExtraChange(varianteIndex: number, nuevoPrecio: number): void {
+  /**
+   * Actualizar precio extra de una variante
+   */
+  onPrecioExtraChange(index: number, nuevoPrecio: number): void {
+    if (nuevoPrecio < 0) {
+      nuevoPrecio = 0;
+    }
+
     this.variantes.update(current => {
       const updated = [...current];
-      updated[varianteIndex].precioExtra = nuevoPrecio;
+      const variante = updated[index];
+
+      variante.precioExtra = nuevoPrecio;
+      variante.hasChanges = this.hasVarianteChanges(variante);
+
       return updated;
     });
   }
 
-  // 🔄 Activar/Desactivar variante
-  toggleVarianteActiva(varianteIndex: number): void {
+  /**
+   * Toggle activo/inactivo de una variante
+   */
+  toggleVarianteActiva(index: number): void {
     this.variantes.update(current => {
       const updated = [...current];
-      updated[varianteIndex].activo = !updated[varianteIndex].activo;
+      const variante = updated[index];
+
+      variante.activo = !variante.activo;
+      variante.hasChanges = this.hasVarianteChanges(variante);
+
       return updated;
     });
   }
 
-  // 💾 Guardar todos los cambios
+  /**
+   * Verificar si una variante tiene cambios sin guardar
+   */
+  private hasVarianteChanges(variante: VarianteExtendida): boolean {
+    return (
+      variante.stockFisico !== variante.stockOriginal ||
+      variante.precioExtra !== variante.precioExtraOriginal ||
+      variante.activo !== variante.activoOriginal ||
+      variante.imagenFile !== null
+    );
+  }
+
+  // ============================================
+  // MANEJO DE IMÁGENES
+  // ============================================
+
+  /**
+   * Manejar selección de imagen
+   */
+  onImagenSelected(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      this.toastr.error('Solo se permiten archivos de imagen');
+      return;
+    }
+
+    // Validar tamaño (5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      this.toastr.error('La imagen no puede superar los 5MB');
+      return;
+    }
+
+    // Generar preview
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.variantes.update(current => {
+        const updated = [...current];
+        const variante = updated[index];
+
+        variante.imagenFile = file;
+        variante.imagenPreview = e.target?.result as string;
+        variante.hasChanges = true;
+
+        return updated;
+      });
+    };
+
+    reader.readAsDataURL(file);
+
+    // Resetear input para permitir seleccionar el mismo archivo
+    input.value = '';
+  }
+
+  /**
+   * Eliminar imagen seleccionada
+   */
+  removeImagen(index: number): void {
+    this.variantes.update(current => {
+      const updated = [...current];
+      const variante = updated[index];
+
+      variante.imagenFile = null;
+      variante.imagenPreview = null;
+      variante.hasChanges = this.hasVarianteChanges(variante);
+
+      return updated;
+    });
+  }
+
+  /**
+   * Verificar si la variante tiene imagen
+   */
+  tieneImagen(variante: VarianteExtendida): boolean {
+    return !!(variante.imagenPreview || variante.imagenOriginal);
+  }
+
+  /**
+   * Obtener URL de imagen de la variante
+   */
+  getVarianteImagen(variante: VarianteExtendida): string {
+    if (variante.imagenPreview) {
+      return variante.imagenPreview;
+    }
+    if (variante.imagenOriginal) {
+      return variante.imagenOriginal;
+    }
+    return '/assets/images/placeholder-variant.png';
+  }
+
+  // ============================================
+  // GUARDADO Y RESETEO
+  // ============================================
+
+  /**
+   * Guardar todos los cambios
+   */
   guardarCambios(): void {
     const variantesConCambios = this.variantes().filter(v => v.hasChanges);
 
     if (variantesConCambios.length === 0) {
-      this.toast.info('No hay cambios para guardar');
+      this.toastr.info('No hay cambios para guardar');
       return;
     }
 
@@ -177,7 +353,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#71A8D9',
-      cancelButtonColor: '#d33',
+      cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, guardar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {
@@ -187,141 +363,161 @@ export class GestionarVariantesComponent implements OnInit {
     });
   }
 
+  /**
+   * Ejecutar el guardado de cambios
+   */
   private ejecutarGuardado(): void {
     this.isSaving.set(true);
 
-    const dto: ActualizarStockVariantesDTO = {
-      variantes: this.variantes()
-        .filter(v => v.hasChanges)
-        .map(v => ({
-          id: v.id,
-          stockFisico: v.stockFisico || 0
-        }))
-    };
+    const variantesConCambios = this.variantes().filter(v => v.hasChanges);
+    let guardadas = 0;
+    let errores = 0;
 
-    this.varianteService.actualizarStockBulk(this.productoId()!, dto)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.isSaving.set(false);
-          this.toast.success('Stock actualizado correctamente ✅');
+    // TODO: Si hay imágenes, primero subirlas a Cloudinary
+    // Por ahora, guardamos solo los datos
 
-          // Actualizar stockAnterior y resetear hasChanges
-          this.variantes.update(current =>
-            current.map(v => ({
-              ...v,
-              stockAnterior: v.stockFisico || 0,
-              hasChanges: false
-            }))
-          );
+    variantesConCambios.forEach((variante) => {
+      const dto: ActualizarVarianteDTO = {
+        stockFisico: variante.stockFisico,
+        precioExtra: variante.precioExtra,
+        activo: variante.activo
+        // imagenUrl: variante.imagenUrl // TODO: agregar cuando se implemente Cloudinary
+      };
 
-          console.log('✅ Stock guardado:', response);
-        },
-        error: (err) => {
-          this.isSaving.set(false);
-          console.error('❌ Error guardando stock:', err);
-          this.toast.error(err.error?.message || 'Error al guardar el stock');
-        }
-      });
+      this.varianteService.actualizarVariante(variante.id, dto)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            guardadas++;
+
+            // Actualizar valores originales
+            this.variantes.update(current =>
+              current.map(v => v.id === variante.id ? {
+                ...v,
+                stockOriginal: v.stockFisico ?? 0,
+                precioExtraOriginal: v.precioExtra ?? 0,
+                activoOriginal: v.activo ?? true,
+                imagenOriginal: v.imagenPreview ?? null,
+                hasChanges: false,
+                imagenFile: null,
+                imagenPreview: null
+              } : v)
+            );
+
+            // Si es la última, mostrar mensaje
+            if (guardadas + errores === variantesConCambios.length) {
+              this.finalizarGuardado(guardadas, errores);
+            }
+          },
+          error: (err) => {
+            errores++;
+            console.error('❌ Error guardando variante:', err);
+
+            if (guardadas + errores === variantesConCambios.length) {
+              this.finalizarGuardado(guardadas, errores);
+            }
+          }
+        });
+    });
   }
 
-  // 🔄 Resetear cambios
+  /**
+   * Finalizar proceso de guardado
+   */
+  private finalizarGuardado(guardadas: number, errores: number): void {
+    this.isSaving.set(false);
+
+    if (errores === 0) {
+      this.toastr.success(`✅ ${guardadas} variante(s) actualizada(s) correctamente`);
+    } else if (guardadas > 0) {
+      this.toastr.warning(`⚠️ ${guardadas} guardada(s), ${errores} con errores`);
+    } else {
+      this.toastr.error('❌ Error al guardar las variantes');
+    }
+  }
+
+  /**
+   * Resetear todos los cambios
+   */
   resetearCambios(): void {
+  Swal.fire({
+    title: '¿Descartar cambios?',
+    text: 'Se perderán todos los cambios no guardados',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#B92905',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Sí, descartar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.variantes.update(current =>
+        current.map(v => ({
+          ...v,
+          stockFisico: v.stockOriginal ?? 0,
+          precioExtra: v.precioExtraOriginal ?? 0,
+          activo: v.activoOriginal ?? true,
+          hasChanges: false,
+          imagenFile: null,
+          imagenPreview: null
+        }))
+      );
+      this.toastr.info('Cambios descartados');
+    }
+  });
+}
+
+  // ============================================
+  // ELIMINACIÓN
+  // ============================================
+
+  /**
+   * Eliminar una variante
+   */
+  eliminarVariante(index: number): void {
+    const variante = this.variantes()[index];
+
     Swal.fire({
-      title: '¿Descartar cambios?',
-      text: 'Se perderán todos los cambios no guardados',
+      title: '¿Eliminar variante?',
+      html: `<p>Se eliminará la variante:</p><strong>${this.getVarianteDescripcion(variante)}</strong>`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#d33',
+      confirmButtonColor: '#B92905',
       cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sí, descartar',
+      confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.variantes.update(current =>
-          current.map(v => ({
-            ...v,
-            stockFisico: v.stockAnterior || 0,
-            hasChanges: false
-          }))
-        );
-        this.toast.info('Cambios descartados');
+        this.varianteService.eliminarVariante(variante.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.variantes.update(current =>
+                current.filter((_, i) => i !== index)
+              );
+              this.toastr.success('Variante eliminada correctamente');
+            },
+            error: (err) => {
+              console.error('❌ Error eliminando variante:', err);
+              this.toastr.error(err.error?.message || 'Error al eliminar la variante');
+            }
+          });
       }
     });
   }
 
-  // 🎨 Cambiar modo de visualización
-  cambiarModo(modo: 'tabla' | 'tarjetas'): void {
-    this.modoEdicion.set(modo);
-  }
+  // ============================================
+  // ACCIONES MASIVAS
+  // ============================================
 
-  // 🧮 Helpers
-  getVarianteDescripcion(variante: ProductoVariante): string {
-    return this.varianteService.getVarianteDescripcion(variante);
-  }
-  calcularPrecioFinal(variante: ProductoVariante): number {
-    return this.varianteService.calcularPrecioFinal(variante.precioExtra??0, variante);
-  }
-
-  // 📊 Generar reporte
-  generarReporte(): void {
-    const producto = this.productoInfo()?.producto;
-    if (!producto) return;
-
-    const reporte = {
-      producto: {
-        id: producto.id,
-        nombre: producto.nombre,
-        tipo: producto.tipo
-      },
-      stockTotal: this.stockTotal(),
-      cantidadVariantes: this.variantes().length,
-      variantesActivas: this.variantesActivas().length,
-      variantesInactivas: this.variantesInactivas().length,
-      variantes: this.variantes().map(v => ({
-        descripcion: this.getVarianteDescripcion(v),
-        sku: v.sku,
-        stockFisico: v.stockFisico,
-        precioExtra: v.precioExtra,
-        precioFinal: this.calcularPrecioFinal(v),
-        activo: v.activo
-      }))
-    };
-
-    console.log('📊 Reporte generado:', reporte);
-
-    // Aquí podrías implementar la descarga como CSV o PDF
-    this.toast.info('Reporte generado en consola (implementar descarga)');
-  }
-
-  // 🔙 Volver
-  volver(): void {
-    if (this.hasChanges()) {
-      Swal.fire({
-        title: '¿Salir sin guardar?',
-        text: 'Hay cambios sin guardar que se perderán',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.router.navigate(['/admin/administrar-productos']);
-        }
-      });
-    } else {
-      this.router.navigate(['/admin/administrar-productos']);
-    }
-  }
-
-  // 🎯 Aplicar stock a todas las variantes (bulk)
+  /**
+   * Aplicar el mismo stock a todas las variantes activas
+   */
   aplicarStockATodas(): void {
     Swal.fire({
       title: 'Aplicar stock a todas',
       input: 'number',
-      inputLabel: 'Cantidad de stock para todas las variantes',
+      inputLabel: 'Cantidad de stock para todas las variantes activas',
       inputPlaceholder: 'Ej: 10',
       inputAttributes: {
         min: '0',
@@ -340,16 +536,170 @@ export class GestionarVariantesComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         const stockNuevo = parseInt(result.value);
+
         this.variantes.update(current =>
-          current.map(v => ({
+          current.map(v => v.activo ? {
             ...v,
             stockFisico: stockNuevo,
             hasChanges: true
-          }))
+          } : v)
         );
-        this.toast.success(`Stock de ${stockNuevo} aplicado a todas las variantes`);
+
+        this.toastr.success(`Stock de ${stockNuevo} aplicado a todas las variantes activas`);
       }
     });
   }
-}
 
+  /**
+   * Activar todas las variantes
+   */
+  activarTodas(): void {
+    Swal.fire({
+      title: '¿Activar todas las variantes?',
+      text: 'Todas las variantes quedarán disponibles',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2D7A3E',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, activar todas',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.variantes.update(current =>
+          current.map(v => ({
+            ...v,
+            activo: true,
+            hasChanges: this.hasVarianteChanges({ ...v, activo: true })
+          }))
+        );
+        this.toastr.success('Todas las variantes activadas');
+      }
+    });
+  }
+
+  /**
+   * Desactivar todas las variantes
+   */
+  desactivarTodas(): void {
+    Swal.fire({
+      title: '¿Desactivar todas las variantes?',
+      text: 'Las variantes quedarán pausadas (no eliminadas)',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#D28509',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, desactivar todas',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.variantes.update(current =>
+          current.map(v => ({
+            ...v,
+            activo: false,
+            hasChanges: this.hasVarianteChanges({ ...v, activo: false })
+          }))
+        );
+        this.toastr.warning('Todas las variantes desactivadas');
+      }
+    });
+  }
+
+  // ============================================
+  // CAMBIO DE VISTA
+  // ============================================
+
+  /**
+   * Cambiar modo de visualización
+   */
+  cambiarModo(modo: 'tabla' | 'tarjetas'): void {
+    this.modoEdicion.set(modo);
+  }
+
+  // ============================================
+  // HELPERS
+  // ============================================
+
+  /**
+   * Obtener descripción de una variante
+   */
+  getVarianteDescripcion(variante: ProductoVariante): string {
+    return this.varianteService.getVarianteDescripcion(variante);
+  }
+
+  /**
+   * Calcular precio final de una variante
+   */
+  calcularPrecioFinal(variante: ProductoVariante): number {
+    const precioBase = this.precioBaseProducto();
+    const extra = variante.precioExtra || 0;
+    return precioBase + extra;
+  }
+
+  /**
+   * Generar reporte de variantes
+   */
+  generarReporte(): void {
+    const producto = this.productoInfo()?.producto;
+    if (!producto) return;
+
+    const reporte = {
+      producto: {
+        id: producto.id,
+        nombre: producto.nombre,
+        tipo: producto.tipo,
+        precioBase: this.precioBaseProducto()
+      },
+      stockTotal: this.stockTotal(),
+      cantidadVariantes: this.variantes().length,
+      variantesActivas: this.variantesActivas().length,
+      variantesInactivas: this.variantesInactivas().length,
+      variantes: this.variantes().map(v => ({
+        id: v.id,
+        descripcion: this.getVarianteDescripcion(v),
+        sku: v.sku,
+        stockFisico: v.stockFisico,
+        precioExtra: v.precioExtra,
+        precioFinal: this.calcularPrecioFinal(v),
+        activo: v.activo,
+        hasChanges: v.hasChanges
+      }))
+    };
+
+    // Convertir a JSON y descargar
+    const dataStr = JSON.stringify(reporte, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `reporte-variantes-${producto.id}-${Date.now()}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+
+    this.toastr.success('Reporte descargado');
+  }
+
+  /**
+   * Volver a la lista de productos
+   */
+  volver(): void {
+    if (this.hasChanges()) {
+      Swal.fire({
+        title: '¿Salir sin guardar?',
+        text: 'Hay cambios sin guardar que se perderán',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#B92905',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, salir',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.router.navigate(['/administrar-productos']);
+        }
+      });
+    } else {
+      this.router.navigate(['/administrar-productos']);
+    }
+  }
+}

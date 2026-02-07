@@ -2,140 +2,140 @@
 <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
   <div class="max-w-6xl mx-auto">
     <h1 class="text-2xl text-gray-900 mb-2 font-display">Crear producto</h1>
-     <!-- 🎯 Tipo de Producto (solo si tiene plantilla) -->
 
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="mb-4">
-      <h3 class="text-lg font-medium text-gray-900 mb-2">
-        Tipo de Producto <span class="text-red-500">*</span>
-      </h3>
-      <p class="text-sm text-gray-600">
-        Seleccioná si este producto tendrá control de stock físico o se gestionará bajo pedido.
-      </p>
-      @if (mostrarSeleccionTipo() && tipoProducto() === 'POR_DEFINIR') {
-        <p class="mt-2 text-sm text-red-600 font-medium">
-          ⚠️ Debés seleccionar un tipo de producto
+    <!-- 🎯 Tipo de Producto -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="mb-4">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Tipo de Producto <span class="text-red-500">*</span>
+        </h3>
+        <p class="text-sm text-gray-600">
+          Seleccioná si este producto tendrá control de stock físico o se gestionará bajo pedido.
         </p>
-      }
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Opción Energético -->
-      <button
-        type="button"
-        (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
-        [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-          (tipoProducto() === 'ENERGETICO'
-            ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
-            : 'border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
-      >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex items-center gap-3">
-            <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-              (tipoProducto() === 'ENERGETICO' ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
-              <app-icon name="Zap" size="24"></app-icon>
-            </div>
-            <div class="text-left">
-              <h4 class="text-lg font-semibold text-gray-900">Energético</h4>
-              <p class="text-xs text-gray-500">Con stock físico</p>
-            </div>
-          </div>
-          @if (tipoProducto() === 'ENERGETICO') {
-              <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
-          }
-        </div>
-        <p class="text-sm text-gray-600 text-left">
-          El stock se controla físicamente. Ideal para productos con inventario real.
-        </p>
-        <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
-          <li class="flex items-center gap-2">
-           <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-            Control de inventario preciso
-          </li>
-          <li class="flex items-center gap-2">
-           <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-            Evita sobreventa
-          </li>
-          <li class="flex items-center gap-2">
-            <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-            Stock compartido entre paquetes
-          </li>
-        </ul>
-      </button>
-
-      <!-- Opción Sinérgico export enum TipoPaquete {
-    SINERGICO = 'Sinérgico',
-    ENERGICO = 'Enérgico',
-    POR_DEFINIR = 'Por Definir',
-} -->
-      <button
-        type="button"
-        (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
-        [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-          (tipoProducto() === 'SINERGICO'
-            ? 'border-primary bg-blue-50 ring-2 ring-primary ring-offset-2'
-            : 'border-gray-300 hover:border-primary hover:bg-blue-50')"
-      >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex items-center gap-3">
-            <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-              (tipoProducto() === 'SINERGICO' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
-              <app-icon name="users" size="24"></app-icon>
-            </div>
-            <div class="text-left">
-              <h4 class="text-lg font-semibold text-gray-900">Sinérgico</h4>
-              <p class="text-xs text-gray-500">Bajo pedido</p>
-            </div>
-          </div>
-          @if (tipoProducto() === 'SINERGICO') {
-           <app-icon name="Check" size="24" class="text-primary"></app-icon>
-          }
-        </div>
-        <p class="text-sm text-gray-600 text-left">
-          Sin control de stock físico. Se produce o gestiona bajo pedido.
-        </p>
-        <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
-          <li class="flex items-center gap-2">
-            <app-icon name="Check" size="12" class="text-primary"></app-icon>
-            Sin límites de inventario
-          </li>
-          <li class="flex items-center gap-2">
-            <app-icon name="Check" size="12" class="text-primary"></app-icon>
-            Ideal para productos custom
-          </li>
-          <li class="flex items-center gap-2">
-           <app-icon name="Check" size="12" class="text-primary"></app-icon>
-            Pedidos bajo demanda
-          </li>
-        </ul>
-      </button>
-    </div>
-
-    <!-- Info adicional -->
-    <div class="mt-4 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
-      <div class="flex items-start gap-3">
-        <app-icon name="info" size="16"></app-icon>
-        <div class="flex-1">
-          <p class="text-sm text-black font-medium mb-1">
-            ℹ️ Información importante
+        @if (mostrarSeleccionTipo() && tipoProducto() === 'POR_DEFINIR') {
+          <p class="mt-2 text-sm text-red-600 font-medium">
+            ⚠️ Debés seleccionar un tipo de producto
           </p>
-          <p class="text-xs text-black">
+        }
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Opción Energético -->
+        <button
+          type="button"
+          (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
+          [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
+            (tipoProducto() === 'ENERGETICO'
+              ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
+              : 'border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
+                (tipoProducto() === 'ENERGETICO' ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
+                <app-icon name="Zap" size="24"></app-icon>
+              </div>
+              <div class="text-left">
+                <h4 class="text-lg font-semibold text-gray-900">Energético</h4>
+                <p class="text-xs text-gray-500">Con stock físico</p>
+              </div>
+            </div>
             @if (tipoProducto() === 'ENERGETICO') {
-              Después de crear el producto, podrás configurar el stock de cada variante.
+              <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
             }
-            @if (tipoProducto() === 'SINERGICO') {
-              Los productos sinérgicos no requieren configuración de stock.
-            }
-            @if (tipoProducto() === 'POR_DEFINIR') {
-              Elegí el tipo que mejor se adapte a tu modelo de negocio.
-            }
+          </div>
+          <p class="text-sm text-gray-600 text-left">
+            El stock se controla físicamente. Ideal para productos con inventario real.
           </p>
+          <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
+              Control de inventario preciso
+            </li>
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
+              Evita sobreventa
+            </li>
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
+              Stock compartido entre paquetes
+            </li>
+          </ul>
+        </button>
+
+        <!-- Opción Sinérgico -->
+        <button
+          type="button"
+          (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
+          [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
+            (tipoProducto() === 'SINERGICO'
+              ? 'border-primary bg-blue-50 ring-2 ring-primary ring-offset-2'
+              : 'border-gray-300 hover:border-primary hover:bg-blue-50')"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
+                (tipoProducto() === 'SINERGICO' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
+                <app-icon name="users" size="24"></app-icon>
+              </div>
+              <div class="text-left">
+                <h4 class="text-lg font-semibold text-gray-900">Sinérgico</h4>
+                <p class="text-xs text-gray-500">Bajo pedido</p>
+              </div>
+            </div>
+            @if (tipoProducto() === 'SINERGICO') {
+              <app-icon name="Check" size="24" class="text-primary"></app-icon>
+            }
+          </div>
+          <p class="text-sm text-gray-600 text-left">
+            Sin control de stock físico. Se produce o gestiona bajo pedido.
+          </p>
+          <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-primary"></app-icon>
+              Sin límites de inventario
+            </li>
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-primary"></app-icon>
+              Ideal para productos custom
+            </li>
+            <li class="flex items-center gap-2">
+              <app-icon name="Check" size="12" class="text-primary"></app-icon>
+              Pedidos bajo demanda
+            </li>
+          </ul>
+        </button>
+      </div>
+
+      <!-- Info adicional -->
+      <div class="mt-4 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
+        <div class="flex items-start gap-3">
+          <app-icon name="info" size="16" class="text-primary flex-shrink-0"></app-icon>
+          <div class="flex-1">
+            <p class="text-sm text-black font-medium mb-1">
+              ℹ️ Información importante
+            </p>
+            <p class="text-xs text-black">
+              @if (tipoProducto() === 'ENERGETICO' && !selectedTemplate()) {
+                Este producto tendrá control de stock general. Si agregás una plantilla, el stock se manejará por variantes.
+              }
+              @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+                El stock se configurará después por cada variante.
+              }
+              @if (tipoProducto() === 'SINERGICO') {
+                Los productos sinérgicos no requieren configuración de stock.
+              }
+              @if (tipoProducto() === 'POR_DEFINIR') {
+                Elegí el tipo que mejor se adapte a tu modelo de negocio.
+              }
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
     <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Información básica -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -151,7 +151,7 @@
             />
           </div>
 
-          <!-- Marca (Select tradicional - luego lo haremos componente) -->
+          <!-- Marca -->
           <div>
             <label class="block text-lg font-medium text-black mb-2">
               Marca <span class="text-red-500">*</span>
@@ -175,7 +175,7 @@
             }
           </div>
 
-          <!-- Categoría (Select tradicional) -->
+          <!-- Categoría -->
           <div>
             <label class="block text-lg font-medium text-black mb-2">
               Categoría <span class="text-red-500">*</span>
@@ -199,7 +199,7 @@
             }
           </div>
 
-          <!-- ✅ Descripción (Textarea - por ahora tradicional, luego componente) -->
+          <!-- Descripción -->
           <div class="lg:col-span-2">
             <label class="block text-lg font-medium text-black mb-2">Descripción</label>
             <textarea
@@ -212,6 +212,7 @@
         </div>
       </div>
 
+      <!-- Imágenes (sin cambios) -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="mb-4">
           <h3 class="text-lg font-medium text-gray-900 mb-2">
@@ -254,7 +255,7 @@
                   <span class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10">Principal</span>
                 }
                 <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-50 text-white text-xs px-2 py-1 rounded z-10">
-                 <app-icon name="Pencil" size="16"></app-icon>
+                  <app-icon name="Pencil" size="16"></app-icon>
                 </div>
               } @else {
                 <div class="text-center pointer-events-none">
@@ -268,9 +269,10 @@
         </div>
       </div>
 
+      <!-- Precio y Stock -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+          <!-- Precio -->
           <app-input
             formControlName="precio"
             [typeValue]="'number'"
@@ -281,32 +283,44 @@
             [minValue]="0"
             [stepValue]="0.01"
           />
-          @if (!mostrarStock()) {
-  <p class="text-sm text-gray-500 mt-2">
-    ℹ️ El stock se gestionará automáticamente por variante.
-  </p>
-}
 
-@if(mostrarStock()) {
-
-
-          <app-input
-            formControlName="stock"
-            [typeValue]="'number'"
-            [labelValue]="'Stock'"
-            [placeholderValue]="'Cantidad disponible'"
-            [suffixValue]="'unidades'"
-            [minValue]="0"
-          />
+          <!-- Stock (condicional) -->
+          @if (mostrarStock()) {
+            <app-input
+              formControlName="stock"
+              [typeValue]="'number'"
+              [labelValue]="'Stock'"
+              [placeholderValue]="'Cantidad disponible'"
+              [suffixValue]="'unidades'"
+              [minValue]="0"
+              [helperTextValue]="'Dejá vacío para stock ilimitado'"
+            />
+          } @else {
+            <!-- Mensaje informativo cuando no se muestra stock -->
+            <div class="flex items-start gap-3 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
+              <app-icon name="info" size="16" class="text-primary flex-shrink-0 mt-1"></app-icon>
+              <div class="flex-1">
+                <p class="text-sm text-black font-medium mb-1">
+                  Stock gestionado automáticamente
+                </p>
+                <p class="text-xs text-gray-600">
+                  @if (tipoProducto() === 'SINERGICO') {
+                    Los productos sinérgicos no requieren control de stock.
+                  }
+                  @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+                    El stock se configurará por variante después de crear el producto.
+                  }
+                </p>
+              </div>
+            </div>
           }
         </div>
       </div>
 
+      <!-- Dimensiones y peso -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Dimensiones y peso</h3>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-          <!-- ✅ Ancho -->
           <app-input
             formControlName="ancho"
             [typeValue]="'number'"
@@ -316,7 +330,6 @@
             [minValue]="0"
           />
 
-          <!-- ✅ Alto -->
           <app-input
             formControlName="altura"
             [typeValue]="'number'"
@@ -326,7 +339,6 @@
             [minValue]="0"
           />
 
-          <!-- ✅ Profundidad -->
           <app-input
             formControlName="profundidad"
             [typeValue]="'number'"
@@ -336,7 +348,6 @@
             [minValue]="0"
           />
 
-          <!-- ✅ Peso -->
           <app-input
             formControlName="peso"
             [typeValue]="'number'"
@@ -349,34 +360,45 @@
         </div>
       </div>
 
-      <!-- ===================================== -->
-      <!-- 🎨 Plantillas (mantener igual) -->
-      <!-- ===================================== -->
+      <!-- Plantillas -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
           <div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">Plantillas</h3>
             <p class="text-sm text-gray-600">Plantillas para tus productos</p>
           </div>
-          <app-button type="button" variant="primary" size="sm" (click)="openCreateModal()" class="mt-4 sm:mt-0">
-            + Crear plantilla
-          </app-button>
+          <app-button
+            [type]="'button'"
+            [variant]="'primary'"
+            [size]="'sm'"
+            [label]="'+ Crear plantilla'"
+            (buttonClick)="openCreateModal()"
+            class="mt-4 sm:mt-0"
+          />
         </div>
 
         <div class="flex flex-wrap gap-2 mb-6">
           @for (template of plantillas(); track template.id) {
-            <app-button type="button" variant="tertiary" [selected]="selectedTemplate()?.id === template.id" (click)="selectTemplate(template)">
-              {{ template.nombre }}
-            </app-button>
+            <app-button
+              [type]="'button'"
+              [variant]="'tertiary'"
+              [selected]="selectedTemplate()?.id === template.id"
+              [label]="template.nombre"
+              (buttonClick)="selectTemplate(template)"
+            />
           }
         </div>
 
         @if (selectedTemplate()) {
           <div class="my-2">
-            <app-button class="bg-red-500" type="button" variant="warning" size="sm" class="flex items-center gap-2" (click)="deseleccionarPlantilla()">
-              Sin plantilla
-              <app-icon name="Close" size="12" class="text-white"></app-icon>
-            </app-button>
+            <app-button
+              [type]="'button'"
+              [variant]="'warning'"
+              [size]="'sm'"
+              [iconStart]="'X'"
+              [label]="'Sin plantilla'"
+              (buttonClick)="deseleccionarPlantilla()"
+            />
           </div>
           <div class="space-y-6">
             <p class="text-sm text-gray-600 mb-4">Esta plantilla contiene los siguientes atributos:</p>
@@ -399,32 +421,46 @@
         }
       </div>
 
-      <!-- ===================================== -->
-      <!-- 🎯 Botones de acción -->
-      <!-- ===================================== -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-end">
-        <app-button type="button" variant="tertiary" size="lg" class="w-full sm:w-auto" (click)="resetForm()">
-          Cancelar
-        </app-button>
+     <!-- Botones de acción -->
+<div class="flex flex-col sm:flex-row gap-4 justify-end">
+  <app-button
+    [type]="'button'"
+    [variant]="'tertiary'"
+    [size]="'lg'"
+    [label]="'Cancelar'"
+    (buttonClick)="resetForm()"
+    class="w-full sm:w-auto"
+  />
 
-        <app-button type="submit" variant="primary" size="lg" [disabled]="isLoading()" class="w-full sm:w-auto">
-          @if (isLoading()) {
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Creando...
-          } @else {
-            Crear producto
-          }
-        </app-button>
-      </div>
+  <app-button
+    [type]="'submit'"
+    [variant]="'primary'"
+    [size]="'lg'"
+    [disabled]="isLoading()"
+    [loading]="isLoading()"
+    class="w-full sm:w-auto"
+  >
+    @if (isLoading()) {
+      <span class="flex items-center gap-2">
+        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Creando...
+      </span>
+    } @else {
+      Crear producto
+    }
+  </app-button>
+</div>
     </form>
 
-    <!-- Modal para crear plantilla -->
-    <app-crear-plantilla-modal [isOpen]="isCreateModalOpen()" [plantillaToEdit]="plantillaToEdit" (close)="closeCreateModal()" (plantillaCreated)="onPlantillaCreated($event)">
-    </app-crear-plantilla-modal>
+    <!-- Modal -->
+    <app-crear-plantilla-modal
+      [isOpen]="isCreateModalOpen()"
+      [plantillaToEdit]="plantillaToEdit"
+      (close)="closeCreateModal()"
+      (plantillaCreated)="onPlantillaCreated($event)"
+    />
   </div>
-
-
 </div>
