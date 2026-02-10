@@ -17,6 +17,7 @@ import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtr
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { PageLayoutComponent } from '@app/shared/page-layout/page-layout';
 
 @Component({
   selector: 'app-productos',
@@ -25,7 +26,8 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
     CommonModule,
     FiltrosComponent,
     ProductoCard,
-    PaginationComponent
+    PaginationComponent,
+    PageLayoutComponent
 ],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],

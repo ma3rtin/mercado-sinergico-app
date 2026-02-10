@@ -1,122 +1,113 @@
-<div class="page-container">
-  <div class="page-content">
+<app-page-layout
+  [titulo]="'Productos Disponibles'"
+  [subtitulo]="'Descubrí nuestros productos y elegí el paquete que mejor se adapte a tus necesidades'"
+>
+  <!-- 📐 Layout principal -->
+  <section class="page-layout">
 
-    <!-- 🎯 Header -->
-    <header class="page-header">
-      <h1 class="page-title">
-        Productos Disponibles
-      </h1>
-      <p class="page-subtitle">
-        Descubrí nuestros productos y elegí el paquete que mejor se adapte a tus necesidades
-      </p>
-    </header>
+    <!-- 🎨 Filtros -->
+    <app-filtros
+      [config]="configFiltrosProductos()"
+      [titulo]="'Filtrar Productos'"
+      (filtrosAplicados)="aplicarFiltros($event)"
+      (filtrosLimpiados)="limpiarFiltros()"
+    />
 
-    <!-- 📐 Layout principal -->
-    <section class="page-layout">
+    <!-- 📦 Contenido -->
+    <div class="flex-1 min-w-0">
 
-      <!-- 🎨 Filtros -->
-      <app-filtros
-        [config]="configFiltrosProductos()"
-        [titulo]="'Filtrar Productos'"
-        (filtrosAplicados)="aplicarFiltros($event)"
-        (filtrosLimpiados)="limpiarFiltros()"
-      />
-
-      <!-- 📦 Contenido -->
-      <div class="flex-1 min-w-0">
-
-        <!-- 🔄 Loading -->
-        @if (isLoading()) {
-          <div class="flex flex-col items-center justify-center py-20">
-            <div
-              class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4">
-            </div>
-            <p class="text-gray-600 text-lg">Cargando productos...</p>
+      <!-- 🔄 Loading -->
+      @if (isLoading()) {
+        <div class="flex flex-col items-center justify-center py-20">
+          <div
+            class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-500 mb-4">
           </div>
-        }
+          <p class="text-gray-600 text-lg">Cargando productos...</p>
+        </div>
+      }
 
-        <!-- ❌ Error -->
-        @else if (errorMessage()) {
-          <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-            <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-              </path>
-            </svg>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">
-              Error al cargar productos
-            </h3>
-            <p class="text-gray-600 mb-6 text-center max-w-md">
-              {{ errorMessage() }}
-            </p>
-            <button
-              (click)="recargarProductos()"
-              class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-              Intentar de nuevo
-            </button>
-          </div>
-        }
+      <!-- ❌ Error -->
+      @else if (errorMessage()) {
+        <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
+          <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+            </path>
+          </svg>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Error al cargar productos
+          </h3>
+          <p class="text-gray-600 mb-6 text-center max-w-md">
+            {{ errorMessage() }}
+          </p>
+          <button
+            (click)="recargarProductos()"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            Intentar de nuevo
+          </button>
+        </div>
+      }
 
-        <!-- ✅ Grid -->
-        @else {
-          <div class="grid grid-cols-1
-                      sm:grid-cols-3
-                      lg:grid-cols-3
-                      xl:grid-cols-3
-                      2xl:grid-cols-4
-                      gap-4 sm:gap-5 lg:gap-6 xl:gap-8">
+      <!-- ✅ Grid -->
+      @else {
+        <div class="grid grid-cols-1
+                    sm:grid-cols-3
+                    lg:grid-cols-3
+                    xl:grid-cols-3
+                    2xl:grid-cols-4
+                    gap-4 sm:gap-5 lg:gap-6 xl:gap-8">
 
-            @for (p of productosPaginados(); track p.id_producto) {
-              <!-- 🎯 Producto Card Component -->
-              <app-producto-card
-                [producto]="p"
-                [contexto]="'productos'"
-                [mostrarDescripcion]="true"
-                [navegacion]="'detalle-seleccion'"
-                [longitudMaximaDescripcion]="120"
-                (cardClick)="navegarAProducto($event)"
-              />
-            }
+          @for (p of productosPaginados(); track p.id_producto) {
+            <!-- 🎯 Producto Card Component -->
+            <app-producto-card
+              [producto]="p"
+              [contexto]="'productos'"
+              [mostrarDescripcion]="true"
+              [navegacion]="'detalle-seleccion'"
+              [longitudMaximaDescripcion]="120"
+              (cardClick)="navegarAProducto($event)"
+            />
+          }
 
-            @empty {
-              <div class="col-span-full">
-                <div class="flex flex-col items-center justify-center py-16 bg-white rounded-xl shadow-md">
-                  <div
-                    class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5">
-                      </path>
-                    </svg>
-                  </div>
-                  <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                    No hay productos disponibles
-                  </h3>
-                  <p class="text-sm text-gray-500 text-center max-w-md">
-                    No se encontraron productos que coincidan con tus criterios de búsqueda.
-                    Intentá ajustar los filtros.
-                  </p>
+          @empty {
+            <div class="col-span-full">
+              <div class="flex flex-col items-center justify-center py-16 bg-white rounded-xl shadow-md">
+                <div
+                  class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5">
+                    </path>
+                  </svg>
                 </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                  No hay productos disponibles
+                </h3>
+                <p class="text-sm text-gray-500 text-center max-w-md">
+                  No se encontraron productos que coincidan con tus criterios de búsqueda.
+                  Intentá ajustar los filtros.
+                </p>
               </div>
-            }
+            </div>
+          }
 
-          </div>
-        }
+        </div>
+      }
 
-      </div>
-    </section>
-                <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
-            @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
-              <app-pagination
-                [totalItems]="totalItemsPaginacion()"
-                [itemsPerPage]="itemsPorPagina()"
-                [currentPage]="paginaActual()"
-                [showItemsPerPage]="true"
-                [itemsPerPageOptions]="[12, 24, 36, 48]"
-                (pageChange)="onPageChange($event)"
-                (itemsPerPageChange)="onItemsPerPageChange($event)"
-              />
-            }
-  </div>
-</div>
+    </div>
+  </section>
+
+  <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
+  @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
+    <app-pagination
+      [totalItems]="totalItemsPaginacion()"
+      [itemsPerPage]="itemsPorPagina()"
+      [currentPage]="paginaActual()"
+      [showItemsPerPage]="true"
+      [itemsPerPageOptions]="[12, 24, 36, 48]"
+      (pageChange)="onPageChange($event)"
+      (itemsPerPageChange)="onItemsPerPageChange($event)"
+    />
+  }
+</app-page-layout>

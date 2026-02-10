@@ -1,15 +1,7 @@
-<div class="page-container">
-  <div class="page-content">
-
-    <!-- 🎯 Header -->
-    <header class="page-header">
-      <h1 class="page-title">
-        Tus pedidos
-      </h1>
-      <p class="page-subtitle">
-        Administrá tus pedidos y gestioná tus productos reservados
-      </p>
-    </header>
+<app-page-layout
+  [titulo]="'Tus pedidos'"
+  [subtitulo]="'Administrá tus pedidos y gestioná tus productos reservados'"
+>
 
     <!-- 🔄 Estado de carga -->
     @if (isLoading()) {
@@ -92,5 +84,4 @@
       </div>
     }
 
-  </div>
-</div>
+</app-page-layout>

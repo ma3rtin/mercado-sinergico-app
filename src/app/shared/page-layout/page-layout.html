@@ -1,0 +1,18 @@
+<div class="page-container">
+  <div class="page-content">
+
+    <!-- 🎯 Header -->
+    <header class="page-header">
+      <h1 class="page-title">
+        {{ titulo() }}
+      </h1>
+      @if (subtitulo()) {
+        <p class="page-subtitle">
+          {{ subtitulo() }}
+        </p>
+      }
+    </header>
+
+    <ng-content />
+  </div>
+</div>

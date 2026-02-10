@@ -27,6 +27,7 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
+import { PageLayoutComponent } from '@app/shared/page-layout/page-layout';
 
 @Component({
   selector: 'app-paquetes-publicos',
@@ -36,7 +37,8 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ 
     PaqueteCard,
     FiltrosComponent,
     IconComponent,
-    PaginationComponent
+    PaginationComponent,
+    PageLayoutComponent
   ],
   templateUrl: './paquetes.html',
 })
