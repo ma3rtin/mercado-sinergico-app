@@ -12,14 +12,18 @@ export class ProductosService extends ApiService {
   getProductos(): Observable<Producto[]> {
     if (this.productosCache$) return this.productosCache$;
 
-    console.log('🛡️ ProductosService - GET', );
+    console.log('🛡️ ProductosService - GET',);
 
     this.productosCache$ = this.get<Producto[]>('productos').pipe(
       timeout(30000),
       retry(2),
       map(response => {
         console.log('✅ Productos recibidos del backend:', response);
-        return response;
+        // Normalize Data: Ensure id_producto exists
+        return response.map(p => ({
+          ...p,
+          id_producto: p.id_producto || p.id
+        }));
       }),
       catchError(err => {
         console.error('❌ Error en getProductos:', err);
@@ -42,17 +46,17 @@ export class ProductosService extends ApiService {
   }
 
   getProductoById(id: number) {
-  return this.get<any>(`productos/${id}`).pipe(
-    map(res => {
-      console.log('📦 RESPUESTA REAL BACKEND:', res);
-      return res.producto ?? res;
-    })
-  );
-}
+    return this.get<any>(`productos/${id}`).pipe(
+      map(res => {
+        console.log('📦 RESPUESTA REAL BACKEND:', res);
+        return res.producto ?? res;
+      })
+    );
+  }
 
   getProductoDetalle(id: number): Observable<ProductoDetalleDTO> {
-  return this.get<ProductoDetalleDTO>(`productos/${id}`);
-}
+    return this.get<ProductoDetalleDTO>(`productos/${id}`);
+  }
 
   createProduct(data: FormData): Observable<Producto> {
     return this.post<Producto>('productos', data).pipe(
@@ -111,25 +115,31 @@ export class ProductosService extends ApiService {
   }
 
   getProductosFiltrados(
-  search: string,
-  offset: number,
-  limit: number
-): Observable<Producto[]> {
-  const params = new URLSearchParams({
-    search,
-    offset: offset.toString(),
-    limit: limit.toString(),
-  });
+    search: string,
+    offset: number,
+    limit: number
+  ): Observable<Producto[]> {
+    const params = new URLSearchParams({
+      search,
+      offset: offset.toString(),
+      limit: limit.toString(),
+    });
 
-  return this.get<Producto[]>(`productos/filtrados?${params}`).pipe(
-    timeout(15000),
-    retry(1),
-    map((response) => response || []),
-    catchError((err) => {
-      console.error('❌ Error en getProductosFiltrados:', err);
-      return throwError(() => err);
-    })
-  );
-}
+    return this.get<Producto[]>(`productos/filtrados?${params}`).pipe(
+      timeout(15000),
+      retry(1),
+      map((response) => {
+        // Normalize Data: Ensure id_producto exists
+        return (response || []).map(p => ({
+          ...p,
+          id_producto: p.id_producto || p.id
+        }));
+      }),
+      catchError((err) => {
+        console.error('❌ Error en getProductosFiltrados:', err);
+        return throwError(() => err);
+      })
+    );
+  }
 
 }

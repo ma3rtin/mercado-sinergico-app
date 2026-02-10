@@ -139,7 +139,7 @@
           <!-- Grid de Paquetes -->
           @if (hayPaquetesDisponibles()) {
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-              @for (paquete of paquetesDelProducto(); track paquete.id_paquete_publicado) {
+              @for (paquete of paquetesPaginados(); track paquete.id_paquete_publicado) {
                 <div class="transform transition-transform hover:scale-[1.02]">
                   <app-paquete-card
                     [paquete]="paquete"
@@ -236,6 +236,18 @@
       </div>
 
     }
+    <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
+          @if (paquetesPaginados().length > 0) {
+            <app-pagination
+              [totalItems]="totalItemsPaginacion()"
+              [itemsPerPage]="itemsPorPagina()"
+              [currentPage]="paginaActual()"
+              [showItemsPerPage]="true"
+              [itemsPerPageOptions]="[12, 24, 36, 48]"
+              (pageChange)="onPageChange($event)"
+              (itemsPerPageChange)="onItemsPerPageChange($event)"
+            />
+          }
   </div>
 </div>
 

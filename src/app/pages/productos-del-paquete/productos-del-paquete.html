@@ -9,7 +9,7 @@
           Productos del Paquete
         </h2>
         <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-          Elegí los productos que querés incluir en <strong class="text-primary" >tu paquete</strong>
+          Elegí los productos que querés incluir en <strong class="text-primary">tu paquete</strong>
         </p>
       </div>
 
@@ -18,17 +18,15 @@
         <app-paquete-banner [paquete]="paquete()!" />
       }
 
-
-
       <!-- 📊 Estadísticas -->
-@if (!isLoading() && !errorMessage()) {
-  <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
-    <span>
-      Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
-      de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
-    </span>
-  </div>
-}
+      @if (!isLoading() && !errorMessage()) {
+        <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
+          <span>
+            Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
+            de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
+          </span>
+        </div>
+      }
     </div>
 
     <!-- 📐 Layout: Filtros + Grid -->
@@ -77,7 +75,7 @@
             </p>
             <button
               (click)="recargarProductos()"
-              class="inline-flex items-center gap-2 bg-blue-600 hover:secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -89,20 +87,21 @@
 
         <!-- ✅ Grid de Productos -->
         @else {
-@if (productoSeleccionado()) {
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-    <app-producto-card
-      [producto]="productoSeleccionado()!"
-      [contexto]="'paquete-detalle'"
-      [tipoPaquete]="tipoPaquete()"
-      [descuento]="descuentoPaquete()"
-      [paqueteId]="idPaquete()"
-      [navegacion]="'detalle-sumarse'"
-      [mostrarDescripcion]="true"
-    />
-  </div>
-} @else {
-            <!-- Mostrar grid completo filtrado -->
+          @if (productoSeleccionado()) {
+            <!-- Si hay un producto seleccionado, mostrar solo ese -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
+              <app-producto-card
+                [producto]="productoSeleccionado()!"
+                [contexto]="'paquete-detalle'"
+                [tipoPaquete]="tipoPaquete()"
+                [descuento]="descuentoPaquete()"
+                [paqueteId]="idPaquete()"
+                [navegacion]="'detalle-sumarse'"
+                [mostrarDescripcion]="true"
+              />
+            </div>
+          } @else {
+            <!-- Grid completo con productos paginados -->
             <div class="grid grid-cols-1
                         sm:grid-cols-2
                         lg:grid-cols-2
@@ -111,20 +110,20 @@
                         gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
                         auto-rows-fr">
 
-              @for (producto of productosFiltrados(); track producto.id_producto) {
-  <div class="flex">
-    <app-producto-card
-      [producto]="producto"
-      [contexto]="'paquete-detalle'"
-      [tipoPaquete]="tipoPaquete()"
-      [descuento]="descuentoPaquete()"
-      [paqueteId]="idPaquete()"
-      [navegacion]="'detalle-sumarse'"
-      [mostrarDescripcion]="true"
-      class="w-full"
-    />
-  </div>
-}
+              @for (producto of productosPaginados(); track producto.id_producto) {
+                <div class="flex">
+                  <app-producto-card
+                    [producto]="producto"
+                    [contexto]="'paquete-detalle'"
+                    [tipoPaquete]="tipoPaquete()"
+                    [descuento]="descuentoPaquete()"
+                    [paqueteId]="idPaquete()"
+                    [navegacion]="'detalle-sumarse'"
+                    [mostrarDescripcion]="true"
+                    class="w-full"
+                  />
+                </div>
+              }
 
               <!-- 🚫 Estado Vacío -->
               @empty {
@@ -144,13 +143,26 @@
                     </p>
                     <button
                       (click)="limpiarFiltros()"
-                      class="text-blue-600 hover:secondary-dark font-medium transition-colors">
+                      class="text-blue-600 hover:text-secondary-dark font-medium transition-colors">
                       Limpiar filtros
                     </button>
                   </div>
                 </div>
               }
             </div>
+
+            <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
+            @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
+              <app-pagination
+                [totalItems]="totalItemsPaginacion()"
+                [itemsPerPage]="itemsPorPagina()"
+                [currentPage]="paginaActual()"
+                [showItemsPerPage]="true"
+                [itemsPerPageOptions]="[12, 24, 36, 48]"
+                (pageChange)="onPageChange($event)"
+                (itemsPerPageChange)="onItemsPerPageChange($event)"
+              />
+            }
           }
         }
 

@@ -24,6 +24,7 @@ import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-producto-detalle-seleccion',
@@ -34,10 +35,23 @@ import { IconComponent } from '@app/shared/icono/icono';
     PaqueteCard,
     ButtonComponent,
     IconComponent,
+    PaginationComponent
   ],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
+// 📄 MÉTODOS DE PAGINACIÓN
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+    console.log(`📄 Cambiando a página ${page}`);
+  }
+
+  onItemsPerPageChange(itemsPerPage: number): void {
+    this.itemsPorPagina.set(itemsPerPage);
+    this.paginaActual.set(1); // Resetear a página 1
+    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
+  }
+
   // 🔧 Services
   private readonly productosService = inject(ProductosService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
@@ -57,6 +71,27 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   isLoadingProducto = signal(true);
   isLoadingPaquetes = signal(true);
   errorMessage = signal('');
+
+  // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(4); // 12 paquetes por página (óptimo para e-commerce)
+
+  // 📊 COMPUTED: Paquetes paginados
+  paquetesPaginados = computed(() => {
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.todosLosPaquetes();
+
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+
+    return filtrados.slice(start, end);
+  });
+
+  // 📊 COMPUTED: Total de items para la paginación
+  totalItemsPaginacion = computed(() => {
+    return this.todosLosPaquetes().length;
+  });
 
   // 📊 Computed Signals
   paquetesDelProducto = computed(() => this.todosLosPaquetes());
