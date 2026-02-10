@@ -215,10 +215,11 @@ generarVariantes(data: GenerarVariantesDTO): Observable<any> {
     varianteId: number,
     data: ActualizarVarianteDTO
   ): Observable<ProductoVariante> {
-    console.log(`🎨 VarianteService - PATCH actualizar variante ${varianteId}`);
+    console.log('🔧 Intentando PATCH a:', `productos/variantes/${varianteId}`);
+console.log('🔧 Data a enviar:', data);
 
     return this.patch<ProductoVariante>(
-      `variantes/${varianteId}`,
+      `productos/variantes/${varianteId}`,
       data
     ).pipe(
       timeout(10000),
@@ -240,7 +241,7 @@ generarVariantes(data: GenerarVariantesDTO): Observable<any> {
   eliminarVariante(varianteId: number): Observable<any> {
     console.log(`🎨 VarianteService - DELETE variante ${varianteId}`);
 
-    return this.delete<any>(`variantes/${varianteId}`).pipe(
+    return this.delete<any>(`productos/variantes/${varianteId}`).pipe(
       timeout(10000),
       map(response => {
         console.log('✅ Variante eliminada:', response);

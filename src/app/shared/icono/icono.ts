@@ -21,7 +21,7 @@ import { IconsService } from '@app/services/iconos/icons.service';
       [size]="size()"
       [strokeWidth]="strokeWidth()"
       [color]="color()"
-      [class]="'inline-block leading-none align-text-bottom mt-1' + cssClass()"
+      [class]="'inline-block leading-none align-middle ' + cssClass()"
     />
   `,
 })

@@ -293,7 +293,7 @@
               [placeholderValue]="'Cantidad disponible'"
               [suffixValue]="'unidades'"
               [minValue]="0"
-              [helperTextValue]="'Dejá vacío para stock ilimitado'"
+              [helperTextValue]="'Llená este campo si tu producto es un producto energético sin plantilla. Si agregás una plantilla, el stock se gestionará por cada variante después.'"
             />
           } @else {
             <!-- Mensaje informativo cuando no se muestra stock -->
@@ -395,10 +395,12 @@
               [type]="'button'"
               [variant]="'warning'"
               [size]="'sm'"
-              [iconStart]="'X'"
-              [label]="'Sin plantilla'"
               (buttonClick)="deseleccionarPlantilla()"
-            />
+              class="inline-flex items-center gap-1.5"
+            >
+              <app-icon name="x" [size]="'16'" class="text-current pt-1" />
+              Deseleccionar plantilla
+            </app-button>
           </div>
           <div class="space-y-6">
             <p class="text-sm text-gray-600 mb-4">Esta plantilla contiene los siguientes atributos:</p>

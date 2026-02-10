@@ -58,11 +58,14 @@ export class CrearProductoComponent implements OnInit {
   private toast = inject(ToastService);
 
   readonly TipoPaquete = TipoPaquete;
-  readonly TipoPaqueteLabel: Record<TipoPaquete, string> = {
-    [TipoPaquete.SINERGICO]: 'Sinérgico',
-    [TipoPaquete.ENERGICO]: 'Enérgico',
-    [TipoPaquete.POR_DEFINIR]: 'Por Definir',
-  };
+readonly tipoMap: Record<TipoPaquete, string> = {
+  [TipoPaquete.SINERGICO]: 'SINERGICO',
+  [TipoPaquete.ENERGICO]: 'ENERGETICO',
+  [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
+};
+
+
+
 
   // 📝 Form
   productForm!: FormGroup;
@@ -393,16 +396,11 @@ export class CrearProductoComponent implements OnInit {
     });
 
     // 🔁 Mapear tipo de frontend → enum backend
-    const tipoMap: Record<string, string> = {
-      'Sinérgico': 'SINERGICO',
-      'Enérgico': 'ENERGETICO',
-      'Por Definir': 'POR_DEFINIR',
-    };
-
-    const tipoBackend = tipoMap[this.tipoProducto()];
-    if (tipoBackend) {
-      formData.append('tipo', tipoBackend);
-    }
+// 🔁 Mapear tipo del enum al backend
+const tipoBackend = this.tipoMap[this.tipoProducto()];
+if (tipoBackend) {
+  formData.append('tipo', tipoBackend);
+}
 
     // 📸 Agregar imágenes
     const slots = this.imageSlots();
