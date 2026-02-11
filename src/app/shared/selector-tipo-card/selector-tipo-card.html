@@ -1,0 +1,85 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <button
+    type="button"
+    (click)="onSelect(TipoPaquete.ENERGICO)"
+    [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all text-left ' +
+      (isSelected(TipoPaquete.ENERGICO)
+        ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
+        : 'cursor-pointer border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
+  >
+    <div class="flex items-start justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <div
+          [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
+            (isSelected(TipoPaquete.ENERGICO)
+              ? 'bg-secondary-dark text-white'
+              : 'bg-gray-200 text-gray-600')"
+        >
+          <app-icon name="Zap" size="24"></app-icon>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900">{{ contenido().energetico.titulo }}</h4>
+          <p class="text-xs text-gray-500">{{ contenido().energetico.subtitulo }}</p>
+        </div>
+      </div>
+      @if (isSelected(TipoPaquete.ENERGICO)) {
+        <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
+      }
+    </div>
+
+    <p class="text-sm text-gray-600">{{ contenido().energetico.descripcion }}</p>
+
+    @if (contenido().energetico.items.length > 0) {
+      <ul class="mt-3 space-y-1 text-xs text-gray-600">
+        @for (item of contenido().energetico.items; track item) {
+          <li class="flex items-center gap-2">
+            <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
+            {{ item }}
+          </li>
+        }
+      </ul>
+    }
+  </button>
+
+  <button
+    type="button"
+    (click)="onSelect(TipoPaquete.SINERGICO)"
+    [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all text-left ' +
+      (isSelected(TipoPaquete.SINERGICO)
+        ? 'border-primary bg-blue-50 ring-2 ring-blue-300 ring-offset-2'
+        : 'cursor-pointer border-gray-300 hover:border-primary hover:bg-blue-50')"
+  >
+    <div class="flex items-start justify-between mb-3">
+      <div class="flex items-center gap-3">
+        <div
+          [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
+            (isSelected(TipoPaquete.SINERGICO)
+              ? 'bg-primary text-white'
+              : 'bg-gray-200 text-gray-600')"
+        >
+          <app-icon name="users" size="24"></app-icon>
+        </div>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-900">{{ contenido().sinergico.titulo }}</h4>
+          <p class="text-xs text-gray-500">{{ contenido().sinergico.subtitulo }}</p>
+        </div>
+      </div>
+      @if (isSelected(TipoPaquete.SINERGICO)) {
+        <app-icon name="Check" size="24" class="text-primary"></app-icon>
+      }
+    </div>
+
+    <p class="text-sm text-gray-600">{{ contenido().sinergico.descripcion }}</p>
+
+    @if (contenido().sinergico.items.length > 0) {
+      <ul class="mt-3 space-y-1 text-xs text-gray-600">
+        @for (item of contenido().sinergico.items; track item) {
+          <li class="flex items-center gap-2">
+            <app-icon name="Check" size="12" class="text-primary"></app-icon>
+            {{ item }}
+          </li>
+        }
+      </ul>
+    }
+  </button>
+</div>

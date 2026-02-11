@@ -15,6 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Router } from '@angular/router';
+import { TipoPaquete } from '@app/models/Enums';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -23,18 +24,48 @@ import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ToastService } from '@app/services/toast/toast.service';
+import { AdminCreateLayoutComponent } from '@app/shared/admin-create-layout/admin-create-layout';
+import {
+  SelectorTipoCardComponent,
+  SelectorTipoCardContenido
+} from '@app/shared/selector-tipo-card/selector-tipo-card';
 
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, HttpClientModule],
+  imports: [FormsModule, HttpClientModule, AdminCreateLayoutComponent, SelectorTipoCardComponent],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
+  readonly TipoPaquete = TipoPaquete;
+  readonly tipoCardContenido: SelectorTipoCardContenido = {
+    energetico: {
+      titulo: 'Energético',
+      subtitulo: 'Con stock físico',
+      descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
+      items: [
+        'Control de inventario preciso',
+        'Evita sobreventa',
+        'Stock compartido entre paquetes'
+      ]
+    },
+    sinergico: {
+      titulo: 'Sinérgico',
+      subtitulo: 'Bajo pedido',
+      descripcion: 'Sin control de stock físico. Se produce o gestiona bajo pedido.',
+      items: [
+        'Sin límites de inventario',
+        'Ideal para productos custom',
+        'Pedidos bajo demanda'
+      ]
+    }
+  };
+
   // 🧠 Signals principales
   nombre = signal<string>('');
   descripcion = signal<string>('');
+  tipoPaquete = signal<TipoPaquete>(TipoPaquete.SINERGICO);
   marcaSeleccionada = signal<number | null>(null);
   categoriaSeleccionada = signal<number | null>(null);
   marcas = signal<Marca[]>([]);
@@ -97,6 +128,10 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
       next: (data) => this.marcas.set(data),
       error: (err) => console.error('Error al obtener marcas:', err),
     });
+  }
+
+  onTipoPaqueteChange(tipo: TipoPaquete): void {
+    this.tipoPaquete.set(tipo);
   }
 
   private cargarCategorias(): void {

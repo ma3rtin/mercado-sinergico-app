@@ -23,6 +23,11 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { InputComponent } from '@app/shared/input/input-component';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminCreateLayoutComponent } from '@app/shared/admin-create-layout/admin-create-layout';
+import {
+  SelectorTipoCardComponent,
+  SelectorTipoCardContenido
+} from '@app/shared/selector-tipo-card/selector-tipo-card';
 
 import Swal from 'sweetalert2';
 
@@ -41,7 +46,9 @@ interface ImageSlot {
     ButtonComponent,
     InputComponent,
     CrearPlantillaModalComponent,
-    IconComponent
+    IconComponent,
+    AdminCreateLayoutComponent,
+    SelectorTipoCardComponent
   ],
   standalone: true
 })
@@ -58,6 +65,28 @@ export class CrearProductoComponent implements OnInit {
   private toast = inject(ToastService);
 
   readonly TipoPaquete = TipoPaquete;
+  readonly tipoCardContenido: SelectorTipoCardContenido = {
+    energetico: {
+      titulo: 'Energético',
+      subtitulo: 'Con stock físico',
+      descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
+      items: [
+        'Control de inventario preciso',
+        'Evita sobreventa',
+        'Stock compartido entre paquetes'
+      ]
+    },
+    sinergico: {
+      titulo: 'Sinérgico',
+      subtitulo: 'Bajo pedido',
+      descripcion: 'Sin control de stock físico. Se produce o gestiona bajo pedido.',
+      items: [
+        'Sin límites de inventario',
+        'Ideal para productos custom',
+        'Pedidos bajo demanda'
+      ]
+    }
+  };
 readonly tipoMap: Record<TipoPaquete, string> = {
   [TipoPaquete.SINERGICO]: 'SINERGICO',
   [TipoPaquete.ENERGICO]: 'ENERGETICO',
