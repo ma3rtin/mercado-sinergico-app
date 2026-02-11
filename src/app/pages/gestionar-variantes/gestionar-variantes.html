@@ -1,0 +1,764 @@
+<!-- ============================================ -->
+<!-- GESTIONAR-VARIANTES.COMPONENT.HTML -->
+<!-- Template completo con Tailwind CSS y funcionalidades CRUD -->
+<!-- ============================================ -->
+
+<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
+  <div class="max-w-7xl mx-auto">
+    <!-- 🔙 Header con navegación -->
+    <div class="mb-6">
+      <button
+        (click)="volver()"
+        class="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors mb-4"
+      >
+        <app-icon name="arrowLeft" [size]="'20'" class="text-current mt-1" />
+        <span class="font-medium">Volver a productos</span>
+      </button>
+
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
+        <div>
+          <h1 class="text-3xl font-display font-semibold text-gray-900">
+            Gestionar Variantes
+          </h1>
+          @if (productoInfo()) {
+            <p class="text-lg text-gray-600 mt-1">
+              {{ productoInfo()!.producto.nombre }}
+            </p>
+            <p class="text-sm text-gray-500 mt-0.5">
+              Precio base:
+              <span class="font-semibold text-black"
+                >${{ precioBaseProducto() }}</span
+              >
+            </p>
+          }
+        </div>
+
+        <!-- Badges de información -->
+        <div class="flex flex-wrap gap-2">
+          @if (esProductoEnergetico()) {
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-black rounded-full text-sm font-semibold"
+            >
+              <app-icon name="zap" [size]="'16'" class="text-current mt-1" />
+              Energético
+            </span>
+          }
+          @if (esProductoSinergico()) {
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold"
+            >
+              <app-icon name="repeat" [size]="'16'" class="text-current mt-1" />
+              Sinérgico
+            </span>
+          }
+          @if (stockTotal() !== null) {
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-black rounded-full text-sm font-semibold"
+            >
+              <app-icon
+                name="package"
+                [size]="'16'"
+                class="text-current mt-1"
+              />
+              Stock total: {{ stockTotal() }}
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ⚠️ Loading State -->
+    @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-16">
+        <app-icon
+          name="loader"
+          [size]="'32'"
+          class="text-primary animate-spin mb-4 mt-1"
+        />
+        <p class="text-gray-600 text-lg">Cargando variantes...</p>
+      </div>
+    }
+
+    <!-- ✅ Contenido principal -->
+    @if (!isLoading() && tieneVariantes()) {
+      <!-- 🎛️ Barra de herramientas -->
+      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        >
+          <!-- Controles de vista -->
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-gray-700">Vista:</span>
+            <div
+              class="inline-flex rounded-lg border border-gray-300 bg-gray-50 p-1"
+            >
+              <button
+                (click)="cambiarModo('tabla')"
+                [class]="
+                  'px-3 py-1.5 text-sm font-medium rounded-md transition-all inline-flex items-center gap-1.5 ' +
+                  (modoEdicion() === 'tabla'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900')
+                "
+              >
+                <app-icon name="List" [size]="'16'" class="text-current mt-1" />
+                Tabla
+              </button>
+              <button
+                (click)="cambiarModo('tarjetas')"
+                [class]="
+                  'px-3 py-1.5 text-sm font-medium rounded-md transition-all inline-flex items-center gap-1.5 ' +
+                  (modoEdicion() === 'tarjetas'
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900')
+                "
+              >
+                <app-icon name="Grid" [size]="'16'" class="text-current mt-1" />
+                Tarjetas
+              </button>
+            </div>
+          </div>
+
+          <!-- Acciones rápidas -->
+          <div class="flex flex-wrap gap-2 md:gap-3 items-center justify-end">
+            @if (esProductoEnergetico()) {
+              <app-button
+                type="button"
+                variant="warning"
+                size="sm"
+                (click)="aplicarStockATodas()"
+                class="inline-flex items-center gap-1.5 text-orange-600"
+              >
+                <app-icon
+                  name="sliders"
+                  [size]="'16'"
+                  class="text-current mt-1"
+                />
+                Aplicar stock a todas las variantes
+              </app-button>
+            }
+
+            <app-button
+              type="button"
+              variant="success"
+              size="sm"
+              (click)="activarTodas()"
+              class="inline-flex items-center gap-1.5"
+            >
+              <app-icon
+                name="checkCircle"
+                [size]="'16'"
+                class="text-white mt-1"
+              />
+              Activar todas
+            </app-button>
+
+            <app-button
+              type="button"
+              variant="danger"
+              size="sm"
+              (click)="desactivarTodas()"
+              class="inline-flex items-center gap-1.5 !text-orange-600 hover:!text-orange-700"
+            >
+              <app-icon
+                name="MinusCircle"
+                [size]="'16'"
+                class="text-white mt-1"
+              />
+              Desactivar todas
+            </app-button>
+
+            <app-button
+              type="button"
+              variant="info"
+              size="sm"
+              (click)="generarReporte()"
+              class="inline-flex items-center gap-1.5 text-orange-600"
+            >
+              <app-icon
+                name="download"
+                [size]="'16'"
+                class="text-current mt-1"
+              />
+              Reporte
+            </app-button>
+          </div>
+        </div>
+
+        <!-- Indicador de cambios -->
+        @if (hasChanges()) {
+          <div
+            class="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <app-icon
+                  name="AlertOctagon"
+                  [size]="'20'"
+                  class="text-yellow-600 mt-1"
+                />
+                <span class="text-sm font-medium text-yellow-800">
+                  Hay cambios sin guardar
+                </span>
+              </div>
+              <div class="flex gap-2">
+                <app-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  (click)="resetearCambios()"
+                  class="inline-flex items-center gap-1.5"
+                >
+                  <app-icon name="x" [size]="'16'" class="text-white mt-1" />
+                  Descartar
+                </app-button>
+                <app-button
+                  type="button"
+                  variant="success"
+                  size="sm"
+                  [disabled]="isSaving()"
+                  (click)="guardarCambios()"
+                  class="inline-flex items-center gap-1.5"
+                >
+                  <app-icon
+                    [name]="isSaving() ? 'loader' : 'download'"
+                    [size]="'16'"
+                    class="text-current mt-1"
+                    [class.animate-spin]="isSaving()"
+                  />
+                  {{ isSaving() ? "Guardando..." : "Guardar" }}
+                </app-button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- 📊 VISTA TABLA -->
+      @if (modoEdicion() === "tabla") {
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Imagen
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Variante
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    SKU
+                  </th>
+
+                  @if (productoInfo() && esProductoEnergetico()) {
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      STOCK
+                    </th>
+                  }
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Precio Extra
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Precio Final
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Estado
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                @for (
+                  variante of variantes();
+                  track variante.id;
+                  let i = $index
+                ) {
+                  <tr
+                    [class]="
+                      variante.hasChanges
+                        ? 'bg-yellow-50'
+                        : variante.activo
+                          ? ''
+                          : 'bg-gray-50 opacity-60'
+                    "
+                  >
+                    <!-- Imagen -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div
+                        class="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 group"
+                      >
+                        @if (tieneImagen(variante)) {
+                          <!-- ✅ CORRECTO -->
+                          <img
+                            [src]="getVarianteImagen(variante)"
+                            [alt]="getVarianteDescripcion(variante)"
+                            class="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            (click)="removeImagen(i)"
+                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Eliminar imagen"
+                          >
+                            <app-icon
+                              name="trash2"
+                              [size]="'14'"
+                              class="text-current"
+                            />
+                          </button>
+                        } @else {
+                          <label
+                            class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                          >
+                            <app-icon
+                              name="Upload"
+                              [size]="'24'"
+                              class="text-gray-500 mt-1"
+                            />
+                            <input
+                              type="file"
+                              accept="image/*"
+                              (change)="onImagenSelected($event, i)"
+                              class="hidden"
+                            />
+                          </label>
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Descripción -->
+                    <td class="px-6 py-4">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ getVarianteDescripcion(variante) }}
+                      </div>
+                      @if (variante.hasChanges) {
+                        <span
+                          class="inline-flex items-center gap-1 mt-1 text-xs text-yellow-700"
+                        >
+                          <app-icon
+                            name="alertCircle"
+                            [size]="'12'"
+                            class="text-current mt-1"
+                          />
+                          Modificado
+                        </span>
+                      }
+                    </td>
+
+                    <!-- SKU -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <code
+                        class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-mono"
+                      >
+                        {{ variante.sku || "N/A" }}
+                      </code>
+                    </td>
+
+                    <!-- Stock (solo energético) -->
+
+                      @if (esProductoEnergetico()) {
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="number"
+                          [value]="variante.stockFisico"
+                          (input)="onStockChange(i, +$any($event.target).value)"
+                          min="0"
+                          step="1"
+                          placeholder="0"
+                          class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                          [class.border-yellow-400]="variante.hasChanges"
+                        />
+                      </td>
+}
+
+                    <!-- Precio Extra -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center gap-1">
+                        <span class="text-gray-500 text-sm">$</span>
+                        <input
+                          type="number"
+                          [value]="variante.precioExtra"
+                          (input)="
+                            onPrecioExtraChange(i, +$any($event.target).value)
+                          "
+                          min="0"
+                          step="0.01"
+                          class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                        />
+                      </div>
+                    </td>
+
+                    <!-- Precio Final -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="text-sm font-semibold text-black">
+                        ${{ calcularPrecioFinal(variante).toFixed(2) }}
+                      </span>
+                    </td>
+
+                    <!-- Estado -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <button
+                        (click)="toggleVarianteActiva(i)"
+                        [class]="
+                          'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ' +
+                          (variante.activo
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300')
+                        "
+                      >
+                        <app-icon
+                          [name]="variante.activo ? 'checkCircle' : 'xCircle'"
+                          [size]="'14'"
+                          class="text-current mt-1"
+                        />
+                        {{ variante.activo ? "Activa" : "Inactiva" }}
+                      </button>
+                    </td>
+
+                    <!-- Acciones -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                      <button
+                        type="button"
+                        (click)="eliminarVariante(i)"
+                        class="text-red-600 hover:text-red-800 transition-colors"
+                        title="Eliminar variante"
+                      >
+                        <app-icon
+                          name="trash2"
+                          [size]="'18'"
+                          class="text-current mt-1"
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- 🎴 VISTA TARJETAS -->
+      @if (modoEdicion() === "tarjetas") {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (variante of variantes(); track variante.id; let i = $index) {
+            <div
+              [class]="
+                'bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-lg ' +
+                (variante.hasChanges ? 'ring-2 ring-yellow-400' : '') +
+                (!variante.activo ? ' opacity-60' : '')
+              "
+            >
+              <!-- Header de la tarjeta con estado -->
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                  <h3
+                    class="text-lg font-semibold text-gray-900 mb-1 line-clamp-2"
+                  >
+                    {{ getVarianteDescripcion(variante) }}
+                  </h3>
+                  @if (variante.sku) {
+                    <code
+                      class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 font-mono"
+                    >
+                      {{ variante.sku }}
+                    </code>
+                  }
+                </div>
+                <button
+                  (click)="toggleVarianteActiva(i)"
+                  [class]="
+                    'flex-shrink-0 ml-2 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ' +
+                    (variante.activo
+                      ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300')
+                  "
+                >
+                  <app-icon
+                    [name]="variante.activo ? 'checkCircle' : 'xCircle'"
+                    [size]="'14'"
+                    class="text-current"
+                  />
+                </button>
+              </div>
+
+              <!-- Indicador de cambios -->
+              @if (variante.hasChanges) {
+                <div
+                  class="mb-3 flex items-center gap-2 text-xs text-yellow-700 bg-yellow-50 px-3 py-2 rounded-lg"
+                >
+                  <app-icon
+                    name="alertCircle"
+                    [size]="'16'"
+                    class="text-current mt-1"
+                  />
+                  <span>Tiene cambios sin guardar</span>
+                </div>
+              }
+
+              <!-- Imagen de la variante -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Imagen de la variante
+                </label>
+                <div
+                  class="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 group hover:border-primary transition-colors"
+                >
+                  @if (tieneImagen(variante)) {
+                    <!-- ✅ CORRECTO -->
+                    <img
+                      [src]="getVarianteImagen(variante)"
+                      [alt]="getVarianteDescripcion(variante)"
+                      class="w-full h-full object-cover"
+                    />
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center"
+                    >
+                      <button
+                        type="button"
+                        (click)="removeImagen(i)"
+                        class="bg-red-500 text-white rounded-full p-3 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all"
+                        title="Eliminar imagen"
+                      >
+                        <app-icon
+                          name="trash2"
+                          [size]="'20'"
+                          class="text-current mt-1"
+                        />
+                      </button>
+                    </div>
+                  } @else {
+                    <label
+                      class="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                    >
+                      <app-icon
+                        name="Layers"
+                        [size]="'32'"
+                        class="text-gray-400 mb-2 mt-1"
+                      />
+                      <span class="text-sm text-gray-500 font-medium"
+                        >Subir imagen</span
+                      >
+                      <span class="text-xs text-gray-400 mt-1"
+                        >JPG, PNG (max 5MB)</span
+                      >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        (change)="onImagenSelected($event, i)"
+                        class="hidden"
+                      />
+                    </label>
+                  }
+                </div>
+              </div>
+
+              <!-- Opciones de la variante -->
+              <div class="space-y-2 mb-4 border-t pt-3">
+                <p
+                  class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2"
+                >
+                  Características
+                </p>
+                @for (
+                  opcion of variante.opciones;
+                  track opcion.caracteristicaId
+                ) {
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600 font-medium"
+                      >{{ opcion.caracteristica }}:</span
+                    >
+                    <span
+                      class="text-gray-900 bg-gray-100 px-3 py-1 rounded-full font-medium"
+                      >{{ opcion.opcion }}</span
+                    >
+                  </div>
+                }
+              </div>
+
+              <!-- Controles de edición -->
+              <div class="space-y-3 border-t pt-4">
+                @if (esProductoEnergetico()) {
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5"
+                    >
+                      <app-icon
+                        name="package"
+                        [size]="'14'"
+                        class="text-current mt-1"
+                      />
+                      Stock disponible
+                    </label>
+                    <input
+                      type="number"
+                      [value]="variante.stockFisico"
+                      (input)="onStockChange(i, +$any($event.target).value)"
+                      min="0"
+                      step="1"
+                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                      [class.border-yellow-400]="variante.hasChanges"
+                      [class.bg-yellow-50]="variante.hasChanges"
+                    />
+                  </div>
+                }
+
+                <div>
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1.5"
+                  >
+                    <app-icon
+                      name="filePlus"
+                      [size]="'14'"
+                      class="text-current mt-1"
+                    />
+                    Precio extra
+                  </label>
+                  <div class="relative">
+                    <span
+                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
+                      >$</span
+                    >
+                    <input
+                      type="number"
+                      [value]="variante.precioExtra"
+                      (input)="
+                        onPrecioExtraChange(i, +$any($event.target).value)
+                      "
+                      min="0"
+                      step="0.01"
+                      class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Se suma al precio base del producto
+                  </p>
+                </div>
+
+                <div
+                  class="flex items-center justify-between pt-3 border-t border-gray-200"
+                >
+                  <div class="flex items-center gap-2">
+                    <app-icon
+                      name="dollarSign"
+                      [size]="'16'"
+                      class="text-black mt-1"
+                    />
+                    <span class="text-sm font-medium text-gray-700"
+                      >Precio final:</span
+                    >
+                  </div>
+                  <span class="text-2xl font-bold text-black">
+                    ${{ calcularPrecioFinal(variante).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Botón de eliminar -->
+              <div class="mt-4 pt-4 border-t">
+                <app-button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  class="w-full inline-flex items-center justify-center gap-1.5"
+                  (click)="eliminarVariante(i)"
+                >
+                  <app-icon
+                    name="trash2"
+                    [size]="'16'"
+                    class="text-current mt-1"
+                  />
+                  Eliminar variante
+                </app-button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- ⚠️ Sin variantes -->
+    @if (!isLoading() && !tieneVariantes()) {
+      <div class="bg-white rounded-lg shadow-sm p-12">
+        <div class="text-center">
+          <app-icon
+            name="package"
+            [size]="'48'"
+            class="text-gray-400 mx-auto mb-4 mt-1"
+          />
+          <h3 class="text-lg font-medium text-gray-900 mb-2">
+            Este producto no tiene variantes
+          </h3>
+          <p class="text-gray-600 mb-6">
+            Para gestionar variantes, el producto debe tener una plantilla
+            asignada.
+          </p>
+          <app-button
+            type="button"
+            variant="primary"
+            (click)="volver()"
+            class="inline-flex items-center gap-1.5"
+          >
+            <app-icon
+              name="arrowLeft"
+              [size]="'16'"
+              class="text-current mt-1"
+            />
+            Volver a productos
+          </app-button>
+        </div>
+      </div>
+    }
+
+    <!-- 💾 Botón flotante de guardar (mobile) -->
+    @if (hasChanges() && !isLoading()) {
+      <div class="fixed bottom-6 right-6 md:hidden z-50">
+        <app-button
+          type="button"
+          variant="success"
+          size="lg"
+          [disabled]="isSaving()"
+          (click)="guardarCambios()"
+          class="shadow-2xl inline-flex items-center gap-1.5 px-6"
+        >
+          <app-icon
+            [name]="isSaving() ? 'loader' : 'save'"
+            [size]="'18'"
+            class="text-current mt-1"
+            [class.animate-spin]="isSaving()"
+          />
+          {{ isSaving() ? "Guardando..." : "Guardar" }}
+        </app-button>
+      </div>
+    }
+  </div>
+</div>

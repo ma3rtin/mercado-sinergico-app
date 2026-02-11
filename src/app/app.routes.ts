@@ -20,6 +20,7 @@ import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
 import { MainLayout } from './layouts/main-layout/main-layout';
+import { GestionarVariantesComponent } from './pages/gestionar-variantes/gestionar-variantes';
 
 export const routes: Routes = [
 
@@ -85,6 +86,10 @@ export const routes: Routes = [
             component: EditarProductoComponent,
             data: { renderMode: RenderMode.Client }
           },
+          {
+            path: 'gestionar-variantes/:id',
+            component: GestionarVariantesComponent
+          }
         ]
       }
     ]
