@@ -245,8 +245,10 @@ export class ProductosComponent implements OnInit {
 
   // 🎨 HELPERS VISUALES
   getCategoriaNombre(producto: Producto): string {
-    return producto.categoria?.nombre || 'Sin categoría';
-  }
+  return typeof producto.categoria === 'string'
+    ? producto.categoria
+    : producto.categoria?.nombre ?? 'Sin categoría';
+}
 
   formatPrice(price?: number): string {
     if (!price) return '$0';

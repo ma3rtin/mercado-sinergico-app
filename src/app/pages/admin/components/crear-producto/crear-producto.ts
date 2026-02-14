@@ -204,20 +204,36 @@ readonly tipoMap: Record<TipoPaquete, string> = {
   }
 
   // 🎨 Selección de plantilla
-  selectTemplate(template: Plantilla): void {
-    if (this.selectedTemplate()?.id !== template.id) {
-      this.selectedTemplate.set(template);
-      this.selectedAttributes.set({});
-      this.selectedAttributesTouched.set({});
-    }
+selectTemplate(template: Plantilla): void {
+  if (this.selectedTemplate()?.id !== template.id) {
+    this.selectedTemplate.set(template);
 
-    this.productForm.patchValue({ plantillaId: template.id });
+    // 🔥 Inicializar TODOS los atributos seleccionados
+    const atributosIniciales: { [key: string]: string[] } = {};
 
-    // ❌ Si es energético y tiene plantilla → stock por variantes
-    if (this.tipoProducto() === TipoPaquete.ENERGICO) {
-      this.productForm.patchValue({ stock: null });
-    }
+    template.caracteristicas.forEach(car => {
+      atributosIniciales[car.nombre] =
+        car.opciones.map(op => op.nombre);
+    });
+
+    this.selectedAttributes.set(atributosIniciales);
+
+    // Marcar como tocados
+    const touched: { [key: string]: boolean } = {};
+    template.caracteristicas.forEach(car => {
+      touched[car.nombre] = true;
+    });
+
+    this.selectedAttributesTouched.set(touched);
   }
+
+  this.productForm.patchValue({ plantillaId: template.id });
+
+  if (this.tipoProducto() === TipoPaquete.ENERGICO) {
+    this.productForm.patchValue({ stock: null });
+  }
+}
+
 
   onAttributeChange(attributeName: string, value: string, checked: boolean): void {
     this.selectedAttributesTouched.update(current => ({
@@ -243,12 +259,10 @@ readonly tipoMap: Record<TipoPaquete, string> = {
     });
   }
 
-  isAttributeSelected(attributeName: string, value: string): boolean {
-    if (!this.selectedAttributesTouched()[attributeName]) {
-      return true;
-    }
-    return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
-  }
+isAttributeSelected(attributeName: string, value: string): boolean {
+  return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
+}
+
 
   // 📸 Manejo de imágenes
   onFileSelected(event: Event, index: number) {
@@ -475,13 +489,13 @@ if (tipoBackend) {
               <p class="text-sm text-gray-600">
                 <strong>${response.variantes?.length || 0}</strong> variantes generadas.
               </p>
-              <p class="text-sm text-gray-600 mt-2">¿Querés configurar el stock ahora?</p>
+              <p class="text-sm text-gray-600 mt-2">¿Querés configurar la/s variante/s ahora?</p>
             `,
             icon: 'success',
             showCancelButton: true,
             confirmButtonColor: '#71A8D9',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, configurar stock',
+            confirmButtonText: 'Sí, configurar',
             cancelButtonText: 'Más tarde'
           }).then((result) => {
             if (result.isConfirmed) {
