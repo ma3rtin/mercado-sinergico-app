@@ -19,6 +19,7 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
+import { GestionarVariantesComponent } from './pages/gestionar-variantes/gestionar-variantes';
 
 export const routes: Routes = [
   {
@@ -31,57 +32,78 @@ export const routes: Routes = [
 
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
   {
     path: 'registrarse',
-    component: RegistrarseComponent
+    component: RegistrarseComponent,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
-  // 🛍️ Flujo de compra: Home > Productos > Detalle > Sumarse > Mis Paquetes
   {
     path: 'productos',
-    component: ProductosComponent
+    component: ProductosComponent,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
   {
     path: 'producto/:id',
     component: ProductoDetalleSeleccionComponent,
     data: {
-      renderMode: RenderMode.Server,
+      renderMode: RenderMode.Client
     },
   },
+
   {
     path: 'paquete/:paqueteId/productos',
     component: ProductosDelPaquete,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
+
   {
     path: 'paquete/:paqueteId/producto/:productoId',
     component: DetalleProductoSumarse,
     data: {
-      renderMode: RenderMode.Server,
+      renderMode: RenderMode.Client
     },
   },
+
   {
     path: 'paquetes',
-    component: PaquetesPublicosComponent
+    component: PaquetesPublicosComponent,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
-  // 👤 Rutas usuario (con login)
   {
     path: 'perfil',
     component: Perfil,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
   {
     path: 'mis-pedidos',
     component: MisPedidosComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 
-  // 🧑‍💻 Rutas de admin
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
@@ -119,18 +141,21 @@ export const routes: Routes = [
         component: AdministrarProductosComponent
       },
       {
+        path: 'gestionar-variantes/:id',
+        component: GestionarVariantesComponent
+      },
+      {
         path: 'editar-producto/:id',
-        component: EditarProductoComponent,
-        data: {
-          renderMode: RenderMode.Client
-        },
+        component: EditarProductoComponent
       },
     ],
   },
 
-  // 🌍 Fallback
   {
     path: '**',
-    component: Home
+    component: Home,
+    data: {
+      renderMode: RenderMode.Client
+    }
   },
 ];

@@ -177,12 +177,25 @@ private setupSearch(): void {
 
       const term = this.searchTerm().toLowerCase();
 
-      const productosFiltrados = data.productos.filter(p =>
-        p.nombre?.toLowerCase().includes(term) ||
-        p.descripcion?.toLowerCase().includes(term) ||
-        p.marca?.nombre?.toLowerCase().includes(term) ||
-        p.categoria?.nombre?.toLowerCase().includes(term)
-      );
+const productosFiltrados = data.productos.filter(p => {
+  const marcaNombre =
+    typeof p.marca === 'string'
+      ? p.marca
+      : p.marca?.nombre ?? '';
+
+  const categoriaNombre =
+    typeof p.categoria === 'string'
+      ? p.categoria
+      : p.categoria?.nombre ?? '';
+
+  return (
+    p.nombre?.toLowerCase().includes(term) ||
+    p.descripcion?.toLowerCase().includes(term) ||
+    marcaNombre.toLowerCase().includes(term) ||
+    categoriaNombre.toLowerCase().includes(term)
+  );
+});
+
 
       const paquetesFiltrados = data.paquetes.filter(paq =>
         paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||

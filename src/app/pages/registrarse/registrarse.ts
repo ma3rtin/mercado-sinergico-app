@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, afterNextRender } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
   FormBuilder,
@@ -46,6 +46,22 @@ export class RegistrarseComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  constructor() {
+    // ✅ Cargar reCAPTCHA solo en navegador y después del render
+    afterNextRender(() => {
+      if (isPlatformBrowser(this.platformId)) {
+        const script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+        (window as any).onRecaptchaSuccess = (token: string) => {
+          this.form.get('recaptcha')?.setValue(token);
+        };
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.form = this.fb.group(
       {
@@ -81,18 +97,6 @@ export class RegistrarseComponent implements OnInit {
       },
       { validators: this.passwordsMatch }
     );
-
-    // ⚙️ Cargar script reCAPTCHA solo en navegador
-    if (isPlatformBrowser(this.platformId)) {
-      const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-      (window as any).onRecaptchaSuccess = (token: string) => {
-        this.form.get('recaptcha')?.setValue(token);
-      };
-    }
   }
 
   // 🔍 Validador custom
