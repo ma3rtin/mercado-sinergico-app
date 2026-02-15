@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID, afterNextRender } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -127,10 +127,17 @@ export class ProductosComponent implements OnInit {
     tituloOrdenamiento: 'Ordenar por',
   }));
 
-  ngOnInit(): void {
-    if (this.isBrowser) {
+  // 🔥 CONSTRUCTOR: Aquí movemos la carga de datos
+  constructor() {
+    // ✅ Solo ejecutar en el navegador, después del primer render
+    afterNextRender(() => {
       this.loadProductos();
-    }
+    });
+  }
+
+  ngOnInit(): void {
+    // ✅ Ya no necesitamos hacer nada aquí
+    // La carga se hace en afterNextRender()
   }
 
   // 📥 CARGA DE DATOS
