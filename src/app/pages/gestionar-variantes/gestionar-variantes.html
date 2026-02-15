@@ -91,7 +91,7 @@
             [value]="searchTerm()"
             (input)="onSearchChange($any($event.target).value)"
             placeholder="Buscar por descripción o SKU..."
-            class="w-full px-4 py-3 pl-11 pr-12 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 shadow-sm"
+            class="w-full px-4 py-3 pl-11 pr-12 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-primary transition-all duration-200 shadow-sm"
             autocomplete="off"
           />
           <app-icon
@@ -345,7 +345,7 @@
                     [checked]="todasSeleccionadas()"
                     [indeterminate]="algunaSeleccionada()"
                     (change)="toggleTodasLasSelecciones()"
-                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                    class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer"
                     title="Seleccionar todas"
                   />
                 </th>
@@ -425,7 +425,7 @@
                       type="checkbox"
                       [checked]="variante.seleccionada"
                       (click)="toggleSeleccion(i, $event)"
-                      class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                      class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer"
                     />
                   </td>
 
@@ -510,7 +510,7 @@
                         min="0"
                         step="1"
                         placeholder="0"
-                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
                         [class.border-yellow-400]="variante.hasChanges"
                       />
                     </td>
@@ -528,7 +528,7 @@
                         "
                         min="0"
                         step="0.01"
-                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm"
+                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
                       />
                     </div>
                   </td>

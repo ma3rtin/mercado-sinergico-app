@@ -26,7 +26,7 @@
                         [value]="searchTerm()"
                         (input)="onSearchChange($event)"
                         placeholder="Escribe para buscar..."
-                        class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-xl focus:ring-primary focus:border-primary block p-3 pl-10 outline-none transition-all"
+                        class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-xl  focus:border-primary block p-3 pl-10 outline-none transition-all"
                     />
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@
                         id="location-select"
                         [value]="selectedLocalidadId() ?? ''"
                         (change)="onSelectionChange($event)"
-                        class="w-full appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-xl focus:ring-primary focus:border-primary block p-3 pr-10 outline-none transition-all cursor-pointer hover:bg-gray-100"
+                        class="w-full appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-xl  focus:border-primary block p-3 pr-10 outline-none transition-all cursor-pointer hover:bg-gray-100"
                     >
                         <option value="" disabled>Elige una localidad...</option>
                         @for (loc of localidadesFiltradas(); track loc.id_localidad) {

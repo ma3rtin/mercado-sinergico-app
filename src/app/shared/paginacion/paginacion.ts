@@ -174,7 +174,7 @@ export class PaginationComponent {
 
   // 🎨 Helper para clases de botones
   getButtonClass(isActive: boolean, isDisabled: boolean): string {
-    const base = 'px-3 py-2 min-w-[2.5rem] text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1';
+    const base = 'px-3 py-2 min-w-[2.5rem] text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2  focus:ring-offset-1';
 
     if (isDisabled) {
       return `${base} opacity-40 cursor-not-allowed bg-gray-200 text-gray-500 border border-gray-300`;
