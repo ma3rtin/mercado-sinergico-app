@@ -1,7 +1,7 @@
 <!-- crear-producto.html -->
-<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-2xl text-gray-900 mb-2 font-display">Crear producto</h1>
+<app-admin-create-wrapper
+  [titulo]="'Crear producto'"
+>
 
     <!-- 🎯 Tipo de Producto -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -19,93 +19,11 @@
         }
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Opción Energético -->
-        <button
-          type="button"
-          (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
-          [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-            (tipoProducto() === 'ENERGETICO'
-              ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
-              : 'border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                (tipoProducto() === 'ENERGETICO' ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
-                <app-icon name="Zap" size="24"></app-icon>
-              </div>
-              <div class="text-left">
-                <h4 class="text-lg font-semibold text-gray-900">Energético</h4>
-                <p class="text-xs text-gray-500">Con stock físico</p>
-              </div>
-            </div>
-            @if (tipoProducto() === 'ENERGETICO') {
-              <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
-            }
-          </div>
-          <p class="text-sm text-gray-600 text-left">
-            El stock se controla físicamente. Ideal para productos con inventario real.
-          </p>
-          <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-              Control de inventario preciso
-            </li>
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-              Evita sobreventa
-            </li>
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
-              Stock compartido entre paquetes
-            </li>
-          </ul>
-        </button>
-
-        <!-- Opción Sinérgico -->
-        <button
-          type="button"
-          (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
-          [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-            (tipoProducto() === 'SINERGICO'
-              ? 'border-primary bg-blue-50 ring-2  ring-offset-2'
-              : 'border-gray-300 hover:border-primary hover:bg-blue-50')"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                (tipoProducto() === 'SINERGICO' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
-                <app-icon name="users" size="24"></app-icon>
-              </div>
-              <div class="text-left">
-                <h4 class="text-lg font-semibold text-gray-900">Sinérgico</h4>
-                <p class="text-xs text-gray-500">Bajo pedido</p>
-              </div>
-            </div>
-            @if (tipoProducto() === 'SINERGICO') {
-              <app-icon name="Check" size="24" class="text-primary"></app-icon>
-            }
-          </div>
-          <p class="text-sm text-gray-600 text-left">
-            Sin control de stock físico. Se produce o gestiona bajo pedido.
-          </p>
-          <ul class="mt-3 space-y-1 text-xs text-gray-600 text-left">
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-primary"></app-icon>
-              Sin límites de inventario
-            </li>
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-primary"></app-icon>
-              Ideal para productos custom
-            </li>
-            <li class="flex items-center gap-2">
-              <app-icon name="Check" size="12" class="text-primary"></app-icon>
-              Pedidos bajo demanda
-            </li>
-          </ul>
-        </button>
-      </div>
+      <app-selector-tipo-card
+        [selectedType]="tipoProducto()"
+        [contenido]="tipoCardContenido"
+        (typeChange)="cambiarTipoProducto($event)"
+      />
 
       <!-- Info adicional -->
       <div class="mt-4 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
@@ -461,5 +379,4 @@
       (close)="closeCreateModal()"
       (plantillaCreated)="onPlantillaCreated($event)"
     />
-  </div>
-</div>
+</app-admin-create-wrapper>

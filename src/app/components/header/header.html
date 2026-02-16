@@ -93,7 +93,7 @@
         <div class="relative profile-menu-area">
           <button
             (click)="toggleProfileMenu()"
-            class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+            class="inline-flex w-10 h-10 items-center justify-center cursor-pointer rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
             aria-label="Mi perfil"
           >
             <app-icon name="User" class="w-7 h-7 translate-y-[1px]"></app-icon>
@@ -115,14 +115,14 @@
               (click)="profileMenuOpen.set(false)"
               class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
             >
-              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
+              <app-icon name="User"></app-icon> Mi perfil
             </a>
             <button
               (click)="signOut()"
               type="button"
-              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
+              class="w-full cursor-pointer text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium"
             >
-              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+              <app-icon name="LogOut"></app-icon> Cerrar sesión
             </button>
           </div>
           }

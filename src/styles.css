@@ -61,46 +61,70 @@ p {
 
 /* Personalización de los toasts de Sonner */
 [data-sonner-toaster] {
-  font-family: var(--font-body);
+    font-family: var(--font-body);
 }
 
 [data-sonner-toast] {
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 /* Success toast */
 [data-sonner-toast][data-type="success"] {
-  background-color: #f0fdf4 !important;
-  border: 1px solid #86efac !important;
-  color: #166534 !important;
+    background-color: #f0fdf4 !important;
+    border: 1px solid #86efac !important;
+    color: #166534 !important;
 }
 
 /* Error toast */
 [data-sonner-toast][data-type="error"] {
-  background-color: #fef2f2 !important;
-  border: 1px solid #fca5a5 !important;
-  color: #991b1b !important;
+    background-color: #fef2f2 !important;
+    border: 1px solid #fca5a5 !important;
+    color: #991b1b !important;
+}
+
+.page-container {
+    @apply min-h-screen bg-gray-50 font-body;
+}
+
+.page-content {
+    @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+.page-header {
+    @apply text-center mb-8 sm:mb-10 lg:mb-12;
+}
+
+.page-title {
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4;
+}
+
+.page-subtitle {
+    @apply text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4;
+}
+
+.page-layout {
+    @apply flex flex-col lg:flex-row gap-6;
 }
 
 /* Warning toast */
 [data-sonner-toast][data-type="warning"] {
-  background-color: #fefce8 !important;
-  border: 1px solid #fde047 !important;
-  color: #854d0e !important;
+    background-color: #fefce8 !important;
+    border: 1px solid #fde047 !important;
+    color: #854d0e !important;
 }
 
 /* Info toast */
 [data-sonner-toast][data-type="info"] {
-  background-color: #eff6ff !important;
-  border: 1px solid #93c5fd !important;
-  color: #1e40af !important;
+    background-color: #eff6ff !important;
+    border: 1px solid #93c5fd !important;
+    color: #1e40af !important;
 }
 
 /* Loading toast */
 [data-sonner-toast][data-type="loading"] {
-  background-color: #f3f4f6 !important;
-  border: 1px solid #d1d5db !important;
-  color: #374151 !important;
+    background-color: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
 }

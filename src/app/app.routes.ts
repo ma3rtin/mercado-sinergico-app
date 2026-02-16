@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { RenderMode } from '@angular/ssr';
+
 import { Home } from './pages/home/home';
 import { LoginComponent } from './pages/login/login';
 import { RegistrarseComponent } from './pages/registrarse/registrarse';
@@ -19,143 +19,57 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
+import { MainLayout } from './layouts/main-layout/main-layout';
 import { GestionarVariantesComponent } from './pages/gestionar-variantes/gestionar-variantes';
 
 export const routes: Routes = [
+
   {
     path: '',
-    component: Home,
-    data: {
-      renderMode: RenderMode.Client
-    },
-  },
-
-  {
-    path: 'login',
-    component: LoginComponent,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'registrarse',
-    component: RegistrarseComponent,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'productos',
-    component: ProductosComponent,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'producto/:id',
-    component: ProductoDetalleSeleccionComponent,
-    data: {
-      renderMode: RenderMode.Client
-    },
-  },
-
-  {
-    path: 'paquete/:paqueteId/productos',
-    component: ProductosDelPaquete,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'paquete/:paqueteId/producto/:productoId',
-    component: DetalleProductoSumarse,
-    data: {
-      renderMode: RenderMode.Client
-    },
-  },
-
-  {
-    path: 'paquetes',
-    component: PaquetesPublicosComponent,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'perfil',
-    component: Perfil,
-    canActivate: [authGuard],
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'mis-pedidos',
-    component: MisPedidosComponent,
-    canActivate: [authGuard],
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
-
-  {
-    path: 'admin',
-    canActivate: [authGuard, adminGuard],
-    data: {
-      renderMode: RenderMode.Client
-    },
+    component: MainLayout,
     children: [
+
+      // 🏠 Home
+      { path: '', component: Home },
+
+      // 🔐 Auth
+      { path: 'login', component: LoginComponent },
+      { path: 'registrarse', component: RegistrarseComponent },
+
+      // 🛍️ Público
+      { path: 'productos', component: ProductosComponent },
+      { path: 'paquetes', component: PaquetesPublicosComponent },
+
+      // 📦 Detalles
+      { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },
+      { path: 'paquete/:paqueteId/productos', component: ProductosDelPaquete },
+      { path: 'paquete/:paqueteId/producto/:productoId', component: DetalleProductoSumarse },
+
+      // 👤 Usuario
+      { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+      { path: 'mis-pedidos', component: MisPedidosComponent, canActivate: [authGuard] },
+
+      // 🧑‍💻 Admin
       {
-        path: '',
-        redirectTo: 'perfil',
-        pathMatch: 'full',
-      },
-      {
-        path: 'perfil',
-        component: PerfilAdmin
-      },
-      {
-        path: 'crear-producto',
-        component: CrearProductoComponent
-      },
-      {
-        path: 'crear-paquete',
-        component: CrearPaqueteComponent
-      },
-      {
-        path: 'publicar-paquete',
-        component: PublicarPaqueteComponent
-      },
-      {
-        path: 'administrar-plantillas',
-        component: AdministrarPlantillasComponent
-      },
-      {
-        path: 'administrar-productos',
-        component: AdministrarProductosComponent
-      },
-      {
-        path: 'gestionar-variantes/:id',
-        component: GestionarVariantesComponent
-      },
-      {
-        path: 'editar-producto/:id',
-        component: EditarProductoComponent
-      },
-    ],
+        path: 'admin',
+        canActivate: [authGuard, adminGuard],
+        children: [
+          { path: '', redirectTo: 'perfil', pathMatch: 'full' },
+          { path: 'perfil', component: PerfilAdmin },
+          { path: 'crear-producto', component: CrearProductoComponent },
+          { path: 'crear-paquete', component: CrearPaqueteComponent },
+          { path: 'publicar-paquete', component: PublicarPaqueteComponent },
+          { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
+          { path: 'administrar-productos', component: AdministrarProductosComponent },
+          { path: 'editar-producto/:id', component: EditarProductoComponent },
+          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent }
+        ]
+      }
+
+    ]
   },
 
-  {
-    path: '**',
-    component: Home,
-    data: {
-      renderMode: RenderMode.Client
-    }
-  },
+  // 🌍 Fallback
+  { path: '**', redirectTo: '' }
+
 ];
