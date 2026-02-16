@@ -2,13 +2,13 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-page-layout',
+  selector: 'app-catalogo-wrapper',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './page-layout.html'
+  templateUrl: './catalogo-wrapper.html'
 })
 
-export class PageLayoutComponent {
+export class CatalogoWrapperComponent {
   titulo = input.required<string>();
   subtitulo = input<string | null>(null);
 }

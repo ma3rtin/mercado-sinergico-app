@@ -27,7 +27,7 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { IconComponent } from '@app/shared/icono/icono';
-import { PageLayoutComponent } from '@app/shared/page-layout/page-layout';
+import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
@@ -39,7 +39,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
     FiltrosComponent,
     IconComponent,
     PaginationComponent,
-    PageLayoutComponent
+    CatalogoWrapperComponent
   ],
   templateUrl: './paquetes.html',
 })

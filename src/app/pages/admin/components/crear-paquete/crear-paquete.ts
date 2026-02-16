@@ -24,7 +24,7 @@ import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ToastService } from '@app/services/toast/toast.service';
-import { AdminCreateLayoutComponent } from '@app/shared/admin-create-layout/admin-create-layout';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
@@ -34,7 +34,7 @@ import {
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, HttpClientModule, AdminCreateLayoutComponent, SelectorTipoCardComponent],
+  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {

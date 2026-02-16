@@ -23,7 +23,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { InputComponent } from '@app/shared/input/input-component';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { IconComponent } from '@app/shared/icono/icono';
-import { AdminCreateLayoutComponent } from '@app/shared/admin-create-layout/admin-create-layout';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
@@ -47,9 +47,9 @@ interface ImageSlot {
     InputComponent,
     CrearPlantillaModalComponent,
     IconComponent,
-    AdminCreateLayoutComponent,
-    SelectorTipoCardComponent
-  ],
+    SelectorTipoCardComponent,
+    AdminCreateWrapperComponent
+],
   standalone: true
 })
 export class CrearProductoComponent implements OnInit {

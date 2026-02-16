@@ -23,7 +23,7 @@ import { ToastService } from '@app/services/toast/toast.service';
 
 // Shared components
 import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/paquete-usuario-card';
-import { PageLayoutComponent } from '@app/shared/page-layout/page-layout';
+import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 
 
 // ------------------------------
@@ -55,7 +55,7 @@ interface PedidoDelUsuario extends Pedido {
     CommonModule,
     FormsModule,
     PaqueteUsuarioCardComponent,
-    PageLayoutComponent
+    CatalogoWrapperComponent
   ],
   templateUrl: './mis-pedidos.html'
 })
