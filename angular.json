@@ -21,10 +21,11 @@
             ],
             "styles": [
               "src/styles.css",
+
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],
             "server": "src/main.server.ts",
-            "prerender": false,
+            "outputMode": "static",
             "ssr": {
               "entry": "src/server.ts"
             }
@@ -49,14 +50,12 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all",
-              "prerender": false
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true,
-              "prerender": false
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
