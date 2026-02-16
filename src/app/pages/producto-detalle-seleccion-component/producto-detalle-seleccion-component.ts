@@ -245,7 +245,7 @@ recargarDatos(): void {
    * Volver a la vista de productos
    */
   volverAProductos(): void {
-    this.router.navigate(['/productos']);
+    this.router.navigate(['/admin/administrar-productos']);
   }
 
   /**

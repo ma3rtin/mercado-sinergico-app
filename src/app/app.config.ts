@@ -4,7 +4,9 @@ import {
   provideAppInitializer,
   inject,
   importProvidersFrom,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {
@@ -89,24 +91,27 @@ import {
   featherGrid,
   featherMinusCircle,
   featherAlertOctagon,
-featherFilePlus
+  featherFilePlus,
 } from '@ng-icons/feather-icons';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideAnimations(), // ✅ Necesario para ngx-sonner
-
-    // 🔥 YA NO NECESITAS provideToastr - eliminalo
-
+    provideAnimations(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 
+    // 🔥 SOLUCIÓN: Solo restaurar sesión en el navegador
     provideAppInitializer(() => {
       const authService = inject(AuthService);
-      return authService.restoreSession();
+      const platformId = inject(PLATFORM_ID);
+
+      // ✅ Solo ejecutar en el navegador
+      if (isPlatformBrowser(platformId)) {
+        return authService.restoreSession();
+      }
+      return Promise.resolve(); // No hacer nada en SSR
     }),
 
     // ⭐️ NgIcons
@@ -178,7 +183,7 @@ export const appConfig: ApplicationConfig = {
         featherGrid,
         featherMinusCircle,
         featherAlertOctagon,
-        featherFilePlus
+        featherFilePlus,
       })
     ),
   ],

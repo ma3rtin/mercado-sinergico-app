@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { RenderMode } from '@angular/ssr';
+
 import { Home } from './pages/home/home';
 import { LoginComponent } from './pages/login/login';
 import { RegistrarseComponent } from './pages/registrarse/registrarse';
@@ -30,44 +30,24 @@ export const routes: Routes = [
     children: [
 
       // 🏠 Home
-      {
-        path: '',
-        component: Home,
-        data: { renderMode: RenderMode.Client }
-      },
+      { path: '', component: Home },
+
+      // 🔐 Auth
+      { path: 'login', component: LoginComponent },
+      { path: 'registrarse', component: RegistrarseComponent },
 
       // 🛍️ Público
       { path: 'productos', component: ProductosComponent },
       { path: 'paquetes', component: PaquetesPublicosComponent },
 
       // 📦 Detalles
-      {
-        path: 'producto/:id',
-        component: ProductoDetalleSeleccionComponent,
-        data: { renderMode: RenderMode.Server }
-      },
+      { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },
       { path: 'paquete/:paqueteId/productos', component: ProductosDelPaquete },
-      {
-        path: 'paquete/:paqueteId/producto/:productoId',
-        component: DetalleProductoSumarse,
-        data: { renderMode: RenderMode.Server }
-      },
+      { path: 'paquete/:paqueteId/producto/:productoId', component: DetalleProductoSumarse },
 
       // 👤 Usuario
-      {
-        path: 'perfil',
-        component: Perfil,
-        canActivate: [authGuard]
-      },
-      {
-        path: 'mis-pedidos',
-        component: MisPedidosComponent,
-        canActivate: [authGuard]
-      },
-
-      // 🔐 Auth
-      { path: 'login', component: LoginComponent },
-      { path: 'registrarse', component: RegistrarseComponent },
+      { path: 'perfil', component: Perfil, canActivate: [authGuard] },
+      { path: 'mis-pedidos', component: MisPedidosComponent, canActivate: [authGuard] },
 
       // 🧑‍💻 Admin
       {
@@ -81,23 +61,15 @@ export const routes: Routes = [
           { path: 'publicar-paquete', component: PublicarPaqueteComponent },
           { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
           { path: 'administrar-productos', component: AdministrarProductosComponent },
-          {
-            path: 'editar-producto/:id',
-            component: EditarProductoComponent,
-            data: { renderMode: RenderMode.Client }
-          },
-          {
-            path: 'gestionar-variantes/:id',
-            component: GestionarVariantesComponent
-          }
+          { path: 'editar-producto/:id', component: EditarProductoComponent },
+          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent }
         ]
       }
+
     ]
   },
 
   // 🌍 Fallback
-  {
-    path: '**',
-    redirectTo: ''
-  }
+  { path: '**', redirectTo: '' }
+
 ];

@@ -9,50 +9,39 @@ import { ProductoDetalleDTO } from '@app/models/DTOs/Producto/productoDetalleDTO
 export class ProductosService extends ApiService {
   private productosCache$?: Observable<Producto[]>;
 
-  getProductos(): Observable<Producto[]> {
-    if (this.productosCache$) return this.productosCache$;
+ getProductos(): Observable<Producto[]> {
+  if (this.productosCache$) return this.productosCache$;
 
-    console.log('🛡️ ProductosService - GET',);
+  this.productosCache$ = this.get<Producto[]>('productos').pipe(
+    timeout(30000),
+    retry(2),
+    map(response =>
+      response.map(p => this.normalizeProducto(p))
+    ),
+    catchError(err => {
+      this.productosCache$ = undefined;
+      return throwError(() => err);
+    }),
+    shareReplay(1)
+  );
 
-    this.productosCache$ = this.get<Producto[]>('productos').pipe(
-      timeout(30000),
-      retry(2),
-      map(response => {
-        console.log('✅ Productos recibidos del backend:', response);
-        // Normalize Data: Ensure id_producto exists
-        return response.map(p => ({
-          ...p,
-          id_producto: p.id_producto || p.id
-        }));
-      }),
-      catchError(err => {
-        console.error('❌ Error en getProductos:', err);
-        this.productosCache$ = undefined;
+  return this.productosCache$;
+}
 
-        if (err.name === 'TimeoutError') {
-          console.error('⏱️ Timeout: El backend no respondió a tiempo');
-        }
-
-        return throwError(() => err);
-      }),
-      shareReplay(1)
-    );
-
-    return this.productosCache$;
-  }
 
   clearCache(): void {
     this.productosCache$ = undefined;
   }
 
-  getProductoById(id: number) {
-    return this.get<any>(`productos/${id}`).pipe(
-      map(res => {
-        console.log('📦 RESPUESTA REAL BACKEND:', res);
-        return res.producto ?? res;
-      })
-    );
-  }
+getProductoById(id: number): Observable<Producto> {
+  return this.get<any>(`productos/${id}`).pipe(
+    map(res => {
+      const producto = res.producto ?? res;
+      return this.normalizeProducto(producto);
+    })
+  );
+}
+
 
   getProductoDetalle(id: number): Observable<ProductoDetalleDTO> {
     return this.get<ProductoDetalleDTO>(`productos/${id}`);
@@ -114,32 +103,45 @@ export class ProductosService extends ApiService {
     );
   }
 
-  getProductosFiltrados(
-    search: string,
-    offset: number,
-    limit: number
-  ): Observable<Producto[]> {
-    const params = new URLSearchParams({
-      search,
-      offset: offset.toString(),
-      limit: limit.toString(),
-    });
+getProductosFiltrados(
+  search: string,
+  offset: number,
+  limit: number
+): Observable<Producto[]> {
 
-    return this.get<Producto[]>(`productos/filtrados?${params}`).pipe(
-      timeout(15000),
-      retry(1),
-      map((response) => {
-        // Normalize Data: Ensure id_producto exists
-        return (response || []).map(p => ({
-          ...p,
-          id_producto: p.id_producto || p.id
-        }));
-      }),
-      catchError((err) => {
-        console.error('❌ Error en getProductosFiltrados:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+  const params = new URLSearchParams({
+    search,
+    offset: offset.toString(),
+    limit: limit.toString(),
+  });
+
+  return this.get<Producto[]>(`productos/filtrados?${params}`).pipe(
+    timeout(15000),
+    retry(1),
+    map(response =>
+      (response || []).map(p => this.normalizeProducto(p))
+    ),
+    catchError(err => throwError(() => err))
+  );
+}
+
+
+ private normalizeProducto(producto: any): Producto {
+  return {
+    ...producto,
+    id_producto: producto.id_producto || producto.id,
+
+    marca:
+      typeof producto.marca === 'string'
+        ? { nombre: producto.marca }
+        : producto.marca ?? undefined,
+
+    categoria:
+      typeof producto.categoria === 'string'
+        ? { nombre: producto.categoria }
+        : producto.categoria ?? undefined,
+  };
+}
+
 
 }

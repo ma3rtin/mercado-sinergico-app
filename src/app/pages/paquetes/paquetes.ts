@@ -6,6 +6,7 @@ import {
   DestroyRef,
   signal,
   computed,
+  afterNextRender,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
@@ -26,8 +27,8 @@ import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { IconComponent } from '@app/shared/icono/icono';
-import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
 import { PageLayoutComponent } from '@app/shared/page-layout/page-layout';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-paquetes-publicos',
@@ -53,7 +54,7 @@ export class PaquetesPublicosComponent implements OnInit {
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
-  itemsPorPagina = signal<number>(4); // 12 paquetes por página (óptimo para e-commerce)
+  itemsPorPagina = signal<number>(4);
 
   // 📊 COMPUTED: Paquetes paginados
   paquetesPaginados = computed(() => {
@@ -95,7 +96,7 @@ export class PaquetesPublicosComponent implements OnInit {
     mostrarCategoria: true,
     mostrarMarca: true,
     mostrarTipoPaquete: true,
-    mostrarRangoPrecio: false, // No hay precio en paquetes
+    mostrarRangoPrecio: false,
     mostrarOrdenamiento: true,
     mostrarEstados: true,
 
@@ -184,19 +185,23 @@ export class PaquetesPublicosComponent implements OnInit {
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+
+    // ✅ Solo ejecutar en el navegador, después del primer render
+    afterNextRender(() => {
+      this.cargarPaquetes();
+    });
   }
 
   ngOnInit(): void {
-    if (this.isBrowser) {
-      this.cargarPaquetes();
-    }
+    // ✅ Ya no necesitamos hacer nada aquí
+    // La carga se hace en afterNextRender()
   }
 
   // 📥 Cargar paquetes desde el servicio
   private cargarPaquetes(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
-    this.paginaActual.set(1); // ✅ Resetear página al cargar
+    this.paginaActual.set(1);
 
     this.paquetePublicadoService
       .getPaquetes()
@@ -212,7 +217,7 @@ export class PaquetesPublicosComponent implements OnInit {
 
           this.paquetesOriginales.set(paquetesActivos);
           this.paquetesFiltrados.set(paquetesActivos);
-          this.paginaActual.set(1); // ✅ Resetear a página 1
+          this.paginaActual.set(1);
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -304,7 +309,7 @@ export class PaquetesPublicosComponent implements OnInit {
     }
 
     this.paquetesFiltrados.set(resultado);
-    this.paginaActual.set(1); // ✅ Resetear a página 1 al filtrar
+    this.paginaActual.set(1);
   }
 
   private ordenarPaquetes(paquetes: PaquetePublicado[], orden: string): PaquetePublicado[] {
@@ -331,12 +336,12 @@ export class PaquetesPublicosComponent implements OnInit {
 
   limpiarFiltros(): void {
     this.paquetesFiltrados.set(this.paquetesOriginales());
-    this.paginaActual.set(1); // ✅ Resetear a página 1 al limpiar
+    this.paginaActual.set(1);
   }
 
   // 🔄 Recargar paquetes
   recargarPaquetes(): void {
-    this.paginaActual.set(1); // ✅ Resetear página
+    this.paginaActual.set(1);
     this.cargarPaquetes();
   }
 
@@ -348,7 +353,7 @@ export class PaquetesPublicosComponent implements OnInit {
 
   onItemsPerPageChange(itemsPerPage: number): void {
     this.itemsPorPagina.set(itemsPerPage);
-    this.paginaActual.set(1); // Resetear a página 1
+    this.paginaActual.set(1);
     console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
 

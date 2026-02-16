@@ -246,6 +246,7 @@ export class IconsService {
     MinusCircle: featherMinusCircle,
     AlertOctagon: featherAlertOctagon,
 
+
   };
 
   /**
