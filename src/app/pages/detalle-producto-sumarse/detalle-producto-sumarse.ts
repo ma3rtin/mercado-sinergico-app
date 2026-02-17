@@ -99,7 +99,7 @@ export class DetalleProductoSumarse implements OnInit {
   faltanParaCerrar = computed(() => this.maxParticipantes() - this.participantesActuales());
   zonaDelPaquete = computed(() => this.paqueteSeleccionado()?.zona?.nombre || 'Sin zona');
   estadoDelPaquete = computed(() => this.paqueteSeleccionado()?.estado?.nombre || 'Sin estado');
-  
+
   mostrarAyudaVariantes = computed(() =>
     this.paqueteEstaActivo() &&
     this.productoTieneVariantes() &&
@@ -153,7 +153,7 @@ export class DetalleProductoSumarse implements OnInit {
 
         this.loadProducto(productoId);
         this.loadPaqueteSeleccionado(paqueteId);
-        this.loadPaquetesRelacionados(paqueteId); // ✅ recibe el ID como parámetro
+        this.loadPaquetesDelProducto(productoId);
       });
   }
 
@@ -216,9 +216,9 @@ export class DetalleProductoSumarse implements OnInit {
       });
   }
 
-  // ✅ Recibe paqueteId como parámetro (no snapshot)
-  private loadPaquetesRelacionados(paqueteId: number): void {
-    this.paquetePublicadoService.getRelacionados(paqueteId)
+  private loadPaquetesDelProducto(productoId: number): void {
+    this.paquetePublicadoService
+      .getByProductId(productoId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (paquetes) => {
@@ -229,6 +229,7 @@ export class DetalleProductoSumarse implements OnInit {
         }
       });
   }
+
 
   onVarianteIdChange(id: number | null) {
     this.varianteIdSeleccionada.set(id);

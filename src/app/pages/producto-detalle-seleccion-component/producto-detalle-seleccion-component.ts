@@ -136,7 +136,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     this.productoSeleccionado.set(null);
 
     this.cargarProducto(productoId);
-    this.cargarPaquetes();
+    this.cargarPaquetesDelProducto(productoId);
   }
 
   // 📦 Cargar producto por ID
@@ -170,31 +170,21 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   }
 
   // 🎁 Cargar todos los paquetes
-  private cargarPaquetes(): void {
+  private cargarPaquetesDelProducto(productoId: number): void {
     this.isLoadingPaquetes.set(true);
 
     this.paquetePublicadoService
-      .getPaquetes()
+      .getByProductId(productoId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (paquetes) => {
-          console.log('✅ Paquetes cargados:', paquetes.length);
+          console.log('✅ Paquetes del producto:', paquetes.length);
           this.todosLosPaquetes.set(paquetes);
           this.isLoadingPaquetes.set(false);
         },
         error: (error) => {
-          console.error('❌ Error cargando paquetes:', error);
+          console.error('❌ Error cargando paquetes del producto:', error);
           this.isLoadingPaquetes.set(false);
-
-          let mensaje = 'Error al cargar los paquetes.';
-
-          if (error.status === 0) {
-            mensaje = 'No se pudo conectar con el servidor.';
-          } else if (error.status === 404) {
-            mensaje = 'No se encontraron paquetes.';
-          }
-
-          this.errorMessage.set(mensaje);
           this.todosLosPaquetes.set([]);
         },
       });

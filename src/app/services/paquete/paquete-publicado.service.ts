@@ -36,4 +36,10 @@ export class PaquetePublicadoService extends ApiService {
     getPaquetesDelUsuario(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/mis-pedidos`);
     }
+
+    getByProductId(productoId: number): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(
+            `${this.apiUrl}/producto/${productoId}`
+        );
+    }
 }
