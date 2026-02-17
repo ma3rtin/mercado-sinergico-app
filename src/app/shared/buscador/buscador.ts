@@ -8,8 +8,9 @@ import {
   computed,
   input,
   output,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
@@ -70,6 +71,7 @@ export class BuscadorComponent {
   private productosService = inject(ProductosService);
   private paquetesService = inject(PaquetePublicadoService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   // 📌 ViewChild
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
@@ -120,101 +122,103 @@ export class BuscadorComponent {
   private searchSubject = new Subject<string>();
 
   constructor() {
-    this.setupSearch();
+    if (isPlatformBrowser(this.platformId)) {
+      this.setupSearch();
+    }
   }
 
   // 🔧 Configuración de búsqueda con debounce
-private setupSearch(): void {
-  this.searchSubject
-    .pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => {
-        if (!term.trim()) {
-          this.resultados.set({
-            productos: [],
-            paquetes: [],
-            cargando: false,
-            error: null,
-          });
-          return of(null);
-        }
-
-        this.resultados.update(prev => ({
-          ...prev,
-          cargando: true,
-          error: null,
-        }));
-
-        return combineLatest({
-          productos: this.productosService.getProductos().pipe(
-             take(1), // 🔑 CLAVE
-            catchError(err => {
-              console.error('❌ Error productos', err);
-              return of([]);
-            })
-          ),
-          paquetes: this.paquetesService.getPaquetes().pipe(
-             take(1), // 🔑 CLAVE
-            catchError(err => {
-              console.error('❌ Error paquetes', err);
-              return of([]);
-            })
-          ),
-        }).pipe(
-          finalize(() => {
-            // 🔑 SIEMPRE se apaga el loading
-            this.resultados.update(prev => ({
-              ...prev,
+  private setupSearch(): void {
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(term => {
+          if (!term.trim()) {
+            this.resultados.set({
+              productos: [],
+              paquetes: [],
               cargando: false,
-            }));
-          })
+              error: null,
+            });
+            return of(null);
+          }
+
+          this.resultados.update(prev => ({
+            ...prev,
+            cargando: true,
+            error: null,
+          }));
+
+          return combineLatest({
+            productos: this.productosService.getProductos().pipe(
+              take(1), // 🔑 CLAVE
+              catchError(err => {
+                console.error('❌ Error productos', err);
+                return of([]);
+              })
+            ),
+            paquetes: this.paquetesService.getPaquetes().pipe(
+              take(1), // 🔑 CLAVE
+              catchError(err => {
+                console.error('❌ Error paquetes', err);
+                return of([]);
+              })
+            ),
+          }).pipe(
+            finalize(() => {
+              // 🔑 SIEMPRE se apaga el loading
+              this.resultados.update(prev => ({
+                ...prev,
+                cargando: false,
+              }));
+            })
+          );
+        })
+      )
+      .subscribe(data => {
+        if (!data) return;
+
+        const term = this.searchTerm().toLowerCase();
+
+        const productosFiltrados = data.productos.filter(p => {
+          const marcaNombre =
+            typeof p.marca === 'string'
+              ? p.marca
+              : p.marca?.nombre ?? '';
+
+          const categoriaNombre =
+            typeof p.categoria === 'string'
+              ? p.categoria
+              : p.categoria?.nombre ?? '';
+
+          return (
+            p.nombre?.toLowerCase().includes(term) ||
+            p.descripcion?.toLowerCase().includes(term) ||
+            marcaNombre.toLowerCase().includes(term) ||
+            categoriaNombre.toLowerCase().includes(term)
+          );
+        });
+
+
+        const paquetesFiltrados = data.paquetes.filter(paq =>
+          paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
+          paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
+          paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||
+          paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
         );
-      })
-    )
-    .subscribe(data => {
-      if (!data) return;
 
-      const term = this.searchTerm().toLowerCase();
+        this.resultados.set({
+          productos: productosFiltrados.slice(0, 6),
+          paquetes: paquetesFiltrados.slice(0, 6),
+          cargando: false,
+          error: null,
+        });
 
-const productosFiltrados = data.productos.filter(p => {
-  const marcaNombre =
-    typeof p.marca === 'string'
-      ? p.marca
-      : p.marca?.nombre ?? '';
-
-  const categoriaNombre =
-    typeof p.categoria === 'string'
-      ? p.categoria
-      : p.categoria?.nombre ?? '';
-
-  return (
-    p.nombre?.toLowerCase().includes(term) ||
-    p.descripcion?.toLowerCase().includes(term) ||
-    marcaNombre.toLowerCase().includes(term) ||
-    categoriaNombre.toLowerCase().includes(term)
-  );
-});
-
-
-      const paquetesFiltrados = data.paquetes.filter(paq =>
-        paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
-        paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
-        paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||
-        paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
-      );
-
-      this.resultados.set({
-        productos: productosFiltrados.slice(0, 6),
-        paquetes: paquetesFiltrados.slice(0, 6),
-        cargando: false,
-        error: null,
       });
-
-    });
-      tap(() => console.log('🟡 loading true')),
-finalize(() => console.log('🟢 finalize ejecutado'));
-}
+    tap(() => console.log('🟡 loading true')),
+      finalize(() => console.log('🟢 finalize ejecutado'));
+  }
 
 
   // 🔍 Métodos de búsqueda
