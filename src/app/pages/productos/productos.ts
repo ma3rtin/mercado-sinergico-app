@@ -48,7 +48,8 @@ export class ProductosComponent implements OnInit {
   productoSeleccionado = signal<Producto | null>(null);
   isLoading = signal(true);
   errorMessage = signal('');
-   // 📄 SIGNALS DE PAGINACIÓN
+
+  // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
   itemsPorPagina = signal<number>(4); // 12 productos por página (óptimo)
 
@@ -254,10 +255,17 @@ export class ProductosComponent implements OnInit {
 
   // 🎨 HELPERS VISUALES
   getCategoriaNombre(producto: Producto): string {
-  return typeof producto.categoria === 'string'
-    ? producto.categoria
-    : producto.categoria?.nombre ?? 'Sin categoría';
-}
+    return typeof producto.categoria === 'string'
+      ? producto.categoria
+      : producto.categoria?.nombre ?? 'Sin categoría';
+  }
+
+  // 🆕 NUEVO: Helper para obtener el nombre de la marca
+  getMarcaNombre(producto: Producto): string {
+    return typeof producto.marca === 'string'
+      ? producto.marca
+      : producto.marca?.nombre ?? 'Sin marca';
+  }
 
   formatPrice(price?: number): string {
     if (!price) return '$0';
@@ -277,8 +285,7 @@ export class ProductosComponent implements OnInit {
     target.src = '/assets/images/placeholder-product.png';
   }
 
-
- // 📄 MÉTODOS DE PAGINACIÓN
+  // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
     this.paginaActual.set(page);
     console.log(`📄 Cambiando a página ${page}`);
@@ -289,5 +296,4 @@ export class ProductosComponent implements OnInit {
     this.paginaActual.set(1); // Resetear a página 1
     console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
-
 }

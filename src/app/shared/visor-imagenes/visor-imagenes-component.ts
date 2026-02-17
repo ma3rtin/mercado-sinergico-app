@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
@@ -8,41 +8,39 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
   imports: [CommonModule],
   templateUrl: './visor-imagenes-component.html',
 })
-export class VisorImagenesComponent implements OnInit {
+export class VisorImagenesComponent implements OnChanges {
   @Input() producto!: Producto;
   @Input() altText: string = 'Imagen del producto';
-  
+
   allImages: string[] = [];
   currentImageIndex: number = 0;
 
-  ngOnInit(): void {
-    this.loadImages();
-  }
-
+  // ✅ Solo OnChanges, no OnInit + OnChanges (evita doble ejecución)
   ngOnChanges(): void {
     this.loadImages();
   }
 
   private loadImages(): void {
-    this.allImages = [];
-    
-    // Primero agregamos la imagen principal si existe
+    const urls = new Set<string>(); // ✅ Set evita duplicados automáticamente
+
+    // Prioridad 1: imagen_url principal
     if (this.producto?.imagen_url) {
-      this.allImages.push(this.producto.imagen_url);
-    }
-    
-    // Luego agregamos las imágenes adicionales
-    if (this.producto?.imagenes && this.producto.imagenes.length > 0) {
-      const additionalImages = this.producto.imagenes.map(img => img.url);
-      this.allImages.push(...additionalImages);
+      urls.add(this.producto.imagen_url);
     }
 
-    // Si no hay imágenes, agregar placeholder
-    if (this.allImages.length === 0) {
-      this.allImages.push('/assets/images/placeholder-product.png');
+    // Prioridad 2: array imagenes[] - solo agregar si la URL no está ya
+    if (this.producto?.imagenes?.length > 0) {
+      for (const img of this.producto.imagenes) {
+        const url = img.url;
+        if (url) urls.add(url);
+      }
     }
 
-    // Resetear índice si es necesario
+    this.allImages = urls.size > 0
+      ? Array.from(urls)
+      : ['/assets/images/placeholder-product.png'];
+
+    // Resetear índice si queda fuera de rango
     if (this.currentImageIndex >= this.allImages.length) {
       this.currentImageIndex = 0;
     }
@@ -66,9 +64,9 @@ export class VisorImagenesComponent implements OnInit {
 
   previousImage(): void {
     if (this.allImages.length > 1) {
-      this.currentImageIndex = 
-        this.currentImageIndex === 0 
-          ? this.allImages.length - 1 
+      this.currentImageIndex =
+        this.currentImageIndex === 0
+          ? this.allImages.length - 1
           : this.currentImageIndex - 1;
     }
   }
@@ -77,14 +75,19 @@ export class VisorImagenesComponent implements OnInit {
     return index === this.currentImageIndex;
   }
 
-  onImageError(event: any): void {
-    console.error('Error cargando imagen:', event.target.src);
-    event.target.src = '/assets/images/placeholder-product.png';
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (!target.src.includes('placeholder')) {
+      target.src = '/assets/images/placeholder-product.png';
+    }
   }
 
-  onThumbnailError(event: any): void {
-    console.error('Error cargando miniatura:', event.target.src);
-    event.target.src = 'https://via.placeholder.com/100x100/6b7280/ffffff?text=N/A';
+  // ✅ Usa placeholder local, no via.placeholder.com
+  onThumbnailError(event: Event): void {
+    const target = event.target as HTMLImageElement;
+    if (!target.src.includes('placeholder')) {
+      target.src = '/assets/images/placeholder-product.png';
+    }
   }
 
   hasMultipleImages(): boolean {

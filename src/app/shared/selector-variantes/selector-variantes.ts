@@ -38,10 +38,12 @@ export class SelectorVariantesComponent {
 
   // 🎯 INPUTS
   producto = input.required<Producto>();
+  habilitado = input<boolean>(true);
 
   // 📤 OUTPUTS
   variantesChange = output<VariantesSeleccionadas>();
   valido = output<boolean>();
+  varianteSeleccionada = output<number | null>();
 
   // 🎨 SIGNALS - Estado interno
   seleccionadas = signal<VariantesSeleccionadas>({});
@@ -111,13 +113,40 @@ export class SelectorVariantesComponent {
     ).length;
   });
 
+  private encontrarVarianteId(): number | null {
+    const seleccionadas = this.seleccionadas();
+    const variantes = this.producto().variantes || [];
+
+    for (const variante of variantes) {
+      const coincide = variante.opciones.every(op =>
+        seleccionadas[op.caracteristicaId] === op.opcionId
+      );
+
+      if (coincide) {
+        return variante.id;
+      }
+    }
+
+    return null;
+  }
+
   constructor() {
     // Effect: Emitir cambios cuando se actualizan las variantes
     effect(() => {
       const seleccionadas = this.seleccionadas();
+      const todas = this.todasSeleccionadas();
+
       this.variantesChange.emit(seleccionadas);
-      this.valido.emit(this.todasSeleccionadas());
-    }, { allowSignalWrites: true });
+      this.valido.emit(todas);
+
+      if (todas) {
+        const varianteId = this.encontrarVarianteId();
+        this.varianteSeleccionada.emit(varianteId);
+      } else {
+        this.varianteSeleccionada.emit(null);
+      }
+    });
+
   }
 
   // 🎯 MÉTODOS - Selección de variantes
@@ -126,11 +155,14 @@ export class SelectorVariantesComponent {
    * Selecciona una opción para una característica
    */
   seleccionarOpcion(caracteristicaId: number, opcionId: number): void {
+    if (!this.habilitado()) return;
+
     this.seleccionadas.update(current => ({
       ...current,
       [caracteristicaId]: opcionId
     }));
   }
+
 
   /**
    * Verifica si una opción está seleccionada
