@@ -275,7 +275,7 @@ export class DetalleProductoSumarse implements OnInit {
       cantidad: this.quantity()
     };
 
-    console.log("🧪 Body enviado:", body);
+    console.log('🧪 Body enviado:', body);
 
     this.pedidoService
       .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
