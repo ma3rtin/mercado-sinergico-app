@@ -119,8 +119,12 @@ export class DetalleProductoSumarse implements OnInit {
   });
 
   ngOnInit(): void {
+     console.log('🚀 Iniciando DetalleProductoSumarse');
+  console.log('📍 URL params:', this.route.snapshot.paramMap);
+
     const productoId = Number(this.route.snapshot.paramMap.get('productoId'));
     const paqueteId = Number(this.route.snapshot.paramMap.get('paqueteId'));
+      console.log('🔢 IDs obtenidos:', { productoId, paqueteId });
 
     if (!productoId || !paqueteId) {
       this.errorMessage.set('Parámetros inválidos');

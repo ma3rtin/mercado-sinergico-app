@@ -40,7 +40,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
-// 📄 MÉTODOS DE PAGINACIÓN
+  // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
     this.paginaActual.set(page);
     console.log(`📄 Cambiando a página ${page}`);
@@ -60,7 +60,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   productoIdActual = signal<number | null>(null);
-
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -113,7 +112,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
         const productoId = Number(params.get('id'));
-
 
         console.log('🔄 Cambio de ruta detectado, producto ID:', productoId);
 
@@ -203,19 +201,18 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   }
 
   // 🔄 Recargar datos
-recargarDatos(): void {
-  const productoId = this.productoIdActual();
+  recargarDatos(): void {
+    const productoId = this.productoIdActual();
 
-  if (!productoId) {
-    console.error('❌ No hay productoId para recargar');
-    return;
+    if (!productoId) {
+      console.error('❌ No hay productoId para recargar');
+      return;
+    }
+
+    console.log('🔄 Recargando datos para producto ID:', productoId);
+    this.errorMessage.set('');
+    this.cargarDatos(productoId);
   }
-
-  console.log('🔄 Recargando datos para producto ID:', productoId);
-  this.errorMessage.set('');
-  this.cargarDatos(productoId);
-}
-
 
   // 🧭 NAVEGACIÓN
 
@@ -234,11 +231,14 @@ recargarDatos(): void {
       return;
     }
 
-    console.log('🧭 Navegando a sumarse:', { productoId, paqueteId });
-
-    // Navegar a la vista de "sumarse" con ambos IDs
-    this.router.navigate(['paquete/', paqueteId, 'producto', productoId], {
+    console.log('🧭 Navegando a sumarse:', {
+      productoId,
+      paqueteId,
+      url: `/paquete/${paqueteId}/producto/${productoId}`
     });
+
+    // ✅ CORREGIDO: Sin el / al final de 'paquete'
+    this.router.navigate(['/paquete', paqueteId, 'producto', productoId]);
   }
 
   /**

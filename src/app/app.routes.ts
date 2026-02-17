@@ -42,8 +42,8 @@ export const routes: Routes = [
 
       // 📦 Detalles
       { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },
-      { path: 'paquete/:paqueteId/productos', component: ProductosDelPaquete },
       { path: 'paquete/:paqueteId/producto/:productoId', component: DetalleProductoSumarse },
+      { path: 'paquete/:paqueteId/productos', component: ProductosDelPaquete },
 
       // 👤 Usuario
       { path: 'perfil', component: Perfil, canActivate: [authGuard] },
