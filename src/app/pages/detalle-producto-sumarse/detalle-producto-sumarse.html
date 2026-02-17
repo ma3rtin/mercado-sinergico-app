@@ -60,13 +60,15 @@
             @if (productoTieneVariantes()) {
             <app-selector-variantes
                 [producto]="producto()!"
+                [habilitado]="paqueteEstaActivo()"
                 (variantesChange)="onVariantesChange($event)"
                 (valido)="onVariantesValidoChange($event)"
-            ></app-selector-variantes>
+                (varianteSeleccionada)="onVarianteIdChange($event)">
+            </app-selector-variantes>
             }
 
             <!-- Cantidad -->
-            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 mt-8">
                 <button (click)="changeQuantity(-1)"
                     class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold transition-colors"
                     [disabled]="quantity() <= minQuantity()">
@@ -80,23 +82,23 @@
                 </button>
 
                 <!-- Botón Sumarse -->
-                <button
-                    (click)="addToCart()"
-                    [disabled]="!puedeAgregarAlCarrito()"
-                    [class]="'px-8 py-3 rounded-lg font-semibold transition-all ' +
-                             (puedeAgregarAlCarrito()
-                              ? 'bg-yellow-400 shadow-md hover:bg-yellow-500 text-gray-800 cursor-pointer'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60')">
-                    @if (productoTieneVariantes() && !variantesValidas()) {
-                        Elegí todas las opciones
+                <button (click)="addToCart()" [disabled]="!puedeAgregarAlCarrito()" [class]="'px-8 py-3 rounded-lg font-semibold transition-all ' +
+                    (puedeAgregarAlCarrito()
+                        ? 'bg-yellow-400 shadow-md hover:bg-yellow-500 text-gray-800 cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60')">
+
+                    @if (!paqueteEstaActivo()) {
+                    Paquete no disponible
+                    } @else if (productoTieneVariantes() && !variantesValidas()) {
+                    Elegí todas las opciones
                     } @else {
-                        Sumarse
+                    Sumarse
                     }
                 </button>
             </div>
 
             <!-- 🆕 AYUDA CONTEXTUAL (si tiene variantes y no están todas seleccionadas) -->
-            @if (productoTieneVariantes() && !variantesValidas()) {
+            @if (mostrarAyudaVariantes()) {
             <div class="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <app-icon name="Info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <p class="text-sm text-blue-800">
@@ -183,10 +185,7 @@
         <!-- Grid de paquetes -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @for (paquete of paquetesRelacionados(); track paquete.id_paquete_publicado) {
-            <app-paquete-card
-                [paquete]="paquete"
-                (cardClick)="onPaqueteClick($event)"
-            ></app-paquete-card>
+            <app-paquete-card [paquete]="paquete" (cardClick)="onPaqueteClick($event)"></app-paquete-card>
             }
         </div>
     </section>

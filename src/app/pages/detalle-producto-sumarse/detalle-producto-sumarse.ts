@@ -70,7 +70,7 @@ export class DetalleProductoSumarse implements OnInit {
   showFullDescription = signal(false);
   variantesSeleccionadas = signal<VariantesSeleccionadas>({});
   variantesValidas = signal(false);
-
+  varianteIdSeleccionada = signal<number | null>(null);
 
   private productoCargado = signal(false);
   private paqueteCargado = signal(false);
@@ -87,7 +87,10 @@ export class DetalleProductoSumarse implements OnInit {
   });
 
   puedeAgregarAlCarrito = computed(() => {
+    if (!this.paqueteEstaActivo()) return false;
+
     if (!this.productoTieneVariantes()) return true;
+
     return this.variantesValidas();
   });
 
@@ -96,6 +99,17 @@ export class DetalleProductoSumarse implements OnInit {
   faltanParaCerrar = computed(() => this.maxParticipantes() - this.participantesActuales());
   zonaDelPaquete = computed(() => this.paqueteSeleccionado()?.zona?.nombre || 'Sin zona');
   estadoDelPaquete = computed(() => this.paqueteSeleccionado()?.estado?.nombre || 'Sin estado');
+  
+  mostrarAyudaVariantes = computed(() =>
+    this.paqueteEstaActivo() &&
+    this.productoTieneVariantes() &&
+    !this.variantesValidas()
+  );
+
+  paqueteEstaActivo = computed(() => {
+    const estado = this.paqueteSeleccionado()?.estado?.nombre;
+    return estado?.toLowerCase() === 'activo';
+  });
 
   fechaCierre = computed(() => {
     const paquete = this.paqueteSeleccionado();
@@ -158,7 +172,10 @@ export class DetalleProductoSumarse implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('🟢 Producto cargado:', response);
+
+          // El producto YA trae variantes
           this.producto.set(response.producto);
+
           this.productoCargado.set(true);
           this.finalizarCarga();
         },
@@ -213,6 +230,10 @@ export class DetalleProductoSumarse implements OnInit {
       });
   }
 
+  onVarianteIdChange(id: number | null) {
+    this.varianteIdSeleccionada.set(id);
+  }
+
   onVariantesChange(variantes: VariantesSeleccionadas): void {
     this.variantesSeleccionadas.set(variantes);
   }
@@ -242,16 +263,18 @@ export class DetalleProductoSumarse implements OnInit {
       return;
     }
 
-    if (this.productoTieneVariantes() && !this.variantesValidas()) {
-      this.toast.error('Debes seleccionar todas las variantes del producto');
+    if (this.productoTieneVariantes() && !this.varianteIdSeleccionada()) {
+      this.toast.error('Debe seleccionar una variante válida');
       return;
     }
 
     const body = {
       productoId: producto.id_producto,
-      cantidad: this.quantity(),
-      variantes: this.productoTieneVariantes() ? this.variantesSeleccionadas() : undefined
+      varianteId: this.varianteIdSeleccionada(),
+      cantidad: this.quantity()
     };
+
+    console.log("🧪 Body enviado:", body);
 
     this.pedidoService
       .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
