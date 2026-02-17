@@ -1,0 +1,159 @@
+<div class="importar-productos-container">
+  <div class="header">
+    <h1>Gestión de Productos - Importar/Exportar Excel</h1>
+    <p class="subtitle">Importa productos masivamente o exporta el catálogo actual</p>
+  </div>
+
+  <!-- Sección de descarga de plantilla -->
+  <div class="section plantilla-section">
+    <div class="section-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    </div>
+    <div class="section-content">
+      <h2>Plantilla de Excel</h2>
+      <p>Descarga la plantilla con el formato correcto para importar productos</p>
+      <button class="btn btn-secondary" (click)="descargarPlantilla()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Descargar Plantilla
+      </button>
+    </div>
+  </div>
+
+  <!-- Sección de importación -->
+  <div class="section importar-section">
+    <div class="section-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15" />
+      </svg>
+    </div>
+    <div class="section-content">
+      <h2>Importar Productos</h2>
+      <p>Selecciona un archivo Excel con los productos a importar</p>
+
+      <div class="file-input-wrapper">
+        <input type="file" id="fileInput" accept=".xlsx,.xls" (change)="onFileSelected($event)"
+          [disabled]="isUploading()" />
+        <label for="fileInput" class="file-label" [class.disabled]="isUploading()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+          </svg>
+          <span *ngIf="!selectedFile()">Seleccionar archivo Excel</span>
+          <span *ngIf="selectedFile()">{{ selectedFile()!.name }}</span>
+        </label>
+      </div>
+
+      <div class="actions" *ngIf="hasFile()">
+        <button class="btn btn-primary" (click)="importarProductos()" [disabled]="isUploading()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15" />
+          </svg>
+          {{ isUploading() ? 'Importando...' : 'Importar Productos' }}
+        </button>
+        <button class="btn btn-ghost" (click)="limpiar()" [disabled]="isUploading()">
+          Cancelar
+        </button>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="progress-wrapper" *ngIf="isUploading()">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress()"></div>
+        </div>
+        <p class="progress-text">{{ uploadProgress() }}%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados de la importación -->
+  <div class="section result-section" *ngIf="hasResult()">
+    <div class="section-icon" [class.success]="importResult()!.success" [class.error]="!importResult()!.success">
+      <svg *ngIf="importResult()!.success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <svg *ngIf="!importResult()!.success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+    </div>
+    <div class="section-content">
+      <h2>Resultado de la Importación</h2>
+      <p class="result-message">{{ importResult()!.message }}</p>
+
+      <div class="result-stats" *ngIf="importResult()!.data">
+        <div class="stat success">
+          <span class="stat-number">{{ importResult()!.data!.importados }}</span>
+          <span class="stat-label">Productos Importados</span>
+        </div>
+        <div class="stat error" *ngIf="hasErrors()">
+          <span class="stat-number">{{ importResult()!.data!.errores.length }}</span>
+          <span class="stat-label">Errores</span>
+        </div>
+      </div>
+
+      <!-- Lista de errores -->
+      <div class="errors-list" *ngIf="hasErrors()">
+        <h3>Detalles de Errores</h3>
+        <div class="error-item" *ngFor="let error of importResult()!.data!.errores">
+          <div class="error-header">
+            <span class="error-fila">Fila {{ error.fila }}</span>
+            <span class="error-mensaje">{{ error.mensaje }}</span>
+          </div>
+          <details class="error-details">
+            <summary>Ver datos</summary>
+            <pre>{{ error.datos | json }}</pre>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de exportación -->
+  <div class="section exportar-section">
+    <div class="section-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12h6m-6 3h6m-6 3h6M9 21V8.25M15 8.25V21" />
+      </svg>
+    </div>
+    <div class="section-content">
+      <h2>Exportar Productos</h2>
+      <p>Descarga todos los productos actuales en formato Excel</p>
+      <button class="btn btn-primary" (click)="exportarProductos()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+        </svg>
+        Exportar Productos
+      </button>
+    </div>
+  </div>
+
+  <!-- Información útil -->
+  <div class="info-section">
+    <h3>ℹ️ Información Importante</h3>
+    <ul>
+      <li><strong>Formato:</strong> Solo se aceptan archivos .xlsx y .xls</li>
+      <li><strong>Tamaño máximo:</strong> 10 MB</li>
+      <li><strong>Campos requeridos:</strong> nombre, descripcion, precio, marca, categoria</li>
+      <li><strong>Creación automática:</strong> Las marcas y categorías se crean automáticamente si no existen</li>
+      <li><strong>Variantes:</strong> Si incluyes un SKU, se creará una variante del producto</li>
+      <li><strong>Errores:</strong> Las filas con errores se omiten, pero la importación continúa</li>
+    </ul>
+  </div>
+</div>
