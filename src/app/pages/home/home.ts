@@ -7,9 +7,10 @@ import {
   signal,
   DestroyRef,
   inject,
+  PLATFORM_ID,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -33,11 +34,13 @@ export class Home implements OnInit {
 
   private dataLoaded = false;
   private destroyRef = inject(DestroyRef);
+  private platformId = inject(PLATFORM_ID);
 
-  constructor(private paquetePublicadoService: PaquetePublicadoService) {}
+  constructor(private paquetePublicadoService: PaquetePublicadoService) { }
 
   ngOnInit(): void {
-    if (!this.dataLoaded) {
+    // ✅ Solo ejecutar en el navegador (evita timeout en prerender)
+    if (isPlatformBrowser(this.platformId) && !this.dataLoaded) {
       this.dataLoaded = true;
       this.cargarPaquetesPorCerrarse();
     }

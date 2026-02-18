@@ -5,8 +5,10 @@ import {
   signal,
   computed,
   effect,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
@@ -123,10 +125,12 @@ export class FiltrosComponent {
   });
 
   // 🎯 EFFECTS - Cargar datos cuando cambia la config
+  private platformId = inject(PLATFORM_ID);
+
   constructor() {
     effect(() => {
       const cfg = this.config();
-      if (cfg) {
+      if (cfg && isPlatformBrowser(this.platformId)) {
         this.cargarDatosFiltros();
       }
     });
@@ -144,10 +148,10 @@ export class FiltrosComponent {
       // Cargar categorías si está configurado
       if (cfg.obtenerCategorias && cfg.mostrarCategoria) {
         cfg.obtenerCategorias().subscribe({
-          next: (categorias) => {
+          next: (categorias: OpcionFiltro[]) => {
             this.categorias.set(categorias);
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error cargando categorías:', err);
           }
         });
@@ -156,10 +160,10 @@ export class FiltrosComponent {
       // Cargar marcas si está configurado
       if (cfg.obtenerMarcas && cfg.mostrarMarca) {
         cfg.obtenerMarcas().subscribe({
-          next: (marcas) => {
+          next: (marcas: OpcionFiltro[]) => {
             this.marcas.set(marcas);
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error cargando marcas:', err);
           }
         });
