@@ -39,7 +39,7 @@ export class ImportarProductosComponent {
     });
     hasResult = computed(() => this.importResult() !== null);
 
-    private readonly apiUrl = `${environment.apiUrl}/api/productos/excel`;
+    private readonly apiUrl = `${environment.apiUrl}/productos/excel`;
 
     constructor(private readonly http: HttpClient) { }
 
