@@ -73,7 +73,8 @@ export const routes: Routes = [
           { path: 'administrar-paquetes', component: AdministrarPaquetesComponent },
           { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent },
           { path: 'administrar-publicaciones', component: AdministrarPublicacionesComponent },
-          { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent }
+          { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent },
+          { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) }
         ]
       }
 
