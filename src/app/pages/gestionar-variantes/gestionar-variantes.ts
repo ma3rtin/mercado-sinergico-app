@@ -257,11 +257,11 @@ export class GestionarVariantesComponent implements OnInit {
               stockOriginal: v.stockFisico ?? null,
               precioExtraOriginal: v.precioExtra || 0,
               activoOriginal: v.activo ?? true,
-              imagenOriginal: null,
+              imagenOriginal: v.imagen_url ?? null,
               hasChanges: false,
               imagenFile: null,
               imagenPreview: null,
-              seleccionada: false, // 🆕
+              seleccionada: false,
             }));
 
           this.variantes.set(variantesConMetadata);
@@ -805,9 +805,6 @@ export class GestionarVariantesComponent implements OnInit {
     let guardadas = 0;
     let errores = 0;
 
-    // TODO: Si hay imágenes, primero subirlas a Cloudinary
-    // Por ahora, guardamos solo los datos
-
     variantesConCambios.forEach((variante) => {
       const dto: ActualizarVarianteDTO = {
         precioExtra: variante.precioExtra,
@@ -819,31 +816,30 @@ export class GestionarVariantesComponent implements OnInit {
       }
 
       this.varianteService
-        .actualizarVariante(variante.id, dto)
+        .actualizarVariante(variante.id, dto, variante.imagenFile)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => {
+          next: (varianteActualizada) => {
             guardadas++;
 
-            // Actualizar valores originales
+            // Actualizar valores originales (incluyendo imagen_url devuelta por el backend)
             this.variantes.update((current) =>
               current.map((v) =>
                 v.id === variante.id
                   ? {
-                      ...v,
-                      stockOriginal: v.stockFisico ?? null,
-                      precioExtraOriginal: v.precioExtra ?? 0,
-                      activoOriginal: v.activo ?? true,
-                      imagenOriginal: v.imagenPreview ?? null,
-                      hasChanges: false,
-                      imagenFile: null,
-                      imagenPreview: null,
-                    }
+                    ...v,
+                    stockOriginal: v.stockFisico ?? null,
+                    precioExtraOriginal: v.precioExtra ?? 0,
+                    activoOriginal: v.activo ?? true,
+                    imagenOriginal: varianteActualizada.imagen_url ?? v.imagenOriginal,
+                    hasChanges: false,
+                    imagenFile: null,
+                    imagenPreview: null,
+                  }
                   : v,
               ),
             );
 
-            // Si es la última, mostrar mensaje
             if (guardadas + errores === variantesConCambios.length) {
               this.finalizarGuardado(guardadas, errores);
             }
@@ -985,10 +981,10 @@ export class GestionarVariantesComponent implements OnInit {
           current.map((v) =>
             v.activo
               ? {
-                  ...v,
-                  stockFisico: stockNuevo,
-                  hasChanges: true,
-                }
+                ...v,
+                stockFisico: stockNuevo,
+                hasChanges: true,
+              }
               : v,
           ),
         );
