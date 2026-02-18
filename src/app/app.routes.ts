@@ -62,7 +62,8 @@ export const routes: Routes = [
           { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
           { path: 'administrar-productos', component: AdministrarProductosComponent },
           { path: 'editar-producto/:id', component: EditarProductoComponent },
-          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent }
+          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent },
+          { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) }
         ]
       }
 
