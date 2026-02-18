@@ -32,6 +32,11 @@ export class ApiService {
         return this.http.patch<T>(this.buildUrl(path), body);
     }
 
+    patchFormData<T>(path: string, formData: FormData): Observable<T> {
+        // No setear Content-Type: Angular lo detecta automáticamente con FormData
+        return this.http.patch<T>(this.buildUrl(path), formData);
+    }
+
     delete<T>(path: string): Observable<T> {
         return this.http.delete<T>(this.buildUrl(path));
     }

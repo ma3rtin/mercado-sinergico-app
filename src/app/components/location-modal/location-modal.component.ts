@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, signal, computed, ChangeDetectorRef, DestroyRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal, computed, ChangeDetectorRef, DestroyRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Localidad, LocalidadService } from '../../services/localidad/localidad.service';
@@ -18,6 +18,7 @@ export class LocationModalComponent implements OnInit {
     private readonly locationState = inject(LocationStateService);
     private readonly cdr = inject(ChangeDetectorRef);
     private readonly destroyRef = inject(DestroyRef);
+    private readonly platformId = inject(PLATFORM_ID);
 
     // 🚀 Signals
     localidades = signal<Localidad[]>([]);
@@ -39,7 +40,7 @@ export class LocationModalComponent implements OnInit {
         const filtradas = term
             ? localidades.filter(loc =>
                 loc.nombre.toLowerCase().includes(term)
-              )
+            )
             : localidades;
 
         // Ordenar alfabéticamente
@@ -49,7 +50,9 @@ export class LocationModalComponent implements OnInit {
     });
 
     ngOnInit() {
-        this.loadLocalidades();
+        if (isPlatformBrowser(this.platformId)) {
+            this.loadLocalidades();
+        }
     }
 
     private loadLocalidades() {

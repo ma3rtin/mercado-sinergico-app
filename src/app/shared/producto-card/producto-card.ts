@@ -55,7 +55,7 @@ export class ProductoCard {
   longitudMaximaDescripcion = input<number>(120);
   tipoPaquete = input<string | null>(null);
   paqueteId = input<number | null>(null);
-  navegacion = input<ProductoCardNavegacion>('detalle-seleccion'); // ✅ NUEVO
+  navegacion = input<ProductoCardNavegacion>('detalle-seleccion');
 
   // 📤 OUTPUTS
   cardClick = output<number>();
@@ -99,20 +99,44 @@ export class ProductoCard {
     return producto.descripcion.substring(0, maxLength) + '...';
   });
 
-  // Nombre de la categoría
+  // 🆕 CORREGIDO: Nombre de la categoría (maneja string u objeto)
   categoriaNombre = computed(() => {
-    return this.producto().categoria || 'Sin categoría';
+    const categoria = this.producto().categoria;
+    return typeof categoria === 'string'
+      ? categoria
+      : categoria?.nombre ?? 'Sin categoría';
   });
 
-  // Nombre de la marca
+  // 🆕 CORREGIDO: Nombre de la marca (maneja string u objeto)
   marcaNombre = computed(() => {
-    return this.producto().marca|| 'Sin marca';
+    const marca = this.producto().marca;
+    return typeof marca === 'string'
+      ? marca
+      : marca?.nombre ?? 'Sin marca';
   });
 
   // Imagen URL con fallback
-  imagenUrl = computed(() => {
-    return this.producto().imagen_url || '/assets/images/placeholder-product.png';
+imagenUrl = computed(() => {
+  const producto = this.producto();
+
+  // Log para ver qué devuelve el backend
+  console.log('🖼️ Imagen del producto:', {
+    imagen_url: producto.imagen_url,
+    imagenes: producto.imagenes
   });
+
+  // Prioridad 1: imagen_url
+  if (producto.imagen_url) return producto.imagen_url;
+
+  // Prioridad 2: primer elemento de imagenes[]
+  if (producto.imagenes?.length > 0) {
+    return producto.imagenes[0].url;
+  }
+
+  // Fallback
+  return '/assets/images/placeholder-product.png';
+});
+
 
   // Texto del botón según contexto
   textoBoton = computed(() => {
@@ -171,6 +195,7 @@ export class ProductoCard {
 
     // ✅ TIPO 1: Ir a detalle-seleccion (usuario elige paquete)
     if (nav === 'detalle-seleccion') {
+      console.log('🧭 Navegando a detalle-seleccion:', productoId);
       this.router.navigate(['/producto', productoId]);
     }
     // ✅ TIPO 2: Ir a detalle-sumarse (usuario se suma a paquete)
@@ -180,7 +205,12 @@ export class ProductoCard {
         console.warn('⚠️ PaqueteId requerido para detalle-sumarse');
         return;
       }
-      this.router.navigate(['/paquete/', paqId, 'producto', productoId]);
+      console.log('🧭 Navegando a detalle-sumarse:', {
+        paqueteId: paqId,
+        productoId: productoId,
+        url: `/paquete/${paqId}/producto/${productoId}`
+      });
+      this.router.navigate(['/paquete', paqId, 'producto', productoId]);
     }
   }
 

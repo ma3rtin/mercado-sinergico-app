@@ -1,5 +1,6 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject, effect, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs';
 import { LocationModalComponent } from './components/location-modal/location-modal.component';
 import { LocationStateService } from './services/localidad/location-state.service';
@@ -15,6 +16,7 @@ export class App {
   protected readonly title = signal('frontend');
   private locationState = inject(LocationStateService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   showLocationModal = signal(false);
 
@@ -35,7 +37,7 @@ export class App {
   }
 
   private checkLocation() {
-    if (!this.locationState.hasLocation()) {
+    if (isPlatformBrowser(this.platformId) && !this.locationState.hasLocation()) {
       this.showLocationModal.set(true);
     }
   }

@@ -44,6 +44,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log('PAQUETE COMPLETO:', this.paquete);
+
     interval(60000) // cada 1 minuto
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -82,6 +84,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       0
     );
   }
+
   get tiempoRestante(): string {
     if (!this.paquete?.fecha_fin) return '—';
 
@@ -219,6 +222,24 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       ...prod,
       id_producto: prod.id_producto ?? prod.id_producto
     });
+  }
+
+  formatVariante(variante: any): string {
+    if (!variante) return '';
+    if (typeof variante === 'string') return variante;
+
+    // Tu caso real
+    if (Array.isArray(variante.opciones)) {
+      return variante.opciones
+        .map((o: any) => {
+          const nombreCaracteristica = o.caracteristica?.nombre ?? '';
+          const nombreOpcion = o.opcion?.nombre ?? '';
+          return `${nombreCaracteristica}: ${nombreOpcion}`;
+        })
+        .join(', ');
+    }
+
+    return '';
   }
 
   onImageError(ev: Event): void {

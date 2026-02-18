@@ -1,68 +1,59 @@
 <div class="space-y-4">
-        <!-- Botones navegación -->
-        @if (allImages.length > 1) {
-    <!-- Imagen principal -->
-    <div class="relative bg-gray-50 rounded-lg overflow-hidden">
-        <img title="Imagen"
-            [src]="getCurrentImage()"
-            [alt]="altText"
-            class="w-full h-96 object-contain rounded-lg"
-            (error)="onImageError($event)">
 
-        <!-- Contador de imágenes -->
-        @if (hasMultipleImages()) {
-            <div class="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
-                {{ currentImageIndex + 1 }} / {{ getTotalImages() }}
-            </div>
-        }
+  <!-- Imagen principal - SIEMPRE visible -->
+  <div class="relative bg-gray-50 rounded-lg overflow-hidden">
+    <img
+      [src]="getCurrentImage()"
+      [alt]="altText"
+      class="w-full h-96 object-contain rounded-lg"
+      (error)="onImageError($event)"
+    />
 
-        <!-- Botones de navegación -->
-        @if (hasMultipleImages()) {
-            <button
-                (click)="previousImage()"
-                class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all hover:scale-110 w-10 h-10 flex items-center justify-center"
-                aria-label="Imagen anterior">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m14 7l-5 5m0 0l5 5"/>
-                </svg>
-
-            </button>
-
-            <button
-                (click)="nextImage()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all hover:scale-110 w-10 h-10 flex items-center justify-center"
-                aria-label="Imagen siguiente">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m10 17l5-5m0 0l-5-5"/>
-                </svg>
-
-            </button>
-        }
-    </div>
-
-
-    <!-- Indicador cuando no hay imágenes adicionales pero sí imagen principal -->
-    @if (!hasMultipleImages() && allImages.length === 1 && producto.imagen_url) {
-        <p class="text-center text-gray-500 text-sm">
-            Este producto tiene solo una imagen
-        </p>
+    <!-- Contador (solo si hay múltiples) -->
+    @if (hasMultipleImages()) {
+      <div class="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium">
+        {{ currentImageIndex + 1 }} / {{ getTotalImages() }}
+      </div>
     }
 
-        }
+    <!-- Botones de navegación (solo si hay múltiples) -->
+    @if (hasMultipleImages()) {
+      <button
+        (click)="previousImage()"
+        class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all hover:scale-110 w-10 h-10 flex items-center justify-center"
+        aria-label="Imagen anterior">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m14 7l-5 5m0 0l5 5"/>
+        </svg>
+      </button>
 
-
-    <!-- Miniaturas -->
-    @if (allImages.length > 1) {
-    <div class="grid grid-cols-4 gap-3 mt-4">
-        @for (img of allImages; track $index) {
-        <img title="{{img}}" [src]="img" [alt]="'Vista ' + ($index + 1)" (click)="changeMainImage($index)"
-            (error)="onThumbnailError($event)" [class]="
-            'w-full h-20 object-contain rounded-lg cursor-pointer border-2 ' +
-            (isThumbnailActive($index) ? 'border-secondary-dark shadow-md shadow-secondary-dark' : 'border-gray-300')
-            ">
-        }
-        @empty {
-        <p class="text-center text-gray-500">No hay imágenes disponibles</p>
-        }
-    </div>
+      <button
+        (click)="nextImage()"
+        class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all hover:scale-110 w-10 h-10 flex items-center justify-center"
+        aria-label="Imagen siguiente">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m10 17l5-5m0 0l-5-5"/>
+        </svg>
+      </button>
     }
+  </div>
+
+  <!-- Miniaturas (solo si hay múltiples imágenes) -->
+  @if (hasMultipleImages()) {
+    <div class="grid grid-cols-4 gap-3">
+      @for (img of allImages; track $index) {
+        <img
+          [src]="img"
+          [alt]="'Vista ' + ($index + 1)"
+          (click)="changeMainImage($index)"
+          (error)="onThumbnailError($event)"
+          [class]="'w-full h-20 object-contain rounded-lg cursor-pointer border-2 transition-all ' +
+            (isThumbnailActive($index)
+              ? 'border-secondary-dark shadow-md'
+              : 'border-gray-300 hover:border-gray-400')"
+        />
+      }
+    </div>
+  }
+
+</div>

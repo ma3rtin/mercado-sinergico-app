@@ -32,6 +32,7 @@ export interface ProductoVariante {
   stockFisico: number | null; // null = sinérgico, número = energético
   precioExtra?: number;
   activo: boolean;
+  imagen_url?: string | null;
   opciones: VarianteOpcion[];
   paquetesActivos?: PaqueteDisponible[];
 }
@@ -150,36 +151,36 @@ export class VarianteService extends ApiService {
  * Genera variantes automáticamente basándose en opciones seleccionadas
  * POST /api/productos/:id/variantes/generar
  */
-generarVariantes(data: GenerarVariantesDTO): Observable<any> {
-  console.log(`🎨 VarianteService - POST generar variantes para producto ${data.productoId}`);
-  console.log('🎨 Opciones a enviar:', data.opcionesDisponibles);
+  generarVariantes(data: GenerarVariantesDTO): Observable<any> {
+    console.log(`🎨 VarianteService - POST generar variantes para producto ${data.productoId}`);
+    console.log('🎨 Opciones a enviar:', data.opcionesDisponibles);
 
-  // Enviar solo el objeto que el DTO espera
-  const payload = {
-    productoId: data.productoId,
-    opcionesDisponibles: data.opcionesDisponibles
-  };
+    // Enviar solo el objeto que el DTO espera
+    const payload = {
+      productoId: data.productoId,
+      opcionesDisponibles: data.opcionesDisponibles
+    };
 
-  return this.post<any>(
-    `productos/${data.productoId}/generar-variantes`,
-    payload
-  ).pipe(
-    timeout(30000),
-    map(response => {
-      console.log('✅ Variantes generadas:', response);
-      return response;
-    }),
-    catchError(err => {
-      console.error('❌ Error generando variantes:', err);
-      console.error('❌ Error completo:', err);
-      console.error('❌ Status:', err.status);
-      console.error('❌ StatusText:', err.statusText);
-      console.error('❌ Error body:', err.error);
-      console.error('❌ Message:', err.message);
-      return throwError(() => err);
-    })
-  );
-}
+    return this.post<any>(
+      `productos/${data.productoId}/generar-variantes`,
+      payload
+    ).pipe(
+      timeout(30000),
+      map(response => {
+        console.log('✅ Variantes generadas:', response);
+        return response;
+      }),
+      catchError(err => {
+        console.error('❌ Error generando variantes:', err);
+        console.error('❌ Error completo:', err);
+        console.error('❌ Status:', err.status);
+        console.error('❌ StatusText:', err.statusText);
+        console.error('❌ Error body:', err.error);
+        console.error('❌ Message:', err.message);
+        return throwError(() => err);
+      })
+    );
+  }
 
   /**
    * Actualiza el stock de múltiples variantes en una sola operación
@@ -213,11 +214,40 @@ generarVariantes(data: GenerarVariantesDTO): Observable<any> {
    */
   actualizarVariante(
     varianteId: number,
-    data: ActualizarVarianteDTO
+    data: ActualizarVarianteDTO,
+    imagenFile?: File | null
   ): Observable<ProductoVariante> {
     console.log('🔧 Intentando PATCH a:', `productos/variantes/${varianteId}`);
-console.log('🔧 Data a enviar:', data);
+    console.log('🔧 Data a enviar:', data);
 
+    // Si hay imagen, usar FormData (multipart/form-data)
+    if (imagenFile) {
+      const formData = new FormData();
+      formData.append('imagen', imagenFile);
+      if (data.sku !== undefined) formData.append('sku', data.sku);
+      if (data.precioExtra !== undefined) formData.append('precioExtra', String(data.precioExtra));
+      if (data.activo !== undefined) formData.append('activo', String(data.activo));
+      if (data.stockFisico !== undefined && data.stockFisico !== null) {
+        formData.append('stockFisico', String(data.stockFisico));
+      }
+
+      return this.patchFormData<ProductoVariante>(
+        `productos/variantes/${varianteId}`,
+        formData
+      ).pipe(
+        timeout(30000),
+        map(response => {
+          console.log('✅ Variante actualizada con imagen:', response);
+          return response;
+        }),
+        catchError(err => {
+          console.error('❌ Error actualizando variante con imagen:', err);
+          return throwError(() => err);
+        })
+      );
+    }
+
+    // Sin imagen: enviar JSON normal
     return this.patch<ProductoVariante>(
       `productos/variantes/${varianteId}`,
       data

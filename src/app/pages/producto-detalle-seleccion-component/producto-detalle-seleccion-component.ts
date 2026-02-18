@@ -40,7 +40,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
-// 📄 MÉTODOS DE PAGINACIÓN
+  // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
     this.paginaActual.set(page);
     console.log(`📄 Cambiando a página ${page}`);
@@ -60,7 +60,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   productoIdActual = signal<number | null>(null);
-
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -114,7 +113,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       .subscribe((params) => {
         const productoId = Number(params.get('id'));
 
-
         console.log('🔄 Cambio de ruta detectado, producto ID:', productoId);
 
         if (!productoId || isNaN(productoId)) {
@@ -138,7 +136,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     this.productoSeleccionado.set(null);
 
     this.cargarProducto(productoId);
-    this.cargarPaquetes();
+    this.cargarPaquetesDelProducto(productoId);
   }
 
   // 📦 Cargar producto por ID
@@ -172,50 +170,39 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   }
 
   // 🎁 Cargar todos los paquetes
-  private cargarPaquetes(): void {
+  private cargarPaquetesDelProducto(productoId: number): void {
     this.isLoadingPaquetes.set(true);
 
     this.paquetePublicadoService
-      .getPaquetes()
+      .getByProductId(productoId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (paquetes) => {
-          console.log('✅ Paquetes cargados:', paquetes.length);
+          console.log('✅ Paquetes del producto:', paquetes.length);
           this.todosLosPaquetes.set(paquetes);
           this.isLoadingPaquetes.set(false);
         },
         error: (error) => {
-          console.error('❌ Error cargando paquetes:', error);
+          console.error('❌ Error cargando paquetes del producto:', error);
           this.isLoadingPaquetes.set(false);
-
-          let mensaje = 'Error al cargar los paquetes.';
-
-          if (error.status === 0) {
-            mensaje = 'No se pudo conectar con el servidor.';
-          } else if (error.status === 404) {
-            mensaje = 'No se encontraron paquetes.';
-          }
-
-          this.errorMessage.set(mensaje);
           this.todosLosPaquetes.set([]);
         },
       });
   }
 
   // 🔄 Recargar datos
-recargarDatos(): void {
-  const productoId = this.productoIdActual();
+  recargarDatos(): void {
+    const productoId = this.productoIdActual();
 
-  if (!productoId) {
-    console.error('❌ No hay productoId para recargar');
-    return;
+    if (!productoId) {
+      console.error('❌ No hay productoId para recargar');
+      return;
+    }
+
+    console.log('🔄 Recargando datos para producto ID:', productoId);
+    this.errorMessage.set('');
+    this.cargarDatos(productoId);
   }
-
-  console.log('🔄 Recargando datos para producto ID:', productoId);
-  this.errorMessage.set('');
-  this.cargarDatos(productoId);
-}
-
 
   // 🧭 NAVEGACIÓN
 
@@ -234,11 +221,14 @@ recargarDatos(): void {
       return;
     }
 
-    console.log('🧭 Navegando a sumarse:', { productoId, paqueteId });
-
-    // Navegar a la vista de "sumarse" con ambos IDs
-    this.router.navigate(['paquete/', paqueteId, 'producto', productoId], {
+    console.log('🧭 Navegando a sumarse:', {
+      productoId,
+      paqueteId,
+      url: `/paquete/${paqueteId}/producto/${productoId}`
     });
+
+    // ✅ CORREGIDO: Sin el / al final de 'paquete'
+    this.router.navigate(['/paquete', paqueteId, 'producto', productoId]);
   }
 
   /**
