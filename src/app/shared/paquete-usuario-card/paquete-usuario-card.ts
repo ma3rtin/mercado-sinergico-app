@@ -185,7 +185,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id // por si viene directo del backend
     };
 
     this.aumentarCantidad.emit(limpio);
@@ -196,7 +197,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id
     };
 
     this.disminuirCantidad.emit(limpio);
@@ -218,8 +220,9 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   onEliminarProducto(prod: ProductoEnPedido): void {
     this.eliminarProducto.emit({
       ...prod,
-      id_producto: prod.id_producto ?? prod.id_producto
-    });
+      id_producto: prod.id_producto ?? prod.id_producto,
+      id_detalle: (prod as any).id_detalle ?? (prod as any).id
+    } as any);
   }
 
   formatVariante(variante: any): string {

@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
+import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
@@ -29,16 +30,6 @@ import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-
 // ------------------------------
 // MODELOS INTERNOS
 // ------------------------------
-
-type ProductoEnPedido = {
-  id_producto: number;
-  nombre: string;
-  precio: number;
-  precioConDescuento?: number;
-  imagen_url?: string;
-  cantidad: number;
-  variante?: string | null;
-};
 
 interface PedidoDelUsuario extends Pedido {
   expandido?: boolean;
@@ -138,6 +129,7 @@ export class MisPedidosComponent implements OnInit {
           const precioConDescuento = precio - (precio * descuento / 100);
 
           return {
+            id_detalle: x.id, // <-- agregamos el id real del detalle
             id_producto: x.productoId,
             nombre: x.producto!.nombre,
             precio,
@@ -190,7 +182,7 @@ export class MisPedidosComponent implements OnInit {
     // 1. Reemplazar el array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
-        p.id_producto === producto.id_producto
+        p.id_detalle === producto.id_detalle
           ? { ...p, cantidad: p.cantidad + 1 }
           : p
     );
@@ -200,20 +192,20 @@ export class MisPedidosComponent implements OnInit {
 
     // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
-      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+      (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
     // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      actualizado.id_producto,
-      { cantidad: actualizado.cantidad, variante: actualizado.variante }
+      actualizado.id_detalle,
+      { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
         // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
-            p.id_producto === producto.id_producto
+            p.id_detalle === producto.id_detalle
               ? { ...p, cantidad: producto.cantidad }
               : p
         );
@@ -228,7 +220,7 @@ export class MisPedidosComponent implements OnInit {
     // 1. Reemplazar el array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
-        p.id_producto === producto.id_producto
+        p.id_detalle === producto.id_detalle
           ? { ...p, cantidad: p.cantidad - 1 }
           : p
     );
@@ -238,20 +230,20 @@ export class MisPedidosComponent implements OnInit {
 
     // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
-      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+      (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
     // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      actualizado.id_producto,
-      { cantidad: actualizado.cantidad, variante: actualizado.variante }
+      actualizado.id_detalle,
+      { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
         // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
-            p.id_producto === producto.id_producto
+            p.id_detalle === producto.id_detalle
               ? { ...p, cantidad: producto.cantidad }
               : p
         );
@@ -326,12 +318,12 @@ export class MisPedidosComponent implements OnInit {
       if (!result.isConfirmed) return;
 
       this.pedidoService
-        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
+        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_detalle)
         .subscribe({
           next: () => {
             pedido.productosSeleccionados =
               pedido.productosSeleccionados.filter(
-                p => p.id_producto !== producto.id_producto
+                p => p.id_detalle !== producto.id_detalle
               );
 
             this.recalcularPedido(pedido);

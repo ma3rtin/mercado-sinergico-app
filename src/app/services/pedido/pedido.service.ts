@@ -23,21 +23,21 @@ export class PedidoService extends ApiService {
 
   actualizarCantidad(
     pedidoId: number,
-    productoId: number,
-    body: { cantidad: number; variante?: string | null }
+    detalleId: number,
+    body: { cantidad: number }
   ): Observable<PedidoActualizado> {
     return this.patch<PedidoActualizado>(
-      `${this.apiUrl}/${pedidoId}/producto/${productoId}`,
+      `${this.apiUrl}/${pedidoId}/detalle/${detalleId}/cantidad`,
       body
     );
   }
 
   eliminarProductoDelPedido(
     pedidoId: number,
-    productoId: number
+    detalleId: number
   ): Observable<void> {
     return this.delete<void>(
-      `${this.apiUrl}/${pedidoId}/producto/${productoId}`
+      `${this.apiUrl}/${pedidoId}/detalle/${detalleId}`
     );
   }
 

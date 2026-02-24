@@ -189,7 +189,7 @@
             Estás sumado con:
           </h4>
 
-          @for (producto of productosEnPedido; track producto.id_producto) {
+          @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
 
           <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
 
