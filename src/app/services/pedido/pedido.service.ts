@@ -49,7 +49,7 @@ export class PedidoService extends ApiService {
   }
 
   salirDelPaquete(paqueteId: number): Observable<void> {
-    return this.get<void>(`${this.apiUrl}/bajarse/${paqueteId}`);
+    return this.delete<void>(`${this.apiUrl}/${paqueteId}/bajarse`);
   }
 
   iniciarCheckout(pedidoId: number): Observable<any> {

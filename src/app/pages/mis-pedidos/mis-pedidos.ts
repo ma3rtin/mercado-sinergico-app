@@ -264,13 +264,13 @@ export class MisPedidosComponent implements OnInit {
 
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
 
-  const esUltimoProducto = pedido.productosSeleccionados.length === 1;
+    const esUltimoProducto = pedido.productosSeleccionados.length === 1;
 
-  // 🧨 CASO B: último producto → eliminar pedido completo
-  if (esUltimoProducto) {
-    Swal.fire({
-      title: '¿Eliminar pedido completo?',
-      html: `
+    // 🧨 CASO B: último producto → eliminar pedido completo
+    if (esUltimoProducto) {
+      Swal.fire({
+        title: '¿Eliminar pedido completo?',
+        html: `
         <p class="mb-2">
           <strong>${producto.nombre}</strong> es el único producto del pedido.
         </p>
@@ -279,70 +279,70 @@ export class MisPedidosComponent implements OnInit {
           y saldrás del paquete.
         </p>
       `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar pedido',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+
+        const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
+
+        if (!paqueteId) {
+          this.toast.error('No se pudo identificar el paquete.');
+          return;
+        }
+
+        // 👉 reutilizamos la lógica existente
+        this.pedidoService
+          .salirDelPaquete(paqueteId)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.pedidos.set(
+                this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
+              );
+              this.toast.success('Pedido eliminado y salida del paquete confirmada.');
+            },
+            error: () => {
+              this.toast.error('No se pudo eliminar el pedido.');
+            }
+          });
+      });
+
+      return;
+    }
+
+    // 📦 CASO A: hay más productos → eliminar solo el producto
+    Swal.fire({
+      title: '¿Eliminar producto?',
+      text: producto.nombre,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar pedido',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#d33'
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
 
-      const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
-
-      if (!paqueteId) {
-        this.toast.error('No se pudo identificar el paquete.');
-        return;
-      }
-
-      // 👉 reutilizamos la lógica existente
       this.pedidoService
-        .salirDelPaquete(paqueteId)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
         .subscribe({
           next: () => {
-            this.pedidos.set(
-              this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
-            );
-            this.toast.success('Pedido eliminado y salida del paquete confirmada.');
+            pedido.productosSeleccionados =
+              pedido.productosSeleccionados.filter(
+                p => p.id_producto !== producto.id_producto
+              );
+
+            this.recalcularPedido(pedido);
+            this.toast.success('Producto eliminado.');
           },
           error: () => {
-            this.toast.error('No se pudo eliminar el pedido.');
+            this.toast.error('No se pudo eliminar el producto.');
           }
         });
     });
-
-    return;
   }
-
-  // 📦 CASO A: hay más productos → eliminar solo el producto
-  Swal.fire({
-    title: '¿Eliminar producto?',
-    text: producto.nombre,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then(result => {
-    if (!result.isConfirmed) return;
-
-    this.pedidoService
-      .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
-      .subscribe({
-        next: () => {
-          pedido.productosSeleccionados =
-            pedido.productosSeleccionados.filter(
-              p => p.id_producto !== producto.id_producto
-            );
-
-          this.recalcularPedido(pedido);
-          this.toast.success('Producto eliminado.');
-        },
-        error: () => {
-          this.toast.error('No se pudo eliminar el producto.');
-        }
-      });
-  });
-}
 
 
   // ------------------------------
@@ -385,30 +385,30 @@ export class MisPedidosComponent implements OnInit {
   }
 
   finalizarCompra(pedido: PedidoDelUsuario) {
-  const pedidoId = pedido.id_pedido;
+    const pedidoId = pedido.id_pedido;
 
-  if (!pedidoId) {
-    this.toast.error('Error: ID de pedido no válido');
-    return;
+    if (!pedidoId) {
+      this.toast.error('Error: ID de pedido no válido');
+      return;
+    }
+
+    // Opcional: Guardar en localStorage para verificar después
+    localStorage.setItem('pedido_en_pago', pedidoId.toString());
+
+    // Llamar al servicio para obtener la preferencia
+    this.pedidoService.iniciarCheckout(pedidoId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          // Redirigir a MercadoPago
+          window.location.href = response.checkoutUrl.checkoutUrl;
+        },
+        error: (err) => {
+          this.toast.error('No se pudo iniciar el pago');
+          console.error('Error al crear preferencia:', err);
+        }
+      });
   }
-
-  // Opcional: Guardar en localStorage para verificar después
-  localStorage.setItem('pedido_en_pago', pedidoId.toString());
-
-  // Llamar al servicio para obtener la preferencia
-  this.pedidoService.iniciarCheckout(pedidoId)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        // Redirigir a MercadoPago
-        window.location.href = response.checkoutUrl.checkoutUrl;
-      },
-      error: (err) => {
-        this.toast.error('No se pudo iniciar el pago');
-        console.error('Error al crear preferencia:', err);
-      }
-    });
-}
   // ------------------------------
   // HELPERS
   // ------------------------------
