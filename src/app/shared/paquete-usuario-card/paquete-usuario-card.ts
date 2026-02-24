@@ -204,9 +204,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   get puedeSalirDelPaquete(): boolean {
     const estado = this.pedido?.estado?.nombre?.toLowerCase();
-    return estado === 'pendiente'
-      || estado === 'confirmado'
-      || estado === 'pagado';
+    return estado === 'pendiente';
   }
 
   onSalirDelPaquete(): void {
