@@ -116,115 +116,14 @@
                     <p class="text-red-600 font-medium">{{ error() }}</p>
                 </div>
             } @else if (paquetes().length > 0) {
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 gap-4">
                     @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                        <div class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
-                            <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
-                                <!-- Contenido principal -->
-                                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1">
-                                    <!-- Imagen -->
-                                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border-2 border-gray-200 group-hover:border-primary transition-colors mx-auto sm:mx-0">
-                                        @if (paquete.paqueteBase?.imagen_url) {
-                                            <img [src]="paquete.paqueteBase?.imagen_url"
-                                                 [alt]="paquete.paqueteBase?.nombre"
-                                                 class="w-full h-full object-cover" />
-                                        } @else {
-                                            <div class="w-full h-full flex items-center justify-center">
-                                                <app-icon name="package" size="48" class="text-gray-400" />
-                                            </div>
-                                        }
-                                    </div>
-
-                                    <!-- Info del paquete -->
-                                    <div class="flex-1 min-w-0 w-full">
-                                        <h4 class="text-lg sm:text-xl font-display text-gray-900 mb-3 truncate group-hover:text-primary transition-colors text-center sm:text-left">
-                                            {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-                                        </h4>
-
-                                        <!-- Indicadores principales -->
-                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
-                                            <!-- 1. Días restantes (PRIORIDAD 1) -->
-                                            <div class="flex items-center gap-2">
-                                                <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ' + getUrgenciaBackgroundColor(getDiasRestantes(paquete.fecha_fin))">
-                                                    <app-icon name="clock" size="20" class="text-white" />
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs text-gray-500 truncate">Cierre</p>
-                                                    <p [class]="'text-sm font-bold truncate ' + getUrgenciaColor(getDiasRestantes(paquete.fecha_fin))">
-                                                        @if (getDiasRestantes(paquete.fecha_fin) === 0) {
-                                                            Hoy
-                                                        } @else if (getDiasRestantes(paquete.fecha_fin) === 1) {
-                                                            Mañana
-                                                        } @else if (getDiasRestantes(paquete.fecha_fin) < 0) {
-                                                            Cerrado
-                                                        } @else {
-                                                            {{ getDiasRestantes(paquete.fecha_fin) }} días
-                                                        }
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <!-- 2. Stock (PRIORIDAD 2) -->
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                                    <app-icon name="package" size="20" class="text-blue-600" />
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs text-gray-500 truncate">Stock</p>
-                                                    <p class="text-sm font-bold text-gray-900 truncate">
-                                                        {{ paquete.cant_productos_reservados || 0 }}/{{ paquete.cant_productos || 0 }}
-                                                    </p>
-                                                    <!-- Barra de progreso -->
-                                                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                                                        <div class="bg-blue-600 h-1.5 rounded-full transition-all"
-                                                             [style.width]="getStockPercentage(paquete) + '%'">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- 3. Usuarios (PRIORIDAD 3) -->
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                    <app-icon name="users" size="20" class="text-purple-600" />
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs text-gray-500 truncate">Usuarios</p>
-                                                    <p class="text-sm font-bold text-gray-900 truncate">{{ paquete.cant_usuarios_registrados || 0 }}</p>
-                                                </div>
-                                            </div>
-
-                                            <!-- 4. Estado (PRIORIDAD 4) -->
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                                    <span [class]="'w-3 h-3 rounded-full ' + getStatusDotColor(paquete.estado)"></span>
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="text-xs text-gray-500 truncate">Estado</p>
-                                                    <p [class]="'text-sm font-bold truncate ' + getStatusColor(paquete.estado)">
-                                                        {{ paquete.estado.nombre || 'N/A' }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Info secundaria -->
-                                        <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
-                                            @if (paquete.zona?.nombre) {
-                                                <span class="flex items-center gap-1.5">
-                                                    <app-icon name="mapPin" size="16" class="flex-shrink-0" />
-                                                    <span class="truncate">{{ paquete.zona?.nombre }}</span>
-                                                </span>
-                                            }
-                                            <span class="flex items-center gap-1.5">
-                                                <app-icon name="calendar" size="16" class="flex-shrink-0" />
-                                                <span class="truncate">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <app-admin-paquete-card
+                            [paquete]="paquete"
+                            (finalize)="finalizarPaquete($event)"
+                            (refund)="reembolsarPaquete($event)"
+                            (notify)="notificarCierre($event)"
+                        />
                     }
                 </div>
             } @else {

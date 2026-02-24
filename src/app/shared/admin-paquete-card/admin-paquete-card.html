@@ -1,0 +1,70 @@
+<div class="group bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col lg:flex-row items-start lg:items-center gap-6 hover:shadow-md transition-all duration-300">
+    <!-- Miniatura -->
+    <div class="w-full lg:w-24 h-48 lg:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
+        @if (paquete.paqueteBase?.imagen_url || paquete.imagen_url) {
+            <img [src]="paquete.paqueteBase?.imagen_url || paquete.imagen_url" [alt]="paquete.paqueteBase?.nombre || 'Paquete'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        } @else {
+            <div class="w-full h-full flex items-center justify-center text-gray-300">
+                <app-icon name="package" size="32" />
+            </div>
+        }
+    </div>
+
+    <!-- Info Principal -->
+    <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+            <span [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
+                {{ paquete.estado.nombre || 'Sin Estado' }}
+            </span>
+            <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+            <span class="text-xs text-gray-400 flex items-center gap-1">
+                <app-icon name="mapPin" size="12" />
+                {{ paquete.zona?.nombre || 'Sin Zona' }}
+            </span>
+        </div>
+        <h3 class="text-lg font-display text-gray-900 truncate mb-2 group-hover:text-primary transition-colors">
+            {{ paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
+        </h3>
+        
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <!-- Cierre -->
+            <div class="flex items-center gap-2 text-gray-600">
+                <app-icon name="calendar" size="16" [class]="getUrgenciaColor()" />
+                <span class="text-xs">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
+                <span [class]="'text-[10px] font-bold px-1.5 py-0.5 rounded ' + getUrgenciaBg() + ' ' + getUrgenciaColor()">
+                    {{ getDiasRestantes() <= 0 ? 'Expirado' : getDiasRestantes() + 'd' }}
+                </span>
+            </div>
+            <!-- Usuarios -->
+            <div class="flex items-center gap-2 text-gray-600">
+                <app-icon name="users" size="16" class="text-blue-500" />
+                <span class="font-medium text-gray-900 text-xs">{{ paquete.cant_usuarios_registrados || 0 }}</span>
+                <span class="text-[10px]">Usuarios</span>
+            </div>
+            <!-- Reservados -->
+            <div class="flex items-center gap-2 text-gray-600">
+                <app-icon name="package" size="16" class="text-primary" />
+                <span class="font-medium text-gray-900 text-xs">{{ paquete.cant_productos_reservados || 0 }}/{{ paquete.cant_productos || 0 }}</span>
+                <span class="text-[10px]">Reservados</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex flex-wrap lg:flex-nowrap items-center gap-3 w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-none">
+        <!-- Campanita -->
+        <button (click)="onNotify($event)" class="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Notificar">
+            <app-icon name="bell" size="18" />
+        </button>
+
+        <!-- Reembolsar como palabra -->
+        <button (click)="onRefund($event)" class="px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors uppercase tracking-tight">
+            Reembolsar
+        </button>
+        
+        <!-- Finalizar -->
+        <app-button variant="secondary" size="sm" (buttonClick)="onFinalize()">
+            Finalizar Paquete
+        </app-button>
+    </div>
+</div>

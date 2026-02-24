@@ -55,7 +55,7 @@ interface ImageSlot {
 export class CrearProductoComponent implements OnInit {
   // 🧩 Inyecciones modernas
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  public router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private plantillaService = inject(PlantillaService);
   private marcaService = inject(MarcaService);
