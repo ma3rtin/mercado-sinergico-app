@@ -65,20 +65,32 @@ export class MisPedidosComponent implements OnInit {
   pedidos = signal<PedidoDelUsuario[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
-  terminoBusqueda = signal<string>('');   // <-- nuevo
+  terminoBusqueda = signal<string>('');
+  estadoFiltro = signal<string>('Todos');
 
   // 👉 NO ROMPE NADA del HTML porque tu HTML usa pedidosFiltrados()
   pedidosFiltrados = computed(() => {
     const lista = this.pedidos();
     const t = this.terminoBusqueda().toLowerCase();
+    const estado = this.estadoFiltro();
 
-    if (!t) return lista;
+    let filtrados = lista;
 
-    return lista.filter(p =>
-      p.id_pedido?.toString().includes(t) ||
-      p.estado?.nombre?.toLowerCase().includes(t) ||
-      p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
-    );
+    // Filtro por estado
+    if (estado !== 'Todos') {
+      filtrados = filtrados.filter(p => p.estado?.nombre === estado);
+    }
+
+    // Filtro por texto
+    if (t) {
+      filtrados = filtrados.filter(p =>
+        p.id_pedido?.toString().includes(t) ||
+        p.estado?.nombre?.toLowerCase().includes(t) ||
+        p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
+      );
+    }
+
+    return filtrados;
   });
 
 
