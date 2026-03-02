@@ -54,7 +54,7 @@
                 <app-icon name="grid" size="24" class="text-secondary" />
                 Administración
             </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
                 <app-button
                     variant="tertiary"
                     (click)="navigateToAdminProducts()"
@@ -73,6 +73,14 @@
                 </app-button>
                 <app-button
                     variant="tertiary"
+                    (click)="navigateToAdminPublicaciones()"
+                    size="lg"
+                    [fullWidth]="true"
+                    [iconStart]="'fileText'">
+                    Administrar publicaciones
+                </app-button>
+                <app-button
+                    variant="tertiary"
                     (click)="navigateToAdminPostPackages()"
                     size="lg"
                     [fullWidth]="true"
@@ -84,7 +92,7 @@
                     (click)="navigateToAdminTemplates()"
                     size="lg"
                     [fullWidth]="true"
-                    [iconStart]="'´layers'">
+                    [iconStart]="'layers'">
                     Administrar plantillas
                 </app-button>
             </div>
@@ -118,7 +126,9 @@
             } @else if (paquetes().length > 0) {
                 <div class="space-y-4">
                     @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                        <div class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
+                        <div
+                            (click)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)"
+                            class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all cursor-pointer">
                             <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
                                 <!-- Contenido principal -->
                                 <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1">

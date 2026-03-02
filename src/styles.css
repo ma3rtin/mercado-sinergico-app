@@ -1,6 +1,5 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 @import "tailwindcss";
-/* ❌ Ya no necesitas esto: @import 'ngx-toastr/toastr'; */
 
 @font-face {
     font-family: 'Righteous';
@@ -18,30 +17,150 @@
     font-display: swap;
 }
 
-@theme {
-    /*celeste*/
-    --color-primary: #71A8D9;
+:root {
+    /* 🔵 Capa 1 — Primitivos */
+    --color-celeste: #71A8D9;
+    --color-celeste-dark: #4b87bd;
+    --color-celeste-light: #D9E9F6;
+    --color-azul: #2E608C;
+    --color-azul-light: #E6F0F8;
+    --color-amarillo: #FFD562;
+    --color-amarillo-dark: #D28509;
+    --color-naranja: #E05C00;
+    --color-gris-fondo: #F9FAFBF;
+    --color-gris-superficie: #F3F4F6;
+    --color-gris-borde: #D1D5DB;
+    --color-blanco: #FFFFFF;
+    --color-negro: #000000;
 
-    /*azul*/
-    --color-secondary: #2E608C;
+    /* 🧩 Capa 2 — Tokens Semánticos */
+    /* Marca */
+    --brand-primary: var(--color-celeste);
+    --brand-primary-hover: var(--color-celeste-dark);
+    --brand-primary-light: var(--color-celeste-light);
+    --brand-secondary: var(--color-azul);
+    --brand-secondary-light: var(--color-azul-light);
+    --brand-cta: var(--color-amarillo);
+    --brand-cta-hover: var(--color-amarillo-dark);
 
-    /*azul oscuro*/
-    --color-primary-dark: #4b87bd;
+    /* Feedback */
+    --success: #4CAF50;
+    --success-dark: #2E7D32;
+    --success-light: #f0fdf4;
+    --error: #B92905;
+    --error-dark: #8A1F03;
+    --error-light: #fef2f2;
+    --warning: var(--color-naranja);
+    --warning-light: #FFF0E6;
+    --info: var(--color-azul);
+    --info-light: #eff6ff;
 
-    /*naranja*/
-    --color-secondary-dark: #D28509;
+    /* Superficies */
+    --bg-app: var(--color-gris-fondo);
+    --bg-surface: var(--color-blanco);
+    --bg-raised: var(--color-gris-superficie);
+    --border-default: var(--color-gris-borde);
+    --border-focus: var(--color-celeste);
+    --overlay: rgba(0, 0, 0, 0.5);
 
-    /*celeste claro*/
-    --color-primary-light: #D9E9F6;
+    /* Texto */
+    --text-primary: #000000;
+    --text-secondary: #4B5563;
+    /* gray-600 */
+    --text-muted: #9CA3AF;
+    /* gray-400 */
+    --text-on-dark: #FFFFFF;
+    --text-on-light: #000000;
 
-    /*azul claro*/
-    --color-secondary-light: #E6F0F8;
+    /* Interacciones */
+    --interactive-primary: var(--brand-cta);
+    --interactive-primary-hover: var(--brand-cta-hover);
+    --interactive-secondary: var(--brand-primary);
+    --interactive-ghost: transparent;
+    --interactive-ghost-hover: var(--brand-secondary-light);
+    --interactive-selected: var(--brand-primary-light);
 
-    --color-accent: #FFD562;
-    --color-accent-dark: #FFB800;
+    /* Status Badges */
+    --status-active-bg: #f0fdf4;
+    /* success-light */
+    --status-active-text: #166534;
+    /* success-dark */
+    --status-pending-bg: #fffbeb;
+    /* yellow-50 */
+    --status-pending-text: #92400e;
+    /* yellow-800 */
+    --status-closed-bg: #fef2f2;
+    /* error-light */
+    --status-closed-text: #991b1b;
+    /* error-dark */
+    --status-info-bg: #eff6ff;
+    /* info-light */
+    --status-info-text: #1e40af;
+    /* info-dark */
+    --status-neutral-bg: #f3f4f6;
+    /* gray-100 */
+    --status-neutral-text: #374151;
+    /* gray-700 */
 
     --font-display: "Righteous", ui-sans-serif, system-ui, sans-serif;
     --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+    /* Mapeo de tokens a nombres de Tailwind */
+    --color-brand-primary: var(--brand-primary);
+    --color-brand-primary-hover: var(--brand-primary-hover);
+    --color-brand-primary-light: var(--brand-primary-light);
+    --color-brand-secondary: var(--brand-secondary);
+    --color-brand-secondary-light: var(--brand-secondary-light);
+    --color-brand-cta: var(--brand-cta);
+    --color-brand-cta-hover: var(--brand-cta-hover);
+
+    --color-success: var(--success);
+    --color-success-dark: var(--success-dark);
+    --color-success-light: var(--success-light);
+    --color-error: var(--error);
+    --color-error-dark: var(--error-dark);
+    --color-error-light: var(--error-light);
+    --color-warning: var(--warning);
+    --color-warning-light: var(--warning-light);
+    --color-info: var(--info);
+    --color-info-light: var(--info-light);
+
+    --color-bg-app: var(--bg-app);
+    --color-bg-surface: var(--bg-surface);
+    --color-bg-raised: var(--bg-raised);
+    --color-border-default: var(--border-default);
+    --color-border-focus: var(--border-focus);
+
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-text-muted: var(--text-muted);
+    --color-text-on-dark: var(--text-on-dark);
+    --color-text-on-light: var(--text-on-light);
+
+    --color-interactive-primary: var(--interactive-primary);
+    --color-interactive-primary-hover: var(--interactive-primary-hover);
+    --color-interactive-secondary: var(--interactive-secondary);
+
+    --color-status-active-bg: var(--status-active-bg);
+    --color-status-active-text: var(--status-active-text);
+    --color-status-pending-bg: var(--status-pending-bg);
+    --color-status-pending-text: var(--status-pending-text);
+    --color-status-closed-bg: var(--status-closed-bg);
+    --color-status-closed-text: var(--status-closed-text);
+    --color-status-info-bg: var(--status-info-bg);
+    --color-status-info-text: var(--status-info-text);
+    --color-status-neutral-bg: var(--status-neutral-bg);
+    --color-status-neutral-text: var(--status-neutral-text);
+
+    --font-display: var(--font-display);
+    --font-body: var(--font-body);
+
+    /* Mantener compatibilidad si es necesario, pero preferir nuevos tokens */
+    --color-primary: var(--brand-primary);
+    --color-secondary: var(--brand-secondary);
+    --color-accent: var(--brand-cta);
 }
 
 p {
@@ -72,20 +191,20 @@ p {
 
 /* Success toast */
 [data-sonner-toast][data-type="success"] {
-    background-color: #f0fdf4 !important;
-    border: 1px solid #86efac !important;
-    color: #166534 !important;
+    background-color: var(--success-light) !important;
+    border: 1px solid var(--success) !important;
+    color: var(--success-dark) !important;
 }
 
 /* Error toast */
 [data-sonner-toast][data-type="error"] {
-    background-color: #fef2f2 !important;
-    border: 1px solid #fca5a5 !important;
-    color: #991b1b !important;
+    background-color: var(--error-light) !important;
+    border: 1px solid var(--error) !important;
+    color: var(--error-dark) !important;
 }
 
 .page-container {
-    @apply min-h-screen bg-gray-50 font-body;
+    @apply min-h-screen bg-bg-app font-body;
 }
 
 .page-content {
@@ -97,11 +216,11 @@ p {
 }
 
 .page-title {
-    @apply font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4;
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-text-primary mb-3 sm:mb-4;
 }
 
 .page-subtitle {
-    @apply text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4;
+    @apply text-sm sm:text-base lg:text-lg text-text-secondary max-w-2xl mx-auto px-4;
 }
 
 .page-layout {
@@ -110,21 +229,21 @@ p {
 
 /* Warning toast */
 [data-sonner-toast][data-type="warning"] {
-    background-color: #fefce8 !important;
-    border: 1px solid #fde047 !important;
-    color: #854d0e !important;
+    background-color: var(--warning-light) !important;
+    border: 1px solid var(--warning) !important;
+    color: var(--warning) !important;
 }
 
 /* Info toast */
 [data-sonner-toast][data-type="info"] {
-    background-color: #eff6ff !important;
-    border: 1px solid #93c5fd !important;
-    color: #1e40af !important;
+    background-color: var(--info-light) !important;
+    border: 1px solid var(--info) !important;
+    color: var(--brand-secondary) !important;
 }
 
 /* Loading toast */
 [data-sonner-toast][data-type="loading"] {
-    background-color: #f3f4f6 !important;
-    border: 1px solid #d1d5db !important;
-    color: #374151 !important;
+    background-color: var(--bg-raised) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-secondary) !important;
 }

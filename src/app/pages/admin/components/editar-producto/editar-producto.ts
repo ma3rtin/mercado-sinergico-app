@@ -77,7 +77,7 @@ export class EditarProductoComponent implements OnInit {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
-    [TipoPaquete.ENERGICO]: 'ENERGETICO',
+    [TipoPaquete.ENERGICO]: 'Enérgico',
     [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
   };
 

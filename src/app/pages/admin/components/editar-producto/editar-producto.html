@@ -31,14 +31,14 @@
             type="button"
             (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
             [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-              (tipoProducto() === 'ENERGETICO'
+              (tipoProducto() === TipoPaquete.ENERGICO
                 ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
                 : 'border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
           >
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-3">
                 <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                  (tipoProducto() === 'ENERGETICO' ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
+                  (tipoProducto() === TipoPaquete.ENERGICO ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
                   <app-icon name="Zap" size="24"></app-icon>
                 </div>
                 <div class="text-left">
@@ -46,7 +46,7 @@
                   <p class="text-xs text-gray-500">Con stock físico</p>
                 </div>
               </div>
-              @if (tipoProducto() === 'ENERGETICO') {
+              @if (tipoProducto() === TipoPaquete.ENERGICO) {
                 <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
               }
             </div>
@@ -60,14 +60,14 @@
             type="button"
             (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
             [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-              (tipoProducto() === 'SINERGICO'
+              (tipoProducto() === TipoPaquete.SINERGICO
                 ? 'border-primary bg-blue-50 ring-2 ring-offset-2'
                 : 'border-gray-300 hover:border-primary hover:bg-blue-50')"
           >
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-3">
                 <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                  (tipoProducto() === 'SINERGICO' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
+                  (tipoProducto() === TipoPaquete.SINERGICO ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
                   <app-icon name="users" size="24"></app-icon>
                 </div>
                 <div class="text-left">
@@ -75,7 +75,7 @@
                   <p class="text-xs text-gray-500">Bajo pedido</p>
                 </div>
               </div>
-              @if (tipoProducto() === 'SINERGICO') {
+              @if (tipoProducto() === TipoPaquete.SINERGICO) {
                 <app-icon name="Check" size="24" class="text-primary"></app-icon>
               }
             </div>
@@ -94,13 +94,13 @@
                 ℹ️ Información importante
               </p>
               <p class="text-xs text-black">
-                @if (tipoProducto() === 'ENERGETICO' && !selectedTemplate()) {
+                @if (tipoProducto() === TipoPaquete.ENERGICO && !selectedTemplate()) {
                   Este producto tiene control de stock general. Si tiene plantilla, el stock se maneja por variantes.
                 }
-                @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+                @if (tipoProducto() === TipoPaquete.ENERGICO && selectedTemplate()) {
                   El stock se gestiona por cada variante individualmente.
                 }
-                @if (tipoProducto() === 'SINERGICO') {
+                @if (tipoProducto() === TipoPaquete.SINERGICO) {
                   Los productos sinérgicos no requieren configuración de stock.
                 }
               </p>
@@ -292,10 +292,10 @@
                     Stock gestionado automáticamente
                   </p>
                   <p class="text-xs text-gray-600">
-                    @if (tipoProducto() === 'SINERGICO') {
+                    @if (tipoProducto() === TipoPaquete.SINERGICO) {
                       Los productos sinérgicos no requieren control de stock.
                     }
-                    @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+                    @if (tipoProducto() === TipoPaquete.ENERGICO && selectedTemplate()) {
                       El stock se gestiona por cada variante individualmente.
                     }
                   </p>

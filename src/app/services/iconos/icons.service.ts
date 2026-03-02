@@ -108,7 +108,11 @@ import {
   featherList,
   featherMinusCircle,
   featherAlertOctagon,
-
+  featherLock,
+  featherHash,
+  featherTruck,
+  featherInbox,
+  featherImage,
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -206,6 +210,11 @@ export class IconsService {
     bell: featherBell,
     zap: featherZap,
     layers: featherLayers,
+    lock: featherLock,
+    hash: featherHash,
+    truck: featherTruck,
+    inbox: featherInbox,
+    image: featherImage,
 
     // 📋 Documentos
     file: featherFile,

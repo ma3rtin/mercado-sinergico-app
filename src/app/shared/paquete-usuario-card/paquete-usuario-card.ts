@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
@@ -10,7 +11,7 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -142,19 +143,19 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   getEstadoClass(estado?: string): string {
-    if (!estado) return 'text-gray-600 bg-gray-100 border-gray-200';
+    if (!estado) return 'text-status-neutral-text bg-status-neutral-bg border-border-default';
     const e = estado.toLowerCase();
 
     const estilos = {
-      'confirmado': 'text-blue-700 bg-blue-50 border-blue-200',
-      'pendiente': 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      'pagado': 'text-green-700 bg-green-50 border-green-200',
-      'enviado': 'text-purple-700 bg-purple-50 border-purple-200',
-      'activo': 'text-green-700 bg-green-50 border-green-200'
+      'confirmado': 'text-status-info-text bg-status-info-bg border-brand-primary',
+      'pendiente': 'text-status-pending-text bg-status-pending-bg border-warning',
+      'pagado': 'text-status-active-text bg-status-active-bg border-success',
+      'enviado': 'text-status-info-text bg-status-info-bg border-brand-primary',
+      'activo': 'text-status-active-text bg-status-active-bg border-success'
     };
 
     return Object.entries(estilos).find(([k]) => e.includes(k))?.[1]
-      ?? 'text-gray-700 bg-gray-50 border-gray-200';
+      ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
   obtenerImagenUrl(): string {

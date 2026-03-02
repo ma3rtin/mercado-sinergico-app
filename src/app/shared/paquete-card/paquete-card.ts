@@ -72,9 +72,9 @@ export class PaqueteCard implements OnInit {
   obtenerColorBarra(): string {
     const porcentaje = this.porcentajeReservado();
 
-    if (porcentaje < 50) return 'bg-green-500';
-    if (porcentaje < 80) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (porcentaje < 50) return 'bg-success';
+    if (porcentaje < 80) return 'bg-warning';
+    return 'bg-error';
   }
 
   obtenerBadgeEstado(): { clase: string; emoji: string } {
@@ -157,18 +157,18 @@ export class PaqueteCard implements OnInit {
 
   // 🎨 Clase CSS para el estado
   getEstadoClass(estado?: string): string {
-    if (!estado) return 'bg-gray-100 text-gray-700 border-gray-300';
+    if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-border-default';
 
     const e = String(estado).toLowerCase();
     if (e.includes('activo') || e.includes('abierto')) {
-      return 'bg-green-100 text-green-800 border-green-300';
+      return 'bg-status-active-bg text-status-active-text border-success';
     }
     if (e.includes('pend')) {
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      return 'bg-status-pending-bg text-status-pending-text border-warning';
     }
     if (e.includes('cerr')) {
-      return 'bg-red-100 text-red-800 border-red-300';
+      return 'bg-status-closed-bg text-status-closed-text border-error';
     }
-    return 'bg-gray-100 text-gray-700 border-gray-300';
+    return 'bg-status-neutral-bg text-status-neutral-text border-border-default';
   }
 }

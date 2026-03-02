@@ -89,7 +89,7 @@ export class CrearProductoComponent implements OnInit {
   };
 readonly tipoMap: Record<TipoPaquete, string> = {
   [TipoPaquete.SINERGICO]: 'SINERGICO',
-  [TipoPaquete.ENERGICO]: 'ENERGETICO',
+  [TipoPaquete.ENERGICO]: 'Enérgico',
   [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
 };
 

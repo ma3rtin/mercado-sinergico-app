@@ -42,4 +42,19 @@ export class PaquetePublicadoService extends ApiService {
             `${this.apiUrl}/producto/${productoId}`
         );
     }
+
+    /** Admin: obtiene TODOS los paquetes publicados (todos los estados) */
+    getAllPaquetes(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(this.apiUrl);
+    }
+
+    /** Admin: confirma la compra con el fabricante y notifica a los compradores */
+    confirmarCompra(id: number): Observable<{ message: string }> {
+        return this.post<{ message: string }>(`${this.apiUrl}/${id}/confirmar`, {});
+    }
+
+    /** Admin: envía emails de prueba */
+    testEmail(id: number, email: string): Observable<{ message: string }> {
+        return this.post<{ message: string }>(`${this.apiUrl}/${id}/test-email`, { email });
+    }
 }

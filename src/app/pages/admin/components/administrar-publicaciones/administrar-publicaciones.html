@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="bg-bg-surface rounded-2xl shadow-sm p-6 mb-6 border border-border-default">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <button (click)="volver()"
+            class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-border-default hover:border-brand-primary hover:text-brand-primary transition-colors text-text-secondary cursor-pointer">
+            <app-icon name="arrowLeft" size="20" />
+          </button>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-display text-text-primary">Administrar Publicaciones</h1>
+            <p class="text-sm text-text-secondary mt-1">Gestioná todos los paquetes publicados</p>
+          </div>
+        </div>
+
+        <!-- Contador -->
+        @if (!loading()) {
+          <div class="flex items-center gap-2 bg-brand-primary/10 text-brand-primary px-4 py-2 rounded-xl">
+            <app-icon name="package" size="18" />
+            <span class="font-semibold text-sm">{{ filteredPaquetes().length }} publicaciones</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="bg-bg-surface rounded-2xl shadow-sm p-4 sm:p-6 mb-6 border border-border-default">
+      <div class="flex flex-col sm:flex-row gap-4">
+
+        <!-- Buscador -->
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-muted">
+            <app-icon name="search" size="18" />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o zona..."
+            (input)="onSearch($event)"
+            class="w-full pl-10 pr-4 py-2.5 border-2 border-border-default rounded-xl text-sm font-body focus:outline-none focus:border-brand-primary transition-colors bg-bg-app text-text-primary"
+          />
+        </div>
+
+        <!-- Filtro estado -->
+        <div class="flex flex-wrap gap-2">
+          @for (est of ['todos', 'activo', 'pendiente', 'cerrado', 'completo']; track est) {
+            <button
+              (click)="setEstadoFiltro(est)"
+              [class]="estadoFiltro() === est
+                ? 'px-4 py-2.5 rounded-xl text-sm font-semibold bg-brand-primary text-text-on-dark shadow-sm cursor-pointer border-2 border-brand-primary'
+                : 'px-4 py-2.5 rounded-xl text-sm font-medium border-2 border-border-default text-text-secondary hover:border-brand-primary hover:text-brand-primary cursor-pointer transition-colors'">
+              {{ est === 'todos' ? 'Todos' : (est | titlecase) }}
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Estado de carga / error -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <div class="animate-spin rounded-full h-14 w-14 border-b-2 border-brand-primary mb-4"></div>
+        <p class="text-text-secondary font-body">Cargando publicaciones...</p>
+      </div>
+
+    } @else if (error()) {
+      <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4" />
+        <p class="text-error font-semibold text-lg">{{ error() }}</p>
+        <app-button variant="tertiary" size="sm" (click)="loadPaquetes()" class="mt-4">
+          Reintentar
+        </app-button>
+      </div>
+
+    } @else if (filteredPaquetes().length === 0) {
+      <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <app-icon name="inbox" size="64" class="text-text-muted mx-auto mb-4" />
+        <p class="text-text-secondary text-lg font-medium">No se encontraron publicaciones</p>
+        <p class="text-text-muted text-sm mt-1">Probá cambiando los filtros</p>
+      </div>
+
+    } @else {
+      <!-- Grid de cards -->
+      <div class="grid grid-cols-1 gap-4">
+        @for (paquete of filteredPaquetes(); track paquete.id_paquete_publicado) {
+
+          <div
+            (click)="verDetalle(paquete)"
+            class="bg-bg-surface rounded-2xl shadow-sm border-2 border-transparent hover:border-brand-primary hover:shadow-md transition-all cursor-pointer group p-4 sm:p-6">
+
+            <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+
+              <!-- Imagen -->
+              <div class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden bg-bg-app border-2 border-border-default group-hover:border-brand-primary transition-colors mx-auto sm:mx-0 self-start">
+                @if (paquete.paqueteBase?.imagen_url) {
+                  <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover" />
+                } @else {
+                  <div class="w-full h-full flex items-center justify-center">
+                    <app-icon name="package" size="40" class="text-text-muted" />
+                  </div>
+                }
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+                  <div>
+                    <h3 class="text-lg font-display text-text-primary group-hover:text-brand-primary transition-colors truncate">
+                      {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+                    </h3>
+                    <p class="text-sm text-text-secondary mt-0.5">
+                      <app-icon name="mapPin" size="14" class="inline mr-1" />
+                      {{ paquete.zona?.nombre || 'Sin zona' }}
+                    </p>
+                  </div>
+                  <span [class]="'px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide border ' + getEstadoClasses(paquete.estado)">
+                    {{ paquete.estado.nombre || 'N/A' }}
+                  </span>
+                </div>
+
+                <!-- Métricas -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <!-- Stock -->
+                  <div>
+                    <p class="text-xs text-text-secondary mb-1">Stock reservado</p>
+                    <p class="text-sm font-bold text-text-primary">
+                      {{ paquete.cant_productos_reservados ?? 0 }}/{{ paquete.cant_productos ?? 0 }}
+                    </p>
+                    <div class="w-full bg-bg-raised rounded-full h-1.5 mt-1 overflow-hidden">
+                      <div [class]="'h-1.5 rounded-full transition-all ' + getStockBarColor(getStockPct(paquete))"
+                           [style.width]="getStockPct(paquete) + '%'">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Usuarios -->
+                  <div>
+                    <p class="text-xs text-text-secondary mb-1">Compradores</p>
+                    <p class="text-sm font-bold text-text-primary flex items-center gap-1">
+                      <app-icon name="users" size="14" class="text-brand-primary" />
+                      {{ paquete.cant_usuarios_registrados ?? 0 }}
+                    </p>
+                  </div>
+
+                  <!-- Cierre -->
+                  <div>
+                    <p class="text-xs text-text-secondary mb-1">Cierre</p>
+                    <p class="text-sm font-bold text-text-primary">{{ formatFecha(paquete.fecha_fin) }}</p>
+                  </div>
+
+                  <!-- Días restantes -->
+                  <div>
+                    <p class="text-xs text-text-secondary mb-1">Días</p>
+                    @if (getDiasRestantes(paquete.fecha_fin) > 0) {
+                      <p class="text-sm font-bold text-text-primary">{{ getDiasRestantes(paquete.fecha_fin) }}d</p>
+                    } @else {
+                      <p class="text-sm font-bold text-error">Cerrado</p>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Flecha -->
+              <div class="hidden sm:flex items-center self-center text-text-muted group-hover:text-brand-primary transition-colors">
+                <app-icon name="chevronRight" size="24" />
+              </div>
+
+            </div>
+          </div>
+
+        }
+      </div>
+    }
+
+  </div>
+</div>

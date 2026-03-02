@@ -151,6 +151,14 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/administrar-paquetes']);
   }
 
+  navigateToAdminPublicaciones() {
+    this.router.navigate(['/admin/administrar-publicaciones']);
+  }
+
+  navigateToPublicacionDetalle(id: number) {
+    this.router.navigate(['/admin/administrar-publicacion', id]);
+  }
+
   navigateToAdminTemplates() {
     this.router.navigate(['/admin/administrar-plantillas']);
   }
