@@ -1,5 +1,3 @@
-import { Marca } from '@app/models/Producto-Paquete/Marca';
-import { Categoria } from '@app/models/Producto-Paquete/Categoria';
 import { PaqueteBaseProducto } from '@app/models/PaquetesInterfaces/PaqueteBaseProducto';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Imagen } from '@app/models/ProductosInterfaces/Imagenes_producto';

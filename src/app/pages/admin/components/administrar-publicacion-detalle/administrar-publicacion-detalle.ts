@@ -222,7 +222,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const rows = [
       'sep=;', // Truco para que Excel sepa que el separador es ";"
       '# REPORTES MERCADO SINERGICO #',
-      `"Tipo";"REPORTE PARA PROVEEDOR"`,
+      '"Tipo";"REPORTE PARA PROVEEDOR"',
       `"Paquete";"${p.paqueteBase?.nombre ?? 'N/A'} (ID: ${p.id_paquete_publicado})"`,
       `"Zona";"${p.zona?.nombre ?? 'N/A'}"`,
       `"Fecha Generacion";"${now}"`,
@@ -269,7 +269,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const rows: string[] = [
       'sep=;',
       '# REPORTES MERCADO SINERGICO #',
-      `"Tipo";"HOJA DE RUTA / LOGISTICA"`,
+      '"Tipo";"HOJA DE RUTA / LOGISTICA"',
       `"Paquete";"${p.paqueteBase?.nombre ?? 'N/A'} (ID: ${p.id_paquete_publicado})"`,
       `"Zona";"${p.zona?.nombre ?? 'N/A'}"`,
       `"Fecha Generacion";"${now}"`,
@@ -291,7 +291,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     );
     this.toast.success('Reporte de logística generado');
   }
-
+  
   private downloadCsv(content: string, filename: string) {
     const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
