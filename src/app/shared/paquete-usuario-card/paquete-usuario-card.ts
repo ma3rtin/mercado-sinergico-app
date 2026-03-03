@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,7 +11,7 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -146,15 +147,29 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const e = estado.toLowerCase();
 
     const estilos = {
-      'confirmado': 'text-blue-700 bg-blue-50 border-blue-200',
+      'en preparación': 'text-blue-700 bg-blue-50 border-blue-200',
       'pendiente': 'text-yellow-700 bg-yellow-50 border-yellow-200',
-      'pagado': 'text-green-700 bg-green-50 border-green-200',
       'enviado': 'text-purple-700 bg-purple-50 border-purple-200',
+      'entregado': 'text-green-700 bg-green-50 border-green-200',
+      'cancelado': 'text-red-700 bg-red-50 border-red-200',
       'activo': 'text-green-700 bg-green-50 border-green-200'
     };
 
     return Object.entries(estilos).find(([k]) => e.includes(k))?.[1]
       ?? 'text-gray-700 bg-gray-50 border-gray-200';
+  }
+
+  getIconoEstado(estado?: string): string {
+    if (!estado) return 'Clock';
+    const e = estado.toLowerCase();
+
+    if (e.includes('en preparación')) return 'Package';
+    if (e.includes('enviado')) return 'Truck';
+    if (e.includes('entregado')) return 'CheckCircle';
+    if (e.includes('cancelado')) return 'XCircle';
+    if (e.includes('activo')) return 'CheckCircle';
+
+    return 'Clock'; // Pendiente u otros
   }
 
   obtenerImagenUrl(): string {
@@ -185,7 +200,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id // por si viene directo del backend
     };
 
     this.aumentarCantidad.emit(limpio);
@@ -196,7 +212,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id
     };
 
     this.disminuirCantidad.emit(limpio);
@@ -204,9 +221,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   get puedeSalirDelPaquete(): boolean {
     const estado = this.pedido?.estado?.nombre?.toLowerCase();
-    return estado === 'pendiente'
-      || estado === 'confirmado'
-      || estado === 'pagado';
+    return estado === 'pendiente';
   }
 
   onSalirDelPaquete(): void {
@@ -220,8 +235,9 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   onEliminarProducto(prod: ProductoEnPedido): void {
     this.eliminarProducto.emit({
       ...prod,
-      id_producto: prod.id_producto ?? prod.id_producto
-    });
+      id_producto: prod.id_producto ?? prod.id_producto,
+      id_detalle: (prod as any).id_detalle ?? (prod as any).id
+    } as any);
   }
 
   formatVariante(variante: any): string {

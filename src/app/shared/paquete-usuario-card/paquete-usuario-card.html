@@ -15,11 +15,14 @@
 
     <!-- Título + flecha -->
     <div class="flex justify-between items-start">
-      <h3 class="font-display text-lg text-gray-900 truncate">
-        {{ paquete.paqueteBase?.nombre }}
-      </h3>
+      <div class="flex flex-col min-w-0">
+        <span class="text-xs font-mono text-gray-400 mb-0.5">Pedido #{{ pedido.id_pedido }}</span>
+        <h3 class="font-display font-medium text-lg text-gray-900 truncate">
+          {{ paquete.paqueteBase?.nombre }}
+        </h3>
+      </div>
 
-      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
@@ -94,12 +97,16 @@
     <div class="flex-1 min-w-0">
 
       <div class="flex justify-between items-start">
-        <h3 class="font-display text-xl text-gray-900 truncate">
-          {{ paquete.paqueteBase?.nombre }}
-        </h3>
+        <div class="flex flex-col min-w-0">
+          <span class="text-xs font-mono text-gray-400 mb-0.5">Pedido #{{ pedido.id_pedido }}</span>
+          <h3 class="font-display font-medium text-xl text-gray-900 truncate">
+            {{ paquete.paqueteBase?.nombre }}
+          </h3>
+        </div>
 
         <!-- Flecha invertida -->
-        <svg class="w-5 h-5 text-gray-400 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-gray-400 transform rotate-180 flex-shrink-0 mt-1" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
@@ -189,7 +196,7 @@
             Estás sumado con:
           </h4>
 
-          @for (producto of productosEnPedido; track producto.id_producto) {
+          @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
 
           <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
 
@@ -383,11 +390,8 @@
 
               <!-- Estado -->
               <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clip-rule="evenodd" />
-                </svg>
+                <app-icon [name]="getIconoEstado(pedido.estado?.nombre)"
+                  cssClass="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
 
                 <div class="flex-1">
                   <p class="text-sm font-medium text-gray-700 mb-1">Estado del pedido</p>

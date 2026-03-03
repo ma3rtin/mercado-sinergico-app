@@ -235,7 +235,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
    * Volver a la vista de productos
    */
   volverAProductos(): void {
-    this.router.navigate(['/admin/administrar-productos']);
+    this.router.navigate(['/productos']);
   }
 
   /**
