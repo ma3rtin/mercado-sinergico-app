@@ -30,6 +30,9 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
+import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
+import { ErrorState } from '@app/shared/error-state/error-state';
+
 @Component({
   selector: 'app-paquetes-publicos',
   standalone: true,
@@ -39,7 +42,9 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
     FiltrosComponent,
     IconComponent,
     PaginationComponent,
-    CatalogoWrapperComponent
+    CatalogoWrapperComponent,
+    DelayedSkeleton,
+    ErrorState
   ],
   templateUrl: './paquetes.html',
 })
@@ -222,24 +227,26 @@ export class PaquetesPublicosComponent implements OnInit {
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes:', error);
+
           this.isLoading.set(false);
 
-          let mensaje = 'Error al cargar los paquetes. Por favor, intentá nuevamente.';
+          let mensaje = 'Ocurrió un error inesperado.';
 
           if (error.name === 'TimeoutError') {
-            mensaje = 'El servidor tardó demasiado en responder. Verificá tu conexión.';
-          } else if (error.status === 0) {
-            mensaje = 'No se pudo conectar con el servidor. Verificá tu conexión a Internet.';
-          } else if (error.status === 404) {
-            mensaje = 'No se encontraron paquetes disponibles.';
-          } else if (error.status >= 500) {
-            mensaje = 'Error en el servidor. Intentá nuevamente más tarde.';
+            mensaje = 'El servidor no respondió a tiempo. Por favor, intentá de nuevo.';
+          }
+          else if (error.status === 0) {
+            mensaje = 'No se pudo conectar con el servidor. Verificá tu conexión.';
+          }
+          else if (error.status >= 500) {
+            mensaje = 'Error interno del servidor. Intentá más tarde.';
           }
 
           this.errorMessage.set(mensaje);
+
           this.paquetesOriginales.set([]);
           this.paquetesFiltrados.set([]);
-        },
+        }
       });
   }
 

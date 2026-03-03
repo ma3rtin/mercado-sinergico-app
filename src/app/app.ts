@@ -1,6 +1,6 @@
 import { Component, signal, inject, effect, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs';
 import { LocationModalComponent } from './components/location-modal/location-modal.component';
 import { LocationStateService } from './services/localidad/location-state.service';

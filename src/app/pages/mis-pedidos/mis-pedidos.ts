@@ -27,6 +27,9 @@ import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/pa
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 
 
+import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
+import { ErrorState } from '@app/shared/error-state/error-state';
+
 // ------------------------------
 // MODELOS INTERNOS
 // ------------------------------
@@ -46,7 +49,9 @@ interface PedidoDelUsuario extends Pedido {
     CommonModule,
     FormsModule,
     PaqueteUsuarioCardComponent,
-    CatalogoWrapperComponent
+    CatalogoWrapperComponent,
+    DelayedSkeleton,
+    ErrorState
   ],
   templateUrl: './mis-pedidos.html'
 })
@@ -68,7 +73,6 @@ export class MisPedidosComponent implements OnInit {
   terminoBusqueda = signal<string>('');
   estadoFiltro = signal<string>('Todos');
 
-  // 👉 NO ROMPE NADA del HTML porque tu HTML usa pedidosFiltrados()
   pedidosFiltrados = computed(() => {
     const lista = this.pedidos();
     const t = this.terminoBusqueda().toLowerCase();
@@ -120,8 +124,21 @@ export class MisPedidosComponent implements OnInit {
 
           this.isLoading.set(false);
         },
-        error: () => {
-          this.errorMessage.set('Error al cargar los pedidos.');
+        error: (error) => {
+
+          if (error.name === 'TimeoutError') {
+            this.errorMessage.set('El servidor no respondió a tiempo. Por favor, intentá de nuevo.');
+          }
+          else if (error.status === 0) {
+            this.errorMessage.set('No se pudo conectar con el servidor. Verificá tu conexión.');
+          }
+          else if (error.status >= 500) {
+            this.errorMessage.set('Error interno del servidor. Intentá más tarde.');
+          }
+          else {
+            this.errorMessage.set('Ocurrió un error inesperado.');
+          }
+
           this.isLoading.set(false);
         }
       });
