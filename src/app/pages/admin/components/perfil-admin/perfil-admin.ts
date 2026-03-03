@@ -166,4 +166,8 @@ export class PerfilAdmin implements OnInit {
   crearPaquete() {
     this.router.navigate(['/admin/crear-paquete']);
   }
+
+  navigateToImportarProductos() {
+    this.router.navigate(['/admin/importar-productos']);
+  }
 }

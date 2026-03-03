@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpEventType, HttpClientModule } from '@angular/common/http';
 import { toast } from 'ngx-sonner';
 import { environment } from '../../../../../environments/environment';
+import { IconComponent } from '@app/shared/icono/icono';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 interface ImportResult {
     success: boolean;
@@ -20,7 +22,7 @@ interface ImportResult {
 @Component({
     selector: 'app-importar-productos',
     standalone: true,
-    imports: [CommonModule, HttpClientModule],
+    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent],
     templateUrl: './importar-productos.component.html',
     styleUrls: ['./importar-productos.component.css'],
 })
