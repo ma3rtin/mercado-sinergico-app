@@ -18,6 +18,7 @@ export class AdminPaqueteCard {
   @Output() finalize = new EventEmitter<PaquetePublicado>();
   @Output() refund = new EventEmitter<PaquetePublicado>();
   @Output() notify = new EventEmitter<PaquetePublicado>();
+  @Output() duplicate = new EventEmitter<PaquetePublicado>();
 
   private toast = inject(ToastService);
 
@@ -41,6 +42,8 @@ export class AdminPaqueteCard {
   getStatusColor(): string {
     const estado = this.paquete.estado?.nombre?.toLowerCase() || '';
     if (estado.includes('activo') || estado.includes('abierto')) return 'text-green-600';
+    if (estado.includes('próximamente')) return 'text-blue-600';
+    if (estado.includes('completo')) return 'text-secondary';
     if (estado.includes('pend')) return 'text-yellow-600';
     if (estado.includes('cerr')) return 'text-red-600';
     return 'text-gray-600';
@@ -49,6 +52,8 @@ export class AdminPaqueteCard {
   getStatusBgColor(): string {
     const estado = this.paquete.estado?.nombre?.toLowerCase() || '';
     if (estado.includes('activo') || estado.includes('abierto')) return 'bg-green-100';
+    if (estado.includes('próximamente')) return 'bg-blue-100';
+    if (estado.includes('completo')) return 'bg-secondary/10';
     if (estado.includes('pend')) return 'bg-yellow-100';
     if (estado.includes('cerr')) return 'bg-red-100';
     return 'bg-gray-100';
@@ -89,5 +94,10 @@ export class AdminPaqueteCard {
   onRefund(event?: Event): void {
     event?.stopPropagation();
     this.refund.emit(this.paquete);
+  }
+
+  onDuplicate(event?: Event): void {
+    event?.stopPropagation();
+    this.duplicate.emit(this.paquete);
   }
 }

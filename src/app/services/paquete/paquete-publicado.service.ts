@@ -42,4 +42,16 @@ export class PaquetePublicadoService extends ApiService {
             `${this.apiUrl}/producto/${productoId}`
         );
     }
+
+    duplicarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/duplicar`, {});
+    }
+
+    completarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/completar`, {});
+    }
+
+    cancelarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cancelar`, {});
+    }
 }

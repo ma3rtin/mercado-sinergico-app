@@ -98,8 +98,14 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   duplicarPaqueteBase(paquete: PaqueteBase): void {
-    // INFO: Endpoint aún no disponible en el backend
-    this.toast.warning('La duplicación de paquetes base requiere actualización del backend. Consultar backend_requirements.md');
+    console.log('📋 Duplicando paquete base:', paquete.id_paquete_base);
+    this.baseService.duplicarPaquete(paquete.id_paquete_base!).subscribe({
+      next: () => {
+        this.toast.success('Molde duplicado con éxito');
+        this.loadData();
+      },
+      error: () => this.toast.error('Error al duplicar el molde')
+    });
   }
 
   eliminarPaqueteBase(paquete: PaqueteBase): void {
@@ -140,7 +146,14 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   duplicarPublicacion(paquete: PaquetePublicado): void {
-    this.toast.warning('Duplicación de publicación requiere actualización del backend.');
+    console.log('📋 Duplicando publicación:', paquete.id_paquete_publicado);
+    this.publicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: () => {
+        this.toast.success('Publicación duplicada con éxito');
+        this.loadData();
+      },
+      error: () => this.toast.error('Error al duplicar la publicación')
+    });
   }
 
   eliminarPublicacion(paquete: PaquetePublicado): void {
@@ -171,7 +184,14 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   finalizarExitoso(paquete: PaquetePublicado): void {
-    this.toast.warning('El cierre exitoso manual requiere actualización del backend.');
+    console.log('✅ Finalizando paquete exitosamente:', paquete.id_paquete_publicado);
+    this.publicadoService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: () => {
+        this.toast.success('Paquete finalizado con éxito');
+        this.loadData();
+      },
+      error: () => this.toast.error('Error al finalizar el paquete')
+    });
   }
 
   cancelarYReembolsar(paquete: PaquetePublicado): void {
@@ -186,7 +206,13 @@ export class AdministrarPaquetesComponent implements OnInit {
       cancelButtonText: 'No, volver'
     }).then(result => {
       if (result.isConfirmed) {
-        this.toast.warning('Lógica de reembolso pendiente de implementación en backend.');
+        this.publicadoService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+          next: () => {
+            this.toast.success('Paquete cancelado y reembolsos procesados');
+            this.loadData();
+          },
+          error: () => this.toast.error('Error al cancelar el paquete')
+        });
       }
     });
   }

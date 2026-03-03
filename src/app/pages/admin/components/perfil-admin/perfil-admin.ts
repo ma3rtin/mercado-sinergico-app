@@ -103,7 +103,13 @@ export class PerfilAdmin implements OnInit {
       }).then(result => {
         if (result.isConfirmed) {
           console.log('✅ Finalizando paquete:', paquete.id_paquete_publicado);
-          this.toastService.warning('El cierre manual requiere actualización del backend.');
+          this.paquetePublicadoService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+            next: () => {
+              this.toastService.success('Paquete finalizado con éxito');
+              this.loadPaquetesPorCerrarse();
+            },
+            error: () => this.toastService.error('Error al finalizar el paquete')
+          });
         }
       });
     });
@@ -122,9 +128,26 @@ export class PerfilAdmin implements OnInit {
       }).then(result => {
         if (result.isConfirmed) {
           console.log('🚨 Iniciando reembolso para:', paquete.id_paquete_publicado);
-          this.toastService.warning('Lógica de reembolso pendiente de implementación en backend.');
+          this.paquetePublicadoService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+            next: () => {
+              this.toastService.success('Paquete cancelado y reembolsos procesados');
+              this.loadPaquetesPorCerrarse();
+            },
+            error: () => this.toastService.error('Error al procesar el reembolso')
+          });
         }
       });
+    });
+  }
+
+  duplicarPaquete(paquete: PaquetePublicado) {
+    console.log('📋 Duplicando publicación desde perfil:', paquete.id_paquete_publicado);
+    this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: () => {
+        this.toastService.success('Publicación duplicada con éxito');
+        this.loadPaquetesPorCerrarse();
+      },
+      error: () => this.toastService.error('Error al duplicar la publicación')
     });
   }
 
