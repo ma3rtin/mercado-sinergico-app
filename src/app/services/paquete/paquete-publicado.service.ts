@@ -52,9 +52,4 @@ export class PaquetePublicadoService extends ApiService {
     confirmarCompra(id: number): Observable<{ message: string }> {
         return this.post<{ message: string }>(`${this.apiUrl}/${id}/confirmar`, {});
     }
-
-    /** Admin: envía emails de prueba */
-    testEmail(id: number, email: string): Observable<{ message: string }> {
-        return this.post<{ message: string }>(`${this.apiUrl}/${id}/test-email`, { email });
-    }
 }

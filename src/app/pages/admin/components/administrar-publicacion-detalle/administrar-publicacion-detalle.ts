@@ -5,6 +5,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
+import { PaqueteBaseProducto } from '@app/models/PaquetesInterfaces/PaqueteBaseProducto';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -27,8 +28,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   enviandoMail = signal(false);
-  testEmailDestino = signal('');
-  enviandoTest = signal(false);
+
+  // ── Búsqueda y filtros de pedidos ───────────────────────────
+  busquedaPedido = signal('');
+  filtrEstadoPedido = signal<number | null>(null);
+  pedidoSeleccionado = signal<Pedido | null>(null);
 
   // ── Señas Computadas (Optimización de Performance) ──────────
 
@@ -71,6 +75,20 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     return 'bg-brand-secondary';
   });
 
+  pedidosFiltrados = computed(() => {
+    const pedidos = this.paquete()?.pedidos ?? [];
+    const busqueda = this.busquedaPedido().toLowerCase().trim();
+    const estadoFiltro = this.filtrEstadoPedido();
+    return pedidos.filter(p => {
+      const matchBusqueda = !busqueda ||
+        (p.usuario?.nombre ?? '').toLowerCase().includes(busqueda) ||
+        (p.usuario?.email ?? '').toLowerCase().includes(busqueda) ||
+        String(p.id_pedido ?? '').includes(busqueda);
+      const matchEstado = estadoFiltro === null || p.estadoId === estadoFiltro;
+      return matchBusqueda && matchEstado;
+    });
+  });
+
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
@@ -95,13 +113,17 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     });
   }
 
-  // ── Acciones ──────────────────────────────────────────────────
+  // ── Modal detalle pedido ──────────────────────────────────────
 
-  verComoUsuario() {
-    const id = this.paquete()?.id_paquete_publicado;
-    if (!id) return;
-    this.router.navigate(['/paquete', id, 'productos']);
+  abrirDetallePedido(pedido: Pedido) {
+    this.pedidoSeleccionado.set(pedido);
   }
+
+  cerrarDetallePedido() {
+    this.pedidoSeleccionado.set(null);
+  }
+
+  // ── Acciones ──────────────────────────────────────────────────
 
   confirmarYEnviarMail() {
     const p = this.paquete();
@@ -268,28 +290,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `LOGISTICA-${p.paqueteBase?.nombre?.replace(/\s+/g, '_')}.csv`
     );
     this.toast.success('Reporte de logística generado');
-  }
-
-  enviarPruebaEmail() {
-    const id = this.paquete()?.id_paquete_publicado;
-    const email = this.testEmailDestino();
-
-    if (!id || !email) {
-      this.toast.error('Ingresá un email válido para la prueba');
-      return;
-    }
-
-    this.enviandoTest.set(true);
-    this.paqueteService.testEmail(id, email).subscribe({
-      next: (res) => {
-        this.enviandoTest.set(false);
-        this.toast.success(res.message);
-      },
-      error: () => {
-        this.enviandoTest.set(false);
-        this.toast.error('Error al enviar los emails de prueba');
-      }
-    });
   }
 
   private downloadCsv(content: string, filename: string) {
