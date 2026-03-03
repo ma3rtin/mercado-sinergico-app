@@ -11,21 +11,30 @@ export class PaquetePublicadoService extends ApiService {
     constructor() {
         super();
     }
+
     getPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
     }
+
     getPaqueteById(id: number): Observable<PaquetePublicado> {
         return this.get<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
+
     createPaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
         return this.post<PaquetePublicado>(this.apiUrl, paquete);
     }
+
     updatePaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
-        return this.put<PaquetePublicado>(`${this.apiUrl}/${paquete.id_paquete_publicado}`, paquete);
+        return this.put<PaquetePublicado>(
+            `${this.apiUrl}/${paquete.id_paquete_publicado}`,
+            paquete
+        );
     }
+
     deletePaquete(id: number): Observable<PaquetePublicado> {
         return this.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
+
     getPaquetesPorCerrarse(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
     }
@@ -44,6 +53,7 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
+<<<<<<< HEAD
     getPaquetesCerrados(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}`).pipe(
             map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
@@ -63,35 +73,76 @@ export class PaquetePublicadoService extends ApiService {
         });
     }
     /** Admin: obtiene TODOS los paquetes publicados (todos los estados) */
+=======
+    /** Admin: obtiene TODOS los paquetes publicados */
+>>>>>>> 5e0b451 (feat: add export to fabrica and logistica)
     getAllPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
     }
 
-    /** Admin: confirma la compra con el fabricante y notifica a los compradores */
+    /** Admin: confirma compra con fabricante */
     confirmarCompra(id: number): Observable<{ message: string }> {
-        return this.post<{ message: string }>(`${this.apiUrl}/${id}/confirmar`, {});
+        return this.post<{ message: string }>(
+            `${this.apiUrl}/${id}/confirmar`,
+            {}
+        );
     }
 
     duplicarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/duplicar`, {});
+        return this.post<PaquetePublicado>(
+            `${this.apiUrl}/${id}/duplicar`,
+            {}
+        );
     }
 
     completarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/completar`, {});
+        return this.post<PaquetePublicado>(
+            `${this.apiUrl}/${id}/completar`,
+            {}
+        );
     }
 
     cancelarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cancelar`, {});
+        return this.post<PaquetePublicado>(
+            `${this.apiUrl}/${id}/cancelar`,
+            {}
+        );
     }
 
     /** Cierra el paquete y lo pasa a "En Preparación" */
     cerrarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cerrar`, {});
+        return this.post<PaquetePublicado>(
+            `${this.apiUrl}/${id}/cerrar`,
+            {}
+        );
     }
+
     notificarCompradores(id: number): Observable<{ mensaje: string; notificados: number }> {
         return this.http.post<{ mensaje: string; notificados: number }>(
-            `${this.apiUrl}/${id}/notificar`, {}
+            `${this.apiUrl}/${id}/notificar`,
+            {}
+        );
+    }
+
+    /** Obtener paquetes cerrados (filtrado en frontend) */
+    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
+            map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
+        );
+    }
+
+    /** Exportaciones */
+    exportarFabrica(id: number): Observable<Blob> {
+        return this.http.get(
+            `${this.baseUrl}/${this.apiUrl}/${id}/exportar-fabrica`,
+            { responseType: 'blob' }
+        );
+    }
+
+    exportarLogistica(id: number): Observable<Blob> {
+        return this.http.get(
+            `${this.baseUrl}/${this.apiUrl}/${id}/exportar-logistica`,
+            { responseType: 'blob' }
         );
     }
 }
-
