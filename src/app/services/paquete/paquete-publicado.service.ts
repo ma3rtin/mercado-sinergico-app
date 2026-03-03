@@ -1,5 +1,6 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 
@@ -41,5 +42,24 @@ export class PaquetePublicadoService extends ApiService {
         return this.get<PaquetePublicado[]>(
             `${this.apiUrl}/producto/${productoId}`
         );
+    }
+
+    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}`).pipe(
+            map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
+        );
+    }
+
+    // Export methods
+    exportarFabrica(id: number): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/${this.apiUrl}/${id}/exportar-fabrica`, {
+            responseType: 'blob'
+        });
+    }
+
+    exportarLogistica(id: number): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/${this.apiUrl}/${id}/exportar-logistica`, {
+            responseType: 'blob'
+        });
     }
 }

@@ -226,5 +226,92 @@
             </div>
             }
         </div>
+        <!-- Paquetes Cerrados y Exportación -->
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6 sm:mt-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <h3 class="text-xl sm:text-2xl font-display text-gray-900 flex items-center gap-2 sm:gap-3">
+                    <app-icon name="checkCircle" size="28" class="text-green-500 flex-shrink-0" />
+                    <span class="break-words">Paquetes Cerrados</span>
+                </h3>
+            </div>
+
+            @if (loadingCerrados()) {
+            <div class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                <p class="text-gray-500">Cargando paquetes cerrados...</p>
+            </div>
+            } @else if (errorCerrados()) {
+            <div class="text-center py-12">
+                <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
+                <p class="text-red-600 font-medium">{{ errorCerrados() }}</p>
+            </div>
+            } @else if (paquetesCerrados().length > 0) {
+            <div class="space-y-4">
+                @for (paquete of paquetesCerrados(); track paquete.id_paquete_publicado) {
+                <div
+                    class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
+                    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 justify-between items-center">
+                        <!-- Contenido principal -->
+                        <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1 w-full">
+                            <!-- Imagen -->
+                            <div
+                                class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border-2 border-gray-200 group-hover:border-primary transition-colors mx-auto sm:mx-0">
+                                @if (paquete.paqueteBase?.imagen_url) {
+                                <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre"
+                                    class="w-full h-full object-cover" />
+                                } @else {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <app-icon name="package" size="48" class="text-gray-400" />
+                                </div>
+                                }
+                            </div>
+
+                            <!-- Info del paquete -->
+                            <div class="flex-1 min-w-0 w-full mb-4 sm:mb-0">
+                                <h4
+                                    class="text-lg sm:text-xl font-display text-gray-900 mb-2 truncate group-hover:text-primary transition-colors text-center sm:text-left">
+                                    {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+                                </h4>
+                                <div class="flex items-center gap-2 mb-2 justify-center sm:justify-start">
+                                    <span class="text-sm text-gray-500">
+                                        Cerrado el: {{ formatearFecha(paquete.fecha_fin) }}
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full font-medium">
+                                        {{ paquete.cant_productos_reservados || 0 }} productos
+                                    </span>
+                                    <span
+                                        class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full font-medium">
+                                        {{ paquete.cant_usuarios_registrados || 0 }} usuarios
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+                            <app-button variant="secondary"
+                                (click)="descargarPlanillaFabrica(paquete.id_paquete_publicado)" size="sm"
+                                [fullWidth]="false" [iconStart]="'download'">
+                                Plantilla Fábrica
+                            </app-button>
+                            <app-button variant="primary"
+                                (click)="descargarPlanillaLogistica(paquete.id_paquete_publicado)" size="sm"
+                                [fullWidth]="false" [iconStart]="'truck'">
+                                Plantilla Logística
+                            </app-button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            <div class="text-center py-12">
+                <app-icon name="package" size="64" class="text-gray-300 mx-auto mb-4" />
+                <p class="text-gray-500 text-lg font-medium">No hay paquetes cerrados disponibles</p>
+            </div>
+            }
+        </div>
     </div>
 </div>
