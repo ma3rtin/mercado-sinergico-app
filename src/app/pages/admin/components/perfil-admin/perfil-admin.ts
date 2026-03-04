@@ -91,6 +91,11 @@ export class PerfilAdmin implements OnInit {
     console.log('🔔 Notificando cierre de:', paquete.paqueteBase?.nombre);
   }
 
+  cerrarPaqueteDesdeCard(paquete: PaquetePublicado) {
+    // Cierre desde el perfil: navega a administrar-publicaciones con el paquete destacado
+    this.navigateToPublicacionDetalle(paquete.id_paquete_publicado!);
+  }
+
   finalizarPaquete(paquete: PaquetePublicado) {
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
@@ -165,8 +170,9 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/administrar-publicaciones']);
   }
 
+  /** Navega a administrar-publicaciones con el paquete destacado */
   navigateToPublicacionDetalle(id: number) {
-    this.router.navigate(['/admin/administrar-publicacion', id]);
+    this.router.navigate(['/admin/administrar-publicaciones'], { queryParams: { highlight: id } });
   }
 
   navigateToAdminTemplates() {

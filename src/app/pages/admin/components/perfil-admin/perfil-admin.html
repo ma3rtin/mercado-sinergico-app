@@ -126,13 +126,19 @@
             } @else if (paquetes().length > 0) {
                 <div class="grid grid-cols-1 gap-4">
                     @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                        <app-admin-paquete-card
-                            [paquete]="paquete"
-                            (finalize)="finalizarPaquete($event)"
-                            (refund)="reembolsarPaquete($event)"
-                            (notify)="notificarCierre($event)"
-                            (duplicate)="duplicarPaquete($event)"
-                        />
+                        <!-- Usar role=article para separar la zona de click de los botones internos -->
+                        <div
+                            (click)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)"
+                            class="cursor-pointer rounded-xl hover:ring-2 hover:ring-brand-primary/40 transition-all">
+                            <app-admin-paquete-card
+                                [paquete]="paquete"
+                                (close)="cerrarPaqueteDesdeCard($event)"
+                                (prepare)="finalizarPaquete($event)"
+                                (refund)="reembolsarPaquete($event)"
+                                (notify)="notificarCierre($event)"
+                                (duplicate)="duplicarPaquete($event)"
+                            />
+                        </div>
                     }
                 </div>
             } @else {

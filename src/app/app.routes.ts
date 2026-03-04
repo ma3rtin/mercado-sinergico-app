@@ -68,7 +68,7 @@ export const routes: Routes = [
           { path: 'editar-producto/:id', component: EditarProductoComponent },
           { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent },
           { path: 'administrar-paquetes', component: AdministrarPaquetesComponent },
-          { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent }
+          { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent },
           { path: 'administrar-publicaciones', component: AdministrarPublicacionesComponent },
           { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent }
         ]

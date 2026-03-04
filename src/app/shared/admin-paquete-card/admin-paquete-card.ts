@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
@@ -13,91 +14,162 @@ import { ToastService } from '@app/services/toast/toast.service';
 })
 export class AdminPaqueteCard {
   @Input({ required: true }) paquete!: PaquetePublicado;
-  
+
   // 📤 Outputs para acciones
-  @Output() finalize = new EventEmitter<PaquetePublicado>();
-  @Output() refund = new EventEmitter<PaquetePublicado>();
-  @Output() notify = new EventEmitter<PaquetePublicado>();
+  @Output() finalize  = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación → Finalizado
+  @Output() close     = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación
+  @Output() prepare   = new EventEmitter<PaquetePublicado>(); // En Preparación → Finalizado
+  @Output() refund    = new EventEmitter<PaquetePublicado>(); // Activo → Cancelado
+  @Output() notify    = new EventEmitter<PaquetePublicado>();
   @Output() duplicate = new EventEmitter<PaquetePublicado>();
 
   private toast = inject(ToastService);
 
-  // --- Helpers de UI ---
-  
+  /** Controla si el menú desplegable está abierto */
+  menuAbierto = false;
+
+  /** Cierra el menú al hacer click fuera del componente */
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-menu-container')) {
+      this.menuAbierto = false;
+    }
+  }
+
+  toggleMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.menuAbierto = !this.menuAbierto;
+  }
+
+  // ── Helpers de estado ─────────────────────────────────────────
+
+  get estadoNombre(): string {
+    return this.paquete.estado?.nombre?.trim() ?? '';
+  }
+
+  get esActivo(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Activo.toLowerCase();
+  }
+
+  get esPendiente(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Pendiente.toLowerCase();
+  }
+
+  get esEnPreparacion(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.EnPreparacion.toLowerCase();
+  }
+
+  get esFinalizado(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Finalizado.toLowerCase();
+  }
+
+  get esCancelado(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Cancelado.toLowerCase();
+  }
+
+  // ── Acciones válidas por estado ───────────────────────────────
+  /** Notificar a compradores: solo cuando está activo */
+  get canNotify(): boolean    { return this.esActivo; }
+  /** Cerrar anticipadamente (→ En Preparación): solo desde Activo */
+  get canClose(): boolean     { return this.esActivo; }
+  /** Cancelar y reembolsar: solo desde Activo */
+  get canCancel(): boolean    { return this.esActivo; }
+  /** Confirmar despacho (→ Finalizado): solo desde En Preparación */
+  get canFinalize(): boolean  { return this.esEnPreparacion; }
+  /** Duplicar: desde cualquier estado */
+  get canDuplicate(): boolean { return true; }
+  /** Si hay al menos una acción posible en el menú */
+  get hayAcciones(): boolean  { return this.canNotify || this.canClose || this.canCancel || this.canFinalize || this.canDuplicate; }
+
+  // ── Helpers de UI ─────────────────────────────────────────────
+
   getDiasRestantes(): number {
     if (!this.paquete.fecha_fin) return 0;
-    const hoy = new Date();
-    const cierre = new Date(this.paquete.fecha_fin);
-    const diff = cierre.getTime() - hoy.getTime();
+    const diff = new Date(this.paquete.fecha_fin).getTime() - Date.now();
     const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return isNaN(dias) ? 0 : dias;
   }
 
   getStockPercentage(): number {
     if (!this.paquete?.cant_productos) return 0;
-    const porcentaje = ((this.paquete.cant_productos_reservados ?? 0) / this.paquete.cant_productos) * 100;
-    return isNaN(porcentaje) ? 0 : porcentaje;
+    const pct = ((this.paquete.cant_productos_reservados ?? 0) / this.paquete.cant_productos) * 100;
+    return isNaN(pct) ? 0 : Math.min(100, pct);
   }
 
   getStatusColor(): string {
-    const estado = this.paquete.estado?.nombre?.toLowerCase() || '';
-    if (estado.includes('activo') || estado.includes('abierto')) return 'text-green-600';
-    if (estado.includes('próximamente')) return 'text-blue-600';
-    if (estado.includes('completo')) return 'text-secondary';
-    if (estado.includes('pend')) return 'text-yellow-600';
-    if (estado.includes('cerr')) return 'text-red-600';
+    const e = this.estadoNombre.toLowerCase();
+    if (e === 'activo')           return 'text-green-700';
+    if (e === 'pendiente')        return 'text-yellow-700';
+    if (e === 'en preparación')   return 'text-blue-700';
+    if (e === 'finalizado')       return 'text-secondary';
+    if (e === 'cancelado')        return 'text-red-700';
     return 'text-gray-600';
   }
 
   getStatusBgColor(): string {
-    const estado = this.paquete.estado?.nombre?.toLowerCase() || '';
-    if (estado.includes('activo') || estado.includes('abierto')) return 'bg-green-100';
-    if (estado.includes('próximamente')) return 'bg-blue-100';
-    if (estado.includes('completo')) return 'bg-secondary/10';
-    if (estado.includes('pend')) return 'bg-yellow-100';
-    if (estado.includes('cerr')) return 'bg-red-100';
+    const e = this.estadoNombre.toLowerCase();
+    if (e === 'activo')           return 'bg-green-100';
+    if (e === 'pendiente')        return 'bg-yellow-100';
+    if (e === 'en preparación')   return 'bg-blue-100';
+    if (e === 'finalizado')       return 'bg-secondary/10';
+    if (e === 'cancelado')        return 'bg-red-100';
     return 'bg-gray-100';
   }
 
   getUrgenciaColor(): string {
     const dias = this.getDiasRestantes();
     if (dias <= 2) return 'text-red-600';
-    if (dias <= 5) return 'text-blue-600';
-    return 'text-gray-600';
+    if (dias <= 5) return 'text-orange-500';
+    return 'text-gray-500';
   }
 
   getUrgenciaBg(): string {
     const dias = this.getDiasRestantes();
     if (dias <= 2) return 'bg-red-100';
-    if (dias <= 5) return 'bg-blue-100';
+    if (dias <= 5) return 'bg-orange-100';
     return 'bg-gray-100';
   }
 
   formatearFecha(fecha: Date | string | undefined): string {
     if (!fecha) return 'N/A';
-    return new Date(fecha).toLocaleDateString();
+    return new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  // --- Acciones ---
+  // ── Acciones ──────────────────────────────────────────────────
+
+  private cerrarMenu() {
+    this.menuAbierto = false;
+  }
 
   onNotify(event?: Event): void {
     event?.stopPropagation();
-    this.toast.info('Notificación enviada a los usuarios (Simulado)', 'Campanita');
+    this.cerrarMenu();
+    this.toast.info('Notificación enviada a los compradores (simulado)', 'Notificación');
     this.notify.emit(this.paquete);
+  }
+
+  onClose(event?: Event): void {
+    event?.stopPropagation();
+    this.cerrarMenu();
+    this.close.emit(this.paquete);
   }
 
   onFinalize(event?: Event): void {
     event?.stopPropagation();
-    this.finalize.emit(this.paquete);
+    this.cerrarMenu();
+    this.prepare.emit(this.paquete);
   }
 
   onRefund(event?: Event): void {
     event?.stopPropagation();
+    this.cerrarMenu();
     this.refund.emit(this.paquete);
   }
 
   onDuplicate(event?: Event): void {
     event?.stopPropagation();
+    this.cerrarMenu();
     this.duplicate.emit(this.paquete);
   }
 }

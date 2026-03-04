@@ -64,4 +64,10 @@ export class PaquetePublicadoService extends ApiService {
     cancelarPaquete(id: number): Observable<PaquetePublicado> {
         return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cancelar`, {});
     }
+
+    /** Cierra el paquete y lo pasa a "En Preparación" */
+    cerrarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cerrar`, {});
+    }
 }
+
