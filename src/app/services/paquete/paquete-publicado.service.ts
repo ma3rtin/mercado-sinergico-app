@@ -52,4 +52,16 @@ export class PaquetePublicadoService extends ApiService {
     confirmarCompra(id: number): Observable<{ message: string }> {
         return this.post<{ message: string }>(`${this.apiUrl}/${id}/confirmar`, {});
     }
+
+    duplicarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/duplicar`, {});
+    }
+
+    completarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/completar`, {});
+    }
+
+    cancelarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cancelar`, {});
+    }
 }
