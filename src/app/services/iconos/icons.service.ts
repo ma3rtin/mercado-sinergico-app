@@ -11,6 +11,8 @@ import {
   featherMenu,
   featherX,
   featherHome,
+  featherPlus,
+  featherMoreVertical,
 
   // 🔍 Búsqueda y Filtros
   featherSearch,
@@ -128,6 +130,8 @@ export class IconsService {
     menu: featherMenu,
     close: featherX,
     home: featherHome,
+    plus: featherPlus,
+    moreVertical: featherMoreVertical,
 
     // 🔍 Búsqueda
     search: featherSearch,
@@ -245,6 +249,8 @@ export class IconsService {
     List: featherList,
     MinusCircle: featherMinusCircle,
     AlertOctagon: featherAlertOctagon,
+    Plus: featherPlus,
+    MoreVertical: featherMoreVertical,
 
 
   };

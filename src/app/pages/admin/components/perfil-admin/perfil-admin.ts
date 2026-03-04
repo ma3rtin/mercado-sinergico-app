@@ -8,11 +8,14 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
+import { ToastService } from '@app/services/toast/toast.service';
+
+import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
 
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminPaqueteCard],
   templateUrl: './perfil-admin.html',
   styleUrl: './perfil-admin.css',
 })
@@ -66,78 +69,85 @@ export class PerfilAdmin implements OnInit {
 
   // 🎨 Métodos de estilo y helpers
 
-  getStatusColor(estado?: EstadoPaquetePublicado): string {
-    if (!estado) return 'text-gray-600';
-
-    switch (estado.nombre.toLowerCase()) {
-      case 'pendiente':
-        return 'text-yellow-600';
-      case 'abierto':
-      case 'activo':
-        return 'text-green-600';
-      case 'cerrado':
-        return 'text-blue-600';
-      case 'completo':
-        return 'text-gray-600';
-      default:
-        return 'text-gray-600';
-    }
-  }
-
-  getStatusDotColor(estado?: EstadoPaquetePublicado): string {
-    if (!estado) return 'bg-gray-400';
-
-    switch (estado.nombre.toLowerCase()) {
-      case 'pendiente':
-        return 'bg-yellow-500';
-      case 'abierto':
-      case 'activo':
-        return 'bg-green-500';
-      case 'cerrado':
-        return 'bg-blue-500';
-      case 'completo':
-        return 'bg-gray-500';
-      default:
-        return 'bg-gray-400';
-    }
-  }
-
-  getDiasRestantes(fechaFin?: Date): number {
-    if (!fechaFin) return 0;
-    const hoy = new Date();
-    const cierre = new Date(fechaFin);
-    const diferencia = cierre.getTime() - hoy.getTime();
-    return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
-  }
-
-  getUrgenciaColor(dias: number): string {
-    if (dias <= 0) return 'text-red-600';
-    if (dias === 1) return 'text-red-600';
-    if (dias <= 3) return 'text-orange-600';
-    if (dias <= 5) return 'text-yellow-600';
-    return 'text-gray-600';
-  }
-
-  getUrgenciaBackgroundColor(dias: number): string {
-    if (dias <= 0) return 'bg-red-500';
-    if (dias === 1) return 'bg-red-500';
-    if (dias <= 3) return 'bg-orange-500';
-    if (dias <= 5) return 'bg-yellow-500';
-    return 'bg-gray-500';
-  }
-
-  getStockPercentage(paquete: PaquetePublicado): number {
-    if (!paquete.cant_productos || paquete.cant_productos === 0) return 0;
-    const reservados = paquete.cant_productos_reservados || 0;
-    return (reservados / paquete.cant_productos) * 100;
-  }
-
   formatearFecha(fecha?: Date): string {
     if (!fecha) return 'N/A';
     return new Date(fecha).toLocaleDateString('es-AR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
+    });
+  }
+
+  // --- Acciones de la Card ---
+
+  private toastService = inject(ToastService);
+
+  editarPaquete(paquete: PaquetePublicado) {
+    console.log('✏️ Editando publicación desde perfil:', paquete.id_paquete_publicado);
+    this.router.navigate(['/admin/publicar-paquete'], { queryParams: { id: paquete.id_paquete_publicado, edit: true } });
+  }
+
+  notificarCierre(paquete: PaquetePublicado) {
+    console.log('🔔 Notificando cierre de:', paquete.paqueteBase?.nombre);
+  }
+
+  finalizarPaquete(paquete: PaquetePublicado) {
+    import('sweetalert2').then((Swal) => {
+      Swal.default.fire({
+        title: '¿Finalizar paquete?',
+        text: `Se marcará "${paquete.paqueteBase?.nombre}" como completado.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (result.isConfirmed) {
+          console.log('✅ Finalizando paquete:', paquete.id_paquete_publicado);
+          this.paquetePublicadoService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+            next: () => {
+              this.toastService.success('Paquete finalizado con éxito');
+              this.loadPaquetesPorCerrarse();
+            },
+            error: () => this.toastService.error('Error al finalizar el paquete')
+          });
+        }
+      });
+    });
+  }
+
+  reembolsarPaquete(paquete: PaquetePublicado) {
+    import('sweetalert2').then((Swal) => {
+      Swal.default.fire({
+        title: '¿Cancelar y Reembolsar?',
+        text: 'ESTO DEVOLVERÁ EL DINERO A TODOS LOS USUARIOS. Acción irreversible.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#E53935',
+        confirmButtonText: 'SÍ, REEMBOLSAR',
+        cancelButtonText: 'No, volver'
+      }).then(result => {
+        if (result.isConfirmed) {
+          console.log('🚨 Iniciando reembolso para:', paquete.id_paquete_publicado);
+          this.paquetePublicadoService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+            next: () => {
+              this.toastService.success('Paquete cancelado y reembolsos procesados');
+              this.loadPaquetesPorCerrarse();
+            },
+            error: () => this.toastService.error('Error al procesar el reembolso')
+          });
+        }
+      });
+    });
+  }
+
+  duplicarPaquete(paquete: PaquetePublicado) {
+    console.log('📋 Duplicando publicación desde perfil:', paquete.id_paquete_publicado);
+    this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: () => {
+        this.toastService.success('Publicación duplicada con éxito');
+        this.loadPaquetesPorCerrarse();
+      },
+      error: () => this.toastService.error('Error al duplicar la publicación')
     });
   }
 

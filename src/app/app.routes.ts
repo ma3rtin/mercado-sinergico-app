@@ -21,6 +21,8 @@ import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
 import { MainLayout } from './layouts/main-layout/main-layout';
 import { GestionarVariantesComponent } from './pages/gestionar-variantes/gestionar-variantes';
+import { AdministrarPaquetesComponent } from './pages/admin/components/administrar-paquetes/administrar-paquetes';
+import { EditarPaqueteBaseComponent } from './pages/admin/components/editar-paquete-base/editar-paquete-base';
 
 export const routes: Routes = [
 
@@ -62,7 +64,9 @@ export const routes: Routes = [
           { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
           { path: 'administrar-productos', component: AdministrarProductosComponent },
           { path: 'editar-producto/:id', component: EditarProductoComponent },
-          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent }
+          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent },
+          { path: 'administrar-paquetes', component: AdministrarPaquetesComponent },
+          { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent }
         ]
       }
 

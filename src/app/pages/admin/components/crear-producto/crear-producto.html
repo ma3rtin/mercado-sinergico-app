@@ -1,7 +1,16 @@
 <!-- crear-producto.html -->
-<app-admin-create-wrapper
-  [titulo]="'Crear producto'"
->
+<app-admin-create-wrapper [titulo]="'Crear producto'">
+  <div class="relative">
+    <!-- Botón Volver -->
+    <div class="absolute -top-12 left-0">
+      <app-button 
+        variant="ghost" 
+        size="sm" 
+        (buttonClick)="router.navigate(['/admin/perfil'])"
+        [iconStart]="'arrowLeft'">
+        Volver al perfil
+      </app-button>
+    </div>
 
     <!-- 🎯 Tipo de Producto -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -379,4 +388,5 @@
       (close)="closeCreateModal()"
       (plantillaCreated)="onPlantillaCreated($event)"
     />
+  </div>
 </app-admin-create-wrapper>

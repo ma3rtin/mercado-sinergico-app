@@ -1,18 +1,24 @@
-<!-- Contenedor general -->
-<div class="min-h-[80vh] flex justify-center pt-6 pb-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-    <div class="w-full max-w-3xl bg-white p-6 sm:p-8 rounded-2xl shadow-md">
-        <h1 class="text-2xl font-bold mb-6 text-center text-gray-900 font-display">
-            Publicar paquete
-        </h1>
-        <hr class="border-gray-300 mb-6" />
+<app-admin-create-wrapper titulo="Publicar paquete">
+    <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
+        <!-- Botón Volver -->
+        <div class="absolute -top-12 left-0">
+            <app-button 
+            variant="ghost" 
+            size="sm"
+            (buttonClick)="router.navigate(['/admin/administrar-paquetes'])">
+            <app-icon name="arrowLeft" size="18" class="mt-1" />
+            Volver a gestionar paquetes
+            </app-button>
+
+        </div>
 
         <!-- Buscador de paquete base -->
         <div class="mb-6 relative" #scrollContainer>
             <label class="block text-gray-700 font-body mb-1">Paquete base</label>
-
             <input #inputBusqueda type="text" [(ngModel)]="busqueda" (input)="buscarPaquetes()" (focus)="abrirLista()"
                 placeholder="Buscar paquete base..."
                 class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600" />
+            <!-- ... resto del buscador ... -->
 
             <!-- Lista desplegable -->
             @if (mostrandoResultados() && resultadosBusqueda().length > 0) {
@@ -85,4 +91,3 @@
             <app-button variant="primary" label="Publicar paquete" (buttonClick)="publicarPaquete()"></app-button>
         </div>
     </div>
-</div>

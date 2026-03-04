@@ -9,6 +9,7 @@ import {
   signal,
   inject,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
@@ -16,11 +17,13 @@ import { ZonaService } from '@app/services/zona/zona.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
+import { IconComponent } from "@app/shared/icono/icono";
 
 @Component({
   selector: 'app-publicar-paquete',
   standalone: true,
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule, ButtonComponent, AdminCreateWrapperComponent, IconComponent],
   templateUrl: './publicar-paquete.html',
 })
 export class PublicarPaqueteComponent implements OnInit {
@@ -58,7 +61,9 @@ export class PublicarPaqueteComponent implements OnInit {
     private paqueteBaseService: PaqueteBaseService,
     private zonaService: ZonaService,
     private paquetePublicadoService: PaquetePublicadoService,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private route: ActivatedRoute,
+    public router: Router
   ) {
     // ⚡ Efecto reactivo: filtra automáticamente al cambiar la búsqueda
     effect(() => {
@@ -72,6 +77,14 @@ export class PublicarPaqueteComponent implements OnInit {
   ngOnInit(): void {
     this.cargarZonas();
     this.cargarPaquetesIniciales();
+    
+    // 🔍 Capturar baseId de la URL para pre-selección
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const baseId = params['baseId'];
+      if (baseId) {
+        this.paqueteBaseSeleccionado.set(Number(baseId));
+      }
+    });
   }
 
   // --- Cargar primeros 10 paquetes base ---
@@ -83,8 +96,15 @@ export class PublicarPaqueteComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
-          const primeros = data.slice(0, 10);
           this.paquetesBase.set(data);
+          
+          // Si hay un paquete pre-seleccionado, buscar su nombre para el input
+          if (this.paqueteBaseSeleccionado()) {
+            const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
+            if (pre) this.busqueda.set(pre.nombre);
+          }
+
+          const primeros = data.slice(0, 10);
           this.resultadosBusqueda.set(primeros);
           this.cargando.set(false);
         },
@@ -203,6 +223,8 @@ export class PublicarPaqueteComponent implements OnInit {
         next: () => {
           this.toast.success('Paquete publicado correctamente 🎉', 'Éxito');
           this.reiniciarFormulario();
+          // 🚀 Redirigir de vuelta a la gestión
+          this.router.navigate(['/admin/administrar-paquetes']);
         },
         error: (err) => {
           console.error('Error al publicar paquete:', err);

@@ -77,4 +77,14 @@ export class PaqueteBaseService extends ApiService {
       })
     );
   }
+
+  duplicarPaquete(id: number): Observable<PaqueteBase> {
+    return this.post<PaqueteBase>(`paquetes-base/${id}/duplicar`, {}).pipe(
+      timeout(60000),
+      catchError((error) => {
+        console.error('Error en PaqueteBaseService.duplicarPaquete:', error);
+        return throwError(() => error);
+      })
+    );
+  }
 }
