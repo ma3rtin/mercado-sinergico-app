@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
@@ -12,7 +11,6 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
   imports: [CommonModule, ButtonComponent, IconComponent],
   templateUrl: './paquete-usuario-card.html',
 })
