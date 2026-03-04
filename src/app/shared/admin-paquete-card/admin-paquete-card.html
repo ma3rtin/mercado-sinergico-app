@@ -14,12 +14,12 @@
     <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1">
             <span [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
-                {{ paquete.estado.nombre || 'Sin Estado' }}
+                {{ paquete.estado?.nombre || 'Estado desconocido' }}
             </span>
             <span class="w-1 h-1 rounded-full bg-gray-300"></span>
             <span class="text-xs text-gray-400 flex items-center gap-1">
                 <app-icon name="mapPin" size="12" />
-                {{ paquete.zona?.nombre || 'Sin Zona' }}
+                {{ paquete.zona?.nombre || 'Zona no definida' }}
             </span>
         </div>
         <h3 class="text-lg font-display text-gray-900 truncate mb-2 group-hover:text-primary transition-colors">

@@ -71,7 +71,7 @@
                 <img [src]="getImagenUrl(paquete)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div class="absolute bottom-3 left-4 text-white">
-                  <span class="text-xs uppercase tracking-wider font-medium opacity-80">{{ paquete.categoria.nombre }}</span>
+                  <span class="text-xs uppercase tracking-wider font-medium opacity-80">{{ paquete.categoria?.nombre || 'General' }}</span>
                   <h3 class="font-display text-lg truncate">{{ paquete.nombre }}</h3>
                 </div>
               </div>
