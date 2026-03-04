@@ -13,9 +13,19 @@
 
   <!-- 📌 HEADER -->
   <div class="flex items-center justify-between">
-    <h3 class="text-lg font-semibold text-gray-900">
-      Elegí las opciones
-    </h3>
+    <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+      <h3 class="text-lg font-semibold text-gray-900 leading-none">
+        Elegí las opciones
+      </h3>
+
+      <!-- Botón limpiar selección -->
+      @if (hayAlgunaSeleccion()) {
+      <button type="button" (click)="resetear()"
+        class="cursor-pointer font-medium text-secondary hover:text-secondary-dark transition-colors translate-y-[1px]">
+        Limpiar selección
+      </button>
+      }
+    </div>
 
     <!-- Badge de progreso (solo mobile) -->
     @if (caracteristicasFaltantes() > 0) {
@@ -36,9 +46,11 @@
 
   <!-- 📊 RESUMEN DE SELECCIÓN (Desktop) -->
   @if (habilitado() && todasSeleccionadas()) {
-  <div class="hidden sm:flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-    <app-icon name="CheckCircle" class="w-5 h-5 text-green-600 flex-shrink-0" />
-    <span class="text-sm font-medium text-green-800">
+  <div class="hidden sm:flex items-center gap-2 p-3 rounded-lg border"
+    [ngClass]="varianteValida() ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'">
+    <app-icon [name]="varianteValida() ? 'CheckCircle' : 'AlertTriangle'" class="w-5 h-5 flex-shrink-0"
+      [ngClass]="varianteValida() ? 'text-green-600' : 'text-red-600'" />
+    <span class="text-sm font-medium" [ngClass]="varianteValida() ? 'text-green-800' : 'text-red-800'">
       Seleccionaste: {{ textoVariantesSeleccionadas() }}
     </span>
   </div>
@@ -74,14 +86,18 @@
       <!-- Grid de opciones -->
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
         @for (opcion of caracteristica.opciones; track opcion.id) {
-        <button type="button" [disabled]="!habilitado()" [class.opacity-50]="!habilitado()"
-          [class.cursor-not-allowed]="!habilitado()" [class]="getClasesBotonOpcion(caracteristica.id!, opcion.id!)"
+        <button type="button" [disabled]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
+          [class.opacity-40]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
+          [class.cursor-not-allowed]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
+          [class]="getClasesBotonOpcion(caracteristica.id!, opcion.id!)"
+          [title]="!esOpcionCombinable(caracteristica.id!, opcion.id!) ? 'Combinación agotada o inexistente' : ''"
           (click)="seleccionarOpcion(caracteristica.id!, opcion.id!)">
 
           <!-- Contenido del botón -->
           <div class="flex items-center justify-center gap-2">
             <!-- Texto de la opción -->
-            <span class="text-sm sm:text-base truncate">
+            <span class="text-sm sm:text-base truncate"
+              [class.line-through]="!esOpcionCombinable(caracteristica.id!, opcion.id!)">
               {{ opcion.nombre }}
             </span>
 
@@ -130,15 +146,29 @@
   </div>
   }
 
-  <!-- ✅ CONFIRMACIÓN (opcional, decorativo) -->
+  <!-- ✅ CONFIRMACIÓN O ❌ ADVERTENCIA (Ambos requieren todas seleccionadas) -->
   @if (todasSeleccionadas()) {
   <div class="hidden sm:block">
+    <!-- Check de éxito solo si existe la variante -->
+    @if (varianteValida()) {
     <div class="flex items-center gap-2 text-sm text-gray-600">
       <app-icon name="Check" class="w-4 h-4 text-green-500" />
       <span>
         Todas las opciones seleccionadas. Podés continuar con tu compra.
       </span>
     </div>
+    }
+
+    <!-- Advertencia de Variante inexistente -->
+    @if (!varianteValida()) {
+    <div class="flex items-center gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 mt-4">
+      <app-icon name="AlertTriangle" class="w-5 h-5 flex-shrink-0" />
+      <span>
+        Esta combinación de opciones se encuentra <b>agotada o no existe</b> para este producto. Por favor, selecciona
+        otra.
+      </span>
+    </div>
+    }
   </div>
   }
 </div>

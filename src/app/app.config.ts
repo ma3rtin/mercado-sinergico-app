@@ -96,9 +96,7 @@ featherFilePlus,
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideAnimations(), // ✅ Necesario para ngx-sonner
-
-    // 🔥 YA NO NECESITAS provideToastr - eliminalo
+    provideAnimations(),
 
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 

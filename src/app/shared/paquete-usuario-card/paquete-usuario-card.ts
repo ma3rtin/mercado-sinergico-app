@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inj
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,6 +12,7 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
+  imports: [CommonModule, ButtonComponent, IconComponent],
   imports: [CommonModule, ButtonComponent, IconComponent],
   templateUrl: './paquete-usuario-card.html',
 })
@@ -158,6 +160,19 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
+  getIconoEstado(estado?: string): string {
+    if (!estado) return 'Clock';
+    const e = estado.toLowerCase();
+
+    if (e.includes('en preparación')) return 'Package';
+    if (e.includes('enviado')) return 'Truck';
+    if (e.includes('entregado')) return 'CheckCircle';
+    if (e.includes('cancelado')) return 'XCircle';
+    if (e.includes('activo')) return 'CheckCircle';
+
+    return 'Clock'; // Pendiente u otros
+  }
+
   obtenerImagenUrl(): string {
     return (
       this.paquete?.imagen_url ||
@@ -186,7 +201,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id // por si viene directo del backend
     };
 
     this.aumentarCantidad.emit(limpio);
@@ -197,7 +213,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const limpio = {
       ...prod,
-      id_producto: prod.productoId ?? prod.id_producto
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id
     };
 
     this.disminuirCantidad.emit(limpio);
@@ -205,9 +222,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   get puedeSalirDelPaquete(): boolean {
     const estado = this.pedido?.estado?.nombre?.toLowerCase();
-    return estado === 'pendiente'
-      || estado === 'confirmado'
-      || estado === 'pagado';
+    return estado === 'pendiente';
   }
 
   onSalirDelPaquete(): void {
@@ -221,8 +236,9 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   onEliminarProducto(prod: ProductoEnPedido): void {
     this.eliminarProducto.emit({
       ...prod,
-      id_producto: prod.id_producto ?? prod.id_producto
-    });
+      id_producto: prod.id_producto ?? prod.id_producto,
+      id_detalle: (prod as any).id_detalle ?? (prod as any).id
+    } as any);
   }
 
   formatVariante(variante: any): string {
