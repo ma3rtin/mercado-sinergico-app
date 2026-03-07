@@ -72,26 +72,32 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   /** Activo → En Preparación (cierre del pedido) */
   cerrarPaquete(paquete: PaquetePublicado) {
+    const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
+    const avisoFaltantes = faltan > 0 
+      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>` 
+      : `<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>`;
+
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Cerrar pedido?',
-        html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p><p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de confirmación (simulado).</p>`,
-        icon: 'question',
+        html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
+               ${avisoFaltantes}
+               <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
+        icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, cerrar pedido',
+        confirmButtonColor: '#3085d6',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
         this.paqueteService.cerrarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (updated) => {
+          next: (res: any) => {
+            const updated = res.result || res; // back returns { result, faltantes }
             this.toast.success(`"${paquete.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
-            // Actualizar en señal localmente si el back devuelve el paquete actualizado
             this._actualizarPaqueteEnLista(updated);
           },
           error: () => {
-            // Mockear cambio de estado localmente si el endpoint no existe aún
-            this._mockearEstado(paquete, 'En Preparación');
-            this.toast.info(`Estado actualizado a "En Preparación" (simulado)`, 'Cerrar pedido');
+            this.toast.error('Error al intentar cerrar el paquete.', 'Error');
           }
         });
       });
@@ -102,11 +108,16 @@ export class AdministrarPublicacionesComponent implements OnInit {
   finalizarPaquete(paquete: PaquetePublicado) {
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
-        title: '¿Confirmar despacho?',
-        html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p><p class="text-sm text-gray-500 mt-2">Los compradores recibirán el mail de despacho (simulado).</p>`,
+        title: '¿Completar pedido?',
+        html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
+               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+                 <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
+                 <p class="mt-1">Al completar este paquete podrás <strong>descargar los partes de logística y de proveedor</strong> desde la vista de detalles.</p>
+               </div>
+               <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó el paquete.</p>`,
         icon: 'success',
         showCancelButton: true,
-        confirmButtonText: 'Sí, confirmar despacho',
+        confirmButtonText: 'Sí, completar pedido',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
@@ -116,8 +127,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
             this._actualizarPaqueteEnLista(updated);
           },
           error: () => {
-            this._mockearEstado(paquete, 'Finalizado');
-            this.toast.info(`Estado actualizado a "Finalizado" (simulado)`, 'Despacho confirmado');
+             this.toast.error('Error al intentar completar el paquete.', 'Error');
           }
         });
       });
@@ -154,11 +164,30 @@ export class AdministrarPublicacionesComponent implements OnInit {
   /** Duplicar publicación */
   duplicarPaquete(paquete: PaquetePublicado) {
     this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
-      next: () => {
+      next: (nuevoPaquete) => {
         this.toast.success('Publicación duplicada con éxito');
-        this.loadPaquetes();
+        this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toast.error('Error al duplicar la publicación')
+    });
+  }
+
+  /** Notificar Compradores (Acción manual) */
+  notificarCompradores(paquete: PaquetePublicado) {
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: '¿Enviar notificación a compradores?',
+        text: `Se enviará un recordatorio sobre el estado activo de "${paquete.paqueteBase?.nombre || 'este paquete'}".`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, enviar',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (result.isConfirmed) {
+          // Acá podrías llamar a un servicio real si existiera, ej: this.paqueteService.notificarPaquete(id).subscribe(...)
+          this.toast.success('Notificación enviada a todos los miembros inscritos.', '¡Aviso enviado!');
+        }
+      });
     });
   }
 

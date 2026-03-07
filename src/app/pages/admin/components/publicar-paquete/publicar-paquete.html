@@ -1,5 +1,21 @@
-<app-admin-create-wrapper titulo="Publicar paquete">
+<app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación duplicada' : 'Publicar paquete'">
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
+        <!-- Banner Edición / Duplicado -->
+        @if (isEditMode()) {
+        <div class="mb-6 p-4 rounded-lg flex items-start gap-3" 
+             [class.bg-blue-50]="!isDuplicate()" [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
+             [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()" [class.text-amber-800]="isDuplicate()">
+            <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
+            <div>
+                <p class="font-bold text-sm">
+                    {{ isDuplicate() ? 'Estás editando una publicación duplicada' : 'Estás editando una publicación' }}
+                </p>
+                <p class="text-xs mt-1">
+                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes nuevas fechas de inicio y fin para que el paquete sea válido.' : 'Asegúrate de establecer correctamente las fechas.' }}
+                </p>
+            </div>
+        </div>
+        }
         <!-- Botón Volver -->
         <div class="absolute -top-12 left-0">
             <app-button 
@@ -88,6 +104,6 @@
 
         <!-- Botón -->
         <div class="flex justify-center">
-            <app-button variant="primary" label="Publicar paquete" (buttonClick)="publicarPaquete()"></app-button>
+            <app-button variant="primary" [label]="isEditMode() ? 'Guardar cambios' : 'Publicar paquete'" (buttonClick)="publicarPaquete()"></app-button>
         </div>
     </div>

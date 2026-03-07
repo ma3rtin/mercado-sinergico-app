@@ -23,6 +23,7 @@ import { AuthService } from './services/auth/auth.service';
 // 🎨 ngicons
 import { NgIconsModule } from '@ng-icons/core';
 import {
+  featherLock,
   featherChevronRight,
   featherChevronLeft,
   featherArrowRight,
@@ -178,6 +179,7 @@ export const appConfig: ApplicationConfig = {
         featherMinusCircle,
         featherAlertOctagon,
         featherFilePlus,
+        featherLock
       })
     ),
   ],

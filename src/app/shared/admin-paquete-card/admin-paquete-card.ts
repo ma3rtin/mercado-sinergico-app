@@ -10,7 +10,7 @@ import { ToastService } from '@app/services/toast/toast.service';
   selector: 'app-admin-paquete-card',
   standalone: true,
   imports: [CommonModule, IconComponent, ButtonComponent],
-  templateUrl: './admin-paquete-card.html',
+  templateUrl:'./admin-paquete-card.html',
 })
 export class AdminPaqueteCard {
   @Input({ required: true }) paquete!: PaquetePublicado;
@@ -99,36 +99,36 @@ export class AdminPaqueteCard {
 
   getStatusColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')           return 'text-green-700';
-    if (e === 'pendiente')        return 'text-yellow-700';
-    if (e === 'en preparación')   return 'text-blue-700';
-    if (e === 'finalizado')       return 'text-secondary';
-    if (e === 'cancelado')        return 'text-red-700';
-    return 'text-gray-600';
+    if (e === 'activo')           return 'text-status-active-text';
+    if (e === 'pendiente')        return 'text-status-pending-text';
+    if (e === 'en preparación')   return 'text-status-info-text';
+    if (e === 'finalizado')       return 'text-brand-secondary';
+    if (e === 'cancelado')        return 'text-error';
+    return 'text-text-secondary';
   }
 
   getStatusBgColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')           return 'bg-green-100';
-    if (e === 'pendiente')        return 'bg-yellow-100';
-    if (e === 'en preparación')   return 'bg-blue-100';
-    if (e === 'finalizado')       return 'bg-secondary/10';
-    if (e === 'cancelado')        return 'bg-red-100';
-    return 'bg-gray-100';
+    if (e === 'activo')           return 'bg-status-active-bg';
+    if (e === 'pendiente')        return 'bg-status-pending-bg';
+    if (e === 'en preparación')   return 'bg-status-info-bg';
+    if (e === 'finalizado')       return 'bg-status-neutral-bg';
+    if (e === 'cancelado')        return 'bg-error-light';
+    return 'bg-status-neutral-bg';
   }
 
   getUrgenciaColor(): string {
     const dias = this.getDiasRestantes();
-    if (dias <= 2) return 'text-red-600';
-    if (dias <= 5) return 'text-orange-500';
-    return 'text-gray-500';
+    if (dias <= 2) return 'text-error';
+    if (dias <= 5) return 'text-warning';
+    return 'text-text-muted';
   }
 
   getUrgenciaBg(): string {
     const dias = this.getDiasRestantes();
-    if (dias <= 2) return 'bg-red-100';
-    if (dias <= 5) return 'bg-orange-100';
-    return 'bg-gray-100';
+    if (dias <= 2) return 'bg-error-light';
+    if (dias <= 5) return 'bg-warning-light';
+    return 'bg-status-neutral-bg';
   }
 
   formatearFecha(fecha: Date | string | undefined): string {
