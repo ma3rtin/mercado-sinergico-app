@@ -1,7 +1,16 @@
 <!-- crear-producto.html -->
-<app-admin-create-wrapper
-  [titulo]="'Crear producto'"
->
+<app-admin-create-wrapper [titulo]="'Crear producto'">
+  <div class="relative">
+    <!-- Botón Volver -->
+    <div class="absolute -top-12 left-0">
+      <app-button 
+        variant="ghost" 
+        size="sm" 
+        (buttonClick)="router.navigate(['/admin/perfil'])"
+        [iconStart]="'arrowLeft'">
+        Volver al perfil
+      </app-button>
+    </div>
 
     <!-- 🎯 Tipo de Producto -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -34,10 +43,10 @@
               ℹ️ Información importante
             </p>
             <p class="text-xs text-black">
-              @if (tipoProducto() === 'ENERGETICO' && !selectedTemplate()) {
+              @if (tipoProducto() === TipoPaquete.ENERGICO && !selectedTemplate()) {
                 Este producto tendrá control de stock general. Si agregás una plantilla, el stock se manejará por variantes.
               }
-              @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+              @if (tipoProducto() === TipoPaquete.ENERGICO && selectedTemplate()) {
                 El stock se configurará después por cada variante.
               }
               @if (tipoProducto() === 'SINERGICO') {
@@ -222,10 +231,10 @@
                   Stock gestionado automáticamente
                 </p>
                 <p class="text-xs text-gray-600">
-                  @if (tipoProducto() === 'SINERGICO') {
+                  @if (tipoProducto() === TipoPaquete.SINERGICO) {
                     Los productos sinérgicos no requieren control de stock.
                   }
-                  @if (tipoProducto() === 'ENERGETICO' && selectedTemplate()) {
+                  @if (tipoProducto() === TipoPaquete.ENERGICO && selectedTemplate()) {
                     El stock se configurará por variante después de crear el producto.
                   }
                 </p>
@@ -379,4 +388,5 @@
       (close)="closeCreateModal()"
       (plantillaCreated)="onPlantillaCreated($event)"
     />
+  </div>
 </app-admin-create-wrapper>

@@ -11,6 +11,9 @@ import {
   featherMenu,
   featherX,
   featherHome,
+  featherPlus,
+  featherMoreVertical,
+
 
   // 🔍 Búsqueda y Filtros
   featherSearch,
@@ -108,7 +111,11 @@ import {
   featherList,
   featherMinusCircle,
   featherAlertOctagon,
-
+  featherLock,
+  featherHash,
+  featherTruck,
+  featherInbox,
+  featherImage,
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -128,6 +135,8 @@ export class IconsService {
     menu: featherMenu,
     close: featherX,
     home: featherHome,
+    plus: featherPlus,
+    moreVertical: featherMoreVertical,
 
     // 🔍 Búsqueda
     search: featherSearch,
@@ -206,6 +215,11 @@ export class IconsService {
     bell: featherBell,
     zap: featherZap,
     layers: featherLayers,
+    lock: featherLock,
+    hash: featherHash,
+    truck: featherTruck,
+    inbox: featherInbox,
+    image: featherImage,
 
     // 📋 Documentos
     file: featherFile,
@@ -245,6 +259,8 @@ export class IconsService {
     List: featherList,
     MinusCircle: featherMinusCircle,
     AlertOctagon: featherAlertOctagon,
+    Plus: featherPlus,
+    MoreVertical: featherMoreVertical,
 
 
   };

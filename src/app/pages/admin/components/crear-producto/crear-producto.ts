@@ -55,7 +55,7 @@ interface ImageSlot {
 export class CrearProductoComponent implements OnInit {
   // 🧩 Inyecciones modernas
   private fb = inject(FormBuilder);
-  private router = inject(Router);
+  public router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private plantillaService = inject(PlantillaService);
   private marcaService = inject(MarcaService);
@@ -89,7 +89,7 @@ export class CrearProductoComponent implements OnInit {
   };
 readonly tipoMap: Record<TipoPaquete, string> = {
   [TipoPaquete.SINERGICO]: 'SINERGICO',
-  [TipoPaquete.ENERGICO]: 'ENERGETICO',
+  [TipoPaquete.ENERGICO]: 'Enérgico',
   [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
 };
 
