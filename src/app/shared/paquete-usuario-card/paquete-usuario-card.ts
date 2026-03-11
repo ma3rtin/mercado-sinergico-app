@@ -165,7 +165,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (e.includes('en preparación')) return 'Package';
     if (e.includes('enviado')) return 'Truck';
     if (e.includes('entregado')) return 'CheckCircle';
-    if (e.includes('cancelado')) return 'XCircle';
+    if (e.includes('cancelado')) return 'error';
     if (e.includes('activo')) return 'CheckCircle';
 
     return 'Clock'; // Pendiente u otros

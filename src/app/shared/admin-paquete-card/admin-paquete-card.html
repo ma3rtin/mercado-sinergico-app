@@ -26,7 +26,7 @@
     <!-- Banner: Cancelado -->
     @if (esCancelado) {
         <div class="flex items-center gap-2 bg-error-light border-b border-error/20 px-4 py-2 text-error">
-            <app-icon name="xCircle" size="16" />
+            <app-icon name="x" size="16" />
             <span class="text-xs font-bold uppercase tracking-widest">Cancelado — Reembolso ejecutado</span>
         </div>
     }
@@ -101,7 +101,12 @@
 
                 <!-- Solo duplicar: estados terminales -->
                 @if (esFinalizado || esCancelado) {
-                    <div class="flex items-center justify-end">
+                    <div class="flex items-center justify-end gap-2">
+                        <button (click)="onViewDetail($event)"
+                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-brand-primary hover:text-white hover:bg-brand-primary rounded-lg transition-colors border border-brand-primary/30">
+                            <app-icon name="externalLink" size="15" />
+                            Ver detalle
+                        </button>
                         <button (click)="onDuplicate($event)"
                             class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
                             <app-icon name="copy" size="15" />
@@ -113,6 +118,14 @@
                 <!-- Botón kebab con dropdown para estados activos -->
                 @if (!esFinalizado && !esCancelado) {
                     <div class="flex items-center justify-end gap-2">
+
+                        <!-- Botón Ver detalle -->
+                        <button (click)="onViewDetail($event)"
+                            class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all text-brand-primary border-brand-primary/30 hover:bg-brand-primary hover:text-white"
+                            title="Ver detalle">
+                            <app-icon name="externalLink" size="14" />
+                            <span class="text-xs">Ver detalle</span>
+                        </button>
 
                         <!-- Trigger del dropdown -->
                         <button

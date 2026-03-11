@@ -50,8 +50,21 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   puedeEnviarMail = computed(() => {
     const nombre = this.paquete()?.estado?.nombre?.toLowerCase() ?? '';
-    return nombre === 'cerrado' || nombre === 'completo';
+    return nombre === 'cerrado' || nombre === 'completo' || nombre === 'en preparación' || nombre === 'finalizado';
   });
+
+  // ── Estado del paquete (para botones condicionales) ──────────
+  esActivo = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'activo');
+  esPendiente = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'pendiente');
+  esEnPreparacion = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'en preparación');
+  esFinalizado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'finalizado');
+  esCancelado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'cancelado');
+
+  puedeEditar = computed(() => this.esActivo() || this.esPendiente());
+  puedeCerrar = computed(() => this.esActivo());
+  puedeNotificar = computed(() => this.esActivo());
+  puedeFinalizar = computed(() => this.esEnPreparacion());
+  puedeCancelar = computed(() => !this.esCancelado() && !this.esFinalizado());
 
   montoTotal = computed(() => {
     const p = this.paquete();
@@ -121,6 +134,125 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   cerrarDetallePedido() {
     this.pedidoSeleccionado.set(null);
+  }
+
+  // ── Acciones de gestión de paquete ──────────────────────────
+
+  editarPublicacion() {
+    const id = this.paquete()?.id_paquete_publicado;
+    if (!id) return;
+    this.router.navigate(['/admin/publicar-paquete'], { queryParams: { id, edit: true } });
+  }
+
+  cerrarPaquete() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+    const faltan = (p.cant_productos || 0) - (p.cant_usuarios_registrados || 0);
+    const avisoFaltantes = faltan > 0
+      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : `<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>`;
+
+    Swal.fire({
+      title: '¿Cerrar pedido?',
+      html: `<p>Se cerrará <strong>${p.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
+             ${avisoFaltantes}
+             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cerrar pedido',
+      confirmButtonColor: '#3085d6',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      this.paqueteService.cerrarPaquete(p.id_paquete_publicado!).subscribe({
+        next: () => {
+          this.toast.success(`"${p.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
+          this.loadPaquete(p.id_paquete_publicado!);
+        },
+        error: () => this.toast.error('Error al intentar cerrar el paquete.', 'Error')
+      });
+    });
+  }
+
+  finalizarPaquete() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+    Swal.fire({
+      title: '¿Completar pedido?',
+      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
+             <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+               <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
+               <p class="mt-1">Al completar podrás <strong>descargar los partes de logística y de proveedor</strong>.</p>
+             </div>
+             <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó.</p>`,
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, completar pedido',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      this.paqueteService.completarPaquete(p.id_paquete_publicado!).subscribe({
+        next: () => {
+          this.toast.success(`"${p.paqueteBase?.nombre}" finalizado`, 'Paquete completado');
+          this.loadPaquete(p.id_paquete_publicado!);
+        },
+        error: () => this.toast.error('Error al intentar completar el paquete.', 'Error')
+      });
+    });
+  }
+
+  cancelarPaquete() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+    Swal.fire({
+      title: '¿Cancelar y reembolsar?',
+      html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>`,
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#E53935',
+      confirmButtonText: 'SÍ, CANCELAR',
+      cancelButtonText: 'No, volver'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      this.paqueteService.cancelarPaquete(p.id_paquete_publicado!).subscribe({
+        next: () => {
+          this.toast.success(`"${p.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
+          this.loadPaquete(p.id_paquete_publicado!);
+        },
+        error: () => this.toast.error('Error al intentar cancelar el paquete.', 'Error')
+      });
+    });
+  }
+
+  duplicarPaquete() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+    this.paqueteService.duplicarPaquete(p.id_paquete_publicado).subscribe({
+      next: (nuevoPaquete) => {
+        this.toast.success('Publicación duplicada con éxito');
+        this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
+      },
+      error: () => this.toast.error('Error al duplicar la publicación')
+    });
+  }
+
+  notificarCompradores() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+    Swal.fire({
+      title: '¿Enviar notificación a compradores?',
+      text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${p.paqueteBase?.nombre}".`,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+      this.paqueteService.notificarCompradores(p.id_paquete_publicado!).subscribe({
+        next: (res) => this.toast.success(`Notificación enviada a ${res.notificados} comprador/es.`, '¡Aviso enviado!'),
+        error: () => this.toast.error('Error al enviar la notificación.', 'Error')
+      });
+    });
   }
 
   // ── Acciones ──────────────────────────────────────────────────
@@ -348,5 +480,16 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   volver() {
     this.router.navigate(['/admin/administrar-publicaciones']);
+  }
+
+  getEstadoClasesStr(estadoNombre?: string): string {
+    switch (estadoNombre?.toLowerCase().trim()) {
+      case 'activo':         return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'pendiente':      return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'finalizado':     return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado':      return 'bg-red-50 text-red-700 border-red-200';
+      default:               return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+    }
   }
 }

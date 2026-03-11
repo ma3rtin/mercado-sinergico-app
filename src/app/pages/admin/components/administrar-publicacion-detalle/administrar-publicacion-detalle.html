@@ -34,7 +34,7 @@
         <!-- ── HEADER ─────────────────────────────────────── -->
         <div class="bg-bg-surface rounded-2xl shadow-sm overflow-hidden mb-6 border border-border-default">
           <!-- Banner con gradiente -->
-          <div class="h-3 bg-gradient-to-r from-brand-secondary to-brand-primary"></div>
+          <div class="h-3 bg-primary"></div>
 
           <div class="p-6">
             <div class="flex flex-col lg:flex-row gap-6">
@@ -281,134 +281,300 @@
               (click)="cerrarDetallePedido()">
 
               <!-- Backdrop -->
-              <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+              <div class="absolute inset-0 bg-black/65 backdrop-blur-sm"></div>
 
-              <!-- Panel -->
+              <!-- Panel ANCHO -->
               <div
-                class="relative w-full max-w-lg bg-bg-surface rounded-2xl shadow-2xl border border-border-default overflow-hidden"
+                class="relative w-full max-w-2xl bg-bg-surface rounded-2xl shadow-2xl border border-border-default overflow-hidden flex flex-col max-h-[90vh]"
                 (click)="$event.stopPropagation()">
 
-                <!-- Franja de color superior -->
-                <div class="h-1.5 bg-gradient-to-r from-brand-secondary to-brand-primary"></div>
-
-                <!-- Encabezado del modal -->
-                <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-border-default">
+                <!-- ── HEADER CON GRADIENTE ───────────────────────── -->
+                <div class="bg-gradient-to-r from-brand-secondary to-brand-primary px-6 pt-5 pb-4 flex items-start justify-between gap-4 flex-shrink-0">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-brand-primary/10 flex items-center justify-center">
-                      <app-icon name="shoppingCart" size="18" class="text-brand-primary mt-[1px]" />
+                    <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                      <app-icon name="shoppingCart" size="22" class="text-white mt-[2px]" />
                     </div>
                     <div>
-                      <h3 class="text-base font-display text-text-primary">Detalle del pedido #{{ pedidoSeleccionado()!.id_pedido }}</h3>
-                      <p class="text-xs text-text-muted">{{ pedidoSeleccionado()!.fecha ? formatFecha(pedidoSeleccionado()!.fecha) : 'Fecha no disponible' }}</p>
+                      <h3 class="text-xl font-display text-white font-bold">
+                        Pedido #{{ pedidoSeleccionado()!.id_pedido }}
+                      </h3>
+                      <p class="text-white/70 text-xs mt-0.5 flex items-center gap-1.5">
+                        <app-icon name="calendar" size="12" class="mt-[1px]" />
+                        {{ pedidoSeleccionado()!.fecha ? formatFecha(pedidoSeleccionado()!.fecha) : 'Fecha no disponible' }}
+                        <span class="mx-1 opacity-50">·</span>
+                        Paquete ID: {{ paquete()?.id_paquete_publicado }}
+                      </p>
                     </div>
                   </div>
-                  <button
-                    (click)="cerrarDetallePedido()"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl text-text-muted hover:text-text-primary hover:bg-bg-app transition-all">
-                    <app-icon name="x" size="18" class="mt-[1px]" />
-                  </button>
+                  <div class="flex items-center gap-3 flex-shrink-0">
+                    <!-- Badge estado en el header -->
+                    <span [class]="'px-3 py-1.5 rounded-full text-xs font-bold border ' + getEstadoPedidoClasses(pedidoSeleccionado()!.estadoId)">
+                      {{ getEstadoPedidoLabel(pedidoSeleccionado()!.estadoId) }}
+                    </span>
+                    <button
+                      (click)="cerrarDetallePedido()"
+                      class="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all">
+                      <app-icon name="x" size="18" class="mt-[1px]" />
+                    </button>
+                  </div>
                 </div>
 
-                <!-- Cuerpo del modal -->
-                <div class="px-6 py-5 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+                <!-- ── CUERPO con scroll ──────────────────────────── -->
+                <div class="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
 
-                  <!-- Estado del pedido -->
-                  <div class="flex items-center justify-between">
-                    <span class="text-sm text-text-secondary font-medium">Estado del pedido</span>
-                    <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoPedidoClasses(pedidoSeleccionado()!.estadoId)">
-                      {{ getEstadoPedidoLabel(pedidoSeleccionado()!.estadoId) }}
+                  <!-- SECCIÓN: Datos del comprador -->
+                  <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden">
+                    <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                        <app-icon name="user" size="15" class="text-brand-secondary mt-[1px]" />
+                      </div>
+                      <p class="text-sm font-semibold text-text-primary">Datos del comprador</p>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-border-default">
+                      <!-- Nombre -->
+                      <div class="px-4 py-3 flex flex-col gap-0.5">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">Nombre completo</span>
+                        <span class="text-sm font-semibold text-text-primary">{{ pedidoSeleccionado()!.usuario?.nombre || '–' }}</span>
+                      </div>
+                      <!-- Email -->
+                      <div class="px-4 py-3 flex flex-col gap-0.5">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">Email</span>
+                        <span class="text-sm font-medium text-text-primary break-all">{{ pedidoSeleccionado()!.usuario?.email || '–' }}</span>
+                      </div>
+                      <!-- Teléfono -->
+                      <div class="px-4 py-3 flex flex-col gap-0.5 border-t border-border-default">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">Teléfono</span>
+                        <span class="text-sm font-medium text-text-primary">
+                          @if (pedidoSeleccionado()!.usuario?.telefono) {
+                            <a [href]="'tel:' + pedidoSeleccionado()!.usuario!.telefono" class="text-brand-primary hover:underline">
+                              {{ pedidoSeleccionado()!.usuario!.telefono }}
+                            </a>
+                          } @else { – }
+                        </span>
+                      </div>
+                      <!-- ID Usuario -->
+                      <div class="px-4 py-3 flex flex-col gap-0.5 border-t border-border-default">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">ID Usuario</span>
+                        <span class="text-sm font-medium text-text-muted">#{{ pedidoSeleccionado()!.usuarioId }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SECCIÓN: Productos del pedido -->
+                  <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden">
+                    <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-brand-primary/10 flex items-center justify-center flex-shrink-0">
+                          <app-icon name="box" size="15" class="text-brand-primary mt-[1px]" />
+                        </div>
+                        <p class="text-sm font-semibold text-text-primary">Productos del pedido</p>
+                      </div>
+                      @if (pedidoSeleccionado()!.pedidoProductos?.length) {
+                        <span class="text-xs font-semibold bg-brand-primary/10 text-brand-primary px-2.5 py-1 rounded-full">
+                          {{ pedidoSeleccionado()!.pedidoProductos!.length }} ítem/s
+                        </span>
+                      }
+                    </div>
+
+                    @if (pedidoSeleccionado()!.pedidoProductos && pedidoSeleccionado()!.pedidoProductos!.length > 0) {
+                      <div class="divide-y divide-border-default">
+                        @for (pedProd of pedidoSeleccionado()!.pedidoProductos!; track pedProd.id_pedido_producto) {
+                          @if (pedProd.producto; as prod) {
+                            <div class="flex items-start gap-4 px-4 py-3.5 hover:bg-bg-raised/30 transition-colors">
+                              <!-- Imagen del producto -->
+                              <div class="w-14 h-14 rounded-xl overflow-hidden bg-bg-raised border border-border-default flex-shrink-0">
+                                @if (prod?.imagenes?.[0]?.url) {
+                                  <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
+                                } @else {
+                                  <div class="w-full h-full flex items-center justify-center">
+                                    <app-icon name="image" size="20" class="text-text-muted mt-[1px]" />
+                                  </div>
+                                }
+                              </div>
+                              <!-- Info del producto -->
+                              <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-text-primary leading-tight">{{ prod.nombre }}</p>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                                  @if (pedProd.variante) {
+                                    <span class="inline-flex items-center gap-1 text-xs text-text-secondary bg-bg-raised px-2 py-0.5 rounded-full border border-border-default">
+                                      <app-icon name="tag" size="10" class="mt-[1px]" />
+                                      {{ pedProd.variante }}
+                                    </span>
+                                  }
+                                  <span class="text-xs text-text-muted">ID: {{ prod.id_producto ?? prod.id ?? '–' }}</span>
+                                </div>
+                              </div>
+                              <!-- Cantidad, precio y subtotal -->
+                              <div class="text-right flex-shrink-0 flex flex-col gap-1">
+                                <div class="flex items-center justify-end gap-2">
+                                  <span class="text-xs text-text-muted bg-bg-raised px-2 py-0.5 rounded-full">x{{ pedProd.cantidad }}</span>
+                                  <span class="text-sm font-medium text-text-secondary">{{ formatMonto(prod.precio) }} c/u</span>
+                                </div>
+                                <p class="text-sm font-bold text-text-primary">
+                                  {{ formatMonto((prod.precio || 0) * pedProd.cantidad) }}
+                                </p>
+                              </div>
+                            </div>
+                          }
+                        }
+                      </div>
+                    } @else {
+                      <div class="text-center py-8 text-text-muted text-sm">
+                        <app-icon name="inbox" size="32" class="mx-auto mb-2 mt-[1px]" />
+                        <p>Sin productos registrados en este pedido</p>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- SECCIÓN: Resumen financiero -->
+                  <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden">
+                    <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-brand-cta/10 flex items-center justify-center flex-shrink-0">
+                        <app-icon name="dollarSign" size="15" class="text-brand-cta-hover mt-[1px]" />
+                      </div>
+                      <p class="text-sm font-semibold text-text-primary">Resumen financiero</p>
+                    </div>
+                    <div class="px-4 py-3 flex flex-col gap-2">
+                      <!-- Subtotal por productos -->
+                      @if (pedidoSeleccionado()!.pedidoProductos?.length) {
+                        <div class="flex items-center justify-between text-sm">
+                          <span class="text-text-secondary">Subtotal productos</span>
+                          <span class="font-medium text-text-primary">
+                            {{ formatMonto(pedidoSeleccionado()!.pedidoProductos!.reduce((acc, pp) => acc + (pp.producto?.precio || 0) * pp.cantidad, 0)) }}
+                          </span>
+                        </div>
+                      }
+                      <!-- Descuento si existe -->
+                      @if (pedidoSeleccionado()!.descuento_aplicado) {
+                        <div class="flex items-center justify-between text-sm">
+                          <span class="text-success flex items-center gap-1">
+                            <app-icon name="tag" size="13" class="mt-[1px]" />
+                            Descuento aplicado
+                          </span>
+                          <span class="font-semibold text-success">– {{ formatMonto(pedidoSeleccionado()!.descuento_aplicado) }}</span>
+                        </div>
+                      }
+                      <!-- Separador -->
+                      <div class="border-t border-border-default my-1"></div>
+                      <!-- Total final -->
+                      <div class="flex items-center justify-between">
+                        <span class="text-base font-bold text-text-primary">Total pagado</span>
+                        <span class="text-xl font-bold text-brand-cta-hover">{{ formatMonto(pedidoSeleccionado()!.monto_total) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SECCIÓN: Info adicional del pedido -->
+                  <div class="flex flex-wrap gap-3 text-xs text-text-muted">
+                    <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                      <app-icon name="hash" size="12" class="mt-[1px]" />
+                      Pedido #{{ pedidoSeleccionado()!.id_pedido }}
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                      <app-icon name="package" size="12" class="mt-[1px]" />
+                      Paquete: {{ paquete()?.paqueteBase?.nombre || '#' + paquete()?.id_paquete_publicado }}
+                    </span>
+                    <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                      <app-icon name="mapPin" size="12" class="mt-[1px]" />
+                      Zona: {{ paquete()?.zona?.nombre || '–' }}
                     </span>
                   </div>
 
-                  <!-- Datos del comprador -->
-                  <div class="bg-bg-app rounded-xl p-4 border border-border-default">
-                    <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <app-icon name="user" size="13" class="mt-[1px]" /> Datos del comprador
-                    </p>
-                    <div class="flex flex-col gap-2">
-                      <div class="flex justify-between text-sm">
-                        <span class="text-text-secondary">Nombre</span>
-                        <span class="font-medium text-text-primary">{{ pedidoSeleccionado()!.usuario?.nombre || '–' }}</span>
-                      </div>
-                      <div class="flex justify-between text-sm">
-                        <span class="text-text-secondary">Email</span>
-                        <span class="font-medium text-text-primary break-all">{{ pedidoSeleccionado()!.usuario?.email || '–' }}</span>
-                      </div>
-                      <div class="flex justify-between text-sm">
-                        <span class="text-text-secondary">Teléfono</span>
-                        <span class="font-medium text-text-primary">{{ pedidoSeleccionado()!.usuario?.telefono || '–' }}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Productos del pedido -->
-                  @if (pedidoSeleccionado()!.pedidoProductos; as pedidoProds) {
-                    @if (pedidoProds.length > 0) {
-                      <div>
-                        <p class="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                          <app-icon name="box" size="13" class="mt-[1px]" /> Productos
-                        </p>
-                        <div class="flex flex-col gap-2">
-                          @for (pedProd of pedidoProds; track pedProd.id_pedido_producto) {
-                            @if (pedProd.producto; as prod) {
-                              <div class="flex items-center gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
-                                <!-- Imagen del producto -->
-                                <div class="w-10 h-10 rounded-lg overflow-hidden bg-bg-raised border border-border-default flex-shrink-0">
-                                  @if (prod?.imagenes?.[0]?.url) {
-                                    <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
-                                  } @else {
-                                    <div class="w-full h-full flex items-center justify-center">
-                                      <app-icon name="image" size="14" class="text-text-muted mt-[1px]" />
-                                    </div>
-                                  }
-                                </div>
-                                <!-- Info del producto -->
-                                <div class="flex-1 min-w-0">
-                                  <p class="text-sm font-medium text-text-primary truncate">{{ prod.nombre }}</p>
-                                  @if (pedProd.variante) {
-                                    <p class="text-xs text-text-muted">Variante: {{ pedProd.variante }}</p>
-                                  }
-                                </div>
-                                <!-- Cantidad y precio -->
-                                <div class="text-right flex-shrink-0">
-                                  <p class="text-xs font-semibold text-text-primary">x{{ pedProd.cantidad }}</p>
-                                  <p class="text-xs text-text-muted">{{ formatMonto(prod.precio) }}</p>
-                                </div>
-                              </div>
-                            }
-                          }
-                        </div>
-                      </div>
-                    } @else {
-                      <div class="text-center py-4 text-text-muted text-sm">
-                        <app-icon name="inbox" size="28" class="mx-auto mb-2 mt-[1px]" />
-                        <p>Sin productos registrados</p>
-                      </div>
-                    }
-                  }
-
-                  <!-- Monto total -->
-                  <div class="flex items-center justify-between pt-3 border-t border-border-default">
-                    <span class="text-sm font-semibold text-text-secondary">Monto total</span>
-                    <span class="text-lg font-bold text-brand-cta-hover">{{ formatMonto(pedidoSeleccionado()!.monto_total) }}</span>
-                  </div>
-
                 </div>
 
-                <!-- Footer del modal -->
-                <div class="px-6 py-4 border-t border-border-default bg-bg-app/40">
+                <!-- ── FOOTER ──────────────────────────────────────── -->
+                <div class="px-6 py-4 border-t border-border-default bg-bg-app/40 flex-shrink-0">
                   <button
                     (click)="cerrarDetallePedido()"
-                    class="w-full py-2 rounded-xl text-sm font-semibold bg-bg-surface border border-border-default text-text-secondary hover:bg-bg-app hover:text-text-primary transition-all">
-                    Cerrar
+                    class="w-full py-2.5 rounded-xl text-sm font-semibold bg-bg-surface border border-border-default text-text-secondary hover:bg-bg-app hover:text-text-primary transition-all flex items-center justify-center gap-2">
+                    <app-icon name="x" size="16" class="mt-[1px]" />
+                    Cerrar detalle
                   </button>
                 </div>
+
               </div>
             </div>
           }
 
+
           <!-- Acciones de Administración -->
           <div class="flex flex-col gap-6">
+
+            <!-- ── GESTIÓN DEL PAQUETE ──────────────────────────── -->
+            <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
+              <h3 class="text-base font-display text-text-primary mb-4 flex items-center gap-2">
+                <app-icon name="settings" size="18" class="text-brand-primary mt-[2px]" />
+                Gestión del paquete
+              </h3>
+              <!--grid display-->
+              <div class="grid grid-cols-2 gap-4">
+
+                <!-- Editar publicación (Pendiente o Activo) -->
+                @if (puedeEditar()) {
+                  <app-button
+                    variant="secondary"
+                    [fullWidth]="true"
+                    iconStart="edit"
+                    (buttonClick)="editarPublicacion()">
+                    Editar publicación
+                  </app-button>
+                }
+
+                <!-- Notificar compradores (solo Activo) -->
+                @if (puedeNotificar()) {
+                  <app-button
+                    variant="info"
+                    [fullWidth]="true"
+                    iconStart="bell"
+                    (buttonClick)="notificarCompradores()">
+                    Notificar compradores
+                  </app-button>
+                }
+
+                <!-- Cerrar pedido (Activo → En Preparación) -->
+                @if (puedeCerrar()) {
+                  <app-button
+                    variant="primary"
+                    [fullWidth]="true"
+                    iconStart="lock"
+                    (buttonClick)="cerrarPaquete()">
+                    Cerrar pedido
+                  </app-button>
+                }
+
+                <!-- Finalizar paquete (En Preparación → Finalizado) -->
+                @if (puedeFinalizar()) {
+                  <app-button
+                    variant="success"
+                    [fullWidth]="true"
+                    iconStart="checkCircle"
+                    (buttonClick)="finalizarPaquete()">
+                    Finalizar paquete
+                  </app-button>
+                }
+
+                <!-- Duplicar publicación (siempre) -->
+                <app-button
+                  variant="secondary"
+                  [fullWidth]="true"
+                  iconStart="copy"
+                  (buttonClick)="duplicarPaquete()">
+                  Duplicar publicación
+                </app-button>
+
+                <!-- Cancelar y reembolsar (si no está ya Cancelado ni Finalizado) -->
+                @if (puedeCancelar()) {
+                  <app-button
+                    variant="danger"
+                    [fullWidth]="true"
+                    iconStart="x"
+                    (buttonClick)="cancelarPaquete()">
+                    Cancelar y reembolsar
+                  </app-button>
+                }
+
+              </div>
+            </div>
 
             <!-- Acciones avanzadas (solo si cerrado/completo) -->
             <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default"
@@ -420,7 +586,7 @@
               @if (!puedeEnviarMail()) {
                 <p class="text-xs text-text-muted mb-4 flex items-center gap-1">
                   <app-icon name="lock" size="12" class="mt-[2px]" />
-                  Disponible cuando el estado sea Cerrado o Completo
+                  Disponible cuando el estado sea En Preparación o Finalizado
                 </p>
               } @else {
                 <p class="text-xs text-success mb-4 flex items-center gap-1 font-medium">

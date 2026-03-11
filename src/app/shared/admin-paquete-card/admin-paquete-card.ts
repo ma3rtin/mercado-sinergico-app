@@ -16,12 +16,13 @@ export class AdminPaqueteCard {
   @Input({ required: true }) paquete!: PaquetePublicado;
 
   // 📤 Outputs para acciones
-  @Output() finalize  = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación → Finalizado
-  @Output() close     = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación
-  @Output() prepare   = new EventEmitter<PaquetePublicado>(); // En Preparación → Finalizado
-  @Output() refund    = new EventEmitter<PaquetePublicado>(); // Activo → Cancelado
-  @Output() notify    = new EventEmitter<PaquetePublicado>();
-  @Output() duplicate = new EventEmitter<PaquetePublicado>();
+  @Output() finalize   = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación → Finalizado
+  @Output() close      = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación
+  @Output() prepare    = new EventEmitter<PaquetePublicado>(); // En Preparación → Finalizado
+  @Output() refund     = new EventEmitter<PaquetePublicado>(); // Activo → Cancelado
+  @Output() notify     = new EventEmitter<PaquetePublicado>();
+  @Output() duplicate  = new EventEmitter<PaquetePublicado>();
+  @Output() viewDetail = new EventEmitter<PaquetePublicado>(); // Ver detalle
 
   private toast = inject(ToastService);
 
@@ -145,7 +146,6 @@ export class AdminPaqueteCard {
   onNotify(event?: Event): void {
     event?.stopPropagation();
     this.cerrarMenu();
-    this.toast.info('Notificación enviada a los compradores (simulado)', 'Notificación');
     this.notify.emit(this.paquete);
   }
 
@@ -171,5 +171,11 @@ export class AdminPaqueteCard {
     event?.stopPropagation();
     this.cerrarMenu();
     this.duplicate.emit(this.paquete);
+  }
+
+  onViewDetail(event?: Event): void {
+    event?.stopPropagation();
+    this.cerrarMenu();
+    this.viewDetail.emit(this.paquete);
   }
 }

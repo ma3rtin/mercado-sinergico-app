@@ -18,24 +18,24 @@ import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-c
 })
 export class AdministrarPublicacionesComponent implements OnInit {
   private paqueteService = inject(PaquetePublicadoService);
-  private router       = inject(Router);
-  private route        = inject(ActivatedRoute);
-  private toast        = inject(ToastService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toast = inject(ToastService);
 
-  paquetes       = signal<PaquetePublicado[]>([]);
-  loading        = signal(true);
-  error          = signal<string | null>(null);
-  searchTerm     = signal('');
-  estadoFiltro   = signal<string>('todos');
-  highlightedId  = signal<number | null>(null);
+  paquetes = signal<PaquetePublicado[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  searchTerm = signal('');
+  estadoFiltro = signal<string>('todos');
+  highlightedId = signal<number | null>(null);
 
   readonly estadosFiltro = ['todos', 'activo', 'pendiente', 'en preparación', 'finalizado', 'cancelado'];
 
   filteredPaquetes = computed(() => {
-    const term   = this.searchTerm().toLowerCase().trim();
+    const term = this.searchTerm().toLowerCase().trim();
     const estado = this.estadoFiltro().toLowerCase();
     return this.paquetes().filter(p => {
-      const matchTerm   = !term ||
+      const matchTerm = !term ||
         p.paqueteBase?.nombre?.toLowerCase().includes(term) ||
         p.zona?.nombre?.toLowerCase().includes(term);
       const matchEstado = estado === 'todos' ||
@@ -70,19 +70,18 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   // ── Acciones de la card ────────────────────────────────────────
 
-  /** Activo → En Preparación (cierre del pedido) */
   cerrarPaquete(paquete: PaquetePublicado) {
     const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
-    const avisoFaltantes = faltan > 0 
-      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>` 
+    const avisoFaltantes = faltan > 0
+      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
       : `<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>`;
 
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Cerrar pedido?',
         html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
-               ${avisoFaltantes}
-               <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
+             ${avisoFaltantes}
+             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, cerrar pedido',
@@ -92,7 +91,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         if (!result.isConfirmed) return;
         this.paqueteService.cerrarPaquete(paquete.id_paquete_publicado!).subscribe({
           next: (res: any) => {
-            const updated = res.result || res; // back returns { result, faltantes }
+            const updated: PaquetePublicado = res.result ?? res;
             this.toast.success(`"${paquete.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
             this._actualizarPaqueteEnLista(updated);
           },
@@ -122,12 +121,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
       }).then(result => {
         if (!result.isConfirmed) return;
         this.paqueteService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (updated) => {
-            this.toast.success(`"${paquete.paqueteBase?.nombre}" finalizado`, 'Paquete despachado');
+          next: (updated: PaquetePublicado) => {
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" finalizado`, 'Paquete completado'); // ← era "cancelado"
             this._actualizarPaqueteEnLista(updated);
           },
           error: () => {
-             this.toast.error('Error al intentar completar el paquete.', 'Error');
+            this.toast.error('Error al intentar completar el paquete.', 'Error');
           }
         });
       });
@@ -139,7 +138,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Cancelar y reembolsar?',
-        html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso (simulado).</p>`,
+        html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>`,
         icon: 'error',
         showCancelButton: true,
         confirmButtonColor: '#E53935',
@@ -148,13 +147,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
       }).then(result => {
         if (!result.isConfirmed) return;
         this.paqueteService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (updated) => {
+          next: (updated: PaquetePublicado) => {
             this.toast.success(`"${paquete.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
             this._actualizarPaqueteEnLista(updated);
           },
           error: () => {
-            this._mockearEstado(paquete, 'Cancelado');
-            this.toast.info(`Estado actualizado a "Cancelado" (simulado)`, 'Reembolso');
+            this.toast.error('Error al intentar cancelar el paquete.', 'Error');
           }
         });
       });
@@ -177,20 +175,25 @@ export class AdministrarPublicacionesComponent implements OnInit {
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Enviar notificación a compradores?',
-        text: `Se enviará un recordatorio sobre el estado activo de "${paquete.paqueteBase?.nombre || 'este paquete'}".`,
+        text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
         icon: 'info',
         showCancelButton: true,
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
-        if (result.isConfirmed) {
-          // Acá podrías llamar a un servicio real si existiera, ej: this.paqueteService.notificarPaquete(id).subscribe(...)
-          this.toast.success('Notificación enviada a todos los miembros inscritos.', '¡Aviso enviado!');
-        }
+        if (!result.isConfirmed) return;
+        this.paqueteService.notificarCompradores(paquete.id_paquete_publicado!).subscribe({
+          next: (res) => {
+            this.toast.success(
+              `Notificación enviada a ${res.notificados} comprador/es.`,
+              '¡Aviso enviado!'
+            );
+          },
+          error: () => this.toast.error('Error al enviar la notificación.', 'Error')
+        });
       });
     });
   }
-
   verDetalle(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/administrar-publicacion', paquete.id_paquete_publicado]);
   }
@@ -200,13 +203,13 @@ export class AdministrarPublicacionesComponent implements OnInit {
   getEstadoClasses(estado?: EstadoPaquetePublicado): string {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     switch (estado.nombre?.toLowerCase().trim()) {
-      case 'activo':          return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'pendiente':       return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
-      case 'en preparación':  return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'finalizado':      return 'bg-status-active-bg text-secondary border-secondary/20';
-      case 'cancelado':       return 'bg-red-50 text-red-700 border-red-200';
-      case 'eliminado':       return 'bg-status-closed-bg text-status-closed-text border-transparent';
-      default:                return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+      case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
+      case 'eliminado': return 'bg-status-closed-bg text-status-closed-text border-transparent';
+      default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }
 
@@ -221,8 +224,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   getStockBarColor(pct: number): string {
     if (pct >= 100) return 'bg-success';
-    if (pct >= 75)  return 'bg-brand-primary';
-    if (pct >= 50)  return 'bg-brand-cta';
+    if (pct >= 75) return 'bg-brand-primary';
+    if (pct >= 50) return 'bg-brand-cta';
     return 'bg-border-default';
   }
 

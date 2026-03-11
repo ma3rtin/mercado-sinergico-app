@@ -69,5 +69,10 @@ export class PaquetePublicadoService extends ApiService {
     cerrarPaquete(id: number): Observable<PaquetePublicado> {
         return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cerrar`, {});
     }
+    notificarCompradores(id: number): Observable<{ mensaje: string; notificados: number }> {
+        return this.http.post<{ mensaje: string; notificados: number }>(
+            `${this.apiUrl}/${id}/notificar`, {}
+        );
+    }
 }
 
