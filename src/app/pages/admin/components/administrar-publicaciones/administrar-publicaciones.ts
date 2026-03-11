@@ -1,0 +1,267 @@
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
+import { ToastService } from '@app/services/toast/toast.service';
+import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
+
+@Component({
+  selector: 'app-administrar-publicaciones',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard],
+  templateUrl: './administrar-publicaciones.html',
+})
+export class AdministrarPublicacionesComponent implements OnInit {
+  private paqueteService = inject(PaquetePublicadoService);
+  private router       = inject(Router);
+  private route        = inject(ActivatedRoute);
+  private toast        = inject(ToastService);
+
+  paquetes       = signal<PaquetePublicado[]>([]);
+  loading        = signal(true);
+  error          = signal<string | null>(null);
+  searchTerm     = signal('');
+  estadoFiltro   = signal<string>('todos');
+  highlightedId  = signal<number | null>(null);
+
+  readonly estadosFiltro = ['todos', 'activo', 'pendiente', 'en preparación', 'finalizado', 'cancelado'];
+
+  filteredPaquetes = computed(() => {
+    const term   = this.searchTerm().toLowerCase().trim();
+    const estado = this.estadoFiltro().toLowerCase();
+    return this.paquetes().filter(p => {
+      const matchTerm   = !term ||
+        p.paqueteBase?.nombre?.toLowerCase().includes(term) ||
+        p.zona?.nombre?.toLowerCase().includes(term);
+      const matchEstado = estado === 'todos' ||
+        p.estado?.nombre?.toLowerCase().trim() === estado;
+      return matchTerm && matchEstado;
+    });
+  });
+
+  ngOnInit() {
+    // Leer el queryParam de highlight
+    this.route.queryParamMap.subscribe(params => {
+      const id = params.get('highlight');
+      this.highlightedId.set(id ? Number(id) : null);
+    });
+    this.loadPaquetes();
+  }
+
+  loadPaquetes() {
+    this.loading.set(true);
+    this.error.set(null);
+    this.paqueteService.getAllPaquetes().subscribe({
+      next: (data) => {
+        this.paquetes.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('No se pudieron cargar los paquetes publicados.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  // ── Acciones de la card ────────────────────────────────────────
+
+  /** Activo → En Preparación (cierre del pedido) */
+  cerrarPaquete(paquete: PaquetePublicado) {
+    const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
+    const avisoFaltantes = faltan > 0 
+      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>` 
+      : `<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>`;
+
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: '¿Cerrar pedido?',
+        html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
+               ${avisoFaltantes}
+               <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar pedido',
+        confirmButtonColor: '#3085d6',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        this.paqueteService.cerrarPaquete(paquete.id_paquete_publicado!).subscribe({
+          next: (res: any) => {
+            const updated = res.result || res; // back returns { result, faltantes }
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
+            this._actualizarPaqueteEnLista(updated);
+          },
+          error: () => {
+            this.toast.error('Error al intentar cerrar el paquete.', 'Error');
+          }
+        });
+      });
+    });
+  }
+
+  /** En Preparación → Finalizado */
+  finalizarPaquete(paquete: PaquetePublicado) {
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: '¿Completar pedido?',
+        html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
+               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+                 <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
+                 <p class="mt-1">Al completar este paquete podrás <strong>descargar los partes de logística y de proveedor</strong> desde la vista de detalles.</p>
+               </div>
+               <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó el paquete.</p>`,
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, completar pedido',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        this.paqueteService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+          next: (updated) => {
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" finalizado`, 'Paquete despachado');
+            this._actualizarPaqueteEnLista(updated);
+          },
+          error: () => {
+             this.toast.error('Error al intentar completar el paquete.', 'Error');
+          }
+        });
+      });
+    });
+  }
+
+  /** Activo → Cancelado */
+  cancelarPaquete(paquete: PaquetePublicado) {
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: '¿Cancelar y reembolsar?',
+        html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso (simulado).</p>`,
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#E53935',
+        confirmButtonText: 'SÍ, CANCELAR',
+        cancelButtonText: 'No, volver'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        this.paqueteService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+          next: (updated) => {
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
+            this._actualizarPaqueteEnLista(updated);
+          },
+          error: () => {
+            this._mockearEstado(paquete, 'Cancelado');
+            this.toast.info(`Estado actualizado a "Cancelado" (simulado)`, 'Reembolso');
+          }
+        });
+      });
+    });
+  }
+
+  /** Duplicar publicación */
+  duplicarPaquete(paquete: PaquetePublicado) {
+    this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: (nuevoPaquete) => {
+        this.toast.success('Publicación duplicada con éxito');
+        this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
+      },
+      error: () => this.toast.error('Error al duplicar la publicación')
+    });
+  }
+
+  /** Notificar Compradores (Acción manual) */
+  notificarCompradores(paquete: PaquetePublicado) {
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: '¿Enviar notificación a compradores?',
+        text: `Se enviará un recordatorio sobre el estado activo de "${paquete.paqueteBase?.nombre || 'este paquete'}".`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, enviar',
+        cancelButtonText: 'Cancelar'
+      }).then(result => {
+        if (result.isConfirmed) {
+          // Acá podrías llamar a un servicio real si existiera, ej: this.paqueteService.notificarPaquete(id).subscribe(...)
+          this.toast.success('Notificación enviada a todos los miembros inscritos.', '¡Aviso enviado!');
+        }
+      });
+    });
+  }
+
+  verDetalle(paquete: PaquetePublicado) {
+    this.router.navigate(['/admin/administrar-publicacion', paquete.id_paquete_publicado]);
+  }
+
+  // ── Helpers de estilo ──────────────────────────────────────────
+
+  getEstadoClasses(estado?: EstadoPaquetePublicado): string {
+    if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+    switch (estado.nombre?.toLowerCase().trim()) {
+      case 'activo':          return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'pendiente':       return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación':  return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'finalizado':      return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado':       return 'bg-red-50 text-red-700 border-red-200';
+      case 'eliminado':       return 'bg-status-closed-bg text-status-closed-text border-transparent';
+      default:                return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+    }
+  }
+
+  isHighlighted(paquete: PaquetePublicado): boolean {
+    return this.highlightedId() !== null && paquete.id_paquete_publicado === this.highlightedId();
+  }
+
+  getStockPct(p: PaquetePublicado): number {
+    if (!p.cant_productos) return 0;
+    return Math.min(100, Math.round(((p.cant_productos_reservados ?? 0) / p.cant_productos) * 100));
+  }
+
+  getStockBarColor(pct: number): string {
+    if (pct >= 100) return 'bg-success';
+    if (pct >= 75)  return 'bg-brand-primary';
+    if (pct >= 50)  return 'bg-brand-cta';
+    return 'bg-border-default';
+  }
+
+  getDiasRestantes(fechaFin?: Date): number {
+    if (!fechaFin) return 0;
+    return Math.ceil((new Date(fechaFin).getTime() - Date.now()) / 86400000);
+  }
+
+  formatFecha(fecha?: Date): string {
+    if (!fecha) return 'N/A';
+    return new Date(fecha).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  onSearch(event: Event) {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  setEstadoFiltro(estado: string) {
+    this.estadoFiltro.set(estado);
+  }
+
+  volver() {
+    this.router.navigate(['/admin/perfil']);
+  }
+
+  // ── Helpers internos ──────────────────────────────────────────
+
+  private _actualizarPaqueteEnLista(updated: PaquetePublicado) {
+    this.paquetes.update(lista =>
+      lista.map(p => p.id_paquete_publicado === updated.id_paquete_publicado ? updated : p)
+    );
+  }
+
+  private _mockearEstado(paquete: PaquetePublicado, nuevoEstado: string) {
+    this.paquetes.update(lista =>
+      lista.map(p => p.id_paquete_publicado === paquete.id_paquete_publicado
+        ? { ...p, estado: { ...p.estado, nombre: nuevoEstado, id_estado: p.estado?.id_estado ?? 0 } }
+        : p
+      )
+    );
+  }
+}

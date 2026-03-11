@@ -1,11 +1,11 @@
 <!-- CARD COLAPSADO: Mostrar PaqueteCard -->
 @if (!pedido.expandido) {
 <div
-  class="w-full bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer p-4 flex gap-4 items-center"
+  class="w-full bg-bg-surface rounded-xl border border-border-default shadow-sm hover:shadow-md transition cursor-pointer p-4 flex gap-4 items-center"
   (click)="onToggleExpansion()">
 
   <!-- Imagen -->
-  <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
+  <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-bg-app overflow-hidden border border-border-default">
     <img [src]="paquete.paqueteBase?.imagen_url" (error)="onImageError($event)"
       class="w-full h-full object-contain p-2">
   </div>
@@ -15,33 +15,28 @@
 
     <!-- Título + flecha -->
     <div class="flex justify-between items-start">
-      <div class="flex flex-col min-w-0">
-        <span class="text-xs font-mono text-gray-400 mb-0.5">Pedido #{{ pedido.id_pedido }}</span>
-        <h3 class="font-display font-medium text-lg text-gray-900 truncate">
-          {{ paquete.paqueteBase?.nombre }}
-        </h3>
-      </div>
+      <h3 class="font-display text-lg text-text-primary truncate">
+        {{ paquete.paqueteBase?.nombre }}
+      </h3>
 
-      <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
+      <app-icon name="chevronDown" size="20" class="text-text-muted" />
     </div>
 
     <!-- TAGS -->
     <div class="flex flex-wrap gap-2 mt-2 text-xs">
-      <span class="px-2 py-1 rounded-full bg-primary text-white">
+      <span class="px-2 py-1 rounded-full bg-brand-primary text-text-on-dark font-medium">
         {{ getMarcaNombre() }}
       </span>
 
-      <span class="px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+      <span class="px-2 py-1 rounded-full bg-bg-raised text-text-secondary font-medium border border-border-default">
         {{ getCategoriaNombre() }}
       </span>
 
-      <span class="px-2 py-1 rounded-full border border-gray-300 text-gray-700">
+      <span class="px-2 py-1 rounded-full border border-border-default text-text-secondary">
         {{ obtenerTextoTipo() }}
       </span>
 
-      <span [class]="'px-2 py-1 rounded-full border text-gray-700 ' + getEstadoClass(pedido.estado?.nombre)">
+      <span [class]="'px-2 py-1 rounded-full border ' + getEstadoClass(pedido.estado?.nombre)">
         {{ pedido.estado?.nombre }}
       </span>
     </div>
@@ -50,25 +45,25 @@
     <div class="mt-3">
 
       <!-- Barra -->
-      <div class="w-full bg-gray-200 rounded-full h-2">
+      <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden border border-border-default">
         <div class="h-2 rounded-full transition-all" [ngClass]="{
-        'bg-green-500': porcentajeReservado < 50,
-        'bg-yellow-500': porcentajeReservado >= 50 && porcentajeReservado < 80,
-        'bg-red-500': porcentajeReservado >= 80
+        'bg-success': porcentajeReservado < 50,
+        'bg-warning': porcentajeReservado >= 50 && porcentajeReservado < 80,
+        'bg-error': porcentajeReservado >= 80
       }" [style.width.%]="porcentajeReservado">
         </div>
       </div>
 
       <!-- Texto -->
-      <div class="flex justify-between items-center mt-1 text-xs text-gray-500">
+      <div class="flex justify-between items-center mt-1 text-xs text-text-secondary">
         <span>
-          {{ paquete?.cant_productos_reservados ?? 0 }}
+          <strong class="text-text-primary">{{ paquete?.cant_productos_reservados ?? 0 }}</strong>
           /
           {{ paquete?.cant_productos ?? 0 }}
-          productos reservados
+          productos
         </span>
 
-        <span>
+        <span class="font-bold text-brand-primary">
           {{ porcentajeReservado }}%
         </span>
       </div>
@@ -81,14 +76,14 @@
 @else {
 
 <article
-  class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg">
+  class="bg-bg-surface rounded-xl shadow-md border border-border-default overflow-hidden transition-all duration-300 hover:shadow-lg">
 
   <!-- HEADER -->
   <div (click)="onToggleExpansion()"
-    class="cursor-pointer px-4 py-5 flex items-center gap-4 hover:bg-gray-50 transition">
+    class="cursor-pointer px-4 py-5 flex items-center gap-4 hover:bg-bg-app transition border-b border-border-default">
 
     <!-- Imagen -->
-    <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
+    <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-bg-app overflow-hidden border border-border-default">
       <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain p-2"
         (error)="onImageError($event)">
     </div>
@@ -97,18 +92,12 @@
     <div class="flex-1 min-w-0">
 
       <div class="flex justify-between items-start">
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs font-mono text-gray-400 mb-0.5">Pedido #{{ pedido.id_pedido }}</span>
-          <h3 class="font-display font-medium text-xl text-gray-900 truncate">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
-        </div>
+        <h3 class="font-display text-xl text-text-primary truncate">
+          {{ paquete.paqueteBase?.nombre }}
+        </h3>
 
         <!-- Flecha invertida -->
-        <svg class="w-5 h-5 text-gray-400 transform rotate-180 flex-shrink-0 mt-1" fill="none" stroke="currentColor"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
+        <app-icon name="chevronUp" size="20" class="text-text-muted" />
       </div>
 
       <div class="flex justify-between items-center mt-2 text-xs gap-3">
@@ -116,64 +105,36 @@
         <!-- TAGS -->
         <div class="flex flex-wrap gap-2">
           <div class="relative group">
-            <span class="px-2 py-1 rounded-full bg-primary text-white cursor-default">
+            <span class="px-2 py-1 rounded-full bg-brand-primary text-text-on-dark font-medium cursor-default">
               {{ getMarcaNombre() }}
             </span>
-
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2 
-              opacity-0 group-hover:opacity-100
-              transition pointer-events-none
-              bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-              Marca
-            </div>
           </div>
 
           <div class="relative group">
-            <span class="px-2 py-1 rounded-full bg-gray-200 text-gray-700 cursor-default">
+            <span class="px-2 py-1 rounded-full bg-bg-raised text-text-secondary border border-border-default cursor-default font-medium">
               {{ getCategoriaNombre() }}
             </span>
-
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2 
-              opacity-0 group-hover:opacity-100
-              transition pointer-events-none
-              bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-              Categoría
-            </div>
           </div>
 
           <div class="relative group">
-            <span class="px-2 py-1 rounded-full border border-gray-300 text-gray-700 cursor-default">
+            <span class="px-2 py-1 rounded-full border border-border-default text-text-secondary cursor-default">
               {{ obtenerTextoTipo() }}
             </span>
-
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2 
-              opacity-0 group-hover:opacity-100
-              transition pointer-events-none
-              bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-              Tipo de paquete
-            </div>
           </div>
 
           <div class="relative group">
             <span
-              [class]="'px-2 py-1 rounded-full border text-gray-700 ' + getEstadoClass(pedido.estado?.nombre) + ' cursor-default'">
+              [class]="'px-2 py-1 rounded-full border ' + getEstadoClass(pedido.estado?.nombre) + ' cursor-default font-bold'">
               {{ pedido.estado?.nombre }}
             </span>
-
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2 
-              opacity-0 group-hover:opacity-100
-              transition pointer-events-none
-              bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap">
-              Estado del pedido
-            </div>
           </div>
 
         </div>
 
         <!-- CONTADOR -->
-        <div class="text-gray-600 whitespace-nowrap" [ngClass]="{
-    'text-green-600 font-semibold': cantidadProductosUsuario >= paquete?.cant_productos * 0.8
-  }"> <span class="font-semibold text-gray-900">
+        <div class="text-text-secondary whitespace-nowrap" [ngClass]="{
+    'text-success font-semibold': cantidadProductosUsuario >= paquete?.cant_productos * 0.8
+  }"> <span class="font-bold text-text-primary">
             {{ cantidadProductosUsuario }}
           </span>
           /
@@ -185,49 +146,45 @@
   </div>
 
   <!-- Contenido expandido -->
-  <div class="border-t border-gray-200 bg-gray-50">
+  <div class="bg-bg-app">
     <div class="p-6">
-      <div class="gap-6">
+      <div class="flex flex-col lg:flex-row gap-6">
 
         <!-- IZQUIERDA -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="flex-1 space-y-4">
 
-          <h4 class="font-display text-lg text-gray-900 mb-3">
+          <h4 class="font-display text-lg text-text-primary mb-3">
             Estás sumado con:
           </h4>
 
           @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
 
-          <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div class="bg-bg-surface rounded-lg p-4 shadow-sm border border-border-default">
 
             <div class="flex items-center gap-4">
 
               <!-- Imagen -->
-              <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+              <div class="w-16 h-16 flex-shrink-0 bg-bg-app rounded-lg overflow-hidden border border-border-default">
                 @if (producto.imagen_url) {
                 <img [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-contain p-1"
                   (error)="onImageError($event)">
                 } @else {
                 <div class="w-full h-full flex items-center justify-center">
-                  <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                    </path>
-                  </svg>
+                  <app-icon name="image" size="24" class="text-text-muted" />
                 </div>
                 }
               </div>
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-900 truncate">
+                <p class="font-medium text-text-primary truncate">
                   {{ producto.nombre }}
                 </p>
 
                 @if (producto.variante?.opciones?.length) {
                 <div class="flex flex-wrap gap-2 mt-1">
                   @for (op of producto.variante.opciones; track op.id) {
-                  <span class="px-2 py-1 text-xs rounded-md bg-gray-100 text-gray-700 border border-gray-200">
+                  <span class="px-2 py-0.5 text-[10px] rounded-md bg-bg-raised text-text-secondary border border-border-default">
                     {{ op.caracteristica?.nombre }}: {{ op.opcion?.nombre }}
                   </span>
                   }
@@ -242,24 +199,24 @@
                   @if (pedido.descuento > 0) {
 
                   <!-- Precio original tachado -->
-                  <span class="text-sm text-gray-400 line-through">
+                  <span class="text-xs text-text-muted line-through">
                     {{ formatPrice(producto.precio) }}
                   </span>
 
                   <!-- Precio final -->
-                  <span class="text-sm font-semibold text-primary">
+                  <span class="text-sm font-bold text-brand-primary">
                     {{ formatPrice(producto.precioConDescuento ?? producto.precio) }} c/u
                   </span>
 
                   <!-- Etiqueta de descuento -->
-                  <span class="text-xs text-green-600 font-bold">
+                  <span class="text-[10px] text-success font-bold">
                     {{ pedido.descuento }}% OFF
                   </span>
 
                   } @else {
 
                   <!-- Si NO hay descuento -->
-                  <span class="text-sm font-semibold text-primary">
+                  <span class="text-sm font-bold text-brand-primary">
                     {{ formatPrice(producto.precio) }} c/u
                   </span>
 
@@ -269,43 +226,39 @@
               </div>
 
               <!-- Cantidad -->
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
 
                 @if (puedeEditarCantidades) {
 
                 <!-- Botón - -->
-                <button type="button" (click)="onDisminuirCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-full 
-                   bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
-                  </svg>
+                <button type="button" (click)="onDisminuirCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
+                   bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default cursor-pointer">
+                  <app-icon name="minus" size="14" />
                 </button>
 
-                <span class="w-12 text-center font-bold text-lg text-gray-900">
+                <span class="w-10 text-center font-bold text-lg text-text-primary">
                   {{ producto.cantidad }}
                 </span>
 
                 <!-- Botón + -->
-                <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-full 
-                   bg-accent hover:bg-accent-dark text-gray-900 transition-colors">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                  </svg>
+                <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
+                   bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark transition-colors shadow-sm cursor-pointer">
+                  <app-icon name="plus" size="14" />
                 </button>
 
                 } @else {
 
                 <!-- Estado NO editable (solo mostrar cantidad) -->
-                <span class="px-3 py-1 rounded-md bg-gray-100 text-gray-500 font-semibold select-none">
+                <span class="px-3 py-1 rounded-lg bg-bg-raised text-text-muted font-bold select-none border border-border-default">
                   {{ producto.cantidad }}
                 </span>
                 }
               </div>
 
               <!-- Subtotal -->
-              <div class="text-right flex-shrink-0 min-w-[100px]">
-                <p class="text-sm text-gray-600">Subtotal</p>
-                <p class="font-bold text-lg text-gray-900">
+              <div class="text-right flex-shrink-0 min-w-[90px]">
+                <p class="text-[10px] text-text-secondary uppercase tracking-tight">Subtotal</p>
+                <p class="font-bold text-base text-text-primary">
                   {{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}
                 </p>
               </div>
@@ -313,14 +266,9 @@
               @if (puedeEditarCantidades) {
 
               <!-- Tachito -->
-              <button type="button" (click)="onEliminarProducto(producto)" class="ml-2 w-8 h-8 flex items-center justify-center rounded-full
-           bg-red-100 hover:bg-red-200 text-red-600 transition">
-
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-           a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6
-           m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2h10z" />
-                </svg>
+              <button type="button" (click)="onEliminarProducto(producto)" class="ml-2 w-8 h-8 flex items-center justify-center rounded-xl
+           bg-error/10 hover:bg-error/20 text-error transition cursor-pointer border border-error/20">
+                <app-icon name="trash2" size="14" />
               </button>
               }
 
@@ -329,13 +277,14 @@
 
           } @empty {
 
-          <div class="bg-white rounded-lg p-8 text-center border-2 border-dashed border-gray-300">
-            <p class="text-gray-500">No hay productos en este pedido</p>
+          <div class="bg-bg-surface rounded-xl p-8 text-center border-2 border-dashed border-border-default">
+            <app-icon name="inbox" size="40" class="text-text-muted mx-auto mb-2" />
+            <p class="text-text-secondary">No hay productos en este pedido</p>
           </div>
           }
 
           <div class="flex justify-center py-2">
-            <button type="button" class="text-sm text-primary hover:underline hover:font-bold cursor-pointer"
+            <button type="button" class="text-sm text-brand-primary hover:text-brand-secondary font-medium transition-colors cursor-pointer"
               (click)="verProductosDisponibles()">
               Ver todos los productos disponibles del paquete
             </button>
@@ -344,31 +293,31 @@
           <!-- Resumen -->
           @if (pedido.precioSubtotal !== undefined) {
 
-          <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div class="bg-bg-surface rounded-xl p-4 shadow-sm border border-border-default">
 
             <div class="space-y-2">
 
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Subtotal</span>
-                <span class="font-semibold text-gray-900">
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-text-secondary">Subtotal</span>
+                <span class="font-semibold text-text-primary">
                   {{ formatPrice(pedido.precioSubtotal) }}
                 </span>
               </div>
 
               @if (pedido.descuento > 0) {
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-text-secondary">
                   Descuento ({{ pedido.descuento }}%)
                 </span>
-                <span class="font-semibold text-green-600">
-                  -{{ formatPrice(pedido.subtotal * (pedido.descuento / 100)) }}
+                <span class="font-bold text-success">
+                  -{{ formatPrice(pedido.precioSubtotal * (pedido.descuento / 100)) }}
                 </span>
               </div>
               }
 
-              <div class="flex justify-between items-center pt-2 border-t border-gray-200">
-                <span class="text-base font-bold text-gray-900">Total</span>
-                <span class="text-xl font-bold text-primary">
+              <div class="flex justify-between items-center pt-3 border-t border-border-default">
+                <span class="text-base font-bold text-text-primary uppercase tracking-tight">Total del pedido</span>
+                <span class="text-xl font-display text-brand-primary">
                   {{ formatPrice(pedido.precioFinal || pedido.precioSubtotal) }}
                 </span>
               </div>
@@ -379,93 +328,82 @@
         </div>
 
         <!-- INFORMACIÓN -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-lg p-5 shadow-sm border border-gray-200 sticky top-4 mt-5">
+        <div class="w-full lg:w-80">
+          <div class="bg-bg-surface rounded-xl p-5 shadow-sm border border-border-default sticky top-4">
 
-            <h4 class="font-display text-lg text-gray-900 mb-4">
+            <h4 class="font-display text-lg text-text-primary mb-4">
               Información
             </h4>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-4">
 
               <!-- Estado -->
-              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <app-icon [name]="getIconoEstado(pedido.estado?.nombre)"
-                  cssClass="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
+                <app-icon name="info" size="18" class="text-text-muted mt-0.5" />
 
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-700 mb-1">Estado del pedido</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Estado</p>
                   <span
-                    [class]="'inline-block px-3 py-1 rounded-full text-sm font-semibold border ' + getEstadoClass(pedido.estado?.nombre)">
+                    [class]="'inline-block px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
                     {{ pedido.estado?.nombre || 'Pendiente' }}
                   </span>
                 </div>
               </div>
 
               <!-- Tiempo restante -->
-              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
+                <app-icon name="clock" size="18" class="text-text-muted mt-0.5" />
 
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-700 mb-1">Cierra en</p>
-                  <p class="text-lg font-bold" [ngClass]="{
-                        'text-red-600': esUrgente,
-                        'text-gray-900': !esUrgente
+                <div class="flex-1 min-w-0">
+                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Cierra en</p>
+                  <p class="text-lg font-display" [ngClass]="{
+                        'text-error': esUrgente,
+                        'text-text-primary': !esUrgente
                       }">
                     {{ tiempoRestante }}
                   </p>
                 </div>
               </div>
 
-              <!-- Productos -->
-              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                </svg>
+              <!-- Productos del paquete -->
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
+                <app-icon name="package" size="18" class="text-text-muted mt-0.5" />
 
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-700 mb-1">Productos reservados</p>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Stock del paquete</p>
 
-                  <p class="text-lg font-bold text-gray-900">
-                    {{ paquete.cant_productos_reservados || 0 }} /
-                    {{ paquete.cant_productos || 0 }}
+                  <p class="text-lg font-bold text-text-primary">
+                    {{ paquete.cant_productos_reservados || 0 }} <span class="text-text-muted font-normal text-sm">/ {{ paquete.cant_productos || 0 }}</span>
                   </p>
                 </div>
               </div>
 
               <!-- Compradores -->
-              <div class="flex items-start gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.660 .07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
+              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
+                <app-icon name="users" size="18" class="text-text-muted mt-0.5" />
 
-                <div class="flex-1">
-                  <p class="text-sm font-medium text-gray-700 mb-1">Compradores</p>
-                  <p class="text-lg font-bold text-gray-900">
+                <div class="flex-1 min-w-0">
+                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Involucrados</p>
+                  <p class="text-lg font-bold text-text-primary">
                     {{ paquete.cant_usuarios_registrados || 0 }}
                   </p>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- BOTONES -->
-          <div class="flex flex-col sm:flex-row gap-3 pt-4 justify-end">
-            @if (puedeSalirDelPaquete) {
-            <app-button variant="danger" label="Salir del paquete" (buttonClick)="onSalirDelPaquete()">
-            </app-button>
-            }
+            <!-- BOTONES -->
+            <div class="flex flex-col gap-3 pt-6">
+              @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
+              <app-button variant="primary" label="Completar compra" [fullWidth]="true" (buttonClick)="onFinalizarCompra()">
+              </app-button>
+              }
 
-            @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-            <app-button variant="secondary" label="Comprar" (buttonClick)="onFinalizarCompra()">
-            </app-button>
-            }
+              @if (puedeSalirDelPaquete) {
+              <button (click)="onSalirDelPaquete()" class="text-sm text-error hover:text-error-dark font-medium transition-colors py-2 cursor-pointer">
+                Abandonar este paquete
+              </button>
+              }
+            </div>
           </div>
         </div>
       </div>

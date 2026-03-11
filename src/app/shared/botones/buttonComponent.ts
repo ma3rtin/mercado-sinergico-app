@@ -1,4 +1,4 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '@app/shared/icono/icono';
 
@@ -185,4 +185,12 @@ export class ButtonComponent {
   shouldShowLoadingSpinner = computed(() => {
     return this.loading() && !this.iconOnly();
   });
+
+  @HostListener('click', ['$event'])
+  onClick(event: Event) {
+    if (this.disabled() || this.loading()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }
 }

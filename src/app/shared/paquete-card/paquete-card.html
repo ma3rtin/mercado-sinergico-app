@@ -1,8 +1,8 @@
 <!-- paquete-card.html -->
 <!-- Card más cuadrada, imagen simple y datos principales -->
 
-<article (click)="onCardClick()" class="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden
-         border border-gray-200 hover:border-blue-400 cursor-pointer
+<article (click)="onCardClick()" class="group bg-bg-surface rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden
+         border border-border-default hover:border-brand-primary cursor-pointer
          flex flex-col h-full hover:scale-105 active:scale-100 max-w-sm">
 
   <!-- TAGS -->
@@ -11,7 +11,7 @@
 
       <!-- Marca -->
       @if (paquete.paqueteBase?.marca?.nombre) {
-      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary text-white rounded-full text-xs font-semibold">
+      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-primary text-text-on-dark rounded-full text-xs font-semibold">
         {{ paquete.paqueteBase?.marca?.nombre }}
       </span>
       }
@@ -19,7 +19,7 @@
       <!-- Categoría -->
       @if (paquete.paqueteBase?.categoria?.nombre) {
       <span
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full text-xs font-semibold">
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-raised text-text-secondary rounded-full text-xs font-semibold">
         {{ paquete.paqueteBase?.categoria?.nombre }}
       </span>
       }
@@ -27,7 +27,7 @@
       <!-- Tipo -->
       @if (obtenerIconoTipo()) {
       <span
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border text-gray-700 rounded-full text-xs font-semibold">
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-surface border border-border-default text-text-secondary rounded-full text-xs font-semibold">
         {{ obtenerIconoTipo() }} {{ obtenerTextoTipo() }}
       </span>
       }
@@ -44,13 +44,13 @@
   </div>
 
   <!-- IMAGEN -->
-  <div class="relative w-full bg-gray-100 overflow-hidden" style="aspect-ratio: 1 / 1;">
+  <div class="relative w-full bg-bg-app overflow-hidden" style="aspect-ratio: 1 / 1;">
     <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre"
       class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
 
     @if (esUrgente()) {
     <div
-      class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
+      class="absolute top-2 right-2 bg-error text-text-on-dark px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
       ⚠️ {{ getTiempoRestante(paquete.fecha_fin) }}
     </div>
     }
@@ -60,39 +60,39 @@
   <div class="px-4 py-3 space-y-2 flex flex-col flex-grow">
 
     <!-- Nombre -->
-    <h3 class="font-display text-base font-bold text-gray-900 line-clamp-2 group-hover:text-secondary-dark">
+    <h3 class="font-display text-base font-bold text-text-primary line-clamp-2 group-hover:text-brand-cta-hover">
       {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
     </h3>
 
     <!-- STOCK -->
     <div class="flex items-baseline gap-1 text-sm">
-      <span class="text-gray-600">Quedan</span>
-      <span class="font-bold text-secondary-dark">{{ stockDisponible() }}</span>
-      <span class="text-gray-600">de <strong>{{ paquete.cant_productos || 0 }}</strong></span>
+      <span class="text-text-secondary">Quedan</span>
+      <span class="font-bold text-brand-cta-hover">{{ stockDisponible() }}</span>
+      <span class="text-text-secondary">de <strong>{{ paquete.cant_productos || 0 }}</strong></span>
     </div>
 
     <!-- Barra -->
     <div class="space-y-1">
-      <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+      <div class="w-full bg-bg-raised rounded-full h-1.5 overflow-hidden">
         <div class="h-full rounded-full transition-all duration-300" [style.width.%]="porcentajeReservado()"
           [ngClass]="obtenerColorBarra()"></div>
       </div>
 
-      <div class="text-xs text-gray-500 text-right">
+      <div class="text-xs text-text-muted text-right">
         {{ porcentajeReservado().toFixed(0) }}% reservado
       </div>
 
     </div>
 
     <!-- Información inferior -->
-    <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-gray-200">
+    <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-border-default">
 
       <!-- Compradores -->
       <div class="flex items-center gap-1">
         <app-icon name="users" size="16" ></app-icon>
         <div>
-          <p class="text-gray-500">Compradores</p>
-          <p class="font-bold text-gray-900">{{ paquete.cant_usuarios_registrados || 0 }}</p>
+          <p class="text-text-muted">Compradores</p>
+          <p class="font-bold text-text-primary">{{ paquete.cant_usuarios_registrados || 0 }}</p>
         </div>
       </div>
 
@@ -100,8 +100,8 @@
       <div class="flex items-center gap-1">
         <app-icon name="Clock" size="16" ></app-icon>
         <div>
-          <p class="text-gray-500">Cierra</p>
-          <p class="font-bold text-gray-900">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
+          <p class="text-text-muted">Cierra</p>
+          <p class="font-bold text-text-primary">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
         </div>
       </div>
 
@@ -110,8 +110,8 @@
   </div>
 
   <!-- FOOTER -->
-  <div class="px-4 py-2 bg-gray-50 flex items-center justify-center gap-2 text-secondary font-semibold text-sm
-                group-hover:text-secondary-dark transition-colors">
+  <div class="px-4 py-2 bg-bg-app flex items-center justify-center gap-2 text-brand-secondary font-semibold text-sm
+                group-hover:text-brand-primary transition-colors">
     <span>Ver detalles</span>
     <app-icon name="ArrowRight" size="16" class="w-7 h-7 translate-y-[7px]"></app-icon>
   </div>
