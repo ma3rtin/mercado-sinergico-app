@@ -25,14 +25,14 @@
                     <span class="text-yellow-300 font-semibold">Juntos compramos, juntos ahorramos.</span>
                 </p>
 
-                <button [routerLink]="'/registrarse'" class="font-body bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold px-8 py-3 rounded-full
-                 transition-all duration-300 hover:scale-105 shadow-lg inline-flex items-center gap-2">
-                    ¡Quiero sumarme!
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                    </svg>
-                </button>
+                <app-button 
+                    variant="primary" 
+                    size="lg" 
+                    shape="pill" 
+                    iconEnd="arrow-right" 
+                    [routerLink]="'/registrarse'"
+                    label="¡Quiero sumarme!">
+                </app-button>
             </div>
 
             <!-- Espacio vacío a la derecha (la imagen de fondo lo llena) -->
@@ -111,14 +111,14 @@
         </div>
 
         <div class="text-center">
-            <button [routerLink]="'/paquetes'" class="bg-white border-2 border-secondary text-secondary font-semibold px-8 py-3 rounded-full
-               transition-all duration-300 hover:scale-105 shadow-lg inline-flex items-center gap-2">
-                Explorar paquetes
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6">
-                    </path>
-                </svg>
-            </button>
+            <app-button 
+                variant="tertiary" 
+                size="lg" 
+                shape="pill" 
+                iconEnd="arrow-right" 
+                [routerLink]="'/paquetes'"
+                label="Explorar paquetes">
+            </app-button>
         </div>
     </div>
 </section>
@@ -163,61 +163,32 @@
         </div>
 
         <div class="space-y-4">
-            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
-                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
-                    ¿Cuándo pago?
-                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
-                        </path>
-                    </svg>
-                </summary>
-                <p class="text-gray-600 mt-3">Pagás una vez que el paquete alcanza la cantidad mínima de productos.</p>
-            </details>
+            <app-faq-item [pregunta]="'¿Qué pasa si no se completa un paquete?'">
+                <p>Se cancela automáticamente <strong>sin compromiso y sin cobro alguno</strong>. No hay ningún tipo de penalidad ni costo oculto por participar.</p>
+            </app-faq-item>
 
-            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
-                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
-                    ¿Qué pasa si no se completa un paquete?
-                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
-                        </path>
-                    </svg>
-                </summary>
-                <p class="text-gray-600 mt-3">Se cancela sin compromiso y sin cobro alguno. No hay penalidad.</p>
-            </details>
+            <app-faq-item [pregunta]="'¿Cuándo y cómo pago mi pedido?'">
+                <p>Una vez que el paquete alcanza la <strong>cantidad mínima de productos</strong> y se confirma el <strong>cierre exitoso</strong> del mismo, desde <strong>"Mis pedidos"</strong> podrás abonar tu compra.</p>
+            </app-faq-item>
 
-            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
-                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
-                    ¿Puedo comprar más de una unidad?
-                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
-                        </path>
-                    </svg>
-                </summary>
-                <p class="text-gray-600 mt-3">Sí, podés reservar varias unidades del mismo paquete sin problemas.</p>
-            </details>
+            <app-faq-item [pregunta]="'¿Puedo comprar más de una unidad?'">
+                <p>Sí, totalmente. Al sumarte a un paquete, podés elegir <strong>la cantidad de unidades que necesites</strong>, y cada una cuenta para llegar al objetivo grupal más rápido.</p>
+            </app-faq-item>
 
-            <details class="bg-gray-50 rounded-lg p-6 cursor-pointer hover:bg-gray-100 transition-colors">
-                <summary class="font-display text-gray-900 text-lg flex items-center justify-between">
-                    ¿Qué zonas hay disponibles?
-                    <svg class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7-7-7 7">
-                        </path>
-                    </svg>
-                </summary>
-                <p class="text-gray-600 mt-3">Contamos con zonas en CABA, Zona Norte, Sur y Oeste. Podés buscar por tu
-                    código postal.</p>
-            </details>
+            <app-faq-item [pregunta]="'¿Qué zonas hay disponibles para envío o retiro?'">
+                <p>Contamos con zonas de entrega en <strong>CABA, Zona Norte, Sur y Oeste del GBA</strong>. Podés buscar si llegamos a tu domicilio introduciendo tu código postal antes de confirmar la participación.</p>
+            </app-faq-item>
         </div>
 
         <div class="text-center mt-12">
-            <button [routerLink]="'/faq'" class="bg-secondary border-2 border-secondary text-white font-semibold px-8 py-3 rounded-full
-               transition-all duration-300 hover:bg-white hover:text-secondary shadow-lg inline-flex items-center gap-2">
-                Ver todas las preguntas
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6">
-                    </path>
-                </svg>
-            </button>
+            <app-button 
+                variant="secondary" 
+                size="lg" 
+                shape="pill" 
+                iconEnd="arrow-right" 
+                [routerLink]="'/faq'"
+                label="Ver todas las preguntas">
+            </app-button>
         </div>
     </div>
 </section>

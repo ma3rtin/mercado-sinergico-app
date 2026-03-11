@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
+import { FaqItemComponent } from '@app/components/faq-item/faq-item';
 
 @Component({
   selector: 'app-faq',
   standalone: true,
-  imports: [CommonModule, CatalogoWrapperComponent],
+  imports: [CommonModule, CatalogoWrapperComponent, FaqItemComponent],
   templateUrl: './faq.html',
 })
 export class FaqComponent {
