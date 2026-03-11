@@ -75,7 +75,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
     const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
     const avisoFaltantes = faltan > 0 
       ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>` 
-      : `<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>`;
+      : '<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>';
 
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
@@ -139,7 +139,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Cancelar y reembolsar?',
-        html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso (simulado).</p>`,
+        html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso (simulado).</p>',
         icon: 'error',
         showCancelButton: true,
         confirmButtonColor: '#E53935',
@@ -154,7 +154,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
           },
           error: () => {
             this._mockearEstado(paquete, 'Cancelado');
-            this.toast.info(`Estado actualizado a "Cancelado" (simulado)`, 'Reembolso');
+            this.toast.info('Estado actualizado a "Cancelado" (simulado)', 'Reembolso');
           }
         });
       });

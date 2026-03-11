@@ -4,15 +4,12 @@ import {
   OnInit,
   AfterViewChecked,
   ViewChild,
-  HostListener,
   DestroyRef,
   effect,
   signal,
   inject,
 } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
 import { TipoPaquete } from '@app/models/Enums';
@@ -25,9 +22,9 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
-import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-import { IconComponent } from "@app/shared/icono/icono";
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-editar-paquete-base',
