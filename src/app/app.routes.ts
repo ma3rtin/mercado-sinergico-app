@@ -7,6 +7,7 @@ import { ProductosComponent } from './pages/productos/productos';
 import { ProductoDetalleSeleccionComponent } from './pages/producto-detalle-seleccion-component/producto-detalle-seleccion-component';
 import { DetalleProductoSumarse } from './pages/detalle-producto-sumarse/detalle-producto-sumarse';
 import { PaquetesPublicosComponent } from './pages/paquetes/paquetes';
+import { FaqComponent } from './pages/faq/faq';
 import { PerfilAdmin } from './pages/admin/components/perfil-admin/perfil-admin';
 import { CrearProductoComponent } from './pages/admin/components/crear-producto/crear-producto';
 import { CrearPaqueteComponent } from './pages/admin/components/crear-paquete/crear-paquete';
@@ -43,6 +44,7 @@ export const routes: Routes = [
       // 🛍️ Público
       { path: 'productos', component: ProductosComponent },
       { path: 'paquetes', component: PaquetesPublicosComponent },
+      { path: 'faq', component: FaqComponent },
 
       // 📦 Detalles
       { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },

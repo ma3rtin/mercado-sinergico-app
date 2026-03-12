@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
-import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { UsuarioService } from '@app/services/usuario/usuario.service';

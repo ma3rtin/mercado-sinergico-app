@@ -18,7 +18,7 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
-import { IconComponent } from "@app/shared/icono/icono";
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-publicar-paquete',
