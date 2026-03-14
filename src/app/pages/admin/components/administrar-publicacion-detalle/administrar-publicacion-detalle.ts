@@ -478,6 +478,12 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(monto);
   }
 
+  getSubtotalProductos(): number {
+    const productos = this.pedidoSeleccionado()?.pedidoProductos;
+    if (!productos?.length) return 0;
+    return productos.reduce((acc, pp) => acc + (pp.producto?.precio || 0) * pp.cantidad, 0);
+  }
+
   volver() {
     this.router.navigate(['/admin/administrar-publicaciones']);
   }

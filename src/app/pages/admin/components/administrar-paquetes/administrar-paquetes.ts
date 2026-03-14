@@ -35,8 +35,8 @@ export class AdministrarPaquetesComponent implements OnInit {
   filteredBase = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     return this.paquetesBase().filter(p =>
-      p.nombre.toLowerCase().includes(term) ||
-      p.descripcion.toLowerCase().includes(term)
+      (p.nombre ?? '').toLowerCase().includes(term) ||
+      (p.descripcion ?? '').toLowerCase().includes(term)
     );
   });
 

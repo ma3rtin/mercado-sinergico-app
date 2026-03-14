@@ -440,7 +440,7 @@
                         <div class="flex items-center justify-between text-sm">
                           <span class="text-text-secondary">Subtotal productos</span>
                           <span class="font-medium text-text-primary">
-                            {{ formatMonto(pedidoSeleccionado()!.pedidoProductos!.reduce((acc, pp) => acc + (pp.producto?.precio || 0) * pp.cantidad, 0)) }}
+                            {{ formatMonto(getSubtotalProductos()) }}
                           </span>
                         </div>
                       }
