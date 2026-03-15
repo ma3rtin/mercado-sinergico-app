@@ -5,7 +5,6 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
-import { PaqueteBaseProducto } from '@app/models/PaquetesInterfaces/PaqueteBaseProducto';
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';

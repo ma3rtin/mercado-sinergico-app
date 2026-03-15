@@ -18,11 +18,13 @@ import { of } from 'rxjs';
 import { Carrusel } from '@app/components/carrusel/carrusel';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { FaqItemComponent } from '@app/components/faq-item/faq-item';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterModule, CommonModule, Carrusel],
+  imports: [RouterModule, CommonModule, Carrusel, FaqItemComponent, ButtonComponent],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })

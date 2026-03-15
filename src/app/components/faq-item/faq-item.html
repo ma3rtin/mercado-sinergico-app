@@ -1,0 +1,13 @@
+<details class="group bg-white border border-gray-200 rounded-lg transition-colors hover:border-gray-300 shadow-sm">
+    <summary
+        class="font-display text-gray-900 text-lg flex items-center justify-between p-6 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+        {{ pregunta() }}
+        <svg class="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </summary>
+    <div class="text-gray-600 px-6 pb-6 font-body">
+        <ng-content></ng-content>
+    </div>
+</details>
