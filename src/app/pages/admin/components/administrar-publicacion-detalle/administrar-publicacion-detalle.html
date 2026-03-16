@@ -122,13 +122,13 @@
                 <app-icon name="package" size="20" class="text-brand-primary mt-[2px]" />
               </div>
               <div>
-                <p class="text-xs text-text-secondary">Stock</p>
+                <p class="text-xs text-text-secondary">Cantidad de productos reservados</p>
                 <p class="text-xl font-bold text-text-primary">
                   {{ paquete()?.cant_productos_reservados ?? 0 }}/{{ paquete()?.cant_productos ?? 0 }}
                 </p>
               </div>
             </div>
-            <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden">
+            <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden shadow-inner border border-border-default">
               <div class="bg-brand-primary h-2 rounded-full transition-all" [style.width]="stockPct() + '%'"></div>
             </div>
             <p class="text-xs text-text-muted mt-1 text-right">{{ stockPct() }}% reservado</p>
@@ -151,7 +151,7 @@
               <app-icon name="dollarSign" size="24" class="text-brand-cta-hover mt-[2px]" />
             </div>
             <div class="min-w-0">
-              <p class="text-xs text-text-secondary">Monto total</p>
+              <p class="text-xs text-text-secondary">Recaudación total</p>
               <p class="text-lg font-bold text-text-primary truncate">{{ formatMonto(montoTotal()) }}</p>
             </div>
           </div>

@@ -159,7 +159,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, cerrar pedido',
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#71A8D9',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
@@ -208,7 +208,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       html: `<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>`,
       icon: 'error',
       showCancelButton: true,
-      confirmButtonColor: '#E53935',
+      confirmButtonColor: '#B92905',
       confirmButtonText: 'SÍ, CANCELAR',
       cancelButtonText: 'No, volver'
     }).then(result => {

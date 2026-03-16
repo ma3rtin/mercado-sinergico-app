@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
@@ -12,7 +12,7 @@ import { ToastService } from '@app/services/toast/toast.service';
   imports: [CommonModule, IconComponent, ButtonComponent],
   templateUrl:'./admin-paquete-card.html',
 })
-export class AdminPaqueteCard {
+export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Input({ required: true }) paquete!: PaquetePublicado;
 
   // 📤 Outputs para acciones
@@ -28,6 +28,28 @@ export class AdminPaqueteCard {
 
   /** Controla si el menú desplegable está abierto */
   menuAbierto = false;
+  
+  /** Señal para el tiempo restante formateado (ej: 2d 14h 30m 10s) */
+  tiempoRestante = signal<string>('');
+  
+  /** Intervalo para actualizar el contador real-time */
+  private timerInterval: any;
+
+  ngOnInit() {
+    this.actualizarContador();
+    // Iniciar tick cada segundo solo si está activo/pendiente y falta tiempo
+    if (this.esActivo || this.esPendiente) {
+      if (this.tiempoRestante() !== 'Vencido') {
+        this.timerInterval = setInterval(() => this.actualizarContador(), 1000);
+      }
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
+  }
 
   /** Cierra el menú al hacer click fuera del componente */
   @HostListener('document:click', ['$event'])
@@ -90,6 +112,33 @@ export class AdminPaqueteCard {
     const diff = new Date(this.paquete.fecha_fin).getTime() - Date.now();
     const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return isNaN(dias) ? 0 : dias;
+  }
+
+  actualizarContador(): void {
+    if (!this.paquete.fecha_fin) {
+      this.tiempoRestante.set('N/A');
+      return;
+    }
+    const diff = new Date(this.paquete.fecha_fin).getTime() - Date.now();
+    
+    if (diff <= 0) {
+      this.tiempoRestante.set('Vencido');
+      if (this.timerInterval) clearInterval(this.timerInterval);
+      return;
+    }
+    
+    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+    let format = '';
+    if (d > 0) format += `${d}d `;
+    if (h > 0 || d > 0) format += `${h}h `;
+    if (m > 0 || h > 0 || d > 0) format += `${m}m `;
+    format += `${s}s`;
+    
+    this.tiempoRestante.set(format.trim());
   }
 
   getStockPercentage(): number {
