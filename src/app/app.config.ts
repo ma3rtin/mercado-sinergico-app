@@ -23,6 +23,7 @@ import { AuthService } from './services/auth/auth.service';
 // 🎨 ngicons
 import { NgIconsModule } from '@ng-icons/core';
 import {
+  featherLock,
   featherChevronRight,
   featherChevronLeft,
   featherArrowRight,
@@ -96,9 +97,7 @@ featherFilePlus,
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideAnimations(), // ✅ Necesario para ngx-sonner
-
-    // 🔥 YA NO NECESITAS provideToastr - eliminalo
+    provideAnimations(),
 
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
 
@@ -180,6 +179,7 @@ export const appConfig: ApplicationConfig = {
         featherMinusCircle,
         featherAlertOctagon,
         featherFilePlus,
+        featherLock
       })
     ),
   ],

@@ -11,8 +11,16 @@ export class StatusColorPipe implements PipeTransform {
     switch (estado) {
       case 'Abierto':
         return 'text-primary';
-      case 'Pendiente' :
+      case 'Pendiente':
         return 'text-secondary-dark';
+      case 'En Preparación':
+        return 'text-blue-600';
+      case 'Enviado':
+        return 'text-purple-600';
+      case 'Entregado':
+        return 'text-green-600';
+      case 'Cancelado':
+        return 'text-red-500';
       case 'Cerrado':
         return 'text-red-600';
       case 'Completo':

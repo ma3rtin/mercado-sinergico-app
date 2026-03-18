@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
     selector: 'app-info-paquete',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, IconComponent],
     templateUrl: './info-paquete.html'
 })
 export class InfoPaqueteComponent {
@@ -28,12 +29,12 @@ export class InfoPaqueteComponent {
     }
 
     getEstadoClass(estado?: string): string {
-        if (!estado) return 'text-gray-600 bg-gray-100';
+        if (!estado) return 'text-status-neutral-text bg-status-neutral-bg';
 
         const e = String(estado).toLowerCase();
-        if (e.includes('abierto')) return 'text-green-700 bg-green-50 border-green-200';
-        if (e.includes('pend')) return 'text-yellow-700 bg-yellow-50 border-yellow-200';
-        if (e.includes('cerr')) return 'text-red-700 bg-red-50 border-red-200';
-        return 'text-gray-700 bg-gray-50 border-gray-200';
+        if (e.includes('abierto')) return 'text-status-active-text bg-status-active-bg border-success';
+        if (e.includes('pend')) return 'text-status-pending-text bg-status-pending-bg border-warning';
+        if (e.includes('cerr')) return 'text-status-closed-text bg-status-closed-bg border-error';
+        return 'text-status-neutral-text bg-status-neutral-bg border-border-default';
     }
 }

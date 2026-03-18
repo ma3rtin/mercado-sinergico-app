@@ -1,0 +1,122 @@
+<div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="bg-bg-surface rounded-2xl shadow-sm p-6 mb-6 border border-border-default">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <button (click)="volver()"
+            class="w-10 h-10 flex items-center justify-center rounded-xl border-2 border-border-default hover:border-brand-primary hover:text-brand-primary transition-colors text-text-secondary cursor-pointer">
+            <app-icon name="arrowLeft" size="20" />
+          </button>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-display text-text-primary flex items-center gap-2">
+              <app-icon name="clipboard" size="28" class="text-brand-primary" />
+              Administrar Publicaciones
+            </h1>
+            <p class="text-sm text-text-secondary mt-1">Gestioná todos los paquetes publicados</p>
+          </div>
+        </div>
+
+        @if (!loading()) {
+          <div class="flex items-center gap-2 bg-brand-primary/10 text-brand-primary px-4 py-2 rounded-xl">
+            <app-icon name="package" size="18" />
+            <span class="font-semibold text-sm">{{ filteredPaquetes().length }} publicaciones</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="bg-bg-surface rounded-2xl shadow-sm p-4 sm:p-6 mb-6 border border-border-default">
+      <div class="flex flex-col sm:flex-row gap-4">
+
+        <!-- Buscador -->
+        <div class="flex-1 relative">
+          <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-text-muted">
+            <app-icon name="search" size="18" />
+          </div>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o zona..."
+            (input)="onSearch($event)"
+            class="w-full pl-10 pr-4 py-2.5 border-2 border-border-default rounded-xl text-sm font-body focus:outline-none focus:border-brand-primary transition-colors bg-bg-app text-text-primary"
+          />
+        </div>
+
+        <!-- Filtro estado -->
+        <div class="flex flex-wrap gap-2">
+          @for (est of estadosFiltro; track est) {
+            <button
+              (click)="setEstadoFiltro(est)"
+              [class]="estadoFiltro() === est
+                ? 'px-4 py-2.5 rounded-xl text-sm font-semibold bg-brand-primary text-text-on-dark shadow-sm cursor-pointer border-2 border-brand-primary'
+                : 'px-4 py-2.5 rounded-xl text-sm font-medium border-2 border-border-default text-text-secondary hover:border-brand-primary hover:text-brand-primary cursor-pointer transition-colors'">
+              {{ est === 'todos' ? 'Todos' : (est | titlecase) }}
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Highlight activo -->
+    @if (highlightedId()) {
+      <div class="flex items-center gap-2 bg-brand-primary/10 border border-brand-primary/30 text-brand-primary px-4 py-3 rounded-xl mb-4 text-sm">
+        <app-icon name="target" size="18" />
+        <span>Navegaste desde el perfil — el paquete destacado está marcado abajo.</span>
+        <button (click)="highlightedId.set(null)" class="ml-auto text-text-muted hover:text-text-secondary transition-colors">
+          <app-icon name="x" size="16" />
+        </button>
+      </div>
+    }
+
+    <!-- Estado de carga / error -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <div class="animate-spin rounded-full h-14 w-14 border-b-2 border-brand-primary mb-4"></div>
+        <p class="text-text-secondary font-body">Cargando publicaciones...</p>
+      </div>
+
+    } @else if (error()) {
+      <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4" />
+        <p class="text-error font-semibold text-lg">{{ error() }}</p>
+        <app-button variant="tertiary" size="sm" (buttonClick)="loadPaquetes()" class="mt-4">
+          Reintentar
+        </app-button>
+      </div>
+
+    } @else if (filteredPaquetes().length === 0) {
+      <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <app-icon name="inbox" size="64" class="text-text-muted mx-auto mb-4" />
+        <p class="text-text-secondary text-lg font-medium">No se encontraron publicaciones</p>
+        <p class="text-text-muted text-sm mt-1">Probá cambiando los filtros</p>
+      </div>
+
+    } @else {
+      <div class="flex flex-col gap-4">
+        @for (paquete of filteredPaquetes(); track paquete.id_paquete_publicado) {
+
+          <!-- Wrapper con animación de highlight -->
+          <div [class]="isHighlighted(paquete)
+            ? 'ring-4 ring-brand-primary ring-offset-2 rounded-xl animate-[highlightPulse_1.5s_ease-out]'
+            : ''">
+
+            <app-admin-paquete-card
+              [paquete]="paquete"
+              (close)="cerrarPaquete($event)"
+              (prepare)="finalizarPaquete($event)"
+              (refund)="cancelarPaquete($event)"
+              (duplicate)="duplicarPaquete($event)"
+              (notify)="notificarCompradores($event)"
+              (viewDetail)="verDetalle($event)"
+            />
+
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

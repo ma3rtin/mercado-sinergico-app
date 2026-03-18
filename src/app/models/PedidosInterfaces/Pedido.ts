@@ -10,6 +10,7 @@ export interface Pedido {
   paquetePublicadoId: number;
   estadoId: number;
   monto_total?: number;
+  descuento_aplicado?: number | null;
   fecha?: Date;
 
   // Relaciones

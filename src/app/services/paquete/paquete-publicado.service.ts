@@ -62,4 +62,36 @@ export class PaquetePublicadoService extends ApiService {
             responseType: 'blob'
         });
     }
+    /** Admin: obtiene TODOS los paquetes publicados (todos los estados) */
+    getAllPaquetes(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(this.apiUrl);
+    }
+
+    /** Admin: confirma la compra con el fabricante y notifica a los compradores */
+    confirmarCompra(id: number): Observable<{ message: string }> {
+        return this.post<{ message: string }>(`${this.apiUrl}/${id}/confirmar`, {});
+    }
+
+    duplicarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/duplicar`, {});
+    }
+
+    completarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/completar`, {});
+    }
+
+    cancelarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cancelar`, {});
+    }
+
+    /** Cierra el paquete y lo pasa a "En Preparación" */
+    cerrarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(`${this.apiUrl}/${id}/cerrar`, {});
+    }
+    notificarCompradores(id: number): Observable<{ mensaje: string; notificados: number }> {
+        return this.http.post<{ mensaje: string; notificados: number }>(
+            `${this.apiUrl}/${id}/notificar`, {}
+        );
+    }
 }
+

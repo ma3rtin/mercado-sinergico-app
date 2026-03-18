@@ -1,133 +1,119 @@
-<app-catalogo-wrapper
-  [titulo]="'Paquetes Disponibles'"
-  [subtitulo]="'Descubrí nuestros paquetes especiales con productos seleccionados'"
->
+<app-catalogo-wrapper [titulo]="'Paquetes Disponibles'"
+  [subtitulo]="'Descubrí nuestros paquetes especiales con productos seleccionados'">
   <!-- 📐 Layout: Filtros + Grid -->
   <section class="page-layout">
 
     <!-- 🎨 Filtros -->
-    <app-filtros
-      [config]="configFiltrosPaquetes()"
-      [titulo]="'Filtrar Paquetes'"
-      (filtrosAplicados)="aplicarFiltros($event)"
-      (filtrosLimpiados)="limpiarFiltros()"
-    />
+    <app-filtros [config]="configFiltrosPaquetes()" [titulo]="'Filtrar Paquetes'"
+      (filtrosAplicados)="aplicarFiltros($event)" (filtrosLimpiados)="limpiarFiltros()" />
 
     <!-- 📦 Contenido -->
     <div class="flex-1 min-w-0">
 
-      <!-- 🔄 Loading -->
-      @if (isLoading()) {
-        <div class="flex flex-col items-center justify-center py-20 sm:py-32">
-          <div class="relative">
+      <app-delayed-skeleton [isLoading]="isLoading()" [delay]="200">
+        <!-- 🦴 SKELETON -->
+        <div skeleton>
+          <div class="grid grid-cols-1
+                      sm:grid-cols-2
+                      lg:grid-cols-2
+                      xl:grid-cols-3
+                      2xl:grid-cols-4
+                      gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
+                      auto-rows-fr pt-6">
+            @for (i of [1,2,3,4,5,6,7,8]; track i) {
             <div
-              class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500">
+              class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full animate-pulse">
+              <!-- Header Card (Imagen y tag) -->
+              <div class="relative w-full aspect-video bg-gray-200">
+                <div class="absolute top-3 left-3 w-16 h-6 bg-gray-300 rounded-full"></div>
+              </div>
+              <!-- Body -->
+              <div class="p-5 flex flex-col flex-grow gap-4">
+                <div class="h-6 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-full"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+
+                <!-- Info rows -->
+                <div class="mt-2 space-y-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-gray-200 rounded-full"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-gray-200 rounded-full"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                  <div class="h-6 bg-gray-200 rounded w-1/3"></div>
+                  <div class="h-10 bg-gray-200 rounded-lg w-28"></div>
+                </div>
+              </div>
             </div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <app-icon name="Loader" class="w-10 h-10 text-blue-600"></app-icon>
-            </div>
+            }
           </div>
-          <p class="text-gray-600 text-base sm:text-lg font-medium mt-6">
-            Cargando paquetes...
-          </p>
-          <p class="text-gray-500 text-sm mt-2">
-            Esto puede tardar unos segundos
-          </p>
         </div>
-      }
 
-      <!-- ❌ Error -->
-      @else if (errorMessage()) {
-        <div
-          class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
+        <!-- ❌ Error -->
+        @if (errorMessage()) {
+        <app-error-state [titulo]="'Error al cargar paquetes'" [mensaje]="errorMessage()"
+          (reintentar)="recargarPaquetes()">
+        </app-error-state>
+        }
 
-          <div
-            class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
-            <app-icon name="Error" class="w-10 h-10 sm:w-12 sm:h-12 text-red-400"></app-icon>
-          </div>
-
-          <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
-            Error al cargar paquetes
-          </h3>
-
-          <p class="text-gray-600 text-center mb-6 sm:mb-8 max-w-md px-4">
-            {{ errorMessage() }}
-          </p>
-
-          <button
-            (click)="recargarPaquetes()"
-            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700
-                   text-white px-6 py-3 rounded-lg font-medium transition-all
-                   shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
-            <app-icon name="Loader" class="w-5 h-5"></app-icon>
-            Intentar nuevamente
-          </button>
-        </div>
-      }
-
-      <!-- ✅ Grid -->
-      @else {
+        <!-- ✅ Grid -->
+        @else {
         <div class="grid grid-cols-1
-                    sm:grid-cols-2
-                    lg:grid-cols-2
-                    xl:grid-cols-3
-                    2xl:grid-cols-4
-                    gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
-                    auto-rows-fr">
+                      sm:grid-cols-2
+                      lg:grid-cols-2
+                      xl:grid-cols-3
+                      2xl:grid-cols-4
+                      gap-4 sm:gap-5 md:gap-6 lg:gap-7 xl:gap-8
+                      auto-rows-fr">
 
           @for (paquete of paquetesPaginados(); track paquete.id_paquete_publicado) {
-            <div class="flex">
-              <app-paquete-card
-                [paquete]="paquete"
-                (cardClick)="navegarAPaqueteDetalle($event)"
-                class="w-full"
-              />
-            </div>
+          <div class="flex">
+            <app-paquete-card [paquete]="paquete" (cardClick)="navegarAPaqueteDetalle($event)" class="w-full" />
+          </div>
           }
 
           @empty {
-            <div class="col-span-full">
-              <div
-                class="flex flex-col items-center justify-center py-16 sm:py-24
-                       bg-white rounded-xl shadow-md">
+          <div class="col-span-full mt-4">
+            <div class="flex flex-col items-center justify-center py-16 sm:py-24
+                         bg-white rounded-xl shadow-md">
 
-                <div
-                  class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full
-                         flex items-center justify-center mb-6">
-                  <app-icon name="Empty" class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400"></app-icon>
-                </div>
-
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
-                  No hay paquetes disponibles
-                </h3>
-
-                <p class="text-gray-600 text-center mb-6 max-w-md px-4">
-                  No se encontraron paquetes con los filtros seleccionados.
-                </p>
-                <button
-                  (click)="limpiarFiltros()"
-                  class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                  Limpiar filtros
-                </button>
+              <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-full
+                           flex items-center justify-center mb-6">
+                <app-icon name="Empty" class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400"></app-icon>
               </div>
+
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 text-center px-4">
+                No hay paquetes disponibles
+              </h3>
+
+              <p class="text-gray-600 text-center mb-6 max-w-md px-4">
+                No se encontraron paquetes con los filtros seleccionados.
+              </p>
+              <button (click)="limpiarFiltros()"
+                class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                Limpiar filtros
+              </button>
             </div>
+          </div>
           }
 
         </div>
-      }
+        }
+      </app-delayed-skeleton>
 
     </div>
   </section>
-          <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
-        @if (paquetesFiltrados().length > 0) {
-          <app-pagination
-            [totalItems]="totalItemsPaginacion()"
-            [itemsPerPage]="itemsPorPagina()"
-            [currentPage]="paginaActual()"
-            [showItemsPerPage]="true"
-            [itemsPerPageOptions]="[12, 24, 36, 48]"
-            (pageChange)="onPageChange($event)"
-            (itemsPerPageChange)="onItemsPerPageChange($event)"
-          />
-        }
+  <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
+  @if (paquetesFiltrados().length > 0) {
+  <app-pagination [totalItems]="totalItemsPaginacion()" [itemsPerPage]="itemsPorPagina()" [currentPage]="paginaActual()"
+    [showItemsPerPage]="true" [itemsPerPageOptions]="[12, 24, 36, 48]" (pageChange)="onPageChange($event)"
+    (itemsPerPageChange)="onItemsPerPageChange($event)" />
+  }
 </app-catalogo-wrapper>

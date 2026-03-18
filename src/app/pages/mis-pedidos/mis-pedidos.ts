@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
+import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
@@ -26,19 +27,12 @@ import { PaqueteUsuarioCardComponent } from '@app/shared/paquete-usuario-card/pa
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 
 
+import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
+import { ErrorState } from '@app/shared/error-state/error-state';
+
 // ------------------------------
 // MODELOS INTERNOS
 // ------------------------------
-
-type ProductoEnPedido = {
-  id_producto: number;
-  nombre: string;
-  precio: number;
-  precioConDescuento?: number;
-  imagen_url?: string;
-  cantidad: number;
-  variante?: string | null;
-};
 
 interface PedidoDelUsuario extends Pedido {
   expandido?: boolean;
@@ -55,7 +49,9 @@ interface PedidoDelUsuario extends Pedido {
     CommonModule,
     FormsModule,
     PaqueteUsuarioCardComponent,
-    CatalogoWrapperComponent
+    CatalogoWrapperComponent,
+    DelayedSkeleton,
+    ErrorState
   ],
   templateUrl: './mis-pedidos.html'
 })
@@ -74,20 +70,31 @@ export class MisPedidosComponent implements OnInit {
   pedidos = signal<PedidoDelUsuario[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
-  terminoBusqueda = signal<string>('');   // <-- nuevo
+  terminoBusqueda = signal<string>('');
+  estadoFiltro = signal<string>('Todos');
 
-  // 👉 NO ROMPE NADA del HTML porque tu HTML usa pedidosFiltrados()
   pedidosFiltrados = computed(() => {
     const lista = this.pedidos();
     const t = this.terminoBusqueda().toLowerCase();
+    const estado = this.estadoFiltro();
 
-    if (!t) return lista;
+    let filtrados = lista;
 
-    return lista.filter(p =>
-      p.id_pedido?.toString().includes(t) ||
-      p.estado?.nombre?.toLowerCase().includes(t) ||
-      p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
-    );
+    // Filtro por estado
+    if (estado !== 'Todos') {
+      filtrados = filtrados.filter(p => p.estado?.nombre === estado);
+    }
+
+    // Filtro por texto
+    if (t) {
+      filtrados = filtrados.filter(p =>
+        p.id_pedido?.toString().includes(t) ||
+        p.estado?.nombre?.toLowerCase().includes(t) ||
+        p.paquetePublicado?.paqueteBase?.nombre?.toLowerCase().includes(t)
+      );
+    }
+
+    return filtrados;
   });
 
 
@@ -117,8 +124,21 @@ export class MisPedidosComponent implements OnInit {
 
           this.isLoading.set(false);
         },
-        error: () => {
-          this.errorMessage.set('Error al cargar los pedidos.');
+        error: (error) => {
+
+          if (error.name === 'TimeoutError') {
+            this.errorMessage.set('El servidor no respondió a tiempo. Por favor, intentá de nuevo.');
+          }
+          else if (error.status === 0) {
+            this.errorMessage.set('No se pudo conectar con el servidor. Verificá tu conexión.');
+          }
+          else if (error.status >= 500) {
+            this.errorMessage.set('Error interno del servidor. Intentá más tarde.');
+          }
+          else {
+            this.errorMessage.set('Ocurrió un error inesperado.');
+          }
+
           this.isLoading.set(false);
         }
       });
@@ -138,6 +158,7 @@ export class MisPedidosComponent implements OnInit {
           const precioConDescuento = precio - (precio * descuento / 100);
 
           return {
+            id_detalle: x.id, // <-- agregamos el id real del detalle
             id_producto: x.productoId,
             nombre: x.producto!.nombre,
             precio,
@@ -190,7 +211,7 @@ export class MisPedidosComponent implements OnInit {
     // 1. Reemplazar el array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
-        p.id_producto === producto.id_producto
+        p.id_detalle === producto.id_detalle
           ? { ...p, cantidad: p.cantidad + 1 }
           : p
     );
@@ -200,20 +221,20 @@ export class MisPedidosComponent implements OnInit {
 
     // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
-      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+      (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
     // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      actualizado.id_producto,
-      { cantidad: actualizado.cantidad, variante: actualizado.variante }
+      actualizado.id_detalle,
+      { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
         // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
-            p.id_producto === producto.id_producto
+            p.id_detalle === producto.id_detalle
               ? { ...p, cantidad: producto.cantidad }
               : p
         );
@@ -228,7 +249,7 @@ export class MisPedidosComponent implements OnInit {
     // 1. Reemplazar el array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
-        p.id_producto === producto.id_producto
+        p.id_detalle === producto.id_detalle
           ? { ...p, cantidad: p.cantidad - 1 }
           : p
     );
@@ -238,20 +259,20 @@ export class MisPedidosComponent implements OnInit {
 
     // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
-      (x: ProductoEnPedido) => x.id_producto === producto.id_producto
+      (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
     // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
-      actualizado.id_producto,
-      { cantidad: actualizado.cantidad, variante: actualizado.variante }
+      actualizado.id_detalle,
+      { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
         // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
-            p.id_producto === producto.id_producto
+            p.id_detalle === producto.id_detalle
               ? { ...p, cantidad: producto.cantidad }
               : p
         );
@@ -264,13 +285,13 @@ export class MisPedidosComponent implements OnInit {
 
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
 
-  const esUltimoProducto = pedido.productosSeleccionados.length === 1;
+    const esUltimoProducto = pedido.productosSeleccionados.length === 1;
 
-  // 🧨 CASO B: último producto → eliminar pedido completo
-  if (esUltimoProducto) {
-    Swal.fire({
-      title: '¿Eliminar pedido completo?',
-      html: `
+    // 🧨 CASO B: último producto → eliminar pedido completo
+    if (esUltimoProducto) {
+      Swal.fire({
+        title: '¿Eliminar pedido completo?',
+        html: `
         <p class="mb-2">
           <strong>${producto.nombre}</strong> es el único producto del pedido.
         </p>
@@ -279,70 +300,70 @@ export class MisPedidosComponent implements OnInit {
           y saldrás del paquete.
         </p>
       `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar pedido',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33'
+      }).then(result => {
+        if (!result.isConfirmed) return;
+
+        const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
+
+        if (!paqueteId) {
+          this.toast.error('No se pudo identificar el paquete.');
+          return;
+        }
+
+        // 👉 reutilizamos la lógica existente
+        this.pedidoService
+          .salirDelPaquete(paqueteId)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.pedidos.set(
+                this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
+              );
+              this.toast.success('Pedido eliminado y salida del paquete confirmada.');
+            },
+            error: () => {
+              this.toast.error('No se pudo eliminar el pedido.');
+            }
+          });
+      });
+
+      return;
+    }
+
+    // 📦 CASO A: hay más productos → eliminar solo el producto
+    Swal.fire({
+      title: '¿Eliminar producto?',
+      text: producto.nombre,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar pedido',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#d33'
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
 
-      const paqueteId = pedido.paquetePublicado?.id_paquete_publicado;
-
-      if (!paqueteId) {
-        this.toast.error('No se pudo identificar el paquete.');
-        return;
-      }
-
-      // 👉 reutilizamos la lógica existente
       this.pedidoService
-        .salirDelPaquete(paqueteId)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_detalle)
         .subscribe({
           next: () => {
-            this.pedidos.set(
-              this.pedidos().filter(p => p.id_pedido !== pedido.id_pedido)
-            );
-            this.toast.success('Pedido eliminado y salida del paquete confirmada.');
+            pedido.productosSeleccionados =
+              pedido.productosSeleccionados.filter(
+                p => p.id_detalle !== producto.id_detalle
+              );
+
+            this.recalcularPedido(pedido);
+            this.toast.success('Producto eliminado.');
           },
           error: () => {
-            this.toast.error('No se pudo eliminar el pedido.');
+            this.toast.error('No se pudo eliminar el producto.');
           }
         });
     });
-
-    return;
   }
-
-  // 📦 CASO A: hay más productos → eliminar solo el producto
-  Swal.fire({
-    title: '¿Eliminar producto?',
-    text: producto.nombre,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Eliminar',
-    cancelButtonText: 'Cancelar'
-  }).then(result => {
-    if (!result.isConfirmed) return;
-
-    this.pedidoService
-      .eliminarProductoDelPedido(pedido.id_pedido!, producto.id_producto)
-      .subscribe({
-        next: () => {
-          pedido.productosSeleccionados =
-            pedido.productosSeleccionados.filter(
-              p => p.id_producto !== producto.id_producto
-            );
-
-          this.recalcularPedido(pedido);
-          this.toast.success('Producto eliminado.');
-        },
-        error: () => {
-          this.toast.error('No se pudo eliminar el producto.');
-        }
-      });
-  });
-}
 
 
   // ------------------------------
@@ -385,30 +406,30 @@ export class MisPedidosComponent implements OnInit {
   }
 
   finalizarCompra(pedido: PedidoDelUsuario) {
-  const pedidoId = pedido.id_pedido;
+    const pedidoId = pedido.id_pedido;
 
-  if (!pedidoId) {
-    this.toast.error('Error: ID de pedido no válido');
-    return;
+    if (!pedidoId) {
+      this.toast.error('Error: ID de pedido no válido');
+      return;
+    }
+
+    // Opcional: Guardar en localStorage para verificar después
+    localStorage.setItem('pedido_en_pago', pedidoId.toString());
+
+    // Llamar al servicio para obtener la preferencia
+    this.pedidoService.iniciarCheckout(pedidoId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          // Redirigir a MercadoPago
+          window.location.href = response.checkoutUrl.checkoutUrl;
+        },
+        error: (err) => {
+          this.toast.error('No se pudo iniciar el pago');
+          console.error('Error al crear preferencia:', err);
+        }
+      });
   }
-
-  // Opcional: Guardar en localStorage para verificar después
-  localStorage.setItem('pedido_en_pago', pedidoId.toString());
-
-  // Llamar al servicio para obtener la preferencia
-  this.pedidoService.iniciarCheckout(pedidoId)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        // Redirigir a MercadoPago
-        window.location.href = response.checkoutUrl.checkoutUrl;
-      },
-      error: (err) => {
-        this.toast.error('No se pudo iniciar el pago');
-        console.error('Error al crear preferencia:', err);
-      }
-    });
-}
   // ------------------------------
   // HELPERS
   // ------------------------------

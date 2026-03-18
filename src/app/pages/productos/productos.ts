@@ -18,6 +18,8 @@ import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
+import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
+import { ErrorState } from '@app/shared/error-state/error-state';
 
 @Component({
   selector: 'app-productos',
@@ -27,8 +29,10 @@ import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-
     FiltrosComponent,
     ProductoCard,
     PaginationComponent,
-    CatalogoWrapperComponent
-],
+    CatalogoWrapperComponent,
+    DelayedSkeleton,
+    ErrorState
+  ],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
@@ -158,12 +162,15 @@ export class ProductosComponent implements OnInit {
           // Manejo de errores específicos
           if (error.name === 'TimeoutError') {
             this.errorMessage.set('El servidor no respondió a tiempo. Por favor, intentá de nuevo.');
-          } else if (error.status === 0) {
+          }
+          else if (error.status === 0) {
             this.errorMessage.set('No se pudo conectar con el servidor. Verificá tu conexión.');
-          } else if (error.status === 404) {
-            this.errorMessage.set('No se encontraron productos.');
-          } else {
-            this.errorMessage.set('Error al cargar los productos. Por favor, intentá de nuevo.');
+          }
+          else if (error.status >= 500) {
+            this.errorMessage.set('Error interno del servidor. Intentá más tarde.');
+          }
+          else {
+            this.errorMessage.set('Ocurrió un error inesperado.');
           }
 
           this.productosOriginales.set([]);

@@ -1,0 +1,606 @@
+<div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- 🔙 BOTÓN VOLVER (Mejorado y reubicado) -->
+    <div class="mb-4">
+      <app-button 
+        variant="tertiary" 
+        size="md" 
+        iconStart="arrowLeft" 
+        (buttonClick)="volver()"
+        class="hover:shadow-md transition-shadow">
+        Volver al listado de publicaciones
+      </app-button>
+    </div>
+
+    <!-- Cargando -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center min-h-[50vh]">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-brand-primary mb-4"></div>
+        <p class="text-text-secondary font-body">Cargando publicación...</p>
+      </div>
+
+    } @else if (error()) {
+      <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
+        <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4 mt-[2px]" />
+        <p class="text-error font-semibold text-lg">{{ error() }}</p>
+        <app-button variant="tertiary" size="sm" (buttonClick)="volver()" class="mt-4">
+          Volver al listado
+        </app-button>
+      </div>
+
+    } @else if (paquete()) {
+      <ng-container>
+
+        <!-- ── HEADER ─────────────────────────────────────── -->
+        <div class="bg-bg-surface rounded-2xl shadow-sm overflow-hidden mb-6 border border-border-default">
+          <!-- Banner con gradiente -->
+          <div class="h-3 bg-primary"></div>
+
+          <div class="p-6">
+            <div class="flex flex-col lg:flex-row gap-6">
+
+              <!-- Imagen del paquete -->
+              <div class="w-full lg:w-40 h-40 flex-shrink-0 rounded-xl overflow-hidden bg-bg-app border-2 border-border-default mx-auto lg:mx-0">
+                @if (paquete()?.paqueteBase?.imagen_url) {
+                  <img [src]="paquete()?.paqueteBase?.imagen_url" [alt]="paquete()?.paqueteBase?.nombre" class="w-full h-full object-cover" />
+                } @else {
+                  <div class="w-full h-full flex items-center justify-center">
+                    <app-icon name="package" size="56" class="text-text-muted mt-[2px]" />
+                  </div>
+                }
+              </div>
+
+              <!-- Info principal -->
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h1 class="text-2xl sm:text-3xl font-display text-text-primary">
+                      {{ paquete()?.paqueteBase?.nombre || 'Publicación sin nombre' }}
+                    </h1>
+                    <p class="text-sm text-text-secondary mt-1 flex items-center gap-2 flex-wrap">
+                      <span class="flex items-center gap-1">
+                        <app-icon name="hash" size="14" class="mt-[2px]" />
+                        ID: {{ paquete()?.id_paquete_publicado }}
+                      </span>
+                      @if (paquete()?.zona?.nombre) {
+                        <span class="flex items-center gap-1">
+                          <app-icon name="mapPin" size="14" class="mt-[2px]" />
+                          {{ paquete()?.zona?.nombre }}
+                        </span>
+                      }
+                      @if (paquete()?.paqueteBase?.marca?.nombre) {
+                        <span class="flex items-center gap-1">
+                          <app-icon name="tag" size="14" class="mt-[2px]" />
+                          {{ paquete()?.paqueteBase?.marca?.nombre }}
+                        </span>
+                      }
+                    </p>
+                  </div>
+                  <span [class]="'px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide border ' + getEstadoClasses(paquete()?.estado)">
+                    {{ paquete()?.estado?.nombre || 'N/A' }}
+                  </span>
+                </div>
+
+                <!-- Fechas -->
+                <div class="flex flex-wrap gap-4 text-sm text-text-secondary">
+                  <span class="flex items-center gap-1.5">
+                    <app-icon name="calendar" size="16" class="text-brand-primary mt-[2px]" />
+                    Inicio: <strong>{{ formatFecha(paquete()?.fecha_inicio) }}</strong>
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <app-icon name="calendar" size="16" class="text-brand-primary mt-[2px]" />
+                    Cierre: <strong>{{ formatFecha(paquete()?.fecha_fin) }}</strong>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MÉTRICAS ────────────────────────────────────── -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+          <!-- Días restantes -->
+          <div class="bg-bg-surface rounded-2xl shadow-sm p-5 flex items-center gap-4 border border-border-default">
+            <div [class]="'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ' + urgenciaBg()">
+              <app-icon name="clock" size="24" class="text-text-on-dark mt-[2px]" />
+            </div>
+            <div>
+              <p class="text-xs text-text-secondary">Días restantes</p>
+              <p [class]="'text-xl font-bold ' + urgenciaColor()">
+                @if (diasRestantes() <= 0) { Cerrado }
+                @else { {{ diasRestantes() }}d }
+              </p>
+            </div>
+          </div>
+
+          <!-- Stock -->
+          <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center flex-shrink-0">
+                <app-icon name="package" size="20" class="text-brand-primary mt-[2px]" />
+              </div>
+              <div>
+                <p class="text-xs text-text-secondary">Cantidad de productos reservados</p>
+                <p class="text-xl font-bold text-text-primary">
+                  {{ paquete()?.cant_productos_reservados ?? 0 }}/{{ paquete()?.cant_productos ?? 0 }}
+                </p>
+              </div>
+            </div>
+            <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden shadow-inner border border-border-default">
+              <div class="bg-brand-primary h-2 rounded-full transition-all" [style.width]="stockPct() + '%'"></div>
+            </div>
+            <p class="text-xs text-text-muted mt-1 text-right">{{ stockPct() }}% reservado</p>
+          </div>
+
+          <!-- Compradores -->
+          <div class="bg-bg-surface rounded-2xl shadow-sm p-5 flex items-center gap-4 border border-border-default">
+            <div class="w-12 h-12 rounded-xl bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+              <app-icon name="users" size="24" class="text-brand-secondary mt-[2px]" />
+            </div>
+            <div>
+              <p class="text-xs text-text-secondary">Compradores</p>
+              <p class="text-xl font-bold text-text-primary">{{ paquete()?.cant_usuarios_registrados ?? 0 }}</p>
+            </div>
+          </div>
+
+          <!-- Monto total estimado -->
+          <div class="bg-bg-surface rounded-2xl shadow-sm p-5 flex items-center gap-4 border border-border-default">
+            <div class="w-12 h-12 rounded-xl bg-brand-cta/10 flex items-center justify-center flex-shrink-0">
+              <app-icon name="dollarSign" size="24" class="text-brand-cta-hover mt-[2px]" />
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs text-text-secondary">Recaudación total</p>
+              <p class="text-lg font-bold text-text-primary truncate">{{ formatMonto(montoTotal()) }}</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── GRID: PEDIDOS + ACCIONES ───────────────────── -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+          <!-- Tabla de pedidos -->
+          <div class="xl:col-span-2 bg-bg-surface rounded-2xl shadow-sm overflow-hidden border border-border-default">
+
+            <!-- Header -->
+            <div class="p-5 border-b border-border-default flex items-center justify-between flex-wrap gap-3">
+              <h2 class="text-lg font-display text-text-primary flex items-center gap-2">
+                <app-icon name="shoppingCart" size="22" class="text-brand-primary mt-[2px]" />
+                Pedidos y compradores
+              </h2>
+              <span class="text-sm text-text-secondary bg-bg-app px-3 py-1 rounded-full">
+                {{ pedidosFiltrados().length }} / {{ paquete()?.pedidos?.length ?? 0 }} pedidos
+              </span>
+            </div>
+
+            <!-- Buscador y filtros -->
+            @if (paquete()?.pedidos && paquete()!.pedidos!.length > 0) {
+              <div class="px-5 py-4 border-b border-border-default bg-bg-app/40 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                  <app-icon name="search" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted mt-[1px] pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, email o N° pedido..."
+                    [value]="busquedaPedido()"
+                    (input)="busquedaPedido.set($any($event.target).value)"
+                    class="w-full pl-9 pr-4 py-2 text-sm bg-bg-surface border border-border-default rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all"
+                  />
+                </div>
+                <div class="flex gap-1.5 flex-wrap">
+                  <button
+                    (click)="filtrEstadoPedido.set(null)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === null ? 'bg-brand-primary text-text-on-dark border-brand-primary' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Todos
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(1)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 1 ? 'bg-status-pending-bg text-status-pending-text border-status-pending-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Pendiente
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(2)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 2 ? 'bg-status-info-bg text-status-info-text border-status-info-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    En proceso
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(3)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 3 ? 'bg-status-active-bg text-status-active-text border-status-active-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Aprobado
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(4)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 4 ? 'bg-status-closed-bg text-status-closed-text border-status-closed-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Cancelado
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (!paquete()?.pedidos || paquete()?.pedidos?.length === 0) {
+              <div class="text-center py-12">
+                <app-icon name="inbox" size="48" class="text-text-muted mx-auto mb-3 mt-[2px]" />
+                <p class="text-text-muted">Aún no hay pedidos registrados</p>
+              </div>
+            } @else if (pedidosFiltrados().length === 0) {
+              <div class="text-center py-10">
+                <app-icon name="search" size="36" class="text-text-muted mx-auto mb-3 mt-[2px]" />
+                <p class="text-text-muted text-sm">No se encontraron pedidos con ese criterio</p>
+                <button (click)="busquedaPedido.set(''); filtrEstadoPedido.set(null)" class="mt-3 text-xs text-brand-primary hover:underline">Limpiar filtros</button>
+              </div>
+            } @else {
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="bg-bg-app text-left">
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">N° Pedido</th>
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">Usuario</th>
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">Email</th>
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">Monto</th>
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide">Estado</th>
+                      <th class="px-5 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wide text-center">Detalle</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border-default">
+                    @for (pedido of pedidosFiltrados(); track pedido.id_pedido) {
+                      <tr class="hover:bg-bg-app/70 transition-colors">
+                        <td class="px-5 py-3.5 text-text-muted text-xs">#{{ pedido.id_pedido }}</td>
+                        <td class="px-5 py-3.5 font-medium text-text-primary">{{ pedido.usuario?.nombre || '–' }}</td>
+                        <td class="px-5 py-3.5 text-text-secondary">{{ pedido.usuario?.email || '–' }}</td>
+                        <td class="px-5 py-3.5 text-text-primary font-semibold">{{ formatMonto(pedido.monto_total) }}</td>
+                        <td class="px-5 py-3.5">
+                          <span [class]="'px-2.5 py-1 rounded-full text-xs font-semibold border ' + getEstadoPedidoClasses(pedido.estadoId)">
+                            {{ getEstadoPedidoLabel(pedido.estadoId) }}
+                          </span>
+                        </td>
+                        <td class="px-5 py-3.5 text-center">
+                          <button
+                            (click)="abrirDetallePedido(pedido)"
+                            title="Ver detalle del pedido"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-text-on-dark transition-all duration-200 hover:scale-105">
+                            <app-icon name="eye" size="15" class="mt-[1px]" />
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <!-- Acciones de Administración -->
+          <div class="flex flex-col gap-6">
+
+            <!-- ── GESTIÓN DEL PAQUETE ──────────────────────────── -->
+            <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
+              <h3 class="text-base font-display text-text-primary mb-4 flex items-center gap-2">
+                <app-icon name="settings" size="18" class="text-brand-primary mt-[2px]" />
+                Gestión del paquete
+              </h3>
+              <div class="grid grid-cols-2 gap-4">
+                @if (puedeEditar()) {
+                  <app-button variant="secondary" [fullWidth]="true" iconStart="edit" (buttonClick)="editarPublicacion()">
+                    Editar publicación
+                  </app-button>
+                }
+                @if (puedeNotificar()) {
+                  <app-button variant="info" [fullWidth]="true" iconStart="bell" (buttonClick)="notificarCompradores()">
+                    Notificar compradores
+                  </app-button>
+                }
+                @if (puedeCerrar()) {
+                  <app-button variant="primary" [fullWidth]="true" iconStart="lock" (buttonClick)="cerrarPaquete()">
+                    Cerrar pedido
+                  </app-button>
+                }
+                @if (puedeFinalizar()) {
+                  <app-button variant="success" [fullWidth]="true" iconStart="checkCircle" (buttonClick)="finalizarPaquete()">
+                    Finalizar paquete
+                  </app-button>
+                }
+                <app-button variant="secondary" [fullWidth]="true" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                  Duplicar publicación
+                </app-button>
+                @if (puedeCancelar()) {
+                  <app-button variant="danger" [fullWidth]="true" iconStart="x" (buttonClick)="cancelarPaquete()">
+                    Cancelar y reembolsar
+                  </app-button>
+                }
+              </div>
+            </div>
+
+            <!-- Notificaciones y reportes -->
+            <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default"
+                 [class]="!puedeEnviarMail() ? 'opacity-60 grayscale' : ''">
+              <h3 class="text-base font-display text-text-primary mb-1 flex items-center gap-2">
+                <app-icon name="bell" size="18" class="text-brand-secondary mt-[2px]" />
+                Notificaciones y reportes
+              </h3>
+              @if (!puedeEnviarMail()) {
+                <p class="text-xs text-text-muted mb-4 flex items-center gap-1">
+                  <app-icon name="lock" size="12" class="mt-[2px]" />
+                  Disponible cuando el estado sea En Preparación o Finalizado
+                </p>
+              } @else {
+                <p class="text-xs text-success mb-4 flex items-center gap-1 font-medium">
+                  <app-icon name="checkCircle" size="12" class="mt-[2px]" />
+                  Todas las acciones están habilitadas
+                </p>
+              }
+              <div class="flex flex-col gap-3">
+                <app-button variant="info" [fullWidth]="true" iconStart="mail"
+                  [disabled]="!puedeEnviarMail() || enviandoMail()" [loading]="enviandoMail()"
+                  (buttonClick)="confirmarYEnviarMail()">
+                  Confirmar y enviar mail
+                </app-button>
+                <app-button variant="secondary" [fullWidth]="true" iconStart="package"
+                  [disabled]="!puedeEnviarMail()" (buttonClick)="descargarParteProveedor()">
+                  Descargar reporte proveedor
+                </app-button>
+                <app-button variant="secondary" [fullWidth]="true" iconStart="truck"
+                  [disabled]="!puedeEnviarMail()" (buttonClick)="descargarParteLogistica()">
+                  Descargar reporte logística
+                </app-button>
+              </div>
+            </div>
+
+            <!-- Productos del paquete base -->
+            @if (paquete()?.paqueteBase?.productos; as pbProductos) {
+              @if (pbProductos.length > 0) {
+                <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
+                  <h3 class="text-base font-display text-text-primary mb-4 flex items-center gap-2">
+                    <app-icon name="box" size="18" class="text-brand-primary mt-[2px]" />
+                    Productos del paquete
+                  </h3>
+                  <div class="flex flex-col gap-2">
+                    @for (pbProd of pbProductos; track $index) {
+                      @if ($any(pbProd).producto; as prod) {
+                        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-bg-app border border-border-default">
+                          <div class="w-10 h-10 rounded-lg overflow-hidden bg-bg-raised flex-shrink-0">
+                            @if (prod.imagenes?.[0]?.url) {
+                              <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
+                            } @else {
+                              <div class="w-full h-full flex items-center justify-center">
+                                <app-icon name="image" size="16" class="text-text-muted mt-[2px]" />
+                              </div>
+                            }
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-text-primary truncate">{{ prod.nombre }}</p>
+                            <p class="text-xs text-text-secondary">{{ formatMonto(prod.precio) }}</p>
+                          </div>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            }
+
+          </div>
+        </div>
+        <!-- FIN GRID -->
+
+        <!-- ── MODAL DETALLE DE PEDIDO (FUERA DEL GRID) ──────── -->
+        @if (pedidoSeleccionado()) {
+          <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            (click)="cerrarDetallePedido()">
+
+            <div class="absolute inset-0 bg-black/65 backdrop-blur-sm"></div>
+
+            <div
+              class="relative w-[95vw] lg:w-full lg:max-w-screen-xl bg-bg-surface rounded-2xl shadow-2xl border border-border-default flex flex-col h-[95vh] lg:h-[90vh] overflow-hidden"
+              (click)="$event.stopPropagation()">
+
+              <!-- HEADER -->
+              <div class="bg-brand-primary px-6 py-4 flex items-center justify-between gap-4 flex-shrink-0 rounded-t-2xl">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <app-icon name="shoppingCart" size="20" class="text-white mt-[2px]" />
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="text-lg font-display text-white font-bold flex items-center gap-1.5 flex-wrap">
+                      <app-icon name="fileText" size="17" class="text-white flex-shrink-0" />
+                      Pedido #{{ pedidoSeleccionado()!.id_pedido }}
+                    </h3>
+                    <p class="text-white/70 text-xs mt-0.5 flex items-center gap-1.5 flex-wrap">
+                      <app-icon name="calendar" size="12" class="mt-[1px] flex-shrink-0" />
+                      {{ pedidoSeleccionado()!.fecha ? formatFecha(pedidoSeleccionado()!.fecha) : 'Fecha no disponible' }}
+                      <span class="opacity-50">·</span>
+                      Paquete ID: {{ paquete()?.id_paquete_publicado }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoPedidoClasses(pedidoSeleccionado()!.estadoId)">
+                    {{ getEstadoPedidoLabel(pedidoSeleccionado()!.estadoId) }}
+                  </span>
+                  <button
+                    (click)="cerrarDetallePedido()"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all">
+                    <app-icon name="x" size="16" class="text-white" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- CUERPO scrolleable -->
+              <div class="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5 min-h-0">
+
+                <!-- Datos del comprador -->
+                <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden flex-shrink-0">
+                  <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-brand-secondary/10 flex items-center justify-center flex-shrink-0">
+                      <app-icon name="user" size="15" class="text-brand-secondary mt-[1px]" />
+                    </div>
+                    <p class="text-sm font-semibold text-text-primary">Datos del comprador</p>
+                  </div>
+                  <div class="divide-y divide-border-default">
+                    <div class="px-4 py-3">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-0.5">Nombre completo</span>
+                      <span class="text-sm font-semibold text-text-primary break-words">{{ pedidoSeleccionado()!.usuario?.nombre || '–' }}</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-0.5">Email</span>
+                      <span class="text-sm font-medium text-text-primary break-all">{{ pedidoSeleccionado()!.usuario?.email || '–' }}</span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-0.5">Teléfono</span>
+                      <span class="text-sm font-medium text-text-primary">
+                        @if (pedidoSeleccionado()!.usuario?.telefono) {
+                          <a [href]="'tel:' + pedidoSeleccionado()!.usuario!.telefono" class="text-brand-primary hover:underline">
+                            {{ pedidoSeleccionado()!.usuario!.telefono }}
+                          </a>
+                        } @else { – }
+                      </span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-0.5">ID Usuario</span>
+                      <span class="text-sm font-medium text-text-muted">#{{ pedidoSeleccionado()!.usuarioId }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Productos del pedido -->
+                <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden flex-shrink-0">
+                  <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-brand-primary/10 flex items-center justify-center flex-shrink-0">
+                        <app-icon name="box" size="15" class="text-brand-primary mt-[1px]" />
+                      </div>
+                      <p class="text-sm font-semibold text-text-primary">Productos del pedido</p>
+                    </div>
+                    @if (pedidoSeleccionado()!.pedidoProductos?.length) {
+                      <span class="text-xs font-semibold bg-brand-primary/10 text-brand-primary px-2.5 py-1 rounded-full">
+                        {{ pedidoSeleccionado()!.pedidoProductos!.length }} ítem/s
+                      </span>
+                    }
+                  </div>
+
+                  @if (pedidoSeleccionado()!.pedidoProductos && pedidoSeleccionado()!.pedidoProductos!.length > 0) {
+                    <div class="divide-y divide-border-default">
+                      @for (pedProd of pedidoSeleccionado()!.pedidoProductos!; track pedProd.id || pedProd.id_pedido_producto) {
+                        @if (pedProd.producto; as prod) {
+                          <div class="flex items-start gap-3 px-4 py-3 hover:bg-bg-raised/30 transition-colors">
+                            <div class="w-12 h-12 rounded-xl overflow-hidden bg-bg-raised border border-border-default flex-shrink-0">
+                              @if (prod?.imagenes?.[0]?.url) {
+                                <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
+                              } @else {
+                                <div class="w-full h-full flex items-center justify-center">
+                                  <app-icon name="image" size="18" class="text-text-muted mt-[1px]" />
+                                </div>
+                              }
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-sm font-semibold text-text-primary leading-tight break-words">{{ prod.nombre }}</p>
+                              <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                                @if (pedProd.variante) {
+                                  <span class="inline-flex items-center gap-1 text-xs text-text-secondary bg-bg-raised px-2 py-0.5 rounded-full border border-border-default">
+                                    <app-icon name="tag" size="10" class="mt-[1px]" />
+                                    {{ pedProd.variante }}
+                                  </span>
+                                }
+                                <span class="text-xs text-text-muted">ID: {{ prod.id_producto ?? prod.id ?? '–' }}</span>
+                              </div>
+                            </div>
+                            <div class="flex-shrink-0 flex flex-col items-end justify-center text-right ml-2 min-w-[120px]">
+                              <div class="flex flex-col gap-0.5 items-end mb-1">
+                                <div class="flex items-center gap-1.5 text-xs text-right">
+                                  <span class="text-text-muted line-through">{{ formatMonto(prod.precio) }}</span>
+                                  @if (paquete()?.descuento) {
+                                    <span class="text-success font-medium flex items-center gap-0.5">
+                                      <app-icon name="tag" size="10" class="mt-[1px]" /> -{{ paquete()!.descuento }}%
+                                    </span>
+                                  }
+                                </div>
+                                <p class="text-xs font-medium text-text-secondary text-right">
+                                  {{ formatMonto(pedProd.precio_unitario || prod.precio) }} c/u × <span class="text-text-primary font-bold">{{ pedProd.cantidad }} u.</span>
+                                </p>
+                              </div>
+                              <p class="text-base sm:text-lg font-bold text-brand-cta-hover">
+                                {{ formatMonto(pedProd.subtotal || ((prod.precio || 0) * pedProd.cantidad)) }}
+                              </p>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </div>
+                  } @else {
+                    <div class="text-center py-8 text-text-muted text-sm">
+                      <app-icon name="inbox" size="32" class="mx-auto mb-2 mt-[1px]" />
+                      <p>Sin productos registrados en este pedido</p>
+                    </div>
+                  }
+                </div>
+
+                <!-- Resumen financiero -->
+                <div class="bg-bg-app rounded-xl border border-border-default overflow-hidden flex-shrink-0">
+                  <div class="px-4 py-3 border-b border-border-default bg-bg-raised/50 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-brand-cta/10 flex items-center justify-center flex-shrink-0">
+                      <app-icon name="dollarSign" size="15" class="text-brand-cta-hover mt-[1px]" />
+                    </div>
+                    <p class="text-sm font-semibold text-text-primary">Resumen financiero</p>
+                  </div>
+                  <div class="px-4 py-3 flex flex-col gap-2">
+                    @if (pedidoSeleccionado()!.pedidoProductos?.length) {
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-text-secondary">Subtotal productos</span>
+                        <span class="font-medium text-text-primary">{{ formatMonto(getSubtotalProductos()) }}</span>
+                      </div>
+                    }
+                    @if (pedidoSeleccionado()!.descuento_aplicado) {
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-success flex items-center gap-1">
+                          <app-icon name="tag" size="13" class="mt-[1px]" />
+                          Descuento aplicado
+                        </span>
+                        <span class="font-semibold text-success">– {{ formatMonto(pedidoSeleccionado()!.descuento_aplicado) }}</span>
+                      </div>
+                    }
+                    <div class="border-t border-border-default my-1"></div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-base font-bold text-text-primary">Total pagado</span>
+                      <span class="text-xl font-bold text-brand-cta-hover">{{ formatMonto(pedidoSeleccionado()!.monto_total) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Info adicional -->
+                <div class="flex flex-wrap gap-2 text-xs text-text-muted">
+                  <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                    <app-icon name="hash" size="12" class="mt-[1px]" />
+                    Pedido #{{ pedidoSeleccionado()!.id_pedido }}
+                  </span>
+                  <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                    <app-icon name="package" size="12" class="mt-[1px]" />
+                    {{ paquete()?.paqueteBase?.nombre || '#' + paquete()?.id_paquete_publicado }}
+                  </span>
+                  <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
+                    <app-icon name="mapPin" size="12" class="mt-[1px]" />
+                    {{ paquete()?.zona?.nombre || '–' }}
+                  </span>
+                </div>
+
+              </div>
+
+              <!-- FOOTER -->
+              <div class="px-6 py-4 border-t border-border-default bg-bg-app/40 flex-shrink-0">
+                <button
+                  (click)="cerrarDetallePedido()"
+                  class="w-full py-2.5 rounded-xl text-sm font-semibold bg-bg-surface border border-border-default text-text-secondary transition-all flex items-center justify-center gap-2 hover:bg-brand-primary hover:text-white hover:border-brand-primary shadow-sm hover:shadow">
+                  <app-icon name="x" size="16" class="mt-[1px]" />
+                  Cerrar detalle
+                </button>
+              </div>
+
+            </div>
+          </div>
+        }
+
+      </ng-container>
+    }
+
+  </div>
+</div>

@@ -113,9 +113,29 @@ export class SelectorVariantesComponent {
     ).length;
   });
 
+  /**
+   * Verifica si hay al menos una opción seleccionada para mostrar botón de limpiar
+   */
+  hayAlgunaSeleccion = computed(() => {
+    return Object.keys(this.seleccionadas()).length > 0;
+  });
+
+  /**
+   * Verifica si la combinación seleccionada existe realmente 
+   * dentro de las variantes devueltas por el Backend
+   */
+  varianteValida = computed(() => {
+    if (!this.todasSeleccionadas()) return true;
+    return this.encontrarVarianteId() !== null;
+  });
+
   private encontrarVarianteId(): number | null {
     const seleccionadas = this.seleccionadas();
     const variantes = this.producto().variantes || [];
+
+    console.log('--- ENCONTRAR VARIANTE ---');
+    console.log('Seleccionadas:', seleccionadas);
+    console.log('Variantes locales:', variantes);
 
     for (const variante of variantes) {
       const coincide = variante.opciones.every(op =>
@@ -131,15 +151,15 @@ export class SelectorVariantesComponent {
   }
 
   constructor() {
-    // Effect: Emitir cambios cuando se actualizan las variantes
     effect(() => {
       const seleccionadas = this.seleccionadas();
       const todas = this.todasSeleccionadas();
+      const valida = this.varianteValida();
 
       this.variantesChange.emit(seleccionadas);
-      this.valido.emit(todas);
+      this.valido.emit(todas && valida);
 
-      if (todas) {
+      if (todas && valida) {
         const varianteId = this.encontrarVarianteId();
         this.varianteSeleccionada.emit(varianteId);
       } else {
@@ -152,15 +172,25 @@ export class SelectorVariantesComponent {
   // 🎯 MÉTODOS - Selección de variantes
 
   /**
-   * Selecciona una opción para una característica
+   * Selecciona una opción para una característica o la deselecciona si ya estaba activa
    */
   seleccionarOpcion(caracteristicaId: number, opcionId: number): void {
     if (!this.habilitado()) return;
 
-    this.seleccionadas.update(current => ({
-      ...current,
-      [caracteristicaId]: opcionId
-    }));
+    this.seleccionadas.update(current => {
+      // Si el usuario hace clic en la opción que YA está seleccionada, la deselecciona
+      if (current[caracteristicaId] === opcionId) {
+        const next = { ...current };
+        delete next[caracteristicaId];
+        return next;
+      }
+
+      // Si no, la selecciona
+      return {
+        ...current,
+        [caracteristicaId]: opcionId
+      };
+    });
   }
 
 
@@ -176,6 +206,34 @@ export class SelectorVariantesComponent {
    */
   tieneSeleccion(caracteristicaId: number): boolean {
     return this.seleccionadas()[caracteristicaId] !== undefined;
+  }
+
+
+
+  /**
+   * Verifica si una opción específica es combinable con el RESTO de las opciones ya seleccionadas.
+   * Si no hay ninguna variante activa que contenga esta combinación, devuelve false.
+   */
+  esOpcionCombinable(caracteristicaId: number, opcionId: number): boolean {
+    const seleccionadas = this.seleccionadas();
+    const variantes = this.producto().variantes || [];
+    if (variantes.length === 0) return true;
+
+    // Simular cómo quedaría la selección incluyendo la opción que estamos evaluando
+    const seleccionSimulada = { ...seleccionadas, [caracteristicaId]: opcionId };
+
+    // Comprobar si existe AL MENOS UNA variante en BD que contenga todas estas opciones seleccionadas
+    return variantes.some(variante => {
+      // Ignoramos variantes desactivadas del todo
+      if (variante.activo === false) return false;
+
+      return Object.entries(seleccionSimulada).every(([cId, oId]) => {
+        // La variante debe poseer (caracteristicaId === cId AND opcionId === oId)
+        return variante.opciones.some(op =>
+          op.caracteristicaId === Number(cId) && op.opcionId === oId
+        );
+      });
+    });
   }
 
   /**
