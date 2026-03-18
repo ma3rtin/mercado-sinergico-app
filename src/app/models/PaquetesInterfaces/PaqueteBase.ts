@@ -9,7 +9,7 @@ export interface PaqueteBase {
   imagen_url: string;
   categoria_id: number;
   marcaId?: number;
-  marca: Marca;
-  categoria: Categoria;
+  marca?: Marca;
+  categoria?: Categoria;
   productos?: PaqueteBaseProducto[];
 }

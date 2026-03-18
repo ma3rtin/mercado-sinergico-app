@@ -157,7 +157,6 @@ export class IconsService {
     alert: featherAlertCircle,
     alertTriangle: featherAlertTriangle,
     info: featherInfo,
-    error: featherXIcon,
 
     // 👤 Usuario
     user: featherUser,

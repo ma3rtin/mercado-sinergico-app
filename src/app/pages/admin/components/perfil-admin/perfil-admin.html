@@ -102,7 +102,7 @@
         <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-xl sm:text-2xl font-display text-gray-900 flex items-center gap-2 sm:gap-3">
-                    <app-icon name="clock" size="28" class="text-orange-500 flex-shrink-0" />
+                    <app-icon name="clock" size="28" class="text-primary flex-shrink-0 mt-1" />
                     <span class="break-words">Paquetes próximos a cerrarse</span>
                 </h3>
                 <div class="flex items-center gap-2">
@@ -126,19 +126,15 @@
             } @else if (paquetes().length > 0) {
                 <div class="grid grid-cols-1 gap-4">
                     @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                        <!-- Usar role=article para separar la zona de click de los botones internos -->
-                        <div
-                            (click)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)"
-                            class="cursor-pointer rounded-xl hover:ring-2 hover:ring-brand-primary/40 transition-all">
-                            <app-admin-paquete-card
-                                [paquete]="paquete"
-                                (close)="cerrarPaqueteDesdeCard($event)"
-                                (prepare)="finalizarPaquete($event)"
-                                (refund)="reembolsarPaquete($event)"
-                                (notify)="notificarCierre($event)"
-                                (duplicate)="duplicarPaquete($event)"
-                            />
-                        </div>
+                        <app-admin-paquete-card
+                            [paquete]="paquete"
+                            (close)="cerrarPaqueteDesdeCard($event)"
+                            (prepare)="finalizarPaquete($event)"
+                            (refund)="reembolsarPaquete($event)"
+                            (notify)="notificarCierre($event)"
+                            (duplicate)="duplicarPaquete($event)"
+                            (viewDetail)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)"
+                        />
                     }
                 </div>
             } @else {

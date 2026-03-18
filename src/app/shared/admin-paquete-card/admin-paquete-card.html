@@ -1,4 +1,5 @@
-<div class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300"
+<div (click)="onViewDetail($event)"
+    class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300 cursor-pointer hover:ring-2 hover:ring-brand-primary/40"
     [class]="esEnPreparacion ? 'border-info shadow-info-light' : esCancelado ? 'border-error/30' : esFinalizado ? 'border-brand-secondary/30' : 'border-border-default hover:shadow-md'">
 
     <!-- Banner: En Preparación -->
@@ -26,7 +27,7 @@
     <!-- Banner: Cancelado -->
     @if (esCancelado) {
         <div class="flex items-center gap-2 bg-error-light border-b border-error/20 px-4 py-2 text-error">
-            <app-icon name="xCircle" size="16" />
+            <app-icon name="x" size="16" />
             <span class="text-xs font-bold uppercase tracking-widest">Cancelado — Reembolso ejecutado</span>
         </div>
     }
@@ -65,11 +66,11 @@
                 <!-- Cierre -->
                 @if (esActivo || esPendiente) {
                     <div class="flex items-center gap-2 text-text-secondary">
-                        <app-icon name="calendar" size="16" [class]="getUrgenciaColor()" />
+                        <app-icon name="clock" size="16" [class]="getUrgenciaColor()" />
                         <span class="text-xs">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
-                        @if (getDiasRestantes() > 0) {
-                            <span [class]="'text-[10px] font-bold px-1.5 py-0.5 rounded ' + getUrgenciaBg() + ' ' + getUrgenciaColor()">
-                                {{ getDiasRestantes() }}d
+                        @if (tiempoRestante() !== 'Vencido' && tiempoRestante() !== 'N/A') {
+                            <span [class]="'text-[10.5px] font-bold px-2 py-0.5 rounded tabular-nums min-w-[75px] text-center ' + getUrgenciaBg() + ' ' + getUrgenciaColor()">
+                                {{ tiempoRestante() }}
                             </span>
                         } @else {
                             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-error-light text-error">Vencido</span>
@@ -101,7 +102,7 @@
 
                 <!-- Solo duplicar: estados terminales -->
                 @if (esFinalizado || esCancelado) {
-                    <div class="flex items-center justify-end">
+                    <div class="flex items-center justify-end gap-2">
                         <button (click)="onDuplicate($event)"
                             class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
                             <app-icon name="copy" size="15" />

@@ -169,9 +169,9 @@ export class PerfilAdmin implements OnInit {
     this.router.navigate(['/admin/administrar-publicaciones']);
   }
 
-  /** Navega a administrar-publicaciones con el paquete destacado */
+  /** Navega directamente al detalle de la publicación */
   navigateToPublicacionDetalle(id: number) {
-    this.router.navigate(['/admin/administrar-publicaciones'], { queryParams: { highlight: id } });
+    this.router.navigate(['/admin/administrar-publicacion', id]);
   }
 
   navigateToAdminTemplates() {
