@@ -1,4 +1,7 @@
 <app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación duplicada' : 'Publicar paquete'">
+    <div class="mb-3">
+        <app-admin-back-button label="Volver a gestionar paquetes" />
+    </div>
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
         <!-- Banner Edición / Duplicado -->
         @if (isEditMode()) {
@@ -16,17 +19,6 @@
             </div>
         </div>
         }
-        <!-- Botón Volver -->
-        <div class="absolute -top-12 left-0">
-            <app-button 
-            variant="ghost" 
-            size="sm"
-            (buttonClick)="router.navigate(['/admin/administrar-paquetes'])">
-            <app-icon name="arrowLeft" size="18" class="mt-1" />
-            Volver a gestionar paquetes
-            </app-button>
-
-        </div>
 
         <!-- Buscador de paquete base -->
         <div class="mb-6 relative" #scrollContainer>

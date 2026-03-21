@@ -19,11 +19,12 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-publicar-paquete',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, AdminCreateWrapperComponent, IconComponent],
+  imports: [FormsModule, ButtonComponent, AdminCreateWrapperComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './publicar-paquete.html',
 })
 export class PublicarPaqueteComponent implements OnInit {

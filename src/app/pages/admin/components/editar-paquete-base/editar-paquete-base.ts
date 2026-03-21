@@ -25,11 +25,12 @@ import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/ad
 import { SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-editar-paquete-base',
   standalone: true,
-  imports: [FormsModule, AdminCreateWrapperComponent, ButtonComponent, IconComponent],
+  imports: [FormsModule, AdminCreateWrapperComponent, ButtonComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './editar-paquete-base.html',
 })
 export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {

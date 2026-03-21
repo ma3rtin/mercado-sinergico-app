@@ -2,14 +2,8 @@
 <app-admin-create-wrapper [titulo]="'Crear producto'">
   <div class="relative">
     <!-- Botón Volver -->
-    <div class="absolute -top-12 left-0">
-      <app-button 
-        variant="ghost" 
-        size="sm" 
-        (buttonClick)="router.navigate(['/admin/perfil'])"
-        [iconStart]="'arrowLeft'">
-        Volver al perfil
-      </app-button>
+    <div class="mb-4">
+      <app-admin-back-button label="Volver al perfil" />
     </div>
 
     <!-- 🎯 Tipo de Producto -->

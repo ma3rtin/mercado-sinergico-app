@@ -13,11 +13,12 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {
