@@ -9,11 +9,12 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-publicaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent],
   templateUrl: './administrar-publicaciones.html',
 })
 export class AdministrarPublicacionesComponent implements OnInit {

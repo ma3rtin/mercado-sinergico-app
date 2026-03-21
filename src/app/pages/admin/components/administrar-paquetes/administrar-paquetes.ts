@@ -14,11 +14,12 @@ import { ToastService } from '@app/services/toast/toast.service';
 // Shared Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-paquetes',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './administrar-paquetes.html',
 })
 export class AdministrarPaquetesComponent implements OnInit {

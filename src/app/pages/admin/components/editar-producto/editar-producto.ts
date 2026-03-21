@@ -36,6 +36,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
@@ -58,6 +59,7 @@ interface ImageSlot {
     InputComponent,
     IconComponent,
     CrearPlantillaModalComponent,
+    AdminBackButtonComponent,
   ],
   standalone: true,
 })

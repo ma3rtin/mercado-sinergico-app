@@ -1,15 +1,8 @@
 <div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
   <div class="max-w-6xl mx-auto">
-    <!-- 🔙 BOTÓN VOLVER (Mejorado y reubicado) -->
+    <!-- 🔙 BOTÓN VOLVER -->
     <div class="mb-4">
-      <app-button 
-        variant="tertiary" 
-        size="md" 
-        iconStart="arrowLeft" 
-        (buttonClick)="volver()"
-        class="hover:shadow-md transition-shadow">
-        Volver al listado de publicaciones
-      </app-button>
+      <app-admin-back-button label="Volver al listado de publicaciones" />
     </div>
 
     <!-- Cargando -->
@@ -23,9 +16,7 @@
       <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
         <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4 mt-[2px]" />
         <p class="text-error font-semibold text-lg">{{ error() }}</p>
-        <app-button variant="tertiary" size="sm" (buttonClick)="volver()" class="mt-4">
-          Volver al listado
-        </app-button>
+        <app-admin-back-button label="Volver al listado" />
       </div>
 
     } @else if (paquete()) {
