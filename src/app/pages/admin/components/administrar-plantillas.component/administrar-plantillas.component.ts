@@ -6,12 +6,13 @@ import Swal from 'sweetalert2';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
   styleUrls: ['./administrar-plantillas.component.css'],
-  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent],
+  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, AdminBackButtonComponent],
 })
 export class AdministrarPlantillasComponent implements OnInit {
   // ✅ signals

@@ -29,12 +29,13 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent],
+  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent, AdminBackButtonComponent],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {

@@ -28,6 +28,7 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 import Swal from 'sweetalert2';
 
@@ -48,7 +49,8 @@ interface ImageSlot {
     CrearPlantillaModalComponent,
     IconComponent,
     SelectorTipoCardComponent,
-    AdminCreateWrapperComponent
+    AdminCreateWrapperComponent,
+    AdminBackButtonComponent
 ],
   standalone: true
 })

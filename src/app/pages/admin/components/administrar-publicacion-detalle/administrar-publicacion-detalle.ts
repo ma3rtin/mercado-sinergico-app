@@ -8,13 +8,14 @@ import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaq
 import { FormsModule } from '@angular/forms';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-administrar-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule],
+  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, AdminBackButtonComponent],
   templateUrl: './administrar-publicacion-detalle.html',
 })
 export class AdministrarPublicacionDetalleComponent implements OnInit {
