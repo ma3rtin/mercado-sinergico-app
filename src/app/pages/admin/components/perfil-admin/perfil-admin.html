@@ -55,30 +55,31 @@
                 Administración
             </h3>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+            <!-- 🔥 Dashboard de Acciones Rápidas -->
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 auto-rows-fr">
 
                 <app-button variant="tertiary" (click)="navigateToAdminProducts()" size="lg" [fullWidth]="true"
-                    [iconStart]="'box'">
+                    [hFull]="true" direction="column" [iconStart]="'box'" class="h-32">
                     Administrar productos
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPackages()" size="lg" [fullWidth]="true"
-                    [iconStart]="'package'">
+                    [hFull]="true" direction="column" [iconStart]="'package'" class="h-32">
                     Administrar paquetes
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPublicaciones()" size="lg" [fullWidth]="true"
-                    [iconStart]="'clipboard'">
+                    [hFull]="true" direction="column" [iconStart]="'clipboard'" class="h-32">
                     Administrar publicaciones
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" size="lg" [fullWidth]="true"
-                    [iconStart]="'upload'">
+                    [hFull]="true" direction="column" [iconStart]="'upload'" class="h-32">
                     Publicar paquete
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminTemplates()" size="lg" [fullWidth]="true"
-                    [iconStart]="'layers'">
+                    [hFull]="true" direction="column" [iconStart]="'layers'" class="h-32">
                     Administrar plantillas
                 </app-button>
 

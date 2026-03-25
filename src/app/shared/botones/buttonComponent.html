@@ -1,74 +1,60 @@
 <!-- Botón base -->
-<button
-  [type]="type()"
-  [class]="buttonClasses()"
-  [disabled]="disabled() || loading()"
-  [attr.aria-label]="getAriaLabel()"
-  [attr.aria-describedby]="ariaDescribedBy()"
-  [attr.aria-pressed]="selected()"
-  [attr.aria-busy]="loading()"
-  (click)="onButtonClick()"
-  class="relative"
->
+<button [type]="type()" [class]="buttonClasses()" [disabled]="disabled() || loading()"
+  [attr.aria-label]="getAriaLabel()" [attr.aria-describedby]="ariaDescribedBy()" [attr.aria-pressed]="selected()"
+  [attr.aria-busy]="loading()" (click)="onButtonClick()" class="relative">
   <!-- 🌈 Efecto hover (brillo/onda) - Opcional -->
   <span class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity rounded-lg"></span>
 
   <!-- 📦 Contenedor flex para alineación -->
-  <span [class]="'flex items-center justify-center ' + spacerClasses()" [ngClass]="{ 'flex-col': iconOnly() }">
+  <span [class]="'flex items-center justify-center text-center ' + spacerClasses()"
+    [ngClass]="{ 'flex-col': iconOnly() || direction() === 'column' }">
 
     <!-- 🎨 Icono inicial (si existe) -->
     @if (iconStart() && !iconOnly()) {
-      <app-icon
-        [name]="iconStart()!"
-        [class]="iconClasses() + ' transition-transform group-hover:scale-110'"
-      />
+    <app-icon [name]="iconStart()!" [class]="iconClasses() + ' transition-transform group-hover:scale-110'" />
     }
 
     <!-- 📝 Contenido del botón -->
     @if (!loading()) {
+    <div [ngClass]="{ 'flex flex-col items-center justify-center max-w-[140px] px-2 h-10': direction() === 'column' }">
       <!-- Si hay label -->
       @if (label()) {
-        <span class="whitespace-nowrap">{{ label() }}</span>
+      <span [class.whitespace-nowrap]="direction() === 'row'" [class.leading-tight]="direction() === 'column'">
+        {{ label() }}
+      </span>
       }
       <!-- Si no hay label, usa ng-content -->
       @else if (!iconOnly()) {
+      <div [class.leading-tight]="direction() === 'column'">
         <ng-content />
+      </div>
       }
+    </div>
 
-      <!-- Icono único (si solo es icono) -->
-      @if (iconOnly() && iconStart()) {
-        <app-icon
-          [name]="iconStart()!"
-          [class]="iconClasses()"
-        />
-      }
+    <!-- Icono único (si solo es icono) -->
+    @if (iconOnly() && iconStart()) {
+    <app-icon [name]="iconStart()!" [class]="iconClasses()" />
+    }
     }
     <!-- 🔄 Loading spinner -->
     @else {
-      <span class="animate-spin">
-        <app-icon
-          name="loader"
-          [class]="iconClasses()"
-        />
-      </span>
+    <span class="animate-spin">
+      <app-icon name="loader" [class]="iconClasses()" />
+    </span>
     }
 
     <!-- 🎨 Icono final (si existe y no está cargando) -->
     @if (iconEnd() && !loading() && !iconOnly()) {
-      <app-icon
-        [name]="iconEnd()!"
-        [class]="iconClasses() + ' transition-transform group-hover:translate-x-1'"
-      />
+    <app-icon [name]="iconEnd()!" [class]="iconClasses() + ' transition-transform group-hover:translate-x-1'" />
     }
   </span>
 
   <!-- 🔴 Badge (notificación) -->
   @if (shouldShowBadge()) {
-    <span
-      [class]="'absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ' + badgeColor()"
-    >
-      {{ badge()! > 99 ? '99+' : badge() }}
-    </span>
+  <span
+    [class]="'absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ' + badgeColor()">
+    {{ badge()! > 99 ? '99+' : badge() }}
+  </span>
   }
 </button>
 
