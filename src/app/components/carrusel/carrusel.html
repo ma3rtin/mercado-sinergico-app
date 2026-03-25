@@ -1,88 +1,63 @@
-<!-- carrusel.html - VERSIÓN FINAL -->
-<section class="py-12 relative overflow-hidden bg-gradient-to-b from-white to-gray-50">
+<!-- carrusel.html - VERSIÓN CORREGIDA DESKTOP & MOBILE -->
+<div class="relative w-full group">
 
-  <!-- Título -->
-  <div class="max-w-7xl mx-auto px-4 mb-8">
-    <h2 class="font-display text-3xl md:text-4xl font-bold flex items-center justify-center gap-3 text-gray-900">
-      <app-icon name="Package"  size="40"></app-icon>
-      {{ tipo() === "paquete" ? "Paquetes por cerrarse" : "⭐ Productos destacados" }}
-    </h2>
-  </div>
+  <!-- Flechas (Solo desktop) - Posicionadas para no ser recortadas -->
+  <button
+    (click)="scrollLeft()"
+    [disabled]="translateX === 0"
+    class="hidden md:flex absolute -left-2 lg:-left-10 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white shadow-xl hover:shadow-2xl
+           transition-all duration-200 disabled:opacity-0 disabled:pointer-events-none
+           hover:bg-gray-50 border border-gray-100"
+    aria-label="Anterior"
+  >
+    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
 
-  <!-- Carrusel Container -->
-  <div class="relative flex items-center justify-center px-4">
-
-    <!-- Flecha izquierda -->
-    <button
-      (click)="scrollLeft()"
-      [disabled]="translateX === 0"
-      class="absolute left-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl
-             transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-             hover:bg-gray-50"
+  <!-- Contenedor Principal Adaptativo -->
+  <div class="w-full overflow-x-auto md:overflow-hidden snap-x snap-mandatory scrollbar-hide py-6 px-1">
+    <div
+      #carousel
+      class="flex gap-4 md:gap-4 transition-transform duration-500 ease-out"
+      [style.transform]="'translateX(' + translateX + 'px)'"
     >
-      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-      </svg>
-    </button>
-
-    <!-- Cards Container - SIN ANCHO FIJO -->
-    <div class="w-full max-w-6xl overflow-hidden mx-auto p-6">
-      <div
-        #carousel
-        class="flex gap-4 transition-transform duration-500 ease-in-out"
-        [style.transform]="'translateX(' + translateX + 'px)'"
-      >
-        <!-- Cards -->
-        @for (item of items(); track item.id_paquete_publicado) {
-          <div class="flex-shrink-0" [style.width.px]="320">
-            <app-paquete-card
-              [paquete]="item"
-              (cardClick)="onPaqueteClick($event)"
-            ></app-paquete-card>
-          </div>
-        } @empty {
-          <!-- Empty State -->
-          <div class="w-full flex flex-col items-center justify-center py-20 text-gray-500">
-            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-              </path>
-            </svg>
-            <p class="text-center">
-              <span class="block text-lg font-semibold mb-1">No hay paquetes disponibles</span>
-              <span class="text-sm">Vuelve más tarde para ver nuevas ofertas</span>
-            </p>
-          </div>
-        }
-      </div>
+      <!-- Cards: Ancho FIJO de 320px para coincidir con la lógica del TS -->
+      @for (item of items(); track item.id_paquete_publicado) {
+        <div class="flex-shrink-0 snap-center first:ml-4 last:mr-4" [style.width.px]="320">
+          <app-paquete-card
+            [paquete]="item"
+            (cardClick)="onPaqueteClick($event)"
+          ></app-paquete-card>
+        </div>
+      }
     </div>
-
-    <!-- Flecha derecha -->
-    <button
-      (click)="scrollRight()"
-      [disabled]="translateX === maxScroll"
-      class="absolute right-0 z-20 p-3 rounded-full bg-white shadow-lg hover:shadow-xl
-            transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-            hover:bg-gray-50"
-    >
-      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-      </svg>
-    </button>
   </div>
 
-  <!-- Indicador de progreso -->
-  @if (items().length > visibleCards) {
-    <div class="flex justify-center gap-2 mt-8">
-      @for (i of [].constructor(items().length - visibleCards + 1); track $index) {
-        <button
-          (click)="translateX = -($index * (cardWidth + gap))"
-          [class.bg-primary]="currentIndex === $index"
-          [class.bg-gray-300]="currentIndex !== $index"
-          class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer hover:scale-125"
-          [attr.aria-label]="'Ir a paquete ' + ($index + 1)"
-        ></button>
+  <!-- Flecha derecha (Solo desktop) -->
+  <button
+    (click)="scrollRight()"
+    [disabled]="translateX === maxScroll"
+    class="hidden md:flex absolute -right-2 lg:-right-10 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white shadow-xl hover:shadow-2xl
+          transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none
+          hover:bg-gray-50 border border-gray-100"
+    aria-label="Siguiente"
+  >
+    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+
+  <!-- Indicador de progreso (Móvil) -->
+  @if (items().length > 1) {
+    <div class="flex md:hidden justify-center gap-2 mt-2">
+      @for (item of items(); track $index) {
+        <div
+          [class.bg-brand-cta]="currentIndex === $index"
+          [class.bg-gray-200]="currentIndex !== $index"
+          class="w-2.5 h-1.5 rounded-full transition-all duration-300"
+        ></div>
       }
     </div>
   }
-</section>
+</div>

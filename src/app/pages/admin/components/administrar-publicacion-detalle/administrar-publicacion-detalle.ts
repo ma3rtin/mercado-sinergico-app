@@ -341,30 +341,29 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
     // 3. Generar filas (usando ";" para Excel en español)
     let totalGral = 0;
-    const scrub = (v: any) => (v ?? '').toString().replace(/[;\n\r]/g, ' ');
-
     const itemRows = Array.from(consolidado.values()).map(info => {
       const subtotal = info.precio * info.cantidad;
       totalGral += subtotal;
-      return `"${info.id}";"${scrub(info.nombre)}";"${scrub(info.variante)}";"${scrub(info.marca)}";"${this.formatMonto(info.precio)}";"${info.cantidad}";"${this.formatMonto(subtotal)}"`;
+      return `${info.id};"${this.scrubForCsv(info.nombre)}";"${this.scrubForCsv(info.variante)}";"${this.scrubForCsv(info.marca)}";${info.precio};${info.cantidad};${subtotal}`;
     });
 
     // 4. Construir el CSV final
     const now = new Date().toLocaleString('es-AR');
     const rows = [
-      'sep=;', // Truco para que Excel sepa que el separador es ";"
+      'sep=;',
       '# REPORTES MERCADO SINERGICO #',
       '"Tipo";"REPORTE PARA PROVEEDOR"',
-      `"Paquete";"${p.paqueteBase?.nombre ?? 'N/A'} (ID: ${p.id_paquete_publicado})"`,
-      `"Zona";"${p.zona?.nombre ?? 'N/A'}"`,
+      `"Paquete";"${this.scrubForCsv(p.paqueteBase?.nombre)} (ID: ${p.id_paquete_publicado})"`,
+      `"Zona";"${this.scrubForCsv(p.zona?.nombre)}"`,
       `"Fecha Generacion";"${now}"`,
       `"Pedidos Pagados";"${pedidosAprobados.length}"`,
       '',
       '"SKU (ID)";"Producto";"Variante/Modelo";"Marca";"Precio Unit.";"Cant. Total";"Subtotal"',
       ...itemRows,
       '',
-      `"";"";"";"";"";"TOTAL A FACTURAR";"${this.formatMonto(totalGral)}"`
+      `"";"";"";"";"";"TOTAL A FACTURAR";${totalGral}`
     ];
+
 
     this.downloadCsv(
       rows.join('\n'),
@@ -378,40 +377,39 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p) return;
 
     const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId === 3);
-    const scrub = (v: any) => (v ?? '').toString().replace(/[;\n\r]/g, ' ');
-
     const now = new Date().toLocaleString('es-AR');
     let totalRecaudado = 0;
 
     const buyerRows = pedidosAprobados.map(ped => {
       const id = ped.id_pedido ?? 'N/A';
-      const nombre = scrub(ped.usuario?.nombre ?? 'N/A');
-      const email = scrub(ped.usuario?.email ?? 'N/A');
+      const nombre = this.scrubForCsv(ped.usuario?.nombre);
+      const email = this.scrubForCsv(ped.usuario?.email);
       const total = ped.monto_total ?? 0;
       totalRecaudado += total;
       const estado = this.getEstadoPedidoLabel(ped.estadoId);
       
-      const detalle = scrub((ped.pedidoProductos ?? [])
+      const detalle = this.scrubForCsv((ped.pedidoProductos ?? [])
         .map(pp => `${pp.cantidad}x ${pp.producto?.nombre}${pp.variante ? ' ('+pp.variante+')' : ''}`)
         .join(' | '));
 
-      return `"${id}";"${nombre}";"${detalle}";"${email}";"${this.formatMonto(total)}";"${estado}"`;
+      return `${id};"${nombre}";"${detalle}";"${email}";${total};"${estado}"`;
     });
 
     const rows: string[] = [
       'sep=;',
       '# REPORTES MERCADO SINERGICO #',
       '"Tipo";"HOJA DE RUTA / LOGISTICA"',
-      `"Paquete";"${p.paqueteBase?.nombre ?? 'N/A'} (ID: ${p.id_paquete_publicado})"`,
-      `"Zona";"${p.zona?.nombre ?? 'N/A'}"`,
+      `"Paquete";"${this.scrubForCsv(p.paqueteBase?.nombre)} (ID: ${p.id_paquete_publicado})"`,
+      `"Zona";"${this.scrubForCsv(p.zona?.nombre)}"`,
       `"Fecha Generacion";"${now}"`,
       `"Pedidos Pagados";"${pedidosAprobados.length}"`,
       '',
       '"ID Pedido";"Comprador";"Detalle Productos";"Email";"Total Pedido";"Estado"',
       ...buyerRows,
       '',
-      `"";"";"";"";"TOTAL PAGADO RECAUDADO";"${this.formatMonto(totalRecaudado)}"`
+      `"";"";"";"";"TOTAL PAGADO RECAUDADO";${totalRecaudado}`
     ];
+
 
     if (pedidosAprobados.length === 0) {
       rows.push('', '"INFO";"No se registran pedidos pagados para este paquete aun."');
@@ -432,6 +430,17 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Limpia y escapa un string para su uso seguro en CSV (RFC 4180)
+   */
+  private scrubForCsv(v: any): string {
+    if (v === null || v === undefined) return 'N/A';
+    // Escapar comillas dobles duplicándolas y eliminar saltos de línea/punto y coma
+    return v.toString()
+      .replace(/"/g, '""')
+      .replace(/[;\n\r]/g, ' ');
   }
 
   // ── Helpers ───────────────────────────────────────────────────

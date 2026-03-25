@@ -1,137 +1,95 @@
 @if (!cargando() && !sesionIniciada()) {
-  <p class="text-gray-500">Iniciá sesión para ver tu perfil</p>
+<p class="text-gray-500">Iniciá sesión para ver tu perfil</p>
 } @else if (sesionIniciada()) {
-  <section class="max-w-7xl mx-auto px-4 md:px-6 py-8 font-body" aria-labelledby="perfil-titulo">
+<section class="max-w-7xl mx-auto px-4 md:px-6 py-8 font-body" aria-labelledby="perfil-titulo">
 
-    <!-- Datos principales -->
-    <section class="grid md:grid-cols-[1fr_340px] gap-6 md:gap-8 items-start">
-      <div class="flex items-start gap-4 md:gap-6">
+  <!-- Datos principales -->
+  <section class="grid md:grid-cols-[1fr_340px] gap-6 md:gap-8 items-start">
+    <div class="flex items-start gap-4 md:gap-6">
 
-        <!-- Foto de perfil con overlay -->
-        <div class="relative group w-24 h-24 md:w-28 md:h-28">
-          <img [src]="usuario()?.imagen_url || 'assets/usuario.png'" alt="Foto de perfil de {{ usuario()?.nombre }}"
-            class="w-full h-full rounded-full object-cover ring-2 ring-white shadow-sm" />
+      <!-- Foto de perfil con overlay -->
+      <div class="relative group w-24 h-24 md:w-28 md:h-28">
+        <img [src]="usuario()?.imagen_url || 'assets/usuario.png'" alt="Foto de perfil de {{ usuario()?.nombre }}"
+          class="w-full h-full rounded-full object-cover ring-2 ring-white shadow-sm" />
 
-          <!-- Overlay con ícono de lápiz -->
-          <label for="fileInput" class="absolute inset-0 flex items-center justify-center
+        <!-- Overlay con ícono de lápiz -->
+        <label for="fileInput" class="absolute inset-0 flex items-center justify-center
           bg-[rgba(0,0,0,0.40)] rounded-full
             opacity-0 group-hover:opacity-100
             cursor-pointer transition">
-            <!-- Ícono lápiz -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white"
-              class="w-6 h-6">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M16.862 3.487a2.25 2.25 0 013.182 3.182l-9.84 9.84a4.5 4.5 0 01-1.591 1.05l-3.337 1.112a.75.75 0 01-.949-.949l1.112-3.337a4.5 4.5 0 011.05-1.591l9.84-9.84z" />
-            </svg>
-          </label>
+          <!-- Ícono lápiz -->
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white"
+            class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16.862 3.487a2.25 2.25 0 013.182 3.182l-9.84 9.84a4.5 4.5 0 01-1.591 1.05l-3.337 1.112a.75.75 0 01-.949-.949l1.112-3.337a4.5 4.5 0 011.05-1.591l9.84-9.84z" />
+          </svg>
+        </label>
 
-          <!-- Input de archivo oculto -->
-          <input id="fileInput" type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
-        </div>
-
-        <!-- Nombre y email -->
-        <div>
-          <h1 class="text-2xl font-extrabold text-gray-900">{{ usuario()?.nombre }}</h1>
-          <a [href]="'mailto:' + usuario()?.email" class="text-secondary underline underline-offset-2">
-            {{ usuario()?.email }}
-          </a>
-
-        </div>
+        <!-- Input de archivo oculto -->
+        <input id="fileInput" type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
       </div>
 
-    </section>
+      <!-- Nombre y email -->
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ usuario()?.nombre }}</h1>
+        <a [href]="'mailto:' + usuario()?.email" class="text-secondary underline underline-offset-2">
+          {{ usuario()?.email }}
+        </a>
 
-    <!-- Formulario Dirección + Teléfono + Fecha Nac -->
-    <form class="mt-6 grid gap-6 md:grid-cols-2" [formGroup]="form" (ngSubmit)="submit()">
+      </div>
+    </div>
 
-      <!-- Teléfono -->
-      <app-input
-        formControlName="telefono"
-        labelValue="Teléfono"
-        [requiredValue]="true"
-        typeValue="text"
-        [clearableValue]="true"
-        sizeValue="md"
-      ></app-input>
+  </section>
 
+  <!-- Formulario Dirección + Teléfono + Fecha Nac -->
+  <form class="mt-6 grid gap-6 md:grid-cols-2" [formGroup]="form" (ngSubmit)="submit()">
 
-      <!-- Fecha de nacimiento -->
-      <app-input
-        formControlName="fecha_nac"
-        labelValue="Fecha de nacimiento"
-        typeValue="date"
-        [requiredValue]="true"
-        sizeValue="md"
-      ></app-input>
+    <!-- Teléfono -->
+    <app-input formControlName="telefono" labelValue="Teléfono" [requiredValue]="true" typeValue="text"
+      [clearableValue]="true" sizeValue="md"></app-input>
 
 
-      <!-- Localidad -->
-      <app-select
-        formControlName="localidad"
-        labelValue="Localidad"
-        [optionsValue]="opcionesLocalidades()"
-        [requiredValue]="true"
-        [clearableValue]="false"
-        placeholderValue="Seleccione localidad"
-        (valueChange)="actualizarCP($event)"
-      ></app-select>
+    <!-- Fecha de nacimiento -->
+    <app-input formControlName="fecha_nac" labelValue="Fecha de nacimiento" typeValue="date" [requiredValue]="true"
+      sizeValue="md"></app-input>
+
+
+    <!-- Localidad -->
+    <app-select formControlName="localidad" labelValue="Localidad" [optionsValue]="opcionesLocalidades()"
+      [requiredValue]="true" [clearableValue]="false" placeholderValue="Seleccione localidad"
+      (valueChange)="actualizarCP($event)"></app-select>
 
 
 
-      <!-- Código Postal -->
-      <app-input
-        formControlName="cp"
-        labelValue="Código postal"
-        [readonlyValue]="true"
-      ></app-input>
+    <!-- Código Postal -->
+    <app-input formControlName="cp" labelValue="Código postal" [readonlyValue]="true"></app-input>
 
 
-      <!-- Calle -->
-      <app-input
-        formControlName="calle"
-        labelValue="Calle"
-        placeholderValue="Ingresá tu calle"
-      ></app-input>
+    <!-- Calle -->
+    <app-input formControlName="calle" labelValue="Calle" placeholderValue="Ingresá tu calle"></app-input>
 
 
-      <!-- Número -->
-      <app-input
-        formControlName="numero"
-        labelValue="Número"
-        typeValue="text"
-      ></app-input>
+    <!-- Número -->
+    <app-input formControlName="numero" labelValue="Número" typeValue="text"></app-input>
 
 
-      <!-- Dpto -->
-      <app-input
-        formControlName="dpto"
-        labelValue="Dpto"
-        placeholderValue="Departamento"
-      ></app-input>
+    <!-- Dpto -->
+    <app-input formControlName="dpto" labelValue="Dpto" placeholderValue="Departamento"></app-input>
 
 
-      <!-- Piso -->
-      <app-input
-        formControlName="piso"
-        labelValue="Piso"
-        placeholderValue="Piso"
-      ></app-input>
+    <!-- Piso -->
+    <app-input formControlName="piso" labelValue="Piso" placeholderValue="Piso"></app-input>
 
 
-      <!-- Botón guardar -->
-      <div class="md:col-span-2 flex justify-end">
-        <button
-          type="submit"
-          [disabled]="!tieneCambios()"
-          [ngClass]="{
+    <!-- Botón guardar -->
+    <div class="md:col-span-2 flex justify-end">
+      <button type="submit" [disabled]="!tieneCambios()" [ngClass]="{
             'bg-gray-300 text-gray-500 cursor-not-allowed': !tieneCambios(),
             'bg-yellow-400 text-black cursor-pointer hover:brightness-105 active:translate-y-px': tieneCambios()
-          }"
-          class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium shadow transition"
-        >
-          Guardar
-        </button>
-      </div>
-    </form>
-  </section>
+          }" class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium shadow transition">
+        Guardar
+      </button>
+    </div>
+  </form>
+</section>
 }
