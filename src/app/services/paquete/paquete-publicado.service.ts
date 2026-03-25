@@ -22,6 +22,12 @@ export class PaquetePublicadoService extends ApiService {
     updatePaquete(paquete: PaquetePublicado): Observable<PaquetePublicado> {
         return this.put<PaquetePublicado>(`${this.apiUrl}/${paquete.id_paquete_publicado}`, paquete);
     }
+    createPaqueteFormData(formData: FormData): Observable<PaquetePublicado> {
+        return this.http.post<PaquetePublicado>(this.buildUrl(this.apiUrl), formData);
+    }
+    updatePaqueteFormData(id: number, formData: FormData): Observable<PaquetePublicado> {
+        return this.http.put<PaquetePublicado>(this.buildUrl(`${this.apiUrl}/${id}`), formData);
+    }
     deletePaquete(id: number): Observable<PaquetePublicado> {
         return this.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }

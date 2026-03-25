@@ -11,7 +11,8 @@
 
       <!-- Marca -->
       @if (paquete.paqueteBase?.marca?.nombre) {
-      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-primary text-text-on-dark rounded-full text-xs font-semibold">
+      <span
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-primary text-text-on-dark rounded-full text-xs font-semibold">
         {{ paquete.paqueteBase?.marca?.nombre }}
       </span>
       }
@@ -33,10 +34,10 @@
       }
 
       <!-- Estado -->
-      @if (paquete.estado.nombre) {
+      @if (paquete.estado?.nombre) {
       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
-        [class]="getEstadoClass(paquete.estado.nombre)">
-        {{ paquete.estado.nombre }}
+        [class]="getEstadoClass(paquete.estado?.nombre)">
+        {{ paquete.estado?.nombre }}
       </span>
       }
 
@@ -89,7 +90,7 @@
 
       <!-- Compradores -->
       <div class="flex items-center gap-1">
-        <app-icon name="users" size="16" ></app-icon>
+        <app-icon name="users" size="16"></app-icon>
         <div>
           <p class="text-text-muted">Compradores</p>
           <p class="font-bold text-text-primary">{{ paquete.cant_usuarios_registrados || 0 }}</p>
@@ -98,7 +99,7 @@
 
       <!-- Tiempo -->
       <div class="flex items-center gap-1">
-        <app-icon name="Clock" size="16" ></app-icon>
+        <app-icon name="Clock" size="16"></app-icon>
         <div>
           <p class="text-text-muted">Cierra</p>
           <p class="font-bold text-text-primary">{{ getTiempoRestante(paquete.fecha_fin) }}</p>

@@ -5,8 +5,8 @@ import {
   ElementRef,
   HostListener,
   DestroyRef,
-  effect,
   signal,
+  computed,
   inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,15 +16,32 @@ import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ZonaService } from '@app/services/zona/zona.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { InputComponent } from '@app/shared/input/input-component';
+import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+  existingUrl?: string;
+  isExisting?: boolean;
+}
+
 @Component({
   selector: 'app-publicar-paquete',
   standalone: true,
-  imports: [FormsModule, ButtonComponent, AdminCreateWrapperComponent, IconComponent, AdminBackButtonComponent],
+  imports: [
+    FormsModule,
+    ButtonComponent,
+    InputComponent,
+    SelectComponent,
+    AdminCreateWrapperComponent,
+    IconComponent,
+    AdminBackButtonComponent,
+  ],
   templateUrl: './publicar-paquete.html',
 })
 export class PublicarPaqueteComponent implements OnInit {
@@ -41,30 +58,46 @@ export class PublicarPaqueteComponent implements OnInit {
   fechaFin = signal<string>('');
   cantProductos = signal<number | null>(null);
 
+  // 🆕 Nuevos campos
+  nombre = signal<string>('');
+  descuento = signal<number | null>(null);
+  imagenSlot = signal<ImageSlot>({ file: null, preview: null });
+
   // Estados y control
   cargando = signal<boolean>(false);
   mostrandoResultados = signal<boolean>(false);
   busqueda = signal<string>('');
-  
+
   // ✏️ Edición
   isEditMode = signal<boolean>(false);
   editId = signal<number | null>(null);
-  
+
   // 💡 Control de fecha para duplicado
   isDuplicate = signal<boolean>(false);
 
-
+  // 🗂 Opciones de estado (estáticas)
   estados = [
     { id_estado: 1, nombre: 'Pendiente' },
     { id_estado: 2, nombre: 'Activo' },
     { id_estado: 3, nombre: 'Finalizado' },
   ];
 
+  // 🔄 Computed: opciones para app-select de zona
+  zonasOptions = computed<SelectOption[]>(() =>
+    this.zonas().map(z => ({ value: z.id_zona, label: z.nombre }))
+  );
+
+  // 🔄 Computed: opciones para app-select de estado
+  estadosOptions = computed<SelectOption[]>(() =>
+    this.estados.map(e => ({ value: e.id_estado, label: e.nombre }))
+  );
+
   // 🧩 ViewChilds
   @ViewChild('inputBusqueda') inputBusqueda!: ElementRef<HTMLInputElement>;
   @ViewChild('scrollContainer') scrollContainer?: ElementRef<HTMLElement>;
 
   private toast = inject(ToastService);
+
   constructor(
     private paqueteBaseService: PaqueteBaseService,
     private zonaService: ZonaService,
@@ -72,34 +105,36 @@ export class PublicarPaqueteComponent implements OnInit {
     private destroyRef: DestroyRef,
     private route: ActivatedRoute,
     public router: Router
-  ) {
-    // ⚡ Efecto reactivo: filtra automáticamente al cambiar la búsqueda
-    effect(() => {
-      const q = this.busqueda().trim();
-      if (q.length === 0 || q.length > 1) {
-        this.buscarPaquetes();
-      }
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.cargarZonas();
     this.cargarPaquetesIniciales();
-    
+
     // 🔍 Capturar baseId o duplicadoId de la URL para pre-selección
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const baseId = params['baseId'];
       const duplicadoId = params['duplicadoId'];
-      
+
       if (baseId) {
         this.paqueteBaseSeleccionado.set(Number(baseId));
       }
-      
+
       if (duplicadoId) {
         this.isEditMode.set(true);
         this.isDuplicate.set(true);
         this.editId.set(Number(duplicadoId));
         this.cargarDatosEdicion(Number(duplicadoId));
+      }
+    });
+
+    // 🔍 Modo edición desde ruta params /:id/editar
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const id = params['id'];
+      if (id && !this.isDuplicate()) {
+        this.isEditMode.set(true);
+        this.editId.set(Number(id));
+        this.cargarDatosEdicion(Number(id));
       }
     });
   }
@@ -113,7 +148,23 @@ export class PublicarPaqueteComponent implements OnInit {
         this.busqueda.set(paquete.paqueteBase?.nombre ?? '');
         this.zonaSeleccionada.set(paquete.zonaId ?? null);
         this.estadoSeleccionado.set(paquete.estado?.id_estado ?? null);
-        
+
+        // 🆕 Poblar nombre
+        this.nombre.set(paquete.nombre ?? '');
+
+        // 🆕 Poblar descuento
+        this.descuento.set(paquete.descuento ?? null);
+
+        // 🆕 Imagen existente como preview
+        if (paquete.imagen_url) {
+          this.imagenSlot.set({
+            file: null,
+            preview: paquete.imagen_url,
+            existingUrl: paquete.imagen_url,
+            isExisting: true,
+          });
+        }
+
         if (paquete.fecha_inicio) {
           const fi = new Date(paquete.fecha_inicio);
           this.fechaInicio.set(this.isDuplicate() ? '' : fi.toISOString().split('T')[0]);
@@ -122,7 +173,7 @@ export class PublicarPaqueteComponent implements OnInit {
           const ff = new Date(paquete.fecha_fin);
           this.fechaFin.set(this.isDuplicate() ? '' : ff.toISOString().split('T')[0]);
         }
-        
+
         this.cantProductos.set(paquete.cant_productos ?? null);
         this.cargando.set(false);
       },
@@ -144,7 +195,7 @@ export class PublicarPaqueteComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.paquetesBase.set(data);
-          
+
           // Si hay un paquete pre-seleccionado, buscar su nombre para el input
           if (this.paqueteBaseSeleccionado()) {
             const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
@@ -202,6 +253,52 @@ export class PublicarPaqueteComponent implements OnInit {
     this.mostrandoResultados.set(false);
   }
 
+  // --- 🆕 Limpiar selección de paquete base ---
+  limpiarPaqueteBase(): void {
+    this.paqueteBaseSeleccionado.set(null);
+    this.busqueda.set('');
+    this.mostrandoResultados.set(false);
+    // Reenfocar el input de búsqueda
+    setTimeout(() => this.inputBusqueda?.nativeElement.focus(), 50);
+  }
+
+  // --- 🆕 Manejo de imagen ---
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      this.toast.error('Solo se permiten archivos de imagen');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.error('La imagen no puede superar los 5 MB');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagenSlot.set({
+        file,
+        preview: e.target.result,
+        existingUrl: undefined,
+        isExisting: false,
+      });
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  removeImage(event?: Event): void {
+    if (event) event.stopPropagation();
+    this.imagenSlot.set({ file: null, preview: null });
+  }
+
   // --- Detectar click fuera del dropdown ---
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent): void {
@@ -235,6 +332,11 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // --- Publicar paquete ---
   publicarPaquete(): void {
+    // Validaciones
+    if (!this.nombre().trim()) {
+      this.toast.error('El nombre de la publicación es requerido.', 'Error de validación');
+      return;
+    }
     if (!this.paqueteBaseSeleccionado()) {
       this.toast.error('Debés seleccionar un paquete base.', 'Error de validación');
       return;
@@ -251,7 +353,7 @@ export class PublicarPaqueteComponent implements OnInit {
       this.toast.error('Debés ingresar las fechas de inicio y fin.', 'Error de validación');
       return;
     }
-    
+
     // Validar que las fechas sean coherentes (inicio <= fin)
     const dInicio = new Date(this.fechaInicio());
     const dFin = new Date(this.fechaFin());
@@ -260,36 +362,70 @@ export class PublicarPaqueteComponent implements OnInit {
       return;
     }
 
-    const paquetePayload = {
-      ...(this.isEditMode() ? { id_paquete_publicado: this.editId()! } : {}),
-      paqueteBaseId: this.paqueteBaseSeleccionado()!,
-      estadoId: this.estadoSeleccionado()!,
-      zonaId: this.zonaSeleccionada()!,
-      fecha_inicio: new Date(this.fechaInicio()),
-      fecha_fin: new Date(this.fechaFin()),
-      cant_productos: this.cantProductos() ?? undefined,
-      estado: this.estados.find(e => e.id_estado === this.estadoSeleccionado())!,
-    };
+    // Validar descuento
+    const desc = this.descuento();
+    if (desc !== null && (desc < 0 || desc > 100)) {
+      this.toast.error('El descuento debe ser un valor entre 0 y 100.', 'Error de validación');
+      return;
+    }
 
-    const request$ = this.isEditMode()
-      ? this.paquetePublicadoService.updatePaquete(paquetePayload as any)
-      : this.paquetePublicadoService.createPaquete(paquetePayload as any);
+    // Construir FormData
+    const formData = new FormData();
+    formData.append('nombre', this.nombre().trim());
+    formData.append('paqueteBaseId', String(this.paqueteBaseSeleccionado()!));
+    formData.append('estadoId', String(this.estadoSeleccionado()!));
+    formData.append('zonaId', String(this.zonaSeleccionada()!));
+    formData.append('fecha_inicio', new Date(this.fechaInicio()).toISOString());
+    formData.append('fecha_fin', new Date(this.fechaFin()).toISOString());
+
+    if (this.cantProductos() !== null) {
+      formData.append('cant_productos', String(this.cantProductos()));
+    }
+    if (desc !== null) {
+      formData.append('descuento', String(desc));
+    }
+
+    // Adjuntar imagen solo si es nueva
+    const slot = this.imagenSlot();
+    if (slot.file) {
+      formData.append('imagen', slot.file);
+    }
+
+    const editId = this.editId();
+    const request$ = (this.isEditMode() && editId)
+      ? this.paquetePublicadoService.updatePaqueteFormData(editId, formData)
+      : this.paquetePublicadoService.createPaqueteFormData(formData);
+
+    this.cargando.set(true);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.success(this.isEditMode() ? 'Paquete actualizado correctamente 🎉' : 'Paquete publicado correctamente 🎉', 'Éxito');
+          this.cargando.set(false);
+          this.toast.success(
+            this.isEditMode() ? 'Publicación actualizada correctamente 🎉' : 'Paquete publicado correctamente 🎉',
+            'Éxito'
+          );
           this.reiniciarFormulario();
-          // 🚀 Redirigir de vuelta a la gestión
-          this.router.navigate(['/admin/administrar-paquetes']); // Wait... wait. The user wanted to manage packages from "administrar-publicaciones"? No, wait, they click duplicate from "administrar-publicaciones". The redirect should probably be back to administrar-publicaciones. Let me check what the code originally navigated to. It was "administrar-paquetes" originally in publicar-paquete.ts. I will change it to redirect to administrar-publicaciones since that's where we manage them. Actually I will redirect back to administrar-publicaciones. Wait, the original code had `this.router.navigate(['/admin/administrar-paquetes']);`.
           this.router.navigate(['/admin/administrar-publicaciones']);
         },
         error: (err) => {
+          this.cargando.set(false);
           console.error('Error al publicar/actualizar paquete:', err);
           const msg = err.error?.message || 'Ocurrió un error al procesar el paquete.';
           this.toast.error(msg, 'Fallo');
         },
       });
+  }
+
+  // --- 🆕 Helper para parsear descuento desde template ---
+  setDescuento(value: string | number | null): void {
+    if (value === null || value === '' || value === undefined) {
+      this.descuento.set(null);
+    } else {
+      const parsed = Number(value);
+      this.descuento.set(isNaN(parsed) ? null : parsed);
+    }
   }
 
   // --- Reset formulario ---
@@ -301,5 +437,8 @@ export class PublicarPaqueteComponent implements OnInit {
     this.fechaInicio.set('');
     this.fechaFin.set('');
     this.cantProductos.set(null);
+    this.nombre.set('');
+    this.descuento.set(null);
+    this.imagenSlot.set({ file: null, preview: null });
   }
 }
