@@ -1,23 +1,80 @@
-<nav class="hidden md:block bg-bg-surface border-b border-border-default">
+<!-- 🧭 NAVBAR: Mobile-First Responsive Design -->
+<!-- Se comporta como barra inferior fija en móvil y barra superior integrada en escritorio -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 md:relative md:bottom-auto md:z-10
+            bg-white/90 backdrop-blur-md md:bg-bg-surface border-t md:border-t-0 md:border-b border-border-default
+            shadow-[0_-8px_30px_rgba(0,0,0,0.05)] md:shadow-none transition-all duration-300">
+
     <div class="max-w-7xl mx-auto px-4 md:px-6">
-        <ul class="flex items-center justify-center gap-12 py-3 text-text-primary">
-            <li>
+        <ul class="flex items-center justify-around md:justify-center gap-2 md:gap-14 h-16 md:h-14 overflow-hidden">
+
+            <!-- 🛍️ Mis Pedidos -->
+            <li class="flex-1 md:flex-none">
                 <a routerLink="/mis-pedidos"
-                    class="hover:text-brand-primary transition-colors duration-200 flex justify-center items-center gap-2 ">
-                    <app-icon name="ShoppingBag" class="text-brand-primary"></app-icon>Mis pedidos</a>
-            </li>
-            <li>
-                <a routerLink="/productos"
-                    class="hover:text-brand-primary transition-colors duration-200 flex justify-center items-center gap-2 ">
-                    <app-icon name="box" class="text-brand-primary"></app-icon>Productos
+                    routerLinkActive="nav-active"
+                    class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5
+                           text-text-secondary hover:text-brand-primary transition-all duration-300
+                           group relative py-1 md:py-0 active:scale-95">
+
+                    <div class="relative flex items-center justify-center">
+                        <app-icon name="ShoppingBag"
+                            class="w-6 h-6 md:w-5 md:h-5 text-brand-primary group-hover:scale-110 transition-transform">
+                        </app-icon>
+                        <!-- Indicador táctil para mobile -->
+                        <div class="md:hidden absolute -bottom-1 w-1 h-1 bg-brand-primary rounded-full opacity-0 scale-0 transition-all nav-dot"></div>
+                    </div>
+
+                    <span class="text-[10px] md:text-sm font-bold md:font-semibold tracking-tight md:tracking-normal">Mis pedidos</span>
                 </a>
             </li>
-            <li>
-                <a routerLink="/paquetes"
-                    class="hover:text-brand-primary transition-colors duration-200 flex justify-center items-center gap-2 ">
-                    <app-icon name="Package" class="text-brand-primary"></app-icon>
-                    Paquetes</a>
+
+            <!-- 📦 Productos -->
+            <li class="flex-1 md:flex-none">
+                <a routerLink="/productos"
+                    routerLinkActive="nav-active"
+                    class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5
+                           text-text-secondary hover:text-brand-primary transition-all duration-300
+                           group relative py-1 md:py-0 active:scale-95">
+
+                    <div class="relative flex items-center justify-center">
+                        <app-icon name="box"
+                            class="w-6 h-6 md:w-5 md:h-5 text-brand-primary group-hover:scale-110 transition-transform">
+                        </app-icon>
+                        <div class="md:hidden absolute -bottom-1 w-1 h-1 bg-brand-primary rounded-full opacity-0 scale-0 transition-all nav-dot"></div>
+                    </div>
+
+                    <span class="text-[10px] md:text-sm font-bold md:font-semibold tracking-tight md:tracking-normal">Productos</span>
+                </a>
             </li>
+
+            <!-- 🎁 Paquetes -->
+            <li class="flex-1 md:flex-none">
+                <a routerLink="/paquetes"
+                    routerLinkActive="nav-active"
+                    class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2.5
+                           text-text-secondary hover:text-brand-primary transition-all duration-300
+                           group relative py-1 md:py-0 active:scale-95">
+
+                    <div class="relative flex items-center justify-center">
+                        <app-icon name="Package"
+                            class="w-6 h-6 md:w-5 md:h-5 text-brand-primary group-hover:scale-110 transition-transform">
+                        </app-icon>
+                        <div class="md:hidden absolute -bottom-1 w-1 h-1 bg-brand-primary rounded-full opacity-0 scale-0 transition-all nav-dot"></div>
+                    </div>
+
+                    <span class="text-[10px] md:text-sm font-bold md:font-semibold tracking-tight md:tracking-normal">Paquetes</span>
+                </a>
+            </li>
+
         </ul>
     </div>
 </nav>
+
+<style>
+    /* Estilos para el estado activo de Angular */
+    .nav-active {
+        @apply text-brand-primary !important;
+    }
+    .nav-active .nav-dot {
+        @apply opacity-100 scale-100 !important;
+    }
+</style>

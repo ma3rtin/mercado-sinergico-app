@@ -1,38 +1,129 @@
-<aside class="fixed left-0 top-0 z-50 h-dvh w-72 bg-white shadow-xl">
-    <div class="flex items-center justify-between px-4 py-3 border-b">
-        <span class="font-semibold">Menú</span>
-        <button (click)="closeDrawer.emit()" aria-label="Cerrar menú">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
+<!-- Overlay / Backdrop -->
+<div 
+  class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+  (click)="closeDrawer.emit()"
+></div>
+
+<!-- Drawer Content -->
+<aside 
+  class="fixed left-0 top-0 z-50 h-full w-[85%] max-w-sm bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out font-body"
+>
+    <!-- Header: User Info -->
+    <div class="px-6 py-8 border-b border-gray-100 bg-brand-primary/5">
+        <div class="flex items-center justify-between mb-6">
+            <img src="/assets/images/Logo2.png" alt="Logo" class="h-8 w-auto">
+            <button 
+                (click)="closeDrawer.emit()" 
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 active:scale-90 transition-all cursor-pointer"
+            >
+                <app-icon name="X" class="w-5 h-5"></app-icon>
+            </button>
+        </div>
+
+        @if (isLoggedIn && user()) {
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white shadow-lg overflow-hidden shrink-0">
+                    @if (user()?.photoURL) {
+                        <img [src]="user()?.photoURL" alt="Profile" class="w-full h-full object-cover">
+                    } @else {
+                        <app-icon name="User" class="w-7 h-7"></app-icon>
+                    }
+                </div>
+                <div class="min-w-0">
+                    <p class="font-display text-lg text-brand-secondary truncate leading-tight">
+                        {{ user()?.displayName || 'Usuario' }}
+                    </p>
+                    <p class="text-xs text-gray-500 truncate">{{ user()?.email }}</p>
+                </div>
+            </div>
+        } @else {
+            <div class="flex flex-col gap-2">
+                <h3 class="font-display text-xl text-brand-secondary">Bienvenido</h3>
+                <p class="text-sm text-gray-500 mb-2">Ingresá para acceder a ofertas exclusivas.</p>
+                <div class="flex gap-2">
+                    <a routerLink="/login" (click)="closeDrawer.emit()" class="flex-1 bg-brand-secondary text-white py-2.5 rounded-xl text-center font-semibold text-sm shadow-md active:scale-95 transition-all">
+                        Iniciar Sesión
+                    </a>
+                    <a routerLink="/registrarse" (click)="closeDrawer.emit()" class="flex-1 bg-white border border-brand-secondary text-brand-secondary py-2.5 rounded-xl text-center font-semibold text-sm active:scale-95 transition-all">
+                        Registrarse
+                    </a>
+                </div>
+            </div>
+        }
     </div>
 
-    <nav class="px-2 py-2">
-        <ul class="flex flex-col">
-            <li>
-                <button type="button" class="w-full text-left block px-3 py-3 rounded-md hover:bg-gray-100"
-                    (click)="openSearch.emit()">
-                    Buscar
-                </button>
-            </li>
+    <!-- Navigation Body -->
+    <div class="flex-1 overflow-y-auto px-4 py-6">
+        <p class="px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 ml-1">Navegación</p>
+        
+        <nav class="space-y-4">
+            <!-- Paquetes -->
+            <a routerLink="/paquetes" (click)="closeDrawer.emit()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-white border-2 border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all group scale-100 active:scale-98">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
+                    <app-icon name="Package" class="w-5 h-5"></app-icon>
+                </div>
+                <div class="flex-1">
+                    <span class="block font-semibold text-gray-800">Paquetes</span>
+                    <span class="block text-[11px] text-gray-400">Ver ofertas grupales</span>
+                </div>
+                <app-icon name="ChevronRight" class="w-4 h-4 text-gray-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all"></app-icon>
+            </a>
 
-            <li><a routerLink="/paquetes" class="block px-3 py-3 rounded-md hover:bg-gray-100">Paquetes</a></li>
-            <li><a routerLink="/faq" class="block px-3 py-3 rounded-md hover:bg-gray-100">Preguntas frecuentes</a></li>
-            <li><a routerLink="/contacto" class="block px-3 py-3 rounded-md hover:bg-gray-100">Contacto</a></li>
+            <!-- FAQ -->
+            <a routerLink="/faq" (click)="closeDrawer.emit()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-white border-2 border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all group scale-100 active:scale-98">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
+                    <app-icon name="HelpCircle" class="w-5 h-5"></app-icon>
+                </div>
+                <div class="flex-1">
+                    <span class="block font-semibold text-gray-800">Dudas Frecuentes</span>
+                    <span class="block text-[11px] text-gray-400">Cómo funciona el sistema</span>
+                </div>
+                <app-icon name="ChevronRight" class="w-4 h-4 text-gray-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all"></app-icon>
+            </a>
 
-            <li>
-                <hr class="my-2 border-t border-gray-300" />
-            </li>
-
+            <!-- Perfil (if logged) -->
             @if (isLoggedIn) {
-            <li>
-                <button (click)="signOut.emit()"
-                    class="w-full text-left block px-3 py-3 rounded-md hover:bg-gray-100 text-red-600 font-semibold cursor-pointer">
-                    Cerrar sesión
-                </button>
-            </li>
+                <div class="pt-4 pb-2">
+                    <p class="px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4 ml-1">Mi Cuenta</p>
+                </div>
+
+                <a [routerLink]="profileLink" (click)="closeDrawer.emit()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-white border-2 border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all group scale-100 active:scale-98">
+                    <div class="w-10 h-10 rounded-xl bg-brand-secondary/10 text-brand-secondary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
+                        <app-icon name="User" class="w-5 h-5"></app-icon>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-gray-800">Mi Perfil</span>
+                        <span class="block text-[11px] text-gray-400">Datos y configuración</span>
+                    </div>
+                    <app-icon name="ChevronRight" class="w-4 h-4 text-gray-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all"></app-icon>
+                </a>
+                
+                <a routerLink="/mis-pedidos" (click)="closeDrawer.emit()" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl bg-white border-2 border-transparent hover:border-brand-primary/20 hover:bg-brand-primary/5 transition-all group scale-100 active:scale-98">
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-300">
+                        <app-icon name="ShoppingBag" class="w-5 h-5"></app-icon>
+                    </div>
+                    <div class="flex-1">
+                        <span class="block font-semibold text-gray-800">Mis Compras</span>
+                        <span class="block text-[11px] text-gray-400">Estado de tus pedidos</span>
+                    </div>
+                    <app-icon name="ChevronRight" class="w-4 h-4 text-gray-300 group-hover:text-brand-primary group-hover:translate-x-1 transition-all"></app-icon>
+                </a>
             }
-        </ul>
-    </nav>
+        </nav>
+    </div>
+
+    <!-- Footer: Actions -->
+    <div class="p-6 border-t border-gray-100 bg-gray-50/50">
+        @if (isLoggedIn) {
+            <button 
+                (click)="signOut.emit()" 
+                class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-50 text-red-600 font-bold active:scale-95 transition-all shadow-sm group hover:bg-red-600 hover:text-white cursor-pointer"
+            >
+                <app-icon name="LogOut" class="w-5 h-5"></app-icon>
+                <span>Cerrar Sesión</span>
+            </button>
+        } @else {
+            <p class="text-center text-[10px] text-gray-400 uppercase tracking-widest">© 2025 Sinergia Comercial</p>
+        }
+    </div>
 </aside>

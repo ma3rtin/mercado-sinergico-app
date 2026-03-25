@@ -8,6 +8,9 @@ import { ProductoDetalleSeleccionComponent } from './pages/producto-detalle-sele
 import { DetalleProductoSumarse } from './pages/detalle-producto-sumarse/detalle-producto-sumarse';
 import { PaquetesPublicosComponent } from './pages/paquetes/paquetes';
 import { FaqComponent } from './pages/faq/faq';
+import { TerminosCondiciones } from './pages/legales/terminos-condiciones/terminos-condiciones';
+import { PoliticaPrivacidad } from './pages/legales/politica-privacidad/politica-privacidad';
+import { PoliticaDevoluciones } from './pages/legales/politica-devoluciones/politica-devoluciones';
 import { PerfilAdmin } from './pages/admin/components/perfil-admin/perfil-admin';
 import { CrearProductoComponent } from './pages/admin/components/crear-producto/crear-producto';
 import { CrearPaqueteComponent } from './pages/admin/components/crear-paquete/crear-paquete';
@@ -45,6 +48,11 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent },
       { path: 'paquetes', component: PaquetesPublicosComponent },
       { path: 'faq', component: FaqComponent },
+
+      // 📜 Legales
+      { path: 'terminos-y-condiciones', component: TerminosCondiciones },
+      { path: 'politica-de-privacidad', component: PoliticaPrivacidad },
+      { path: 'politica-de-devoluciones', component: PoliticaDevoluciones },
 
       // 📦 Detalles
       { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },

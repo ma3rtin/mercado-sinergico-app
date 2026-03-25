@@ -95,6 +95,7 @@ export class FiltrosComponent {
 
   cargando = signal<boolean>(false);
   error = signal<string | null>(null);
+  isDrawerOpen = signal<boolean>(false);
 
   // 📊 COMPUTED
   tieneCategoriasSeleccionadas = computed(() => this.categoriasSeleccionadas().length > 0);
@@ -265,6 +266,15 @@ export class FiltrosComponent {
     this.precioMax.set(precio);
   }
 
+  // 📱 MÉTODOS DRAWER MOBILE
+  toggleDrawer(): void {
+    this.isDrawerOpen.update(v => !v);
+  }
+
+  closeDrawer(): void {
+    this.isDrawerOpen.set(false);
+  }
+
   // 🎯 APLICAR Y LIMPIAR FILTROS
   aplicarFiltros(): void {
     const filtros: FiltrosAplicados = {
@@ -281,6 +291,7 @@ export class FiltrosComponent {
 
     console.log('🎯 Filtros aplicados:', filtros);
     this.filtrosAplicados.emit(filtros);
+    this.closeDrawer();
   }
 
   limpiarFiltros(): void {
