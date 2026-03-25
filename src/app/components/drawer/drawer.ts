@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, computed } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -25,7 +25,7 @@ export class Drawer {
 
   // 📊 Datos del usuario
   user = this.authService.user;
-  
+
   // 🔗 Links dinámicos
   get profileLink(): string {
     const role = this.authService.getUserRole();

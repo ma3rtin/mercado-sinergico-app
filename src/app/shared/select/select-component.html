@@ -16,7 +16,9 @@
         (keydown)="onKeyDown($event)" [class]="selectClasses()">
         <div class="flex items-center justify-between">
             <!-- Selected Value / Placeholder -->
-            <span [class]="selectedLabel() === placeholder() ? 'text-gray-400' : 'text-gray-900'">
+            <!-- ✅ FIX: internalValue() ahora es un signal, se lee con () -->
+            <span
+                [class]="(internalValue() === null || internalValue() === undefined || internalValue() === '') ? 'text-gray-400' : 'text-gray-900'">
                 {{ selectedLabel() }}
             </span>
 
@@ -34,8 +36,9 @@
                 }
 
                 <!-- Clear Button -->
-                @if (clearable() && internalValue !== null && internalValue !== undefined && internalValue !== '' &&
-                !isDisabled() && !isLoading()) {
+                <!-- ✅ FIX: internalValue() como signal -->
+                @if (clearable() && internalValue() !== null && internalValue() !== undefined && internalValue() !== ''
+                && !isDisabled() && !isLoading()) {
                 <button type="button" (click)="clearValue($event)" [attr.aria-label]="'Limpiar selección'"
                     class="text-gray-400 hover:text-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/30 rounded p-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,15 +87,16 @@
             <!-- Simple Options -->
             @for (option of filteredOptions(); track option.value) {
             <div (click)="selectOption(option)" [class]="
-            'px-4 py-2 cursor-pointer transition-colors flex items-center justify-between ' +
-            (isOptionSelected(option)
-              ? 'bg-yellow-50 text-secondary-dark font-medium'
-              : 'hover:bg-gray-50 text-gray-900') +
-            (option.disabled ? ' opacity-50 cursor-not-allowed' : '')
-          ">
+                'px-4 py-2 cursor-pointer transition-colors flex items-center justify-between ' +
+                (isOptionSelected(option)
+                  ? 'bg-primary-light text-secondary font-medium'
+                  : 'hover:bg-gray-50 text-gray-900') +
+                (option.disabled ? ' opacity-50 cursor-not-allowed' : '')
+              ">
                 <span>{{ option.label }}</span>
+                <!-- ✅ FIX: ícono de check con color secondary (azul) en lugar de warning (naranja) -->
                 @if (isOptionSelected(option)) {
-                <svg class="w-5 h-5 text-secondary-dark" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 text-secondary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"
                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clip-rule="evenodd"></path>
@@ -111,15 +115,15 @@
                 </div>
                 @for (option of group.options; track option.value) {
                 <div (click)="selectOption(option)" [class]="
-              'px-4 py-2 cursor-pointer transition-colors flex items-center justify-between ' +
-              (isOptionSelected(option)
-                ? 'bg-yellow-50 text-secondary-dark font-medium'
-                : 'hover:bg-gray-50 text-gray-900') +
-              (option.disabled ? ' opacity-50 cursor-not-allowed' : '')
-            ">
+                    'px-4 py-2 cursor-pointer transition-colors flex items-center justify-between ' +
+                    (isOptionSelected(option)
+                      ? 'bg-primary-light text-secondary font-medium'
+                      : 'hover:bg-gray-50 text-gray-900') +
+                    (option.disabled ? ' opacity-50 cursor-not-allowed' : '')
+                  ">
                     <span>{{ option.label }}</span>
                     @if (isOptionSelected(option)) {
-                    <svg class="w-5 h-5 text-secondary-dark" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-5 h-5 text-secondary flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd"></path>
@@ -138,12 +142,9 @@
     <!-- Helper Text / Error / Success -->
     @if (hasHelperOrError()) {
     <div [id]="selectId() + '-helper'" class="mt-1">
-        <!-- Helper Text -->
         @if (helperText() && !currentError() && !successMessage()) {
         <p class="text-sm text-gray-500">{{ helperText() }}</p>
         }
-
-        <!-- Error Message -->
         @if (currentError()) {
         <p class="text-sm text-red-600 flex items-start gap-1">
             <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -154,8 +155,6 @@
             {{ currentError() }}
         </p>
         }
-
-        <!-- Success Message -->
         @if (successMessage() && !currentError()) {
         <p class="text-sm text-green-600 flex items-center gap-1">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
