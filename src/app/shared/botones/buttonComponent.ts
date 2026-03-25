@@ -7,7 +7,7 @@ import { IconComponent } from '@app/shared/icono/icono';
  */
 export type ButtonVariant =
   | 'primary'      // Amarillo - acción principal
-  | 'secondary'    | 'tertiary'    | 'warning'      | 'danger'       | 'success'      | 'info'         | 'ghost';       // Otros
+  | 'secondary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info' | 'ghost';       // Otros
 
 /**
  * Tamaños del botón
@@ -29,6 +29,11 @@ export type ButtonWidth = 'auto' | 'full' | 'half';
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: './buttonComponent.html',
+  host: {
+    '[class.w-full]': 'fullWidth()',
+    '[class.h-full]': 'hFull()',
+    'class': 'block'
+  }
 })
 export class ButtonComponent {
 
@@ -38,6 +43,8 @@ export class ButtonComponent {
   size = input<ButtonSize>('md');
   shape = input<ButtonShape>('rounded');
   width = input<ButtonWidth>('auto');
+  direction = input<'row' | 'column'>('row');
+  hFull = input<boolean>(false);
 
   label = input<string | undefined>(undefined);
   disabled = input<boolean>(false);
@@ -115,8 +122,9 @@ export class ButtonComponent {
       ? 'ring-2 ring-offset-2 ring-blue-600 bg-blue-50'
       : '';
 
-    // Full width
+    // Full width y height
     const fullWidthClass = this.fullWidth() ? 'w-full' : '';
+    const hFullClass = this.hFull() ? 'h-full' : '';
 
     // Uppercase
     const uppercaseClass = this.uppercase() ? 'uppercase tracking-wider' : '';
@@ -126,11 +134,13 @@ export class ButtonComponent {
     const widthClass = widths[this.width()];
     const variantClass = variants[this.variant()];
 
-    return `${base} ${sizeClass} ${shapeClass} ${widthClass} ${variantClass} ${disabledClasses} ${selectedClasses} ${fullWidthClass} ${uppercaseClass}`.trim();
+    return `${base} ${sizeClass} ${shapeClass} ${widthClass} ${variantClass} ${disabledClasses} ${selectedClasses} ${fullWidthClass} ${hFullClass} ${uppercaseClass}`.trim();
   });
 
   // 🎨 COMPUTED: Clases del icono
   iconClasses = computed(() => {
+    if (this.direction() === 'column') return 'w-8 h-8 flex-shrink-0';
+
     const sizeMap: Record<ButtonSize, string> = {
       'xs': 'w-3 h-3',
       'sm': 'w-4 h-4',
@@ -145,6 +155,8 @@ export class ButtonComponent {
 
   // 🎨 COMPUTED: Espaciador entre icono y texto
   spacerClasses = computed(() => {
+    if (this.direction() === 'column') return 'gap-2';
+
     const spacings: Record<ButtonSize, string> = {
       'xs': 'gap-1',
       'sm': 'gap-1.5',

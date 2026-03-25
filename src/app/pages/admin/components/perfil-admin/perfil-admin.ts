@@ -26,13 +26,17 @@ export class PerfilAdmin implements OnInit {
 
   // 📊 Señales principales
   paquetes = signal<PaquetePublicado[]>([]);
+  paquetesCerrados = signal<PaquetePublicado[]>([]);
   usuario = signal<Usuario | null>(null);
   loading = signal(true);
+  loadingCerrados = signal(true);
   error = signal<string | null>(null);
+  errorCerrados = signal<string | null>(null);
 
   ngOnInit() {
     this.loadPerfil();
     this.loadPaquetesPorCerrarse();
+    this.loadPaquetesCerrados();
   }
 
   // 👤 Cargar perfil del usuario
@@ -60,9 +64,63 @@ export class PerfilAdmin implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar paquetes:', err);
-        this.error.set('Ocurrió un error al cargar los paquetes.');
+        this.error.set('Ocurrió un error al cargar los paquetes por cerrarse.');
         this.loading.set(false);
       },
+    });
+  }
+
+  loadPaquetesCerrados() {
+    this.loadingCerrados.set(true);
+    this.errorCerrados.set(null);
+
+    this.paquetePublicadoService.getPaquetesCerrados().subscribe({
+      next: (paquetes) => {
+        this.paquetesCerrados.set(paquetes);
+        this.loadingCerrados.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar paquetes cerrados:', err);
+        this.errorCerrados.set('Ocurrió un error al cargar los paquetes cerrados.');
+        this.loadingCerrados.set(false);
+      },
+    });
+  }
+
+  // 📥 Exportaciones Excel
+  descargarPlanillaFabrica(id: number | undefined) {
+    if (!id) return;
+    this.paquetePublicadoService.exportarFabrica(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `plantilla_fabrica_${id}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar plantilla fábrica:', err);
+        alert('Ocurrió un error al descargar la plantilla para fábrica.');
+      }
+    });
+  }
+
+  descargarPlanillaLogistica(id: number | undefined) {
+    if (!id) return;
+    this.paquetePublicadoService.exportarLogistica(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `plantilla_logistica_${id}.xlsx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar plantilla logística:', err);
+        alert('Ocurrió un error al descargar la plantilla para logística.');
+      }
     });
   }
 
@@ -188,5 +246,9 @@ export class PerfilAdmin implements OnInit {
 
   crearPaquete() {
     this.router.navigate(['/admin/crear-paquete']);
+  }
+
+  navigateToImportarProductos() {
+    this.router.navigate(['/admin/importar-productos']);
   }
 }

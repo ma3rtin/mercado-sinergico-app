@@ -8,6 +8,9 @@ import { ProductoDetalleSeleccionComponent } from './pages/producto-detalle-sele
 import { DetalleProductoSumarse } from './pages/detalle-producto-sumarse/detalle-producto-sumarse';
 import { PaquetesPublicosComponent } from './pages/paquetes/paquetes';
 import { FaqComponent } from './pages/faq/faq';
+import { TerminosCondiciones } from './pages/legales/terminos-condiciones/terminos-condiciones';
+import { PoliticaPrivacidad } from './pages/legales/politica-privacidad/politica-privacidad';
+import { PoliticaDevoluciones } from './pages/legales/politica-devoluciones/politica-devoluciones';
 import { PerfilAdmin } from './pages/admin/components/perfil-admin/perfil-admin';
 import { CrearProductoComponent } from './pages/admin/components/crear-producto/crear-producto';
 import { CrearPaqueteComponent } from './pages/admin/components/crear-paquete/crear-paquete';
@@ -46,6 +49,11 @@ export const routes: Routes = [
       { path: 'paquetes', component: PaquetesPublicosComponent },
       { path: 'faq', component: FaqComponent },
 
+      // 📜 Legales
+      { path: 'terminos-y-condiciones', component: TerminosCondiciones },
+      { path: 'politica-de-privacidad', component: PoliticaPrivacidad },
+      { path: 'politica-de-devoluciones', component: PoliticaDevoluciones },
+
       // 📦 Detalles
       { path: 'producto/:id', component: ProductoDetalleSeleccionComponent },
       { path: 'paquete/:paqueteId/producto/:productoId', component: DetalleProductoSumarse },
@@ -69,10 +77,12 @@ export const routes: Routes = [
           { path: 'administrar-productos', component: AdministrarProductosComponent },
           { path: 'editar-producto/:id', component: EditarProductoComponent },
           { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent },
+          { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) },
           { path: 'administrar-paquetes', component: AdministrarPaquetesComponent },
           { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent },
           { path: 'administrar-publicaciones', component: AdministrarPublicacionesComponent },
-          { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent }
+          { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent },
+          { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) }
         ]
       }
 
