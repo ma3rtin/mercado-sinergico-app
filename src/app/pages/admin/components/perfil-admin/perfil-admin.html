@@ -6,22 +6,12 @@
             <div class="flex flex-col lg:flex-row items-start justify-between gap-4 sm:gap-6">
 
                 <!-- Perfil info -->
-<<<<<<< HEAD
                 <div
                     class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full sm:w-auto">
                     <div
                         class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 overflow-hidden ring-4 ring-primary/10 flex-shrink-0">
                         <img [src]="usuario()?.imagen_url || '/assets/images/placeholder-product.png'"
                             [alt]="usuario()?.nombre || 'Administrador'" class="w-full h-full object-cover" />
-=======
-                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full sm:w-auto">
-                    <div class="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 overflow-hidden ring-4 ring-primary/10 flex-shrink-0">
-                        <img
-                            [src]="usuario()?.imagen_url || '/assets/images/placeholder-product.png'"
-                            [alt]="usuario()?.nombre || 'Administrador'"
-                            class="w-full h-full object-cover"
-                        />
->>>>>>> 7fdab3f (feat: Update styles)
                     </div>
 
                     <div class="text-center sm:text-left flex-1 min-w-0">
@@ -39,8 +29,7 @@
                     </div>
                 </div>
 
-<<<<<<< HEAD
-                <!-- Acciones rápidas de creación -->
+                <!-- Acciones rápidas -->
                 <div
                     class="w-full sm:w-auto sm:min-w-[240px] border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
                     <app-button (click)="crearProducto()" variant="primary" size="md" [fullWidth]="true"
@@ -53,17 +42,6 @@
                     </app-button>
                     <app-button (click)="navigateToImportarProductos()" variant="success" size="md" [fullWidth]="true"
                         [iconStart]="'upload'">
-=======
-                <!-- Acciones rápidas -->
-                <div class="w-full sm:w-auto sm:min-w-[240px] border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col gap-3">
-                    <app-button (click)="crearProducto()" variant="primary" size="md" [fullWidth]="true" [iconStart]="'box'">
-                        Crear producto
-                    </app-button>
-                    <app-button (click)="crearPaquete()" variant="secondary" size="md" [fullWidth]="true" [iconStart]="'package'">
-                        Crear paquete
-                    </app-button>
-                    <app-button (click)="navigateToImportarProductos()" variant="success" size="md" [fullWidth]="true" [iconStart]="'upload'">
->>>>>>> 7fdab3f (feat: Update styles)
                         Importar productos
                     </app-button>
                 </div>
@@ -79,28 +57,28 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
 
-                <app-button variant="tertiary" (click)="navigateToAdminProducts()" size="lg" [fullWidth]="true" [iconStart]="'box'">
+                <app-button variant="tertiary" (click)="navigateToAdminProducts()" size="lg" [fullWidth]="true"
+                    [iconStart]="'box'">
                     Administrar productos
                 </app-button>
-<<<<<<< HEAD
+
                 <app-button variant="tertiary" (click)="navigateToAdminPackages()" size="lg" [fullWidth]="true"
                     [iconStart]="'package'">
-=======
-
-                <app-button variant="tertiary" (click)="navigateToAdminPackages()" size="lg" [fullWidth]="true" [iconStart]="'package'">
->>>>>>> 7fdab3f (feat: Update styles)
                     Administrar paquetes
                 </app-button>
 
-                <app-button variant="tertiary" (click)="navigateToAdminPublicaciones()" size="lg" [fullWidth]="true" [iconStart]="'clipboard'">
+                <app-button variant="tertiary" (click)="navigateToAdminPublicaciones()" size="lg" [fullWidth]="true"
+                    [iconStart]="'clipboard'">
                     Administrar publicaciones
                 </app-button>
 
-                <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" size="lg" [fullWidth]="true" [iconStart]="'upload'">
+                <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" size="lg" [fullWidth]="true"
+                    [iconStart]="'upload'">
                     Publicar paquete
                 </app-button>
 
-                <app-button variant="tertiary" (click)="navigateToAdminTemplates()" size="lg" [fullWidth]="true" [iconStart]="'layers'">
+                <app-button variant="tertiary" (click)="navigateToAdminTemplates()" size="lg" [fullWidth]="true"
+                    [iconStart]="'layers'">
                     Administrar plantillas
                 </app-button>
 
@@ -125,151 +103,37 @@
             </div>
 
             @if (loading()) {
-<<<<<<< HEAD
             <div class="flex flex-col items-center justify-center py-12">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
                 <p class="text-gray-500">Cargando paquetes...</p>
             </div>
+
             } @else if (error()) {
+
             <div class="text-center py-12">
                 <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
                 <p class="text-red-600 font-medium">{{ error() }}</p>
             </div>
-=======
-                <div class="flex flex-col items-center justify-center py-12">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                    <p class="text-gray-500">Cargando paquetes...</p>
-                </div>
 
-            } @else if (error()) {
-
-                <div class="text-center py-12">
-                    <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
-                    <p class="text-red-600 font-medium">{{ error() }}</p>
-                </div>
-
->>>>>>> 7fdab3f (feat: Update styles)
             } @else if (paquetes().length > 0) {
 
-                <div class="grid grid-cols-1 gap-4">
-                    @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                        <app-admin-paquete-card
-                            [paquete]="paquete"
-                            (close)="cerrarPaqueteDesdeCard($event)"
-                            (prepare)="finalizarPaquete($event)"
-                            (refund)="reembolsarPaquete($event)"
-                            (notify)="notificarCierre($event)"
-                            (duplicate)="duplicarPaquete($event)"
-                            (viewDetail)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)"
-                        />
-                    }
-<<<<<<< HEAD
+            <div class="grid grid-cols-1 gap-4">
+                @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
+                <app-admin-paquete-card [paquete]="paquete" (close)="cerrarPaqueteDesdeCard($event)"
+                    (prepare)="finalizarPaquete($event)" (refund)="reembolsarPaquete($event)"
+                    (notify)="notificarCierre($event)" (duplicate)="duplicarPaquete($event)"
+                    (viewDetail)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)" />
+                }
             </div>
+
             } @else {
+
             <div class="text-center py-12">
                 <app-icon name="checkCircle" size="64" class="text-gray-300 mx-auto mb-4" />
                 <p class="text-gray-500 text-lg font-medium">No hay paquetes próximos a cerrarse</p>
                 <p class="text-gray-400 text-sm mt-2">Todo está bajo control</p>
             </div>
-            }
-        </div>
-        <!-- Paquetes Cerrados y Exportación -->
-        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6 sm:mt-8">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h3 class="text-xl sm:text-2xl font-display text-gray-900 flex items-center gap-2 sm:gap-3">
-                    <app-icon name="checkCircle" size="28" class="text-green-500 flex-shrink-0" />
-                    <span class="break-words">Paquetes Cerrados</span>
-                </h3>
-            </div>
 
-            @if (loadingCerrados()) {
-            <div class="flex flex-col items-center justify-center py-12">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                <p class="text-gray-500">Cargando paquetes cerrados...</p>
-            </div>
-            } @else if (errorCerrados()) {
-            <div class="text-center py-12">
-                <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
-                <p class="text-red-600 font-medium">{{ errorCerrados() }}</p>
-            </div>
-            } @else if (paquetesCerrados().length > 0) {
-            <div class="space-y-4">
-                @for (paquete of paquetesCerrados(); track paquete.id_paquete_publicado) {
-                <div
-                    class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
-                    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 justify-between items-center">
-                        <!-- Contenido principal -->
-                        <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1 w-full">
-                            <!-- Imagen -->
-                            <div
-                                class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border-2 border-gray-200 group-hover:border-primary transition-colors mx-auto sm:mx-0">
-                                @if (paquete.paqueteBase?.imagen_url) {
-                                <img [src]="paquete.paqueteBase?.imagen_url" [alt]="paquete.paqueteBase?.nombre"
-                                    class="w-full h-full object-cover" />
-                                } @else {
-                                <div class="w-full h-full flex items-center justify-center">
-                                    <app-icon name="package" size="48" class="text-gray-400" />
-                                </div>
-                                }
-                            </div>
-
-                            <!-- Info del paquete -->
-                            <div class="flex-1 min-w-0 w-full mb-4 sm:mb-0">
-                                <h4
-                                    class="text-lg sm:text-xl font-display text-gray-900 mb-2 truncate group-hover:text-primary transition-colors text-center sm:text-left">
-                                    {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-                                </h4>
-                                <div class="flex items-center gap-2 mb-2 justify-center sm:justify-start">
-                                    <span class="text-sm text-gray-500">
-                                        Cerrado el: {{ formatearFecha(paquete.fecha_fin) }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full font-medium">
-                                        {{ paquete.cant_productos_reservados || 0 }} productos
-                                    </span>
-                                    <span
-                                        class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full font-medium">
-                                        {{ paquete.cant_usuarios_registrados || 0 }} usuarios
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones de Acción -->
-                        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto mt-4 lg:mt-0">
-                            <app-button variant="secondary"
-                                (click)="descargarPlanillaFabrica(paquete.id_paquete_publicado)" size="sm"
-                                [fullWidth]="false" [iconStart]="'download'">
-                                Plantilla Fábrica
-                            </app-button>
-                            <app-button variant="primary"
-                                (click)="descargarPlanillaLogistica(paquete.id_paquete_publicado)" size="sm"
-                                [fullWidth]="false" [iconStart]="'truck'">
-                                Plantilla Logística
-                            </app-button>
-                        </div>
-                    </div>
-                </div>
-                }
-            </div>
-            } @else {
-            <div class="text-center py-12">
-                <app-icon name="package" size="64" class="text-gray-300 mx-auto mb-4" />
-                <p class="text-gray-500 text-lg font-medium">No hay paquetes cerrados disponibles</p>
-            </div>
-=======
-                </div>
-
-            } @else {
-
-                <div class="text-center py-12">
-                    <app-icon name="checkCircle" size="64" class="text-gray-300 mx-auto mb-4" />
-                    <p class="text-gray-500 text-lg font-medium">No hay paquetes próximos a cerrarse</p>
-                    <p class="text-gray-400 text-sm mt-2">Todo está bajo control</p>
-                </div>
-
->>>>>>> 7fdab3f (feat: Update styles)
             }
         </div>
 
@@ -283,86 +147,86 @@
             </div>
 
             @if (loadingCerrados()) {
-                <div class="flex flex-col items-center justify-center py-12">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                    <p class="text-gray-500">Cargando paquetes cerrados...</p>
-                </div>
+            <div class="flex flex-col items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                <p class="text-gray-500">Cargando paquetes cerrados...</p>
+            </div>
 
             } @else if (errorCerrados()) {
 
-                <div class="text-center py-12">
-                    <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
-                    <p class="text-red-600 font-medium">{{ errorCerrados() }}</p>
-                </div>
+            <div class="text-center py-12">
+                <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
+                <p class="text-red-600 font-medium">{{ errorCerrados() }}</p>
+            </div>
 
             } @else if (paquetesCerrados().length > 0) {
 
-                <div class="space-y-4">
-                    @for (paquete of paquetesCerrados(); track paquete.id_paquete_publicado) {
-                        <div class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
+            <div class="space-y-4">
+                @for (paquete of paquetesCerrados(); track paquete.id_paquete_publicado) {
+                <div
+                    class="group border-2 border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg hover:border-primary transition-all">
 
-                            <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 justify-between items-center">
+                    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 justify-between items-center">
 
-                                <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1 w-full">
+                        <div class="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 flex-1 w-full">
 
-                                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
-                                        @if (paquete.paqueteBase?.imagen_url) {
-                                            <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-cover" />
-                                        } @else {
-                                            <div class="w-full h-full flex items-center justify-center">
-                                                <app-icon name="package" size="48" class="text-gray-400" />
-                                            </div>
-                                        }
-                                    </div>
-
-                                    <div class="flex-1 min-w-0 w-full">
-                                        <h4 class="text-lg font-display text-gray-900 mb-2">
-                                            {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
-                                        </h4>
-
-                                        <p class="text-sm text-gray-500 mb-2">
-                                            Cerrado el: {{ formatearFecha(paquete.fecha_fin) }}
-                                        </p>
-
-                                        <div class="flex gap-2">
-                                            <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
-                                                {{ paquete.cant_productos_reservados || 0 }} productos
-                                            </span>
-                                            <span class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
-                                                {{ paquete.cant_usuarios_registrados || 0 }} usuarios
-                                            </span>
-                                        </div>
-                                    </div>
+                            <div
+                                class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200">
+                                @if (paquete.paqueteBase?.imagen_url) {
+                                <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-cover" />
+                                } @else {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <app-icon name="package" size="48" class="text-gray-400" />
                                 </div>
-
-                                <div class="flex gap-3">
-                                    <app-button variant="secondary"
-                                        (click)="descargarPlanillaFabrica(paquete.id_paquete_publicado)"
-                                        size="sm"
-                                        [iconStart]="'download'">
-                                        Fábrica
-                                    </app-button>
-
-                                    <app-button variant="primary"
-                                        (click)="descargarPlanillaLogistica(paquete.id_paquete_publicado)"
-                                        size="sm"
-                                        [iconStart]="'truck'">
-                                        Logística
-                                    </app-button>
-                                </div>
-
+                                }
                             </div>
 
+                            <div class="flex-1 min-w-0 w-full">
+                                <h4 class="text-lg font-display text-gray-900 mb-2">
+                                    {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+                                </h4>
+
+                                <p class="text-sm text-gray-500 mb-2">
+                                    Cerrado el: {{ formatearFecha(paquete.fecha_fin) }}
+                                </p>
+
+                                <div class="flex gap-2">
+                                    <span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+                                        {{ paquete.cant_productos_reservados || 0 }} productos
+                                    </span>
+                                    <span class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full">
+                                        {{ paquete.cant_usuarios_registrados || 0 }} usuarios
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    }
+
+                        <div class="flex gap-3">
+                            <app-button variant="secondary"
+                                (click)="descargarPlanillaFabrica(paquete.id_paquete_publicado)" size="sm"
+                                [iconStart]="'download'">
+                                Fábrica
+                            </app-button>
+
+                            <app-button variant="primary"
+                                (click)="descargarPlanillaLogistica(paquete.id_paquete_publicado)" size="sm"
+                                [iconStart]="'truck'">
+                                Logística
+                            </app-button>
+                        </div>
+
+                    </div>
+
                 </div>
+                }
+            </div>
 
             } @else {
 
-                <div class="text-center py-12">
-                    <app-icon name="package" size="64" class="text-gray-300 mx-auto mb-4" />
-                    <p class="text-gray-500 text-lg font-medium">No hay paquetes cerrados disponibles</p>
-                </div>
+            <div class="text-center py-12">
+                <app-icon name="package" size="64" class="text-gray-300 mx-auto mb-4" />
+                <p class="text-gray-500 text-lg font-medium">No hay paquetes cerrados disponibles</p>
+            </div>
 
             }
         </div>

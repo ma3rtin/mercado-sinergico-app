@@ -53,29 +53,7 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
-<<<<<<< HEAD
-    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(`${this.apiUrl}`).pipe(
-            map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
-        );
-    }
-
-    // Export methods
-    exportarFabrica(id: number): Observable<Blob> {
-        return this.http.get(`${this.baseUrl}/${this.apiUrl}/${id}/exportar-fabrica`, {
-            responseType: 'blob'
-        });
-    }
-
-    exportarLogistica(id: number): Observable<Blob> {
-        return this.http.get(`${this.baseUrl}/${this.apiUrl}/${id}/exportar-logistica`, {
-            responseType: 'blob'
-        });
-    }
-    /** Admin: obtiene TODOS los paquetes publicados (todos los estados) */
-=======
     /** Admin: obtiene TODOS los paquetes publicados */
->>>>>>> 5e0b451 (feat: add export to fabrica and logistica)
     getAllPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
     }
