@@ -14,7 +14,7 @@
       @if (!isLoading()) {
       <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
         <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto">
-          Mostrando {{ paquetesFiltrados().length }} paquetes
+          Mostrando {{ paquetesPaginados().length }} paquetes de {{ paquetesFiltrados().length }}
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <label for="sort-paquetes" class="text-sm font-medium text-gray-600 whitespace-nowrap">Ordenar por:</label>

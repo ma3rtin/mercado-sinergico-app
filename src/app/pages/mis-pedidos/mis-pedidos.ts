@@ -30,6 +30,8 @@ import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-
 import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
 import { ErrorState } from '@app/shared/error-state/error-state';
 
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+
 // ------------------------------
 // MODELOS INTERNOS
 // ------------------------------
@@ -51,7 +53,8 @@ interface PedidoDelUsuario extends Pedido {
     PaqueteUsuarioCardComponent,
     CatalogoWrapperComponent,
     DelayedSkeleton,
-    ErrorState
+    ErrorState,
+    PaginationComponent
   ],
   templateUrl: './mis-pedidos.html'
 })
@@ -72,6 +75,10 @@ export class MisPedidosComponent implements OnInit {
   errorMessage = signal('');
   terminoBusqueda = signal<string>('');
   estadoFiltro = signal<string>('Todos');
+
+  // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(10);
 
   pedidosFiltrados = computed(() => {
     const lista = this.pedidos();
@@ -97,9 +104,30 @@ export class MisPedidosComponent implements OnInit {
     return filtrados;
   });
 
+  pedidosPaginados = computed(() => {
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.pedidosFiltrados();
 
+    const start = (page - 1) * perPage;
+    return filtrados.slice(start, start + perPage);
+  });
 
+  totalItemsPaginacion = computed(() => this.pedidosFiltrados().length);
 
+  cambiarBusqueda(texto: string) {
+    this.terminoBusqueda.set(texto);
+    this.paginaActual.set(1);
+  }
+
+  cambiarEstadoFiltro(estado: string) {
+    this.estadoFiltro.set(estado);
+    this.paginaActual.set(1);
+  }
+
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+  }
 
   // ------------------------------
   // INIT
