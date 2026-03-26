@@ -41,9 +41,32 @@
       />
 
       <!-- 📦 GRID DE PRODUCTOS (Derecha) -->
-      <div class="flex-1 min-w-0">
+      <div class="flex-1 min-w-0 flex flex-col">
 
-        <!-- 🔄 Estado de Carga -->
+        <!-- 🛠️ CABECERA DEL CONTENIDO (Resultados y Ordenamiento) -->
+        @if (!isLoading()) {
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
+          <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto">
+            Mostrando {{ productosFiltrados().length }} productos
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <label for="sort-productos-paquete" class="text-sm font-medium text-gray-600 whitespace-nowrap">Ordenar por:</label>
+            <div class="relative flex-1 sm:flex-none">
+              <select id="sort-productos-paquete" [value]="ordenSeleccionado()" (change)="cambiarOrden($event)" 
+                class="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-3 pr-8 py-2 cursor-pointer font-semibold shadow-sm transition-all hover:bg-gray-50">
+                <option value="recientes">Más relevantes</option>
+                <option value="a-z">A-Z</option>
+                <option value="z-a">Z-A</option>
+                <option value="precio-asc">Menor precio</option>
+                <option value="precio-desc">Mayor precio</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        }        <!-- 🔄 Estado de Carga -->
         @if (isLoading()) {
           <div class="flex flex-col items-center justify-center py-20 sm:py-32">
             <div class="relative">
