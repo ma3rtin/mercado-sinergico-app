@@ -59,7 +59,7 @@ export class PaquetesPublicosComponent implements OnInit {
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
-  itemsPorPagina = signal<number>(4);
+  itemsPorPagina = signal<number>(12);
 
   // 📊 COMPUTED: Paquetes paginados
   paquetesPaginados = computed(() => {
@@ -215,13 +215,21 @@ export class PaquetesPublicosComponent implements OnInit {
         next: (paquetes) => {
           console.log('✅ Paquetes cargados:', paquetes);
 
+          // Normalizar el campo 'tipo' a 'tipoPaquete' para que los filtros funcionen
+          const paquetesNormalizados = paquetes.map(p => ({
+            ...p,
+            tipoPaquete: p.tipoPaquete || p.tipo
+          }));
+
           // Filtrar paquetes eliminados por defecto
-          const paquetesActivos = paquetes.filter(
+          const paquetesActivos = paquetesNormalizados.filter(
             (p) => p.estado?.nombre !== 'Eliminado'
           );
 
-          this.paquetesOriginales.set(paquetesActivos);
-          this.paquetesFiltrados.set(paquetesActivos);
+          const paquetesOrdenados = this.ordenarPaquetes(paquetesActivos, 'recientes');
+
+          this.paquetesOriginales.set(paquetesOrdenados);
+          this.paquetesFiltrados.set(paquetesOrdenados);
           this.paginaActual.set(1);
           this.isLoading.set(false);
         },

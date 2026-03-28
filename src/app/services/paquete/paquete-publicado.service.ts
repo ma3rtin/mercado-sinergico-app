@@ -110,7 +110,7 @@ export class PaquetePublicadoService extends ApiService {
     /** Obtener paquetes cerrados (filtrado en frontend) */
     getPaquetesCerrados(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
-            map(paquetes => paquetes.filter(p => p.nombre === 'Cerrado'))
+            map(paquetes => paquetes.filter(p => p.estado?.nombre === 'Cerrado'))
         );
     }
 

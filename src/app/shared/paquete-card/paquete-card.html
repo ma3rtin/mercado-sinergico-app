@@ -62,7 +62,7 @@
 
     <!-- Nombre -->
     <h3 class="font-display text-base font-bold text-text-primary line-clamp-2 group-hover:text-brand-cta-hover">
-      {{ paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
+      {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
     </h3>
 
     <!-- STOCK -->

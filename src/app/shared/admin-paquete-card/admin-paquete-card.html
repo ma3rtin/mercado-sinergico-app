@@ -62,9 +62,8 @@
             </div>
             <h3
                 class="text-lg font-display text-text-primary truncate mb-2 group-hover:text-brand-primary transition-colors">
-                {{ paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
+                {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
             </h3>
-
             <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                 <!-- Cierre -->
                 @if (esActivo || esPendiente) {

@@ -105,7 +105,7 @@ export class PublicarPaqueteComponent implements OnInit {
     private destroyRef: DestroyRef,
     private route: ActivatedRoute,
     public router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarZonas();
@@ -369,45 +369,55 @@ export class PublicarPaqueteComponent implements OnInit {
       return;
     }
 
-    // Construir FormData
-    const formData = new FormData();
-    formData.append('nombre', this.nombre().trim());
-    formData.append('paqueteBaseId', String(this.paqueteBaseSeleccionado()!));
-    formData.append('estadoId', String(this.estadoSeleccionado()!));
-    formData.append('zonaId', String(this.zonaSeleccionada()!));
-    formData.append('fecha_inicio', new Date(this.fechaInicio()).toISOString());
-    formData.append('fecha_fin', new Date(this.fechaFin()).toISOString());
+    // Construir Payload JSON
+    const payload: any = {
+      nombre: this.nombre().trim(),
+      paqueteBaseId: Number(this.paqueteBaseSeleccionado()!),
+      estadoId: Number(this.estadoSeleccionado()!),
+      zonaId: Number(this.zonaSeleccionada()!),
+      fecha_inicio: new Date(this.fechaInicio()).toISOString(),
+      fecha_fin: new Date(this.fechaFin()).toISOString(),
+    };
 
     if (this.cantProductos() !== null) {
-      formData.append('cant_productos', String(this.cantProductos()));
+      payload.cant_productos = Number(this.cantProductos());
     }
     if (desc !== null) {
-      formData.append('descuento', String(desc));
+      payload.descuento = Number(desc);
     }
 
-    // Adjuntar imagen solo si es nueva
     const slot = this.imagenSlot();
-    if (slot.file) {
-      formData.append('imagen', slot.file);
+    if (slot.preview && !slot.isExisting) {
+      payload.imagen_base64 = slot.preview; // Enviar como base64 si el backend lo soporta
     }
 
     const editId = this.editId();
+    if (this.isEditMode() && editId) {
+      payload.id_paquete_publicado = Number(editId);
+    }
+
     const request$ = (this.isEditMode() && editId)
-      ? this.paquetePublicadoService.updatePaqueteFormData(editId, formData)
-      : this.paquetePublicadoService.createPaqueteFormData(formData);
+      ? this.paquetePublicadoService.updatePaquete(payload)
+      : this.paquetePublicadoService.createPaquete(payload);
 
     this.cargando.set(true);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (result: any) => {
           this.cargando.set(false);
           this.toast.success(
             this.isEditMode() ? 'Publicación actualizada correctamente 🎉' : 'Paquete publicado correctamente 🎉',
             'Éxito'
           );
           this.reiniciarFormulario();
-          this.router.navigate(['/admin/administrar-publicaciones']);
+          const newId = result?.id_paquete_publicado;
+          this.router.navigate(['/admin/administrar-publicaciones'], {
+            queryParams: {
+              reload: '1',
+              ...(newId ? { highlight: String(newId) } : {})
+            }
+          });
         },
         error: (err) => {
           this.cargando.set(false);
