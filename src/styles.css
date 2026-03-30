@@ -44,9 +44,9 @@
     --brand-cta-hover: var(--color-amarillo-dark);
 
     /* Feedback */
-    --success: #4CAF50;
-    --success-dark: #2E7D32;
-    --success-light: #f0fdf4;
+    --success: #21683f;
+    --success-dark: #1d573a86;
+    --success-light: #E6F4EA;
     --error: #B92905;
     --error-dark: #8A1F03;
     --error-light: #fef2f2;
@@ -101,6 +101,58 @@
     /* gray-100 */
     --status-neutral-text: #374151;
     /* gray-700 */
+
+    /* 🔘 COLORES DE BOTONES (Conectados directo al ButtonComponent) */
+    --btn-primary-bg: #FFD562;
+    --btn-primary-text: #111827;
+    /* gray-900 */
+    --btn-primary-hover: #FFB800;
+    --btn-primary-active: #FF9D00;
+    --btn-primary-ring: #FFE899;
+
+    --btn-secondary-bg: #71A8D9;
+    --btn-secondary-text: #FFFFFF;
+    --btn-secondary-hover: #4b87bd;
+    --btn-secondary-active: #2E608C;
+    --btn-secondary-ring: #A8C5E0;
+
+    --btn-tertiary-bg: transparent;
+    --btn-tertiary-text: #2E608C;
+    --btn-tertiary-border: #2E608C;
+    --btn-tertiary-hover: #E6F0F8;
+    --btn-tertiary-active: #D9E9F6;
+    --btn-tertiary-ring: #71A8D9;
+
+    --btn-warning-bg: transparent;
+    --btn-warning-text: #D28509;
+    --btn-warning-border: #D28509;
+    --btn-warning-hover: #FEF3E6;
+    --btn-warning-active: #FEE5C8;
+    --btn-warning-ring: #E6BE6B;
+
+    --btn-danger-bg: #B92905;
+    --btn-danger-text: #FFFFFF;
+    --btn-danger-hover: #8A1F03;
+    --btn-danger-active: #6B1702;
+    --btn-danger-ring: #D26B47;
+
+    --btn-success-bg: #21683f;
+    --btn-success-text: #FFFFFF;
+    --btn-success-hover: #153f17;
+    --btn-success-active: #1B5E20;
+    --btn-success-ring: #81C784;
+
+    --btn-info-bg: #2E608C;
+    --btn-info-text: #FFFFFF;
+    --btn-info-hover: #1B3A58;
+    --btn-info-active: #0F2741;
+    --btn-info-ring: #4E7FA8;
+
+    --btn-ghost-bg: transparent;
+    --btn-ghost-text: #2E608C;
+    --btn-ghost-hover: #D9E9F6;
+    --btn-ghost-active: #D9E9F6;
+    --btn-ghost-ring: #71A8D9;
 
     --font-display: "Righteous", ui-sans-serif, system-ui, sans-serif;
     --font-body: "Poppins", ui-sans-serif, system-ui, sans-serif;
@@ -250,13 +302,23 @@ p {
 
 /* ✨ PREMIUM ANIMATIONS */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
 .animate-fade-in {
@@ -271,6 +333,7 @@ p {
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
+
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -279,13 +342,16 @@ p {
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #E5E7EB;
     border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--brand-primary);
 }
