@@ -36,7 +36,7 @@
                         [iconStart]="'box'">
                         Crear producto
                     </app-button>
-                    <app-button (click)="crearPaquete()" variant="secondary" size="md" [fullWidth]="true"
+                    <app-button (click)="crearPaquete()" variant="primary" size="md" [fullWidth]="true"
                         [iconStart]="'package'">
                         Crear paquete
                     </app-button>
@@ -59,30 +59,34 @@
             <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 auto-rows-fr">
 
                 <app-button variant="tertiary" (click)="navigateToAdminProducts()" size="lg" [fullWidth]="true"
-                    [hFull]="true" direction="column" [iconStart]="'box'" class="h-32">
+                    direction="row" [iconStart]="'box'">
                     Administrar productos
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPackages()" size="lg" [fullWidth]="true"
-                    [hFull]="true" direction="column" [iconStart]="'package'" class="h-32">
+                    direction="row" [iconStart]="'package'">
                     Administrar paquetes
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPublicaciones()" size="lg" [fullWidth]="true"
-                    [hFull]="true" direction="column" [iconStart]="'clipboard'" class="h-32">
+                    direction="row" [iconStart]="'clipboard'">
                     Administrar publicaciones
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminPostPackages()" size="lg" [fullWidth]="true"
-                    [hFull]="true" direction="column" [iconStart]="'upload'" class="h-32">
+                    direction="row" [iconStart]="'upload'">
                     Publicar paquete
                 </app-button>
 
                 <app-button variant="tertiary" (click)="navigateToAdminTemplates()" size="lg" [fullWidth]="true"
-                    [hFull]="true" direction="column" [iconStart]="'layers'" class="h-32">
+                    direction="row" [iconStart]="'layers'">
                     Administrar plantillas
                 </app-button>
 
+                <app-button variant="tertiary" (click)="navigateToAdminTemplates()" size="lg" [fullWidth]="true"
+                    direction="row">
+                    Estadisticas(Mockeado)
+                </app-button>
             </div>
         </div>
 
@@ -142,7 +146,7 @@
         <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mt-6 sm:mt-8">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <h3 class="text-xl sm:text-2xl font-display text-gray-900 flex items-center gap-2 sm:gap-3">
-                    <app-icon name="checkCircle" size="28" class="text-green-500 flex-shrink-0" />
+                    <app-icon name="checkCircle" size="28" class="text-accent flex-shrink-0" />
                     <span class="break-words">Paquetes Cerrados</span>
                 </h3>
             </div>

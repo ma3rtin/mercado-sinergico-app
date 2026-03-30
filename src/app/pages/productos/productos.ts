@@ -151,8 +151,11 @@ export class ProductosComponent implements OnInit {
       .subscribe({
         next: (productos) => {
           console.log('✅ Productos cargados:', productos.length);
-          this.productosOriginales.set(productos);
-          this.productosFiltrados.set(productos);
+          // Por defecto mostrar los más recientes (mayor ID primero)
+          const productosOrdenados = this.ordenarProductos(productos, 'recientes');
+
+          this.productosOriginales.set(productosOrdenados);
+          this.productosFiltrados.set(productosOrdenados);
           this.isLoading.set(false);
         },
         error: (error) => {
