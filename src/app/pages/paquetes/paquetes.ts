@@ -102,7 +102,7 @@ export class PaquetesPublicosComponent implements OnInit {
     mostrarMarca: true,
     mostrarTipoPaquete: true,
     mostrarRangoPrecio: false,
-    mostrarOrdenamiento: true,
+    mostrarOrdenamiento: false, // Ahora está arriba a la derecha
     mostrarEstados: true,
 
     // 📋 Opciones de Tipo de Paquete
@@ -258,73 +258,92 @@ export class PaquetesPublicosComponent implements OnInit {
       });
   }
 
+  ordenSeleccionado = signal<string>('recientes');
+
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
     console.log('🎯 Filtros recibidos:', filtros);
 
+    this.filtrosActuales = filtros;
+    this.procesarFiltrosYOrden();
+  }
+
+  private filtrosActuales: FiltrosAplicados | null = null;
+
+  private procesarFiltrosYOrden(): void {
     let resultado = [...this.paquetesOriginales()];
+    const filtros = this.filtrosActuales;
 
-    // Filtrar por categorías
-    if (filtros.categorias.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.categorias.includes(p.paqueteBase?.categoria_id || 0)
-      );
-    }
-
-    // Filtrar por marcas
-    if (filtros.marcas.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.marcas.includes(p.paqueteBase?.marcaId || 0)
-      );
-    }
-
-    // Filtrar por tipo de paquete
-    if (filtros.tiposPaquete.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.tiposPaquete.includes(p.tipoPaquete || '')
-      );
-    }
-
-    // Filtrar por estados especiales
-    if (filtros.estados.length > 0) {
-      filtros.estados.forEach(estado => {
-        if (estado === 'por-cerrar') {
-          const hoy = new Date();
-          const dentroDe5Dias = new Date(hoy);
-          dentroDe5Dias.setDate(hoy.getDate() + 5);
-
-          resultado = resultado.filter(p => {
-            const fechaFin = new Date(p.fecha_fin);
-            return fechaFin >= hoy && fechaFin <= dentroDe5Dias;
-          });
-        }
-
-        if (estado === 'recien-abiertos') {
-          const hoy = new Date();
-          const hace7Dias = new Date(hoy);
-          hace7Dias.setDate(hoy.getDate() - 7);
-
-          resultado = resultado.filter(p => {
-            const fechaInicio = new Date(p.fecha_inicio);
-            return fechaInicio >= hace7Dias;
-          });
-        }
-
-        if (estado === 'populares') {
+    if (filtros) {
+        // Filtrar por categorías
+        if (filtros.categorias.length > 0) {
           resultado = resultado.filter(p =>
-            (p.cant_usuarios_registrados || 0) >= 10
+            filtros.categorias.includes(p.paqueteBase?.categoria_id || 0)
           );
         }
-      });
+
+        // Filtrar por marcas
+        if (filtros.marcas.length > 0) {
+          resultado = resultado.filter(p =>
+            filtros.marcas.includes(p.paqueteBase?.marcaId || 0)
+          );
+        }
+
+        // Filtrar por tipo de paquete
+        if (filtros.tiposPaquete.length > 0) {
+          resultado = resultado.filter(p =>
+            filtros.tiposPaquete.includes(p.tipoPaquete || '')
+          );
+        }
+
+        // Filtrar por estados especiales
+        if (filtros.estados.length > 0) {
+          filtros.estados.forEach(estado => {
+            if (estado === 'por-cerrar') {
+              const hoy = new Date();
+              const dentroDe5Dias = new Date(hoy);
+              dentroDe5Dias.setDate(hoy.getDate() + 5);
+
+              resultado = resultado.filter(p => {
+                const fechaFin = new Date(p.fecha_fin);
+                return fechaFin >= hoy && fechaFin <= dentroDe5Dias;
+              });
+            }
+
+            if (estado === 'recien-abiertos') {
+              const hoy = new Date();
+              const hace7Dias = new Date(hoy);
+              hace7Dias.setDate(hoy.getDate() - 7);
+
+              resultado = resultado.filter(p => {
+                const fechaInicio = new Date(p.fecha_inicio);
+                return fechaInicio >= hace7Dias;
+              });
+            }
+
+            if (estado === 'populares') {
+              resultado = resultado.filter(p =>
+                (p.cant_usuarios_registrados || 0) >= 10
+              );
+            }
+          });
+        }
     }
 
-    // Ordenar
-    if (filtros.ordenamiento) {
-      resultado = this.ordenarPaquetes(resultado, filtros.ordenamiento);
+    // Ordenar con signal local
+    if (this.ordenSeleccionado()) {
+      resultado = this.ordenarPaquetes(resultado, this.ordenSeleccionado());
     }
 
     this.paquetesFiltrados.set(resultado);
     this.paginaActual.set(1);
+  }
+
+  // Al cambiar el orden desde el select
+  cambiarOrden(event: Event): void {
+    const orden = (event.target as HTMLSelectElement).value;
+    this.ordenSeleccionado.set(orden);
+    this.procesarFiltrosYOrden();
   }
 
   private ordenarPaquetes(paquetes: PaquetePublicado[], orden: string): PaquetePublicado[] {
@@ -343,9 +362,8 @@ export class PaquetesPublicosComponent implements OnInit {
         );
       case 'recientes':
       default:
-        return [...paquetes].sort((a, b) =>
-          (b.id_paquete_publicado || 0) - (a.id_paquete_publicado || 0)
-        );
+        // Mantener el orden original en el que vienen del backend
+        return paquetes;
     }
   }
 
