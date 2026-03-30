@@ -1,1 +1,0 @@
-﻿E:\mercado sinergia\back\mercado-sinergico-api\src\services\paquetePublicado.service.ts
