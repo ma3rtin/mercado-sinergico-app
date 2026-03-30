@@ -126,7 +126,7 @@ export class ProductosDelPaquete implements OnInit {
     mostrarMarca: true,
     mostrarTipoPaquete: false,
     mostrarRangoPrecio: true,
-    mostrarOrdenamiento: true,
+    mostrarOrdenamiento: false,
     mostrarEstados: false,
 
     opcionesOrdenamiento: [
@@ -277,35 +277,53 @@ export class ProductosDelPaquete implements OnInit {
       });
   }
 
+  ordenSeleccionado = signal<string>('recientes');
+
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
     console.log('🎯 Filtros recibidos:', filtros);
+    this.filtrosActuales = filtros;
+    this.procesarFiltrosYOrden();
+  }
 
+  private filtrosActuales: FiltrosAplicados | null = null;
+
+  private procesarFiltrosYOrden(): void {
     let resultado = [...this.productosOriginales()];
+    const filtros = this.filtrosActuales;
 
-    if (filtros.categorias.length > 0) {
-      resultado = resultado.filter((p) =>
-        filtros.categorias.includes(p.categoria_id)
-      );
+    if (filtros) {
+      if (filtros.categorias.length > 0) {
+        resultado = resultado.filter((p) =>
+          filtros.categorias.includes(p.categoria_id)
+        );
+      }
+
+      if (filtros.marcas.length > 0) {
+        resultado = resultado.filter((p) => filtros.marcas.includes(p.marca_id));
+      }
+
+      if (filtros.rangoPrecio.min !== null) {
+        resultado = resultado.filter((p) => p.precio >= filtros.rangoPrecio.min!);
+      }
+      if (filtros.rangoPrecio.max !== null) {
+        resultado = resultado.filter((p) => p.precio <= filtros.rangoPrecio.max!);
+      }
     }
 
-    if (filtros.marcas.length > 0) {
-      resultado = resultado.filter((p) => filtros.marcas.includes(p.marca_id));
-    }
-
-    if (filtros.rangoPrecio.min !== null) {
-      resultado = resultado.filter((p) => p.precio >= filtros.rangoPrecio.min!);
-    }
-    if (filtros.rangoPrecio.max !== null) {
-      resultado = resultado.filter((p) => p.precio <= filtros.rangoPrecio.max!);
-    }
-
-    if (filtros.ordenamiento) {
-      resultado = this.ordenarProductos(resultado, filtros.ordenamiento);
+    if (this.ordenSeleccionado()) {
+      resultado = this.ordenarProductos(resultado, this.ordenSeleccionado());
     }
 
     this.productosFiltrados.set(resultado);
     this.paginaActual.set(1); // ✅ Resetear a página 1 al filtrar
+  }
+
+  // Al cambiar el orden desde el select
+  cambiarOrden(event: Event): void {
+    const orden = (event.target as HTMLSelectElement).value;
+    this.ordenSeleccionado.set(orden);
+    this.procesarFiltrosYOrden();
   }
 
   private ordenarProductos(productos: Producto[], orden: string): Producto[] {

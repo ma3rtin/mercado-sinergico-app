@@ -8,7 +8,32 @@
       (filtrosAplicados)="aplicarFiltros($event)" (filtrosLimpiados)="limpiarFiltros()" />
 
     <!-- 📦 Contenido -->
-    <div class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0 flex flex-col">
+    
+      <!-- 🛠️ CABECERA DEL CONTENIDO (Resultados y Ordenamiento) -->
+      @if (!isLoading()) {
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
+        <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto">
+          Mostrando {{ productosPaginados().length }} productos de {{ productosFiltrados().length }}
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <label for="sort-productos" class="text-sm font-medium text-gray-600 whitespace-nowrap">Ordenar por:</label>
+          <div class="relative flex-1 sm:flex-none">
+            <select id="sort-productos" [value]="ordenSeleccionado()" (change)="cambiarOrden($event)" 
+              class="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-3 pr-8 py-2 cursor-pointer font-semibold shadow-sm transition-all hover:bg-gray-50">
+              <option value="recientes">Más relevantes</option>
+              <option value="precio-asc">Menor precio</option>
+              <option value="precio-desc">Mayor precio</option>
+              <option value="a-z">A-Z</option>
+              <option value="z-a">Z-A</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
 
       <app-delayed-skeleton [isLoading]="isLoading()" [delay]="200">
         <!-- 🦴 SKELETON -->
@@ -88,13 +113,13 @@
         }
       </app-delayed-skeleton>
 
+      <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
+      @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
+      <app-pagination [totalItems]="totalItemsPaginacion()" [itemsPerPage]="itemsPorPagina()" [currentPage]="paginaActual()"
+        [showItemsPerPage]="true" [itemsPerPageOptions]="[12, 24, 36, 48]" (pageChange)="onPageChange($event)"
+        (itemsPerPageChange)="onItemsPerPageChange($event)" />
+      }
+
     </div>
   </section>
-
-  <!-- 📄 PAGINACIÓN - Solo si hay productos y no hay selección individual -->
-  @if (productosFiltrados().length > 0 && !productoSeleccionado()) {
-  <app-pagination [totalItems]="totalItemsPaginacion()" [itemsPerPage]="itemsPorPagina()" [currentPage]="paginaActual()"
-    [showItemsPerPage]="true" [itemsPerPageOptions]="[12, 24, 36, 48]" (pageChange)="onPageChange($event)"
-    (itemsPerPageChange)="onItemsPerPageChange($event)" />
-  }
 </app-catalogo-wrapper>

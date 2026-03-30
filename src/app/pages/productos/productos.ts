@@ -55,7 +55,7 @@ export class ProductosComponent implements OnInit {
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
-  itemsPorPagina = signal<number>(4); // 12 productos por página (óptimo)
+  itemsPorPagina = signal<number>(12); // 12 productos por página (óptimo)
 
   // 📊 COMPUTED: Productos paginados
   productosPaginados = computed(() => {
@@ -114,7 +114,7 @@ export class ProductosComponent implements OnInit {
     mostrarMarca: true,
     mostrarTipoPaquete: false, // No aplica para productos
     mostrarRangoPrecio: true,  // SÍ para productos
-    mostrarOrdenamiento: true,
+    mostrarOrdenamiento: false, // Ahora está arriba a la derecha
     mostrarEstados: false, // No aplica para productos
 
     // 📋 Opciones de Ordenamiento para productos
@@ -179,40 +179,62 @@ export class ProductosComponent implements OnInit {
       });
   }
 
+  ordenSeleccionado = signal<string>('recientes');
+
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
     console.log('🎯 Filtros recibidos:', filtros);
 
+    // Guardamos los filtros actuales para poder reutilizarlos al cambiar el orden
+    this.filtrosActuales = filtros;
+
+    this.procesarFiltrosYOrden();
+  }
+
+  // Guardamos un estado interno de los filtros aplicados para procesarlos con el orden
+  private filtrosActuales: FiltrosAplicados | null = null;
+
+  private procesarFiltrosYOrden(): void {
     let resultado = [...this.productosOriginales()];
+    const filtros = this.filtrosActuales;
 
-    // Filtrar por categorías
-    if (filtros.categorias.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.categorias.includes(p.categoria_id)
-      );
+    if (filtros) {
+        // Filtrar por categorías
+        if (filtros.categorias.length > 0) {
+          resultado = resultado.filter(p =>
+            filtros.categorias.includes(p.categoria_id)
+          );
+        }
+
+        // Filtrar por marcas
+        if (filtros.marcas.length > 0) {
+          resultado = resultado.filter(p =>
+            filtros.marcas.includes(p.marca_id)
+          );
+        }
+
+        // Filtrar por rango de precio
+        if (filtros.rangoPrecio.min !== null) {
+          resultado = resultado.filter(p => p.precio >= filtros.rangoPrecio.min!);
+        }
+        if (filtros.rangoPrecio.max !== null) {
+          resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
+        }
     }
 
-    // Filtrar por marcas
-    if (filtros.marcas.length > 0) {
-      resultado = resultado.filter(p =>
-        filtros.marcas.includes(p.marca_id)
-      );
-    }
-
-    // Filtrar por rango de precio
-    if (filtros.rangoPrecio.min !== null) {
-      resultado = resultado.filter(p => p.precio >= filtros.rangoPrecio.min!);
-    }
-    if (filtros.rangoPrecio.max !== null) {
-      resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
-    }
-
-    // Ordenar
-    if (filtros.ordenamiento) {
-      resultado = this.ordenarProductos(resultado, filtros.ordenamiento);
+    // Ordenar con el signal local
+    if (this.ordenSeleccionado()) {
+      resultado = this.ordenarProductos(resultado, this.ordenSeleccionado());
     }
 
     this.productosFiltrados.set(resultado);
+  }
+
+  // Al cambiar el orden desde el select
+  cambiarOrden(event: Event): void {
+    const orden = (event.target as HTMLSelectElement).value;
+    this.ordenSeleccionado.set(orden);
+    this.procesarFiltrosYOrden();
   }
 
   private ordenarProductos(productos: Producto[], orden: string): Producto[] {
@@ -225,13 +247,10 @@ export class ProductosComponent implements OnInit {
         return [...productos].sort((a, b) => a.precio - b.precio);
       case 'precio-desc':
         return [...productos].sort((a, b) => b.precio - a.precio);
-      case 'mas-stock':
-        return [...productos].sort((a, b) => (b.stock || 0) - (a.stock || 0));
       case 'recientes':
       default:
-        return [...productos].sort((a, b) =>
-          (b.id_producto || 0) - (a.id_producto || 0)
-        );
+        // Mantener el orden original en el que vienen del backend
+        return productos;
     }
   }
 

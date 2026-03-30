@@ -189,6 +189,19 @@
               </div>
             </div>
           }
+
+          <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
+          @if (paquetesPaginados().length > 0) {
+            <app-pagination
+              [totalItems]="totalItemsPaginacion()"
+              [itemsPerPage]="itemsPorPagina()"
+              [currentPage]="paginaActual()"
+              [showItemsPerPage]="true"
+              [itemsPerPageOptions]="[12, 24, 36, 48]"
+              (pageChange)="onPageChange($event)"
+              (itemsPerPageChange)="onItemsPerPageChange($event)"
+            />
+          }
         </div>
       </div>
 
@@ -236,18 +249,6 @@
       </div>
 
     }
-    <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
-          @if (paquetesPaginados().length > 0) {
-            <app-pagination
-              [totalItems]="totalItemsPaginacion()"
-              [itemsPerPage]="itemsPorPagina()"
-              [currentPage]="paginaActual()"
-              [showItemsPerPage]="true"
-              [itemsPerPageOptions]="[12, 24, 36, 48]"
-              (pageChange)="onPageChange($event)"
-              (itemsPerPageChange)="onItemsPerPageChange($event)"
-            />
-          }
   </div>
 </div>
 
