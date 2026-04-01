@@ -215,14 +215,8 @@ export class PaquetesPublicosComponent implements OnInit {
         next: (paquetes) => {
           console.log('✅ Paquetes cargados:', paquetes);
 
-          // Normalizar el campo 'tipo' a 'tipoPaquete' para que los filtros funcionen
-          const paquetesNormalizados = paquetes.map(p => ({
-            ...p,
-            tipoPaquete: p.tipoPaquete || p.tipo
-          }));
-
           // Filtrar paquetes eliminados por defecto
-          const paquetesActivos = paquetesNormalizados.filter(
+          const paquetesActivos = paquetes.filter(
             (p) => p.estado?.nombre !== 'Eliminado'
           );
 
