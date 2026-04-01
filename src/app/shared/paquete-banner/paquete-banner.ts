@@ -57,7 +57,7 @@ export class PaqueteBannerComponent {
 
   // Tipo de paquete
   tipoPaquete = computed(() => {
-    return this.paquete()?.tipoPaquete || TipoPaquete.POR_DEFINIR;
+    return this.paquete()?.tipo || TipoPaquete.POR_DEFINIR;
   });
 
   // Icono del tipo de paquete

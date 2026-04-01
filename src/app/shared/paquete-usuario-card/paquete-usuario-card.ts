@@ -116,7 +116,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   getTipoPaqueteIcono(tipo?: string | TipoPaquete) {
-    if (!tipo) tipo = this.paquete?.tipoPaquete;
+    if (!tipo) tipo = this.paquete?.tipo;
 
     const t = String(tipo).toLowerCase();
 
@@ -127,7 +127,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   obtenerTextoTipo(tipo?: string | TipoPaquete): string {
-    if (!tipo) tipo = this.paquete?.tipoPaquete;
+    if (!tipo) tipo = this.paquete?.tipo;
 
     const t = String(tipo).toLowerCase();
 

@@ -35,10 +35,10 @@ export class PaqueteCard implements OnInit {
   });
 
   descuentoCalculado = computed(() => {
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) {
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) {
       return 8;
     }
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) {
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) {
       return 3;
     }
     return 0;
@@ -91,14 +91,14 @@ export class PaqueteCard implements OnInit {
   }
 
   obtenerIconoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return '⚡';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return '🔋';
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) return '⚡';
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) return '🔋';
     return '📦';
   }
 
   obtenerTextoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return 'Energético';
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) return 'Energético';
     return 'Por Definir';
   }
 

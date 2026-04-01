@@ -115,7 +115,7 @@ export class PaquetesPublicosComponent implements OnInit {
       },
       {
         id: 2,
-        nombre: 'Energético',
+        nombre: 'Enérgico',
         icon: 'trendingUp',
         valor: TipoPaquete.ENERGICO
       },
@@ -281,10 +281,9 @@ export class PaquetesPublicosComponent implements OnInit {
           );
         }
 
-        // Filtrar por tipo de paquete
         if (filtros.tiposPaquete.length > 0) {
           resultado = resultado.filter(p =>
-            filtros.tiposPaquete.includes(p.tipoPaquete || '')
+            filtros.tiposPaquete.includes(p.tipo || '')
           );
         }
 

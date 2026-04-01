@@ -42,7 +42,7 @@
               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-secondary-dark rounded-full text-sm font-semibold"
             >
               <app-icon name="zap" [size]="'16'" class="text-current pt-1" />
-              Energético
+              Enérgico
             </span>
           }
           @if (esProductoSinergico()) {
@@ -167,7 +167,7 @@
             </button>
           </div>
 
-          <!-- Filtro Stock (solo energéticos) -->
+          <!-- Filtro Stock (solo enérgicos) -->
           @if (esProductoEnergetico()) {
             <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
               <button
@@ -500,7 +500,7 @@
                     </code>
                   </td>
 
-                  <!-- Stock (solo energético) -->
+                  <!-- Stock (solo enérgico) -->
                   @if (esProductoEnergetico()) {
                     <td class="px-6 py-4 whitespace-nowrap">
                       <input
