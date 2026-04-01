@@ -1,39 +1,88 @@
-<app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación duplicada' : 'Publicar paquete'">
+<app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
     <div class="mb-3">
-        <app-admin-back-button label="Volver a gestionar paquetes" />
+        <app-admin-back-button label="Volver a gestionar publicaciones" />
     </div>
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
+
         <!-- Banner Edición / Duplicado -->
         @if (isEditMode()) {
-        <div class="mb-6 p-4 rounded-lg flex items-start gap-3" 
+        <div class="mb-6 p-4 rounded-lg border flex items-start gap-3"
              [class.bg-blue-50]="!isDuplicate()" [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
              [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()" [class.text-amber-800]="isDuplicate()">
             <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
             <div>
                 <p class="font-bold text-sm">
-                    {{ isDuplicate() ? 'Estás editando una publicación duplicada' : 'Estás editando una publicación' }}
+                    {{ isDuplicate() ? 'Estás creando desde una publicación duplicada' : 'Estás editando una publicación' }}
                 </p>
                 <p class="text-xs mt-1">
-                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes nuevas fechas de inicio y fin para que el paquete sea válido.' : 'Asegúrate de establecer correctamente las fechas.' }}
+                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes nuevas fechas de inicio y fin para que el paquete sea válido.' : 'Asegurate de establecer correctamente las fechas.' }}
                 </p>
             </div>
         </div>
         }
 
-        <!-- Buscador de paquete base -->
+        <!-- ────────────────────────────────────── -->
+        <!-- NOMBRE DE LA PUBLICACIÓN               -->
+        <!-- ────────────────────────────────────── -->
+        <div class="mb-6">
+            <app-input
+                [ngModel]="nombre()"
+                (ngModelChange)="nombre.set($event)"
+                [labelValue]="'Nombre de la publicación'"
+                [placeholderValue]="'Ej: Promo iPhone Verano CABA'"
+                [requiredValue]="true"
+                [clearableValue]="true"
+            />
+        </div>
+
+        <!-- ────────────────────────────────────── -->
+        <!-- BUSCADOR DE PAQUETE BASE               -->
+        <!-- ────────────────────────────────────── -->
         <div class="mb-6 relative" #scrollContainer>
-            <label class="block text-gray-700 font-body mb-1">Paquete base</label>
-            <input #inputBusqueda type="text" [(ngModel)]="busqueda" (input)="buscarPaquetes()" (focus)="abrirLista()"
-                placeholder="Buscar paquete base..."
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600" />
-            <!-- ... resto del buscador ... -->
+            <label class="block text-gray-700 font-body font-medium mb-1">
+                Paquete base <span class="text-red-500">*</span>
+            </label>
+
+            <!-- Input + botón limpiar cuando hay selección -->
+            <div class="relative flex items-center gap-2">
+                <input
+                    #inputBusqueda
+                    type="text"
+                    [ngModel]="busqueda()"
+                    (ngModelChange)="busqueda.set($event); buscarPaquetes()"
+                    (focus)="abrirLista()"
+                    placeholder="Buscar paquete base..."
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600 pr-10"
+                />
+                @if (paqueteBaseSeleccionado()) {
+                <span class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <app-button
+                        variant="ghost"
+                        size="xs"
+                        [iconOnly]="true"
+                        iconEnd="x"
+                        title="Limpiar selección"
+                        (buttonClick)="limpiarPaqueteBase()"
+                    />
+                </span>
+                }
+            </div>
+
+            <!-- Indicador de paquete seleccionado -->
+            @if (paqueteBaseSeleccionado()) {
+            <p class="mt-1 text-xs text-green-600 flex items-center gap-1">
+                <app-icon name="checkCircle" size="14" />
+                Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
+            </p>
+            }
 
             <!-- Lista desplegable -->
             @if (mostrandoResultados() && resultadosBusqueda().length > 0) {
-            <ul
-                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
+            <ul class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
                 @for (paquete of resultadosBusqueda(); track paquete.id_paquete_base) {
-                <li (click)="seleccionarPaquete(paquete)" class="p-2.5 hover:bg-gray-100 cursor-pointer">
+                <li (click)="seleccionarPaquete(paquete)"
+                    class="p-2.5 hover:bg-gray-100 cursor-pointer"
+                    [class.bg-blue-50]="paquete.id_paquete_base === paqueteBaseSeleccionado()">
                     {{ paquete.nombre }}
                 </li>
                 }
@@ -42,60 +91,171 @@
 
             <!-- Sin resultados -->
             @if (mostrandoResultados() && resultadosBusqueda().length === 0) {
-            <div
-                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
+            <div class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
                 No se encontraron resultados.
             </div>
             }
         </div>
 
-        <!-- Estado -->
+        <!-- ────────────────────────────────────── -->
+        <!-- IMAGEN DE LA PUBLICACIÓN               -->
+        <!-- ────────────────────────────────────── -->
         <div class="mb-6">
-            <label class="block text-gray-700 font-body mb-1">Estado</label>
-            <select title="Elegí un estado" [(ngModel)]="estadoSeleccionado"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
-                <option value="" disabled selected hidden>Elegí un estado</option>
-                @for (estado of estados; track estado.id_estado) {
-                <option [value]="estado.id_estado">{{ estado.nombre }}</option>
-                }
-            </select>
+            <label class="block text-gray-700 font-body font-medium mb-2">
+                Imagen de la publicación
+                <span class="text-gray-400 text-xs font-normal ml-1">(opcional, máx. 5 MB)</span>
+            </label>
+            <div class="flex items-start gap-4">
+                <!-- Slot único de imagen -->
+                <div
+                    class="relative w-36 h-36 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all flex-shrink-0"
+                    [class.border-solid]="!imagenSlot().preview"
+                    [class.border-3]="!imagenSlot().preview"
+                    [class.border-accent]="!imagenSlot().preview"
+                    [class.bg-yellow-50]="!imagenSlot().preview"
+                    [class.border-2]="!!imagenSlot().preview"
+                    [class.border-blue-400]="!!imagenSlot().preview"
+                >
+                    @if (imagenSlot().preview) {
+                        <img
+                            [src]="imagenSlot().preview"
+                            alt="Imagen de la publicación"
+                            class="w-full h-full object-cover rounded-xl"
+                        />
+                        <!-- Badge Principal -->
+                        <span class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
+                            Principal
+                        </span>
+                        <!-- Botón eliminar -->
+                        <button
+                            type="button"
+                            (click)="removeImage($event)"
+                            class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-10 transition-colors pointer-events-auto"
+                        >×</button>
+                        <!-- Icono editar -->
+                        <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-50 text-white text-xs px-2 py-1 rounded z-10">
+                            <app-icon name="Pencil" size="16" />
+                        </div>
+                    } @else {
+                        <div class="text-center pointer-events-none">
+                            <app-icon name="Upload" size="32" class="text-gray-500" />
+                            <p class="text-xs text-gray-500 mt-1">Imagen principal</p>
+                        </div>
+                    }
+                    <!-- Input file oculto -->
+                    <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        (change)="onFileSelected($event)"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0"
+                    />
+                </div>
+
+                <!-- Instrucciones -->
+                <div class="text-sm text-gray-500 mt-2">
+                    <p>Hacé click en el cuadro para subir una imagen.</p>
+                    <p class="mt-1">Formatos aceptados: JPG, PNG, GIF, WEBP.</p>
+                    <p class="mt-1">Tamaño máximo: <strong>5 MB</strong>.</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Zona -->
+        <!-- ────────────────────────────────────── -->
+        <!-- ESTADO                                 -->
+        <!-- ────────────────────────────────────── -->
         <div class="mb-6">
-            <label class="block text-gray-700 font-body mb-1">Zona</label>
-            <select title="Elegí una zona" [(ngModel)]="zonaSeleccionada"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
-                <option value="" disabled selected hidden>Elegí una zona</option>
-                @for (zona of zonas(); track zona.id_zona) {
-                <option [value]="zona.id_zona">{{ zona.nombre }}</option>
-                }
-            </select>
+            <app-select
+                [labelValue]="'Estado'"
+                [placeholderValue]="'Elegí un estado'"
+                [optionsValue]="estadosOptions()"
+                [requiredValue]="true"
+                [ngModel]="estadoSeleccionado()"
+                (valueChange)="estadoSeleccionado.set($event)"
+            />
         </div>
 
-        <!-- Fechas -->
+        <!-- ────────────────────────────────────── -->
+        <!-- ZONA                                   -->
+        <!-- ────────────────────────────────────── -->
+        <div class="mb-6">
+            <app-select
+                [labelValue]="'Zona'"
+                [placeholderValue]="'Elegí una zona'"
+                [optionsValue]="zonasOptions()"
+                [searchableValue]="true"
+                [clearableValue]="true"
+                [requiredValue]="true"
+                [ngModel]="zonaSeleccionada()"
+                (valueChange)="zonaSeleccionada.set($event)"
+            />
+        </div>
+
+        <!-- ────────────────────────────────────── -->
+        <!-- FECHAS                                 -->
+        <!-- ────────────────────────────────────── -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
             <div>
-                <label class="block text-gray-700 font-body mb-1">Fecha de inicio</label>
-                <input title="Fecha de inicio" [(ngModel)]="fechaInicio" type="date"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                <label class="block text-gray-700 font-body font-medium mb-1">
+                    Fecha de inicio <span class="text-red-500">*</span>
+                </label>
+                <input
+                    title="Fecha de inicio"
+                    type="date"
+                    [ngModel]="fechaInicio()"
+                    (ngModelChange)="fechaInicio.set($event)"
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300"
+                />
             </div>
             <div>
-                <label class="block text-gray-700 font-body mb-1">Fecha de fin</label>
-                <input title="Fecha de fin" [(ngModel)]="fechaFin" type="date"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                <label class="block text-gray-700 font-body font-medium mb-1">
+                    Fecha de fin <span class="text-red-500">*</span>
+                </label>
+                <input
+                    title="Fecha de fin"
+                    type="date"
+                    [ngModel]="fechaFin()"
+                    (ngModelChange)="fechaFin.set($event)"
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300"
+                />
             </div>
         </div>
 
-        <!-- Cantidad de productos -->
-        <div class="mb-6">
-            <label class="block text-gray-700 font-body mb-1">Cantidad total de productos</label>
-            <input [(ngModel)]="cantProductos" type="number" min="1" placeholder="Ejemplo: 30"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
+        <!-- ────────────────────────────────────── -->
+        <!-- CANTIDAD DE PRODUCTOS + DESCUENTO      -->
+        <!-- ────────────────────────────────────── -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+            <app-input
+                [ngModel]="cantProductos()"
+                (ngModelChange)="cantProductos.set($event)"
+                [typeValue]="'number'"
+                [labelValue]="'Cantidad total de productos'"
+                [placeholderValue]="'Ej: 30'"
+                [minValue]="1"
+            />
+            <app-input
+                [ngModel]="descuento()"
+                (ngModelChange)="setDescuento($event)"
+                [typeValue]="'number'"
+                [labelValue]="'Descuento (%)'"
+                [placeholderValue]="'Ej: 15'"
+                [suffixValue]="'%'"
+                [minValue]="0"
+                [maxValue]="100"
+                [helperTextValue]="'Opcional · entre 0 y 100'"
+            />
         </div>
 
-        <!-- Botón -->
+        <!-- ────────────────────────────────────── -->
+        <!-- BOTÓN                                  -->
+        <!-- ────────────────────────────────────── -->
         <div class="flex justify-center">
-            <app-button variant="primary" [label]="isEditMode() ? 'Guardar cambios' : 'Publicar paquete'" (buttonClick)="publicarPaquete()"></app-button>
+            <app-button
+                variant="primary"
+                [label]="isEditMode() ? 'Guardar cambios' : 'Publicar paquete'"
+                [loading]="cargando()"
+                [disabled]="cargando()"
+                (buttonClick)="publicarPaquete()"
+            />
         </div>
     </div>
+</app-admin-create-wrapper>

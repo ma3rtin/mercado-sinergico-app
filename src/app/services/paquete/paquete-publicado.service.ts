@@ -30,7 +30,12 @@ export class PaquetePublicadoService extends ApiService {
             paquete
         );
     }
-
+    createPaqueteFormData(formData: FormData): Observable<PaquetePublicado> {
+        return this.http.post<PaquetePublicado>(this.buildUrl(this.apiUrl), formData);
+    }
+    updatePaqueteFormData(id: number, formData: FormData): Observable<PaquetePublicado> {
+        return this.http.put<PaquetePublicado>(this.buildUrl(`${this.apiUrl}/${id}`), formData);
+    }
     deletePaquete(id: number): Observable<PaquetePublicado> {
         return this.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
@@ -105,7 +110,7 @@ export class PaquetePublicadoService extends ApiService {
     /** Obtener paquetes cerrados (filtrado en frontend) */
     getPaquetesCerrados(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
-            map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
+            map(paquetes => paquetes.filter(p => p.estado?.nombre === 'Cerrado'))
         );
     }
 

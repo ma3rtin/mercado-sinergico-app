@@ -37,6 +37,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
     const estado = this.estadoFiltro().toLowerCase();
     return this.paquetes().filter(p => {
       const matchTerm = !term ||
+        p.nombre?.toLowerCase().includes(term) ||
         p.paqueteBase?.nombre?.toLowerCase().includes(term) ||
         p.zona?.nombre?.toLowerCase().includes(term);
       const matchEstado = estado === 'todos' ||
@@ -45,14 +46,18 @@ export class AdministrarPublicacionesComponent implements OnInit {
     });
   });
 
+
   ngOnInit() {
-    // Leer el queryParam de highlight
+    // queryParamMap emite sincrónicamente al suscribirse (BehaviorSubject)
+    // → siempre se ejecuta en ngOnInit antes de la siguiente línea
     this.route.queryParamMap.subscribe(params => {
       const id = params.get('highlight');
       this.highlightedId.set(id ? Number(id) : null);
+      // Siempre recarga — tanto la carga inicial como al volver con reload=1
+      this.loadPaquetes();
     });
-    this.loadPaquetes();
   }
+
 
   loadPaquetes() {
     this.loading.set(true);

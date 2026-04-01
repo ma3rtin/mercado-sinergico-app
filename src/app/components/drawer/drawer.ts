@@ -25,7 +25,7 @@ export class Drawer {
 
   // 📊 Datos del usuario
   user = this.authService.user;
-  
+
   // 🔗 Links dinámicos
   get profileLink(): string {
     const role = this.authService.getUserRole();
