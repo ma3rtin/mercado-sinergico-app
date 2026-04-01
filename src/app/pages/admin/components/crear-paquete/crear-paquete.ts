@@ -167,7 +167,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   // 🔍 Buscar productos
   buscarProductos(reset = true): void {
     const query = this.busquedaProducto().trim();
-    if (this.cargando() || this.finResultados()) return;
+    if (this.cargando() || (!reset && this.finResultados())) return;
 
     if (reset) {
       this.page.set(0);
@@ -288,7 +288,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.success('Paquete base creado con éxito!', 'Éxito');
+          this.toast.success('¡Paquete creado con éxito!', 'Éxito');
           this.resetForm();
           this.router.navigate(['admin/perfil']);
         },
