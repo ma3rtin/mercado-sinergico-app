@@ -68,7 +68,7 @@ export class CrearProductoComponent implements OnInit {
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
+    energico: {
       titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
@@ -134,10 +134,10 @@ readonly tipoMap: Record<TipoPaquete, string> = {
     // ❌ Sinérgico → no stock
     if (tipo === TipoPaquete.SINERGICO) return false;
 
-    // ❌ Energético + plantilla → stock por variantes
+    // ❌ Enérgico + plantilla → stock por variantes
     if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
 
-    // ✅ Energético sin plantilla → mostrar stock
+    // ✅ Enérgico sin plantilla → mostrar stock
     return true;
   });
 

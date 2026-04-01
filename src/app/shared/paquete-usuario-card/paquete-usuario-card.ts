@@ -132,7 +132,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const t = String(tipo).toLowerCase();
 
     if (t.includes('sin')) return 'Sinérgico';
-    if (t.includes('ener')) return 'Energético';
+    if (t.includes('ener')) return 'Enérgico';
 
     return 'Por definir';
   }

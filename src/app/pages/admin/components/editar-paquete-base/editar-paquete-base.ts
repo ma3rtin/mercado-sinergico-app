@@ -45,7 +45,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
+    energico: {
       titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente.',

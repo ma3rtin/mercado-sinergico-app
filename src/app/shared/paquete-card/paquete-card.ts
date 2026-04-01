@@ -98,7 +98,7 @@ export class PaqueteCard implements OnInit {
 
   obtenerTextoTipo(): string {
     if (this.paquete.tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (this.paquete.tipo === TipoPaquete.ENERGICO) return 'Energético';
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) return 'Enérgico';
     return 'Por Definir';
   }
 

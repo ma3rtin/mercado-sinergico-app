@@ -11,7 +11,7 @@ export interface TipoCardContenido {
 }
 
 export interface SelectorTipoCardContenido {
-  energetico: TipoCardContenido;
+  energico: TipoCardContenido;
   sinergico: TipoCardContenido;
 }
 

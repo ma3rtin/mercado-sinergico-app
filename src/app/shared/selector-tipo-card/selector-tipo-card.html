@@ -18,8 +18,8 @@
           <app-icon name="Zap" size="24"></app-icon>
         </div>
         <div>
-          <h4 class="text-lg font-semibold text-gray-900">{{ contenido().energetico.titulo }}</h4>
-          <p class="text-xs text-gray-500">{{ contenido().energetico.subtitulo }}</p>
+          <h4 class="text-lg font-semibold text-gray-900">{{ contenido().energico.titulo }}</h4>
+          <p class="text-xs text-gray-500">{{ contenido().energico.subtitulo }}</p>
         </div>
       </div>
       @if (isSelected(TipoPaquete.ENERGICO)) {
@@ -27,11 +27,11 @@
       }
     </div>
 
-    <p class="text-sm text-gray-600">{{ contenido().energetico.descripcion }}</p>
+    <p class="text-sm text-gray-600">{{ contenido().energico.descripcion }}</p>
 
-    @if (contenido().energetico.items.length > 0) {
+    @if (contenido().energico.items.length > 0) {
       <ul class="mt-3 space-y-1 text-xs text-gray-600">
-        @for (item of contenido().energetico.items; track item) {
+        @for (item of contenido().energico.items; track item) {
           <li class="flex items-center gap-2">
             <app-icon name="Check" size="12" class="text-secondary-dark"></app-icon>
             {{ item }}

@@ -91,7 +91,7 @@ export class GestionarVariantesComponent implements OnInit {
   // ============================================
   // COMPUTED PROPERTIES
   // ============================================
-  esProductoEnergetico = computed(() => {
+  esProductoEnergico = computed(() => {
     return this.productoInfo()?.producto.tipo === TipoPaquete.ENERGICO;
   });
 
@@ -104,7 +104,7 @@ export class GestionarVariantesComponent implements OnInit {
   });
 
   stockTotal = computed(() => {
-    if (!this.esProductoEnergetico()) return null;
+    if (!this.esProductoEnergico()) return null;
     return this.variantes().reduce(
       (total, v) => total + (v.stockFisico || 0),
       0,
@@ -148,8 +148,8 @@ export class GestionarVariantesComponent implements OnInit {
       });
     }
 
-    // Filtro por stock (solo para energéticos)
-    if (filtroStk !== 'todas' && this.esProductoEnergetico()) {
+    // Filtro por stock (solo para enérgicos)
+    if (filtroStk !== 'todas' && this.esProductoEnergico()) {
       variantes = variantes.filter((v) => {
         const tieneStock = (v.stockFisico || 0) > 0;
         return filtroStk === 'con' ? tieneStock : !tieneStock;
@@ -668,10 +668,10 @@ export class GestionarVariantesComponent implements OnInit {
    * Verificar si una variante tiene cambios sin guardar
    */
   private hasVarianteChanges(variante: VarianteExtendida): boolean {
-    const esEnergetico = this.esProductoEnergetico();
+    const esEnergico = this.esProductoEnergico();
 
     return (
-      (esEnergetico && variante.stockFisico !== variante.stockOriginal) ||
+      (esEnergico && variante.stockFisico !== variante.stockOriginal) ||
       variante.precioExtra !== variante.precioExtraOriginal ||
       variante.activo !== variante.activoOriginal ||
       variante.imagenFile !== null
@@ -811,7 +811,7 @@ export class GestionarVariantesComponent implements OnInit {
         activo: variante.activo,
       };
 
-      if (this.esProductoEnergetico()) {
+      if (this.esProductoEnergico()) {
         dto.stockFisico = variante.stockFisico;
       }
 
