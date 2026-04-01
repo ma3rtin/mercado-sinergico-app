@@ -41,8 +41,8 @@ import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-ba
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
-      titulo: 'Energético',
+    energico: {
+      titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
       items: [

@@ -156,8 +156,8 @@ export class ProductosDelPaquete implements OnInit {
     if (!p) return null;
 
     let porcentaje = 0;
-    if (p.tipoPaquete === TipoPaquete.SINERGICO) porcentaje = 3;
-    if (p.tipoPaquete === TipoPaquete.ENERGICO) porcentaje = 8;
+    if (p.tipo === TipoPaquete.SINERGICO) porcentaje = 3;
+    if (p.tipo === TipoPaquete.ENERGICO) porcentaje = 8;
 
     return {
       porcentaje,
@@ -168,7 +168,7 @@ export class ProductosDelPaquete implements OnInit {
 
   // 📊 Computed: Tipo de paquete
   tipoPaquete = computed(() => {
-    return this.paquete()?.tipoPaquete || null;
+    return this.paquete()?.tipo || null;
   });
 
   constructor(

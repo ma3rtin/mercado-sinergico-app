@@ -37,12 +37,12 @@
 
         <!-- Badges de información -->
         <div class="flex flex-wrap gap-2">
-          @if (esProductoEnergetico()) {
+          @if (esProductoEnergico()) {
             <span
               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-secondary-dark rounded-full text-sm font-semibold"
             >
               <app-icon name="zap" [size]="'16'" class="text-current pt-1" />
-              Energético
+              Enérgico
             </span>
           }
           @if (esProductoSinergico()) {
@@ -167,8 +167,8 @@
             </button>
           </div>
 
-          <!-- Filtro Stock (solo energéticos) -->
-          @if (esProductoEnergetico()) {
+          <!-- Filtro Stock (solo enérgicos) -->
+          @if (esProductoEnergico()) {
             <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
               <button
                 (click)="cambiarFiltroStock('todas')"
@@ -218,7 +218,7 @@
 
           <!-- Acciones rápidas -->
           <div class="flex flex-wrap gap-2 md:gap-3 items-center">
-            @if (esProductoEnergetico()) {
+            @if (esProductoEnergico()) {
               <app-button
                 type="button"
                 variant="warning"
@@ -368,7 +368,7 @@
                   SKU
                 </th>
 
-                @if (esProductoEnergetico()) {
+                @if (esProductoEnergico()) {
                   <th
                     scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -500,8 +500,8 @@
                     </code>
                   </td>
 
-                  <!-- Stock (solo energético) -->
-                  @if (esProductoEnergetico()) {
+                  <!-- Stock (solo enérgico) -->
+                  @if (esProductoEnergico()) {
                     <td class="px-6 py-4 whitespace-nowrap">
                       <input
                         type="number"
@@ -578,7 +578,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td [attr.colspan]="esProductoEnergetico() ? 9 : 8" class="px-6 py-12 text-center">
+                  <td [attr.colspan]="esProductoEnergico() ? 9 : 8" class="px-6 py-12 text-center">
                     <app-icon
                       name="search"
                       [size]="'48'"
@@ -675,7 +675,7 @@
               Imagen
             </button>
 
-            @if (esProductoEnergetico()) {
+            @if (esProductoEnergico()) {
               <button
                 (click)="aplicarStockASeleccionadas()"
                 class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"

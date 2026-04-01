@@ -68,8 +68,8 @@ export class CrearProductoComponent implements OnInit {
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
-      titulo: 'Energético',
+    energico: {
+      titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
       items: [
@@ -134,10 +134,10 @@ readonly tipoMap: Record<TipoPaquete, string> = {
     // ❌ Sinérgico → no stock
     if (tipo === TipoPaquete.SINERGICO) return false;
 
-    // ❌ Energético + plantilla → stock por variantes
+    // ❌ Enérgico + plantilla → stock por variantes
     if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
 
-    // ✅ Energético sin plantilla → mostrar stock
+    // ✅ Enérgico sin plantilla → mostrar stock
     return true;
   });
 
@@ -407,7 +407,7 @@ isAttributeSelected(attributeName: string, value: string): boolean {
 
     // ✅ Validar tipo de producto si tiene plantilla
     if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
-      this.toast.error('Debés seleccionar el tipo de producto (Energético o Sinérgico)');
+      this.toast.error('Debés seleccionar el tipo de producto (Enérgico o Sinérgico)');
       this.mostrarSeleccionTipo.set(true);
       return;
     }

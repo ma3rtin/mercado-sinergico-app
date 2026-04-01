@@ -18,7 +18,6 @@ export interface PaquetePublicado {
   monto_total?: number;
   descuento?: number;
   imagen_url?: string;
-  tipoPaquete?: TipoPaquete;
   tipo?: TipoPaquete;
 
   // Relaciones
