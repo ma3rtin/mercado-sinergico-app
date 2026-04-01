@@ -277,6 +277,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     formData.append('nombre', this.nombre());
     formData.append('descripcion', this.descripcion());
     formData.append('categoria_id', this.categoriaSeleccionada()!.toString());
+    formData.append('tipo', this.tipoPaquete());
     if (this.marcaSeleccionada()) {
       formData.append('marcaId', this.marcaSeleccionada()!.toString());
     }
