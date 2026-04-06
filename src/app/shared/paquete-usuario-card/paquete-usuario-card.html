@@ -167,121 +167,101 @@
 
           @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
 
-          <div class="bg-bg-surface rounded-lg p-4 shadow-sm border border-border-default">
+          <div class="bg-bg-surface rounded-xl p-3 sm:p-4 shadow-sm border border-border-default">
 
-            <div class="flex items-center gap-4">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
 
-              <!-- Imagen -->
-              <div class="w-16 h-16 flex-shrink-0 bg-bg-app rounded-lg overflow-hidden border border-border-default">
-                @if (producto.imagen_url) {
-                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-contain p-1"
-                  (error)="onImageError($event)">
-                } @else {
-                <div class="w-full h-full flex items-center justify-center">
-                  <app-icon name="image" size="24" class="text-text-muted" />
-                </div>
-                }
-              </div>
-
-              <!-- Info -->
-              <div class="flex-1 min-w-0">
-                <p class="font-medium text-text-primary truncate">
-                  {{ producto.nombre }}
-                </p>
-
-                @if (producto.variante?.opciones?.length) {
-                <div class="flex flex-wrap gap-2 mt-1">
-                  @for (op of producto.variante.opciones; track op.id) {
-                  <span
-                    class="px-2 py-0.5 text-[10px] rounded-md bg-bg-raised text-text-secondary border border-border-default">
-                    {{ op.caracteristica?.nombre }}: {{ op.opcion?.nombre }}
-                  </span>
+              <!-- Imagen y Nombre (Agrupados para mobile) -->
+              <div class="flex items-center gap-3 w-full sm:w-auto flex-1 min-w-0">
+                <!-- Imagen -->
+                <div class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-bg-app rounded-lg overflow-hidden border border-border-default">
+                  @if (producto.imagen_url) {
+                  <img [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-contain p-1"
+                    (error)="onImageError($event)">
+                  } @else {
+                  <div class="w-full h-full flex items-center justify-center">
+                    <app-icon name="image" size="24" class="text-text-muted" />
+                  </div>
                   }
                 </div>
-                }
 
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <p class="font-bold sm:font-medium text-text-primary truncate sm:whitespace-normal sm:line-clamp-2">
+                    {{ producto.nombre }}
+                  </p>
 
-                <!-- PRECIO CON DESCUENTO -->
-                <div class="flex flex-col mt-1">
+                  @if (producto.variante?.opciones?.length) {
+                  <div class="flex flex-wrap gap-1.5 mt-1">
+                    @for (op of producto.variante.opciones; track op.id) {
+                    <span
+                      class="px-2 py-0.5 text-[9px] sm:text-[10px] rounded-md bg-bg-raised text-text-secondary border border-border-default">
+                      {{ op.caracteristica?.nombre }}: {{ op.opcion?.nombre }}
+                    </span>
+                    }
+                  </div>
+                  }
 
-                  <!-- Si hay descuento -->
-                  @if (pedido.descuento > 0) {
+                  <!-- PRECIO UNITARIO (Mobile solo) -->
+                  <div class="sm:hidden flex flex-col mt-1">
+                    <span class="text-xs font-bold text-brand-primary">
+                      {{ formatPrice(producto.precioConDescuento ?? producto.precio) }} c/u
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                  <!-- Precio original tachado -->
-                  <span class="text-xs text-text-muted line-through">
-                    {{ formatPrice(producto.precio) }}
+              <!-- Controles de Cantidad y Total (Mobile layout alternativo) -->
+              <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-border-default/50">
+                
+                <!-- Cantidad -->
+                <div class="flex items-center gap-2">
+
+                  @if (puedeEditarCantidades) {
+                  <!-- Botón - -->
+                  <button type="button" (click)="onDisminuirCantidad(producto)"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl
+                     bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default cursor-pointer">
+                    <app-icon name="minus" size="14" />
+                  </button>
+
+                  <span class="w-8 text-center font-bold text-base text-text-primary">
+                    {{ producto.cantidad }}
                   </span>
 
-                  <!-- Precio final -->
-                  <span class="text-sm font-bold text-brand-primary">
-                    {{ formatPrice(producto.precioConDescuento ?? producto.precio) }} c/u
-                  </span>
-
-                  <!-- Etiqueta de descuento -->
-                  <span class="text-[10px] text-success font-bold">
-                    {{ pedido.descuento }}% OFF
-                  </span>
+                  <!-- Botón + -->
+                  <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
+                     bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark transition-colors shadow-sm cursor-pointer">
+                    <app-icon name="plus" size="14" />
+                  </button>
 
                   } @else {
-
-                  <!-- Si NO hay descuento -->
-                  <span class="text-sm font-bold text-brand-primary">
-                    {{ formatPrice(producto.precio) }} c/u
+                  <!-- Estado NO editable (solo mostrar cantidad) -->
+                  <span
+                    class="px-3 py-1 rounded-lg bg-bg-raised text-text-muted font-bold select-none border border-border-default text-sm">
+                    Cant: {{ producto.cantidad }}
                   </span>
-
                   }
                 </div>
 
+                <!-- Subtotal y Eliminar -->
+                <div class="flex items-center gap-3">
+                  <div class="text-right flex-shrink-0 min-w-[80px]">
+                    <p class="hidden sm:block text-[10px] text-text-secondary uppercase tracking-tight">Subtotal</p>
+                    <p class="font-bold text-base text-brand-primary sm:text-text-primary">
+                      {{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}
+                    </p>
+                  </div>
+
+                  @if (puedeEditarCantidades) {
+                  <!-- Tachito -->
+                  <button type="button" (click)="onEliminarProducto(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
+                     bg-error/10 hover:bg-error/20 text-error transition cursor-pointer border border-error/20">
+                    <app-icon name="trash2" size="14" />
+                  </button>
+                  }
+                </div>
               </div>
-
-              <!-- Cantidad -->
-              <div class="flex items-center gap-2">
-
-                @if (puedeEditarCantidades) {
-
-                <!-- Botón - -->
-                <button type="button" (click)="onDisminuirCantidad(producto)"
-                  class="w-8 h-8 flex items-center justify-center rounded-xl
-                   bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default cursor-pointer">
-                  <app-icon name="minus" size="14" />
-                </button>
-
-                <span class="w-10 text-center font-bold text-lg text-text-primary">
-                  {{ producto.cantidad }}
-                </span>
-
-                <!-- Botón + -->
-                <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
-                   bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark transition-colors shadow-sm cursor-pointer">
-                  <app-icon name="plus" size="14" />
-                </button>
-
-                } @else {
-
-                <!-- Estado NO editable (solo mostrar cantidad) -->
-                <span
-                  class="px-3 py-1 rounded-lg bg-bg-raised text-text-muted font-bold select-none border border-border-default">
-                  {{ producto.cantidad }}
-                </span>
-                }
-              </div>
-
-              <!-- Subtotal -->
-              <div class="text-right flex-shrink-0 min-w-[90px]">
-                <p class="text-[10px] text-text-secondary uppercase tracking-tight">Subtotal</p>
-                <p class="font-bold text-base text-text-primary">
-                  {{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}
-                </p>
-              </div>
-
-              @if (puedeEditarCantidades) {
-
-              <!-- Tachito -->
-              <button type="button" (click)="onEliminarProducto(producto)" class="ml-2 w-8 h-8 flex items-center justify-center rounded-xl
-           bg-error/10 hover:bg-error/20 text-error transition cursor-pointer border border-error/20">
-                <app-icon name="trash2" size="14" />
-              </button>
-              }
 
             </div>
           </div>

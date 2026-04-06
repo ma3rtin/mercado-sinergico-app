@@ -88,4 +88,12 @@ export class Home implements OnInit {
   recargarPaquetes(): void {
     this.cargarPaquetesPorCerrarse();
   }
+
+  // 🖱️ Scroll suave hacia la sección de información
+  scrollToInfo(): void {
+    const section = document.getElementById('info-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 }

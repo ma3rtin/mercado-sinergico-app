@@ -1,5 +1,5 @@
 <!-- 🎨 HERO SECTION CON FONDO COMPLETO -->
-<section class="relative w-full h-[70vh] min-h-[480px] md:h-[600px] flex items-center justify-center overflow-hidden">
+<section class="relative w-full h-[78vh] min-h-[500px] md:h-[600px] flex items-center justify-center overflow-hidden">
 
     <!-- 🖼️ IMAGEN DE FONDO -->
     <div class="absolute inset-0 z-0">
@@ -14,7 +14,7 @@
     </div>
 
     <!-- 📝 CONTENIDO -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pb-32 md:pb-0">
         <div class="flex flex-col items-center text-center md:items-start md:text-left">
 
             <!-- Texto Principal -->
@@ -41,16 +41,22 @@
         </div>
     </div>
 
-    <!-- ↓ Indicador de scroll -->
-    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 animate-bounce hidden sm:block">
-        <svg class="w-6 h-6 text-white opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
+    <!-- ↓ Indicador de scroll (Mobile First) -->
+    <div (click)="scrollToInfo()"
+        class="absolute bottom-24 sm:bottom-20 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2 cursor-pointer group transition-all duration-300">
+        <div
+            class="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 bg-black/10 backdrop-blur-md group-hover:border-brand-cta group-hover:bg-brand-cta/10 animate-bounce transition-all shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 text-white/80 group-hover:text-brand-cta transition-colors" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+        </div>
     </div>
 </section>
 
 <!-- ✨ SECCIÓN: ¿Cómo funciona? -->
-<section class="py-20 bg-white">
+<section id="info-section" class="py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div class="text-center mb-16">
@@ -67,7 +73,7 @@
 
             <!-- Card 1 -->
             <div
-                class="relative bg-bg-surface border-2 border-brand-primary rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                class="relative bg-bg-surface border-2 border-brand-primary rounded-2xl p-6 sm:p-8 text-center hover:shadow-lg transition-shadow">
                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-brand-secondary text-text-on-dark
                     font-semibold flex items-center justify-center text-lg shadow-md">
                     1
@@ -82,7 +88,7 @@
 
             <!-- Card 2 -->
             <div
-                class="relative bg-bg-surface border-2 border-brand-primary  rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                class="relative bg-bg-surface border-2 border-brand-primary  rounded-2xl p-6 sm:p-8 text-center hover:shadow-lg transition-shadow">
                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-brand-secondary text-text-on-dark
                     font-semibold flex items-center justify-center text-lg shadow-md">
                     2
@@ -97,7 +103,7 @@
 
             <!-- Card 3 -->
             <div
-                class="relative bg-bg-surface border-2 border-brand-primary rounded-2xl p-8 text-center hover:shadow-lg transition-shadow">
+                class="relative bg-bg-surface border-2 border-brand-primary rounded-2xl p-6 sm:p-8 text-center hover:shadow-lg transition-shadow">
                 <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-brand-secondary text-text-on-dark
                     font-bold flex items-center justify-center text-lg shadow-md">
                     3
@@ -124,24 +130,20 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Header de sección -->
-        <div class="flex flex-col items-center text-center md:items-end md:flex-row md:justify-between mb-10 md:mb-14 gap-4">
+        <div
+            class="flex flex-col items-center text-center md:items-end md:flex-row md:justify-between mb-10 md:mb-14 gap-4">
             <div class="max-w-xl md:text-left">
                 <h2 class="font-display text-3xl md:text-4xl font-bold text-text-primary mb-4">
                     Paquetes por <span class="text-brand-cta">finalizar</span>
                 </h2>
                 <p class="font-body text-lg text-text-secondary leading-relaxed">
-                    ¡Sumate ahora y no te quedes afuera! Estos paquetes están a punto de alcanzar su objetivo y cerrar su compra colectiva.
+                    ¡Sumate ahora y no te quedes afuera! Estos paquetes están a punto de alcanzar su objetivo y cerrar
+                    su compra colectiva.
                 </p>
             </div>
-            
-            <app-button 
-                class="hidden md:block"
-                variant="tertiary" 
-                size="md" 
-                shape="pill" 
-                iconEnd="arrow-right" 
-                [routerLink]="'/paquetes'"
-                label="Ver todos los paquetes">
+
+            <app-button class="hidden md:block" variant="tertiary" size="md" shape="pill" iconEnd="arrow-right"
+                [routerLink]="'/paquetes'" label="Ver todos los paquetes">
             </app-button>
         </div>
 
@@ -151,22 +153,21 @@
                 <div class="absolute inset-0 border-4 border-brand-primary/10 rounded-full"></div>
                 <div class="absolute inset-0 border-4 border-t-brand-primary rounded-full animate-spin"></div>
             </div>
-            <p class="mt-6 text-brand-primary font-semibold tracking-wide animate-pulse uppercase text-xs">Cargando oportunidades...</p>
+            <p class="mt-6 text-brand-primary font-semibold tracking-wide animate-pulse uppercase text-xs">Cargando
+                oportunidades...</p>
         </div>
         } @else if (errorMessage()) {
         <div class="max-w-xl mx-auto bg-white border border-red-100 p-8 rounded-3xl text-center shadow-sm">
             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
                 </svg>
             </div>
             <h3 class="text-text-primary font-bold text-xl mb-2">Ops, algo salió mal</h3>
             <p class="text-text-secondary mb-6">{{ errorMessage() }}</p>
-            <app-button 
-                variant="primary" 
-                size="md" 
-                (click)="recargarPaquetes()"
-                label="Intentar de nuevo">
+            <app-button variant="primary" size="md" (click)="recargarPaquetes()" label="Intentar de nuevo">
             </app-button>
         </div>
         } @else if (paquetesPorCerrarse().length > 0) {
@@ -177,16 +178,14 @@
         <div class="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm px-6">
             <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v4m16 0s-4-2-4-2l-4 4-4-4s-4 2-4 2"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0V9a2 2 0 00-2-2H6a2 2 0 00-2 2v4m16 0s-4-2-4-2l-4 4-4-4s-4 2-4 2">
+                    </path>
                 </svg>
             </div>
-            <p class="text-text-secondary text-lg max-w-sm mx-auto">Actualmente no hay paquetes por cerrarse, ¡pero podés explorar todos los disponibles!</p>
-            <app-button 
-                class="mt-8"
-                variant="secondary" 
-                size="md" 
-                shape="pill"
-                [routerLink]="'/paquetes'"
+            <p class="text-text-secondary text-lg max-w-sm mx-auto">Actualmente no hay paquetes por cerrarse, ¡pero
+                podés explorar todos los disponibles!</p>
+            <app-button class="mt-8" variant="secondary" size="md" shape="pill" [routerLink]="'/paquetes'"
                 label="Explorar paquetes">
             </app-button>
         </div>
@@ -213,7 +212,8 @@
             <app-faq-item [pregunta]="'¿Cuándo y cómo pago mi pedido?'">
                 <p>Una vez que el paquete alcanza la <strong>cantidad mínima de productos</strong> y se confirma el
                     <strong>cierre exitoso</strong> del mismo, desde <strong>"Mis pedidos"</strong> podrás abonar tu
-                    compra.</p>
+                    compra.
+                </p>
             </app-faq-item>
 
             <app-faq-item [pregunta]="'¿Puedo comprar más de una unidad?'">
