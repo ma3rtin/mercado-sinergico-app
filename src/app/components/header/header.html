@@ -36,7 +36,7 @@
             style="z-index: 9999 !important">
             @if (isAdmin) {
               <a routerLink="/admin/perfil" (click)="profileMenuOpen.set(false)"
-                class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-yellow-700 border-b border-gray-200 flex items-center gap-2">
+                class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-secondary-dark border-b border-gray-200 flex items-center gap-2">
                 <app-icon name="Settings" class="w-5 h-5"></app-icon> Panel de Control
               </a>
             }
@@ -45,8 +45,8 @@
               <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
             </a>
             <button (click)="signOut()" type="button"
-              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium">
-              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
+              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium flex items-center gap-2">
+              <app-icon name="LogOut" class="w-5 h-5"></app-icon> Cerrar sesión
             </button>
           </div>
           }
@@ -86,7 +86,7 @@
             ">
             @if (isAdmin) {
               <a routerLink="/admin/perfil" (click)="profileMenuOpen.set(false)"
-                class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-purple-700 border-b border-gray-200 flex items-center gap-2">
+                class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-secondary-dark border-b border-gray-200 flex items-center gap-2">
                 <app-icon name="Settings"></app-icon> Panel de Control
               </a>
             }
@@ -95,8 +95,8 @@
               <app-icon name="User"></app-icon> Mi perfil
             </a>
             <button (click)="signOut()" type="button"
-              class="w-full cursor-pointer text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium">
-              <app-icon name="LogOut"></app-icon> Cerrar sesión
+              class="w-full cursor-pointer text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium flex items-center gap-2">
+              <app-icon name="LogOut" class="w-5 h-5"></app-icon> Cerrar sesión
             </button>
           </div>
           }
