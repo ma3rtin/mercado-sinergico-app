@@ -44,9 +44,8 @@ export class Header {
   // 📊 Computed
   isLoggedIn = this.authService.isAuthenticated;
 
-  get profileLink(): string {
-    const role = this.authService.getUserRole();
-    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
+  get isAdmin(): boolean {
+    return this.authService.getUserRole()?.toLowerCase() === 'administrador';
   }
 
   // 🏠 Navegación al home
