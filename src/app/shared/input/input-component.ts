@@ -160,6 +160,8 @@ export class InputComponent implements ControlValueAccessor, OnInit {
 
     const disabledClass = this.isDisabled()
       ? 'bg-gray-100 cursor-not-allowed opacity-60'
+      : this.readonly()
+      ? 'bg-gray-50 border-gray-200 text-gray-500 cursor-default focus:ring-0 focus:border-gray-200'
       : 'bg-white';
 
     return `${base} ${sizes[this.size()]} ${leftPadding} ${rightPadding} ${state} ${disabledClass}`;
