@@ -55,6 +55,16 @@ export class Perfil implements OnInit {
       if (!this.inicializando) this.tieneCambios.set(true);
     });
 
+    this.form.get('localidad')?.valueChanges.subscribe(locationId => {
+      if (locationId) {
+        const locId = Number(locationId);
+        const loc = this.localidades().find(l => l.id_localidad === locId);
+        if (loc) {
+          this.form.patchValue({ cp: loc.codigo_postal }, { emitEvent: false });
+        }
+      }
+    });
+
     this.localidadService.getAll().subscribe({
       next: (locs) => this.localidades.set(locs),
       error: (err) => console.error('Error al obtener localidades:', err),
@@ -191,16 +201,10 @@ export class Perfil implements OnInit {
     reader.readAsDataURL(this.selectedFile);
   }
 
-  // 🏙️ Opciones de localidades para el select
   opcionesLocalidades = computed(() =>
     this.localidades().map(l => ({
       value: l.id_localidad,
       label: l.nombre
     }))
   );
-
-  actualizarCP(id: number) {
-    const loc = this.localidades().find(l => l.id_localidad === id);
-    this.form.patchValue({ cp: loc?.codigo_postal || '' });
-  }
 }

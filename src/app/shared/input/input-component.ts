@@ -11,7 +11,8 @@ import {
   effect,
   ChangeDetectionStrategy,
   Injector,
-  OnInit
+  OnInit,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -45,6 +46,7 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
   private injector = inject(Injector);
+  private cdr = inject(ChangeDetectorRef);
   public ngControl?: NgControl | null = null;
 
   // 🎨 Configuración visual - Signals
@@ -241,6 +243,7 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   // 🔄 ControlValueAccessor
   writeValue(value: any): void {
     this.internalValue = value ?? '';
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: any): void {
