@@ -57,7 +57,7 @@ export class Header {
   async signOut(): Promise<void> {
     if (confirm('¿Seguro que desea cerrar sesión?')) {
       await this.authService.signOut();
-      window.location.href = '/login';
+      this.router.navigate(['/login']);
     }
   }
 
@@ -73,7 +73,7 @@ export class Header {
 
     if (!this.isLoggedIn()) {
       console.log('❌ Usuario no logueado, redirigiendo...');
-      window.location.href = '/login';
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -83,6 +83,13 @@ export class Header {
     });
 
     console.log('🔵 profileMenuOpen DESPUÉS:', this.profileMenuOpen());
+  }
+
+  // 🚀 Navegación programática instantánea
+  navigateAndClose(route: string): void {
+    this.router.navigate([route]);
+    this.profileMenuOpen.set(false);
+    this.drawerOpen.set(false);
   }
 
   // 🎧 Host Listeners
