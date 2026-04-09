@@ -6,12 +6,14 @@ import { LocalidadService, Localidad } from '@app/services/localidad/localidad.s
 import { CommonModule } from '@angular/common';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent } from '@app/shared/select/select-component';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent, ButtonComponent, IconComponent],
   templateUrl: './perfil.html',
   styleUrls: ['./perfil.css']
 })
