@@ -75,11 +75,11 @@ export class PerfilAdmin implements OnInit {
     this.errorCerrados.set(null);
 
     this.paquetePublicadoService.getPaquetesCerrados().subscribe({
-      next: (paquetes) => {
+      next: (paquetes: PaquetePublicado[]) => {
         this.paquetesCerrados.set(paquetes);
         this.loadingCerrados.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar paquetes cerrados:', err);
         this.errorCerrados.set('Ocurrió un error al cargar los paquetes cerrados.');
         this.loadingCerrados.set(false);

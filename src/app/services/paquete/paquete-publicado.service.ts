@@ -46,6 +46,10 @@ export class PaquetePublicadoService extends ApiService {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
     }
 
+    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/cerrados`);
+    }
+
     getRelacionados(id: number): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/relacionados/${id}`);
     }
