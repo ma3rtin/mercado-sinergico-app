@@ -124,8 +124,8 @@
 
             <div class="grid grid-cols-1 gap-4">
                 @for (paquete of paquetes(); track paquete.id_paquete_publicado) {
-                <app-admin-paquete-card [paquete]="paquete" (close)="cerrarPaqueteDesdeCard($event)"
-                    (prepare)="finalizarPaquete($event)" (refund)="reembolsarPaquete($event)"
+                <app-admin-paquete-card [paquete]="paquete" 
+                    (refund)="reembolsarPaquete($event)"
                     (notify)="notificarCierre($event)" (duplicate)="duplicarPaquete($event)"
                     (viewDetail)="navigateToPublicacionDetalle(paquete.id_paquete_publicado!)" />
                 }

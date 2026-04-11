@@ -34,7 +34,10 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   filtrEstadoPedido = signal<number | null>(null);
   pedidoSeleccionado = signal<Pedido | null>(null);
 
-  // ── Señas Computadas (Optimización de Performance) ──────────
+  // ── Selección para "en camino" ───────────────────────────────
+  pedidosSeleccionadosEnCamino = signal<Set<number>>(new Set());
+
+  // ── Señas Computadas ──────────────────────────────────────────
 
   stockPct = computed(() => {
     const p = this.paquete();
@@ -48,23 +51,21 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     return Math.ceil((new Date(fechaFin).getTime() - Date.now()) / 86400000);
   });
 
-  puedeEnviarMail = computed(() => {
-    const nombre = this.paquete()?.estado?.nombre?.toLowerCase() ?? '';
-    return nombre === 'cerrado' || nombre === 'completo' || nombre === 'en preparación' || nombre === 'finalizado';
-  });
-
-  // ── Estado del paquete (para botones condicionales) ──────────
-  esActivo = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'activo');
-  esPendiente = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'pendiente');
-  esEnPreparacion = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'en preparación');
-  esFinalizado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'finalizado');
+  // ── Estado del paquete ───────────────────────────────────────
+  esActivo    = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'activo');
+  esCompleto  = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'completo');
+  esConfirmado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'confirmado');
+  esEntregado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'entregado');
   esCancelado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'cancelado');
 
-  puedeEditar = computed(() => this.esActivo() || this.esPendiente());
-  puedeCerrar = computed(() => this.esActivo());
-  puedeNotificar = computed(() => this.esActivo());
-  puedeFinalizar = computed(() => this.esEnPreparacion());
-  puedeCancelar = computed(() => !this.esCancelado() && !this.esFinalizado());
+  // ── Permisos de acción ───────────────────────────────────────
+  puedeEditar     = computed(() => this.esActivo());
+  puedeNotificar  = computed(() => this.esActivo());
+  puedeConfirmar  = computed(() => this.esCompleto() || this.esActivo());
+  puedeEntregar   = computed(() => this.esConfirmado());
+  puedeMarcarEnCamino = computed(() => this.esConfirmado());
+  puedeCancelar   = computed(() => !this.esCancelado() && !this.esEntregado());
+  puedeDescargar  = computed(() => this.esConfirmado() || this.esEntregado());
 
   montoTotal = computed(() => {
     const p = this.paquete();
@@ -101,6 +102,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       return matchBusqueda && matchEstado;
     });
   });
+
+  /** Pedidos En preparación disponibles para marcar en camino */
+  pedidosEnPreparacion = computed(() =>
+    (this.paquete()?.pedidos ?? []).filter(p => p.estadoId === 4)
+  );
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -144,59 +150,103 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     this.router.navigate(['/admin/publicar-paquete'], { queryParams: { id, edit: true } });
   }
 
-  cerrarPaquete() {
+  /** Completo (o Activo) → Confirmado */
+  confirmarCompra() {
     const p = this.paquete();
-    if (!p?.id_paquete_publicado) return;
-    const faltan = (p.cant_productos || 0) - (p.cant_usuarios_registrados || 0);
-    const avisoFaltantes = faltan > 0
-      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
-      : '<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>';
+    if (!p?.id_paquete_publicado || this.enviandoMail()) return;
+    const id = p.id_paquete_publicado;
 
     Swal.fire({
-      title: '¿Cerrar pedido?',
-      html: `<p>Se cerrará <strong>${p.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
-             ${avisoFaltantes}
-             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
-      icon: 'warning',
+      title: '¿Confirmar compra con fabricante?',
+      html: `
+        <p style="color:#374151; font-size:15px; line-height:1.6;">
+          Se confirmará la compra del paquete
+          <strong style="color:#2E608C;">${p.paqueteBase?.nombre ?? 'este paquete'}</strong>
+          con el proveedor.
+        </p>
+        <p style="color:#6b7280; font-size:13px; margin-top:8px;">
+          Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong>
+          y los compradores recibirán un email de confirmación.
+        </p>
+      `,
+      icon: 'question',
+      iconColor: '#71A8D9',
       showCancelButton: true,
-      confirmButtonText: 'Sí, cerrar pedido',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonText: '📧 Confirmar y notificar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af',
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.enviandoMail.set(true);
+        this.paqueteService.confirmarCompra(id).subscribe({
+          next: (res) => {
+            this.enviandoMail.set(false);
+            this.toast.success(res.message ?? 'Compra confirmada correctamente');
+            this.loadPaquete(id);
+          },
+          error: () => {
+            this.enviandoMail.set(false);
+            this.toast.error('Error al confirmar la compra. Intentá de nuevo.');
+          }
+        });
+      }
+    });
+  }
+
+  /** Confirmado → Entregado */
+  marcarEntregado() {
+    const p = this.paquete();
+    if (!p?.id_paquete_publicado) return;
+
+    Swal.fire({
+      title: '¿Marcar como Entregado?',
+      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Entregado</strong>.</p>
+             <p class="text-sm text-gray-500 mt-2">Todos los pedidos pasarán a estado <strong>Recibido</strong>. Esta acción no se puede deshacer.</p>`,
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, marcar como entregado',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
-      this.paqueteService.cerrarPaquete(p.id_paquete_publicado!).subscribe({
+      this.paqueteService.marcarEntregado(p.id_paquete_publicado!).subscribe({
         next: () => {
-          this.toast.success(`"${p.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
+          this.toast.success(`"${p.paqueteBase?.nombre}" marcado como entregado`, 'Paquete entregado');
           this.loadPaquete(p.id_paquete_publicado!);
         },
-        error: () => this.toast.error('Error al intentar cerrar el paquete.', 'Error')
+        error: () => this.toast.error('Error al marcar como entregado.', 'Error')
       });
     });
   }
 
-  finalizarPaquete() {
+  /** Marcar pedidos seleccionados (o todos) como En camino */
+  marcarEnCamino(pedidoIds: number[] = []) {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
+
+    const cantidad = pedidoIds.length > 0 ? pedidoIds.length : this.pedidosEnPreparacion().length;
+    const texto = pedidoIds.length > 0
+      ? `${cantidad} pedido/s seleccionado/s`
+      : `todos los pedidos en preparación (${cantidad})`;
+
     Swal.fire({
-      title: '¿Completar pedido?',
-      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
-             <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
-               <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
-               <p class="mt-1">Al completar podrás <strong>descargar los partes de logística y de proveedor</strong>.</p>
-             </div>
-             <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó.</p>`,
-      icon: 'success',
+      title: '¿Marcar pedidos en camino?',
+      html: `<p>Se marcarán <strong>${texto}</strong> como <strong>En camino</strong>.</p>
+             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un email avisando que su pedido llega hoy.</p>`,
+      icon: 'info',
       showCancelButton: true,
-      confirmButtonText: 'Sí, completar pedido',
+      confirmButtonText: 'Sí, marcar en camino',
+      confirmButtonColor: '#7c3aed',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
-      this.paqueteService.completarPaquete(p.id_paquete_publicado!).subscribe({
-        next: () => {
-          this.toast.success(`"${p.paqueteBase?.nombre}" finalizado`, 'Paquete completado');
+      this.paqueteService.marcarEnCamino(p.id_paquete_publicado!, pedidoIds).subscribe({
+        next: (res) => {
+          this.toast.success(`${res.notificados} comprador/es notificado/s`, 'Pedidos en camino');
+          this.pedidosSeleccionadosEnCamino.set(new Set());
           this.loadPaquete(p.id_paquete_publicado!);
         },
-        error: () => this.toast.error('Error al intentar completar el paquete.', 'Error')
+        error: () => this.toast.error('Error al marcar pedidos en camino.', 'Error')
       });
     });
   }
@@ -255,63 +305,56 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     });
   }
 
-  // ── Acciones ──────────────────────────────────────────────────
+  // ── Selección de pedidos en camino ──────────────────────────
 
-  confirmarYEnviarMail() {
-    const p = this.paquete();
-    if (!p?.id_paquete_publicado || !this.puedeEnviarMail() || this.enviandoMail()) return;
-    const id = p.id_paquete_publicado;
-
-    Swal.fire({
-      title: '¿Confirmar compra y notificar?',
-      html: `
-        <p style="color:#374151; font-size:15px; line-height:1.6;">
-          Se enviará un email de confirmación a <strong>todos los compradores</strong> del paquete
-          <strong style="color:#2E608C;">${p.paqueteBase?.nombre ?? 'este paquete'}</strong>.
-        </p>
-        <p style="color:#6b7280; font-size:13px; margin-top:8px;">Esta acción no se puede deshacer.</p>
-      `,
-      icon: 'question',
-      iconColor: '#71A8D9',
-      showCancelButton: true,
-      confirmButtonText: '📧 Confirmar y enviar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#9ca3af',
-      customClass: { popup: 'rounded-xl' }
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.enviandoMail.set(true);
-        this.paqueteService.confirmarCompra(id).subscribe({
-          next: (res) => {
-            this.enviandoMail.set(false);
-            this.toast.success(res.message ?? 'Emails enviados correctamente');
-            this.loadPaquete(id);
-          },
-          error: () => {
-            this.enviandoMail.set(false);
-            this.toast.error('Error al confirmar la compra. Intentá de nuevo.');
-          }
-        });
+  togglePedidoEnCamino(pedidoId: number) {
+    this.pedidosSeleccionadosEnCamino.update(set => {
+      const nuevo = new Set(set);
+      if (nuevo.has(pedidoId)) {
+        nuevo.delete(pedidoId);
+      } else {
+        nuevo.add(pedidoId);
       }
+      return nuevo;
     });
   }
+
+  seleccionarTodosPedidosEnCamino() {
+    const todos = this.pedidosEnPreparacion().map(p => p.id_pedido!);
+    this.pedidosSeleccionadosEnCamino.set(new Set(todos));
+  }
+
+  limpiarSeleccionEnCamino() {
+    this.pedidosSeleccionadosEnCamino.set(new Set());
+  }
+
+  esPedidoSeleccionadoEnCamino(pedidoId: number): boolean {
+    return this.pedidosSeleccionadosEnCamino().has(pedidoId);
+  }
+
+  /** Ejecuta marcarEnCamino usando la selección actual (o todos si no hay selección) */
+  marcarSeleccionEnCamino() {
+    const seleccionados = Array.from(this.pedidosSeleccionadosEnCamino());
+    this.marcarEnCamino(seleccionados);
+  }
+
+  // ── Reportes CSV ──────────────────────────────────────────────
 
   descargarParteProveedor() {
     const p = this.paquete();
     if (!p) return;
 
-    // 1. Obtener pedidos aprobados
-    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId === 3);
-    
-    // 2. Mapear productos base para asegurar que todos aparezcan (incluso con 0)
-    const consolidado = new Map<string, { id: number, nombre: string, marca: string, precio: number, cantidad: number, variante: string }>();
-    
-    // Inicializar con productos base del paquete
+    // Pedidos Pagados (2), En preparación (4), En camino (5), Recibido (6)
+    const pedidosActivos = (p.pedidos ?? []).filter(ped =>
+      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+    );
+
+    const consolidado = new Map<string, { id: number; nombre: string; marca: string; precio: number; cantidad: number; variante: string }>();
+
     p.paqueteBase?.productos?.forEach(pp => {
       const prod = pp.producto;
       if (!prod) return;
-      const key = `${prod.id_producto || prod.id}-`; // Sin variante por defecto del base
+      const key = `${prod.id_producto || prod.id}-`;
       consolidado.set(key, {
         id: (prod.id_producto || prod.id) as number,
         nombre: prod.nombre,
@@ -322,15 +365,14 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       });
     });
 
-    // Sumar cantidades de pedidos reales
-    pedidosAprobados.forEach(pedido => {
+    pedidosActivos.forEach(pedido => {
       pedido.pedidoProductos?.forEach(pp => {
         const key = `${pp.productoId}-${pp.variante ?? ''}`;
-        const current = consolidado.get(key) || { 
+        const current = consolidado.get(key) || {
           id: pp.productoId,
-          nombre: pp.producto?.nombre ?? 'N/A', 
+          nombre: pp.producto?.nombre ?? 'N/A',
           marca: typeof pp.producto?.marca === 'string' ? pp.producto.marca : (pp.producto?.marca?.nombre ?? 'N/A'),
-          precio: pp.producto?.precio ?? 0, 
+          precio: pp.producto?.precio ?? 0,
           cantidad: 0,
           variante: pp.variante ?? '-'
         };
@@ -339,7 +381,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       });
     });
 
-    // 3. Generar filas (usando ";" para Excel en español)
     let totalGral = 0;
     const itemRows = Array.from(consolidado.values()).map(info => {
       const subtotal = info.precio * info.cantidad;
@@ -347,7 +388,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       return `${info.id};"${this.scrubForCsv(info.nombre)}";"${this.scrubForCsv(info.variante)}";"${this.scrubForCsv(info.marca)}";${info.precio};${info.cantidad};${subtotal}`;
     });
 
-    // 4. Construir el CSV final
     const now = new Date().toLocaleString('es-AR');
     const rows = [
       'sep=;',
@@ -356,7 +396,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `"Paquete";"${this.scrubForCsv(p.paqueteBase?.nombre)} (ID: ${p.id_paquete_publicado})"`,
       `"Zona";"${this.scrubForCsv(p.zona?.nombre)}"`,
       `"Fecha Generacion";"${now}"`,
-      `"Pedidos Pagados";"${pedidosAprobados.length}"`,
+      `"Pedidos Involucrados";"${pedidosActivos.length}"`,
       '',
       '"SKU (ID)";"Producto";"Variante/Modelo";"Marca";"Precio Unit.";"Cant. Total";"Subtotal"',
       ...itemRows,
@@ -364,11 +404,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `"";"";"";"";"";"TOTAL A FACTURAR";${totalGral}`
     ];
 
-
-    this.downloadCsv(
-      rows.join('\n'),
-      `PROVEEDOR-${p.paqueteBase?.nombre?.replace(/\s+/g, '_')}.csv`
-    );
+    this.downloadCsv(rows.join('\n'), `PROVEEDOR-${p.paqueteBase?.nombre?.replace(/\s+/g, '_')}.csv`);
     this.toast.success('Reporte de proveedor generado');
   }
 
@@ -376,20 +412,22 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p) return;
 
-    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId === 3);
+    const pedidosActivos = (p.pedidos ?? []).filter(ped =>
+      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+    );
     const now = new Date().toLocaleString('es-AR');
     let totalRecaudado = 0;
 
-    const buyerRows = pedidosAprobados.map(ped => {
+    const buyerRows = pedidosActivos.map(ped => {
       const id = ped.id_pedido ?? 'N/A';
       const nombre = this.scrubForCsv(ped.usuario?.nombre);
       const email = this.scrubForCsv(ped.usuario?.email);
       const total = ped.monto_total ?? 0;
       totalRecaudado += total;
       const estado = this.getEstadoPedidoLabel(ped.estadoId);
-      
+
       const detalle = this.scrubForCsv((ped.pedidoProductos ?? [])
-        .map(pp => `${pp.cantidad}x ${pp.producto?.nombre}${pp.variante ? ' ('+pp.variante+')' : ''}`)
+        .map(pp => `${pp.cantidad}x ${pp.producto?.nombre}${pp.variante ? ' (' + pp.variante + ')' : ''}`)
         .join(' | '));
 
       return `${id};"${nombre}";"${detalle}";"${email}";${total};"${estado}"`;
@@ -402,7 +440,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `"Paquete";"${this.scrubForCsv(p.paqueteBase?.nombre)} (ID: ${p.id_paquete_publicado})"`,
       `"Zona";"${this.scrubForCsv(p.zona?.nombre)}"`,
       `"Fecha Generacion";"${now}"`,
-      `"Pedidos Pagados";"${pedidosAprobados.length}"`,
+      `"Pedidos Involucrados";"${pedidosActivos.length}"`,
       '',
       '"ID Pedido";"Comprador";"Detalle Productos";"Email";"Total Pedido";"Estado"',
       ...buyerRows,
@@ -410,18 +448,14 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `"";"";"";"";"TOTAL PAGADO RECAUDADO";${totalRecaudado}`
     ];
 
-
-    if (pedidosAprobados.length === 0) {
-      rows.push('', '"INFO";"No se registran pedidos pagados para este paquete aun."');
+    if (pedidosActivos.length === 0) {
+      rows.push('', '"INFO";"No se registran pedidos involucrados para este paquete aun."');
     }
 
-    this.downloadCsv(
-      rows.join('\n'),
-      `LOGISTICA-${p.paqueteBase?.nombre?.replace(/\s+/g, '_')}.csv`
-    );
+    this.downloadCsv(rows.join('\n'), `LOGISTICA-${p.paqueteBase?.nombre?.replace(/\s+/g, '_')}.csv`);
     this.toast.success('Reporte de logística generado');
   }
-  
+
   private downloadCsv(content: string, filename: string) {
     const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -432,12 +466,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  /**
-   * Limpia y escapa un string para su uso seguro en CSV (RFC 4180)
-   */
   private scrubForCsv(v: any): string {
     if (v === null || v === undefined) return 'N/A';
-    // Escapar comillas dobles duplicándolas y eliminar saltos de línea/punto y coma
     return v.toString()
       .replace(/"/g, '""')
       .replace(/[;\n\r]/g, ' ');
@@ -447,22 +477,24 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   getEstadoClasses(estado?: EstadoPaquetePublicado): string {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text';
-    switch (estado.nombre?.toLowerCase()) {
-      case 'activo':    return 'bg-status-active-bg text-status-active-text';
-      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text';
-      case 'cerrado':   return 'bg-status-info-bg text-status-info-text';
-      case 'completo':  return 'bg-status-active-bg text-status-active-text';
-      case 'eliminado': return 'bg-status-closed-bg text-status-closed-text';
-      default:          return 'bg-status-neutral-bg text-status-neutral-text';
+    switch (estado.nombre?.toLowerCase().trim()) {
+      case 'activo':     return 'bg-status-active-bg text-status-active-text';
+      case 'completo':   return 'bg-status-info-bg text-status-info-text';
+      case 'confirmado': return 'bg-status-neutral-bg text-brand-secondary';
+      case 'entregado':  return 'bg-green-50 text-green-700';
+      case 'cancelado':  return 'bg-error-light text-error';
+      default:           return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
 
   getEstadoPedidoClasses(estadoId?: number): string {
     switch (estadoId) {
       case 1: return 'bg-status-pending-bg text-status-pending-text';   // Pendiente
-      case 2: return 'bg-status-info-bg text-status-info-text';         // En proceso
-      case 3: return 'bg-status-active-bg text-status-active-text';     // Aprobado/Pagado
-      case 4: return 'bg-status-closed-bg text-status-closed-text';     // Cancelado
+      case 2: return 'bg-status-active-bg text-status-active-text';     // Pagado
+      case 3: return 'bg-status-neutral-bg text-text-secondary';        // Reembolsado
+      case 4: return 'bg-blue-50 text-blue-700';                        // En preparación
+      case 5: return 'bg-purple-50 text-purple-700';                    // En camino
+      case 6: return 'bg-green-50 text-green-700';                      // Recibido
       default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
@@ -470,9 +502,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   getEstadoPedidoLabel(estadoId?: number): string {
     switch (estadoId) {
       case 1: return 'Pendiente';
-      case 2: return 'En proceso';
-      case 3: return 'Aprobado';
-      case 4: return 'Cancelado';
+      case 2: return 'Pagado';
+      case 3: return 'Reembolsado';
+      case 4: return 'En preparación';
+      case 5: return 'En camino';
+      case 6: return 'Recibido';
       default: return 'Desconocido';
     }
   }
@@ -499,12 +533,12 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   getEstadoClasesStr(estadoNombre?: string): string {
     switch (estadoNombre?.toLowerCase().trim()) {
-      case 'activo':         return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'pendiente':      return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
-      case 'en preparación': return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'finalizado':     return 'bg-status-active-bg text-secondary border-secondary/20';
-      case 'cancelado':      return 'bg-red-50 text-red-700 border-red-200';
-      default:               return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+      case 'activo':     return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'completo':   return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
+      case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
+      case 'entregado':  return 'bg-green-50 text-green-700 border-green-300';
+      case 'cancelado':  return 'bg-red-50 text-red-700 border-red-200';
+      default:           return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }
 }

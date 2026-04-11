@@ -98,9 +98,12 @@
             ? 'ring-4 ring-brand-primary ring-offset-2 rounded-xl animate-[highlightPulse_1.5s_ease-out]'
             : ''">
 
-        <app-admin-paquete-card [paquete]="paquete" (close)="cerrarPaquete($event)" (prepare)="finalizarPaquete($event)"
-          (refund)="cancelarPaquete($event)" (duplicate)="duplicarPaquete($event)"
-          (notify)="notificarCompradores($event)" (viewDetail)="verDetalle($event)" />
+        <app-admin-paquete-card [paquete]="paquete"
+          (confirm)="confirmarPaquete($event)"
+          (refund)="cancelarPaquete($event)"
+          (duplicate)="duplicarPaquete($event)"
+          (notify)="notificarCompradores($event)"
+          (viewDetail)="verDetalle($event)" />
 
       </div>
       }
