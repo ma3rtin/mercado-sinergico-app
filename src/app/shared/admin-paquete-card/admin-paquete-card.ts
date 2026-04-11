@@ -16,29 +16,26 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Input({ required: true }) paquete!: PaquetePublicado;
 
   // 📤 Outputs para acciones
-  @Output() finalize   = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación → Finalizado
-  @Output() close      = new EventEmitter<PaquetePublicado>(); // Activo → En Preparación
-  @Output() prepare    = new EventEmitter<PaquetePublicado>(); // En Preparación → Finalizado
-  @Output() refund     = new EventEmitter<PaquetePublicado>(); // Activo → Cancelado
-  @Output() notify     = new EventEmitter<PaquetePublicado>();
-  @Output() duplicate  = new EventEmitter<PaquetePublicado>();
+  @Output() confirm    = new EventEmitter<PaquetePublicado>(); // Completo → Confirmado
+  @Output() refund     = new EventEmitter<PaquetePublicado>(); // Activo/Completo → Cancelado
+  @Output() notify     = new EventEmitter<PaquetePublicado>(); // Notificar compradores
+  @Output() duplicate  = new EventEmitter<PaquetePublicado>(); // Duplicar
   @Output() viewDetail = new EventEmitter<PaquetePublicado>(); // Ver detalle
 
   private toast = inject(ToastService);
 
   /** Controla si el menú desplegable está abierto */
   menuAbierto = false;
-  
+
   /** Señal para el tiempo restante formateado (ej: 2d 14h 30m 10s) */
   tiempoRestante = signal<string>('');
-  
+
   /** Intervalo para actualizar el contador real-time */
   private timerInterval: any;
 
   ngOnInit() {
     this.actualizarContador();
-    // Iniciar tick cada segundo solo si está activo/pendiente y falta tiempo
-    if (this.esActivo || this.esPendiente) {
+    if (this.esActivo) {
       if (this.tiempoRestante() !== 'Vencido') {
         this.timerInterval = setInterval(() => this.actualizarContador(), 1000);
       }
@@ -51,7 +48,6 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     }
   }
 
-  /** Cierra el menú al hacer click fuera del componente */
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -65,7 +61,7 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     this.menuAbierto = !this.menuAbierto;
   }
 
-  // ── Helpers de estado ─────────────────────────────────────────
+  // ── Helpers de estado ──────────────────────────────────────────
 
   get estadoNombre(): string {
     return this.paquete.estado?.nombre?.trim() ?? '';
@@ -75,37 +71,35 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Activo.toLowerCase();
   }
 
-  get esPendiente(): boolean {
-    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Pendiente.toLowerCase();
+  get esCompleto(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Completo.toLowerCase();
   }
 
-  get esEnPreparacion(): boolean {
-    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.EnPreparacion.toLowerCase();
+  get esConfirmado(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Confirmado.toLowerCase();
   }
 
-  get esFinalizado(): boolean {
-    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Finalizado.toLowerCase();
+  get esEntregado(): boolean {
+    return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Entregado.toLowerCase();
   }
 
   get esCancelado(): boolean {
     return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Cancelado.toLowerCase();
   }
 
-  // ── Acciones válidas por estado ───────────────────────────────
+  // ── Acciones válidas por estado ────────────────────────────────
   /** Notificar a compradores: solo cuando está activo */
   get canNotify(): boolean    { return this.esActivo; }
-  /** Cerrar anticipadamente (→ En Preparación): solo desde Activo */
-  get canClose(): boolean     { return this.esActivo; }
-  /** Cancelar y reembolsar: solo desde Activo */
-  get canCancel(): boolean    { return this.esActivo; }
-  /** Confirmar despacho (→ Finalizado): solo desde En Preparación */
-  get canFinalize(): boolean  { return this.esEnPreparacion; }
+  /** Confirmar con fabricante: desde Completo */
+  get canConfirm(): boolean   { return this.esCompleto; }
+  /** Cancelar y reembolsar: desde Activo o Completo */
+  get canCancel(): boolean    { return this.esActivo || this.esCompleto; }
   /** Duplicar: desde cualquier estado */
   get canDuplicate(): boolean { return true; }
   /** Si hay al menos una acción posible en el menú */
-  get hayAcciones(): boolean  { return this.canNotify || this.canClose || this.canCancel || this.canFinalize || this.canDuplicate; }
+  get hayAcciones(): boolean  { return this.canNotify || this.canConfirm || this.canCancel || this.canDuplicate; }
 
-  // ── Helpers de UI ─────────────────────────────────────────────
+  // ── Helpers de UI ──────────────────────────────────────────────
 
   getDiasRestantes(): number {
     if (!this.paquete.fecha_fin) return 0;
@@ -120,13 +114,13 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
       return;
     }
     const diff = new Date(this.paquete.fecha_fin).getTime() - Date.now();
-    
+
     if (diff <= 0) {
       this.tiempoRestante.set('Vencido');
       if (this.timerInterval) clearInterval(this.timerInterval);
       return;
     }
-    
+
     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -137,7 +131,7 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     if (h > 0 || d > 0) format += `${h}h `;
     if (m > 0 || h > 0 || d > 0) format += `${m}m `;
     format += `${s}s`;
-    
+
     this.tiempoRestante.set(format.trim());
   }
 
@@ -149,21 +143,21 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   getStatusColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')           return 'text-status-active-text';
-    if (e === 'pendiente')        return 'text-status-pending-text';
-    if (e === 'en preparación')   return 'text-status-info-text';
-    if (e === 'finalizado')       return 'text-brand-secondary';
-    if (e === 'cancelado')        return 'text-error';
+    if (e === 'activo')     return 'text-status-active-text';
+    if (e === 'completo')   return 'text-status-info-text';
+    if (e === 'confirmado') return 'text-brand-secondary';
+    if (e === 'entregado')  return 'text-success';
+    if (e === 'cancelado')  return 'text-error';
     return 'text-text-secondary';
   }
 
   getStatusBgColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')           return 'bg-status-active-bg';
-    if (e === 'pendiente')        return 'bg-status-pending-bg';
-    if (e === 'en preparación')   return 'bg-status-info-bg';
-    if (e === 'finalizado')       return 'bg-status-neutral-bg';
-    if (e === 'cancelado')        return 'bg-error-light';
+    if (e === 'activo')     return 'bg-status-active-bg';
+    if (e === 'completo')   return 'bg-status-info-bg';
+    if (e === 'confirmado') return 'bg-status-neutral-bg';
+    if (e === 'entregado')  return 'bg-success-light';
+    if (e === 'cancelado')  return 'bg-error-light';
     return 'bg-status-neutral-bg';
   }
 
@@ -198,16 +192,10 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     this.notify.emit(this.paquete);
   }
 
-  onClose(event?: Event): void {
+  onConfirm(event?: Event): void {
     event?.stopPropagation();
     this.cerrarMenu();
-    this.close.emit(this.paquete);
-  }
-
-  onFinalize(event?: Event): void {
-    event?.stopPropagation();
-    this.cerrarMenu();
-    this.prepare.emit(this.paquete);
+    this.confirm.emit(this.paquete);
   }
 
   onRefund(event?: Event): void {

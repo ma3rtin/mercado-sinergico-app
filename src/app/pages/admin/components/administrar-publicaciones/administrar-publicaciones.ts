@@ -30,7 +30,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   estadoFiltro = signal<string>('todos');
   highlightedId = signal<number | null>(null);
 
-  readonly estadosFiltro = ['todos', 'activo', 'pendiente', 'en preparación', 'finalizado', 'cancelado'];
+  readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
   filteredPaquetes = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -76,63 +76,29 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   // ── Acciones de la card ────────────────────────────────────────
 
-  cerrarPaquete(paquete: PaquetePublicado) {
-    const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
-    const avisoFaltantes = faltan > 0
-      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
-      : '<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>';
-
+  /** Completo → Confirmado: confirma la compra con el fabricante */
+  confirmarPaquete(paquete: PaquetePublicado) {
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
-        title: '¿Cerrar pedido?',
-        html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
-             ${avisoFaltantes}
-             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
-        icon: 'warning',
+        title: '¿Confirmar compra con fabricante?',
+        html: `<p>Confirmás la compra de <strong>${paquete.paqueteBase?.nombre}</strong> con el proveedor.</p>
+               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+                 <p class="mt-1">Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong> y los compradores recibirán un email de confirmación.</p>
+               </div>`,
+        icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí, cerrar pedido',
+        confirmButtonText: 'Sí, confirmar compra',
         confirmButtonColor: '#71A8D9',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.cerrarPaquete(paquete.id_paquete_publicado!).subscribe({
+        this.paqueteService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
           next: (res: any) => {
-            const updated: PaquetePublicado = res.result ?? res;
-            this.toast.success(`"${paquete.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
-            this._actualizarPaqueteEnLista(updated);
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" confirmado con el fabricante`, 'Compra confirmada');
+            this.loadPaquetes();
           },
           error: () => {
-            this.toast.error('Error al intentar cerrar el paquete.', 'Error');
-          }
-        });
-      });
-    });
-  }
-
-  /** En Preparación → Finalizado */
-  finalizarPaquete(paquete: PaquetePublicado) {
-    import('sweetalert2').then(({ default: Swal }) => {
-      Swal.fire({
-        title: '¿Completar pedido?',
-        html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
-               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
-                 <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
-                 <p class="mt-1">Al completar este paquete podrás <strong>descargar los partes de logística y de proveedor</strong> desde la vista de detalles.</p>
-               </div>
-               <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó el paquete.</p>`,
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, completar pedido',
-        cancelButtonText: 'Cancelar'
-      }).then(result => {
-        if (!result.isConfirmed) return;
-        this.paqueteService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (updated: PaquetePublicado) => {
-            this.toast.success(`"${paquete.paqueteBase?.nombre}" finalizado`, 'Paquete completado'); // ← era "cancelado"
-            this._actualizarPaqueteEnLista(updated);
-          },
-          error: () => {
-            this.toast.error('Error al intentar completar el paquete.', 'Error');
+            this.toast.error('Error al confirmar la compra.', 'Error');
           }
         });
       });
@@ -209,13 +175,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
   getEstadoClasses(estado?: EstadoPaquetePublicado): string {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     switch (estado.nombre?.toLowerCase().trim()) {
-      case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
-      case 'en preparación': return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
-      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
-      case 'eliminado': return 'bg-status-closed-bg text-status-closed-text border-transparent';
-      default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+      case 'activo':     return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'completo':   return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
+      case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
+      case 'entregado':  return 'bg-green-50 text-green-700 border-green-300';
+      case 'cancelado':  return 'bg-red-50 text-red-700 border-red-200';
+      default:           return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }
 
