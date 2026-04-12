@@ -74,13 +74,12 @@ export class PerfilAdmin implements OnInit {
     this.loadingCerrados.set(true);
     this.errorCerrados.set(null);
 
-    this.paquetePublicadoService.getAllPaquetes().subscribe({
-      next: (paquetes) => {
-        const cerrados = paquetes.filter(p => ['completo', 'confirmado', 'entregado', 'cancelado'].includes(p.estado?.nombre?.toLowerCase() || ''));
-        this.paquetesCerrados.set(cerrados);
+    this.paquetePublicadoService.getPaquetesCerrados().subscribe({
+      next: (paquetes: PaquetePublicado[]) => {
+        this.paquetesCerrados.set(paquetes);
         this.loadingCerrados.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar paquetes cerrados:', err);
         this.errorCerrados.set('Ocurrió un error al cargar los paquetes cerrados.');
         this.loadingCerrados.set(false);
