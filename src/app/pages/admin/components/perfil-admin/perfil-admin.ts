@@ -74,9 +74,10 @@ export class PerfilAdmin implements OnInit {
     this.loadingCerrados.set(true);
     this.errorCerrados.set(null);
 
-    this.paquetePublicadoService.getPaquetesCerrados().subscribe({
+    this.paquetePublicadoService.getAllPaquetes().subscribe({
       next: (paquetes) => {
-        this.paquetesCerrados.set(paquetes);
+        const cerrados = paquetes.filter(p => ['completo', 'confirmado', 'entregado', 'cancelado'].includes(p.estado?.nombre?.toLowerCase() || ''));
+        this.paquetesCerrados.set(cerrados);
         this.loadingCerrados.set(false);
       },
       error: (err) => {
@@ -148,29 +149,25 @@ export class PerfilAdmin implements OnInit {
     console.log('🔔 Notificando cierre de:', paquete.paqueteBase?.nombre);
   }
 
-  cerrarPaqueteDesdeCard(paquete: PaquetePublicado) {
-    // Cierre desde el perfil: navega a administrar-publicaciones con el paquete destacado
-    this.navigateToPublicacionDetalle(paquete.id_paquete_publicado!);
-  }
-
-  finalizarPaquete(paquete: PaquetePublicado) {
+  confirmarPaquete(paquete: PaquetePublicado) {
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
-        title: '¿Finalizar paquete?',
-        text: `Se marcará "${paquete.paqueteBase?.nombre}" como completado.`,
+        title: '¿Confirmar compra?',
+        text: `Se confirmará la compra de "${paquete.paqueteBase?.nombre}" al fabricante.`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí, finalizar',
+        confirmButtonText: 'Sí, confirmar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (result.isConfirmed) {
-          console.log('✅ Finalizando paquete:', paquete.id_paquete_publicado);
-          this.paquetePublicadoService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+          console.log('✅ Confirmando paquete:', paquete.id_paquete_publicado);
+          this.paquetePublicadoService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
             next: () => {
-              this.toastService.success('Paquete finalizado con éxito');
+              this.toastService.success('Compra confirmada con éxito');
               this.loadPaquetesPorCerrarse();
+              this.loadPaquetesCerrados();
             },
-            error: () => this.toastService.error('Error al finalizar el paquete')
+            error: () => this.toastService.error('Error al confirmar la compra')
           });
         }
       });

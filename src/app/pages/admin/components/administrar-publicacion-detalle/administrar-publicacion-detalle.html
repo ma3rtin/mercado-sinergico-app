@@ -271,48 +271,119 @@
             }
           </div>
 
-          <!-- Acciones de Administración -->
-          <div class="flex flex-col gap-6">
+          <!-- ── PANEL LATERAL CONTEXTUAL ───────────────────── -->
+          <div class="flex flex-col gap-4">
 
-            <!-- ── GESTIÓN DEL PAQUETE ──────────────────────────── -->
-            <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
-              <h3 class="text-base font-display text-text-primary mb-4 flex items-center gap-2">
+            <!-- Panel de gestión contextual -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+              <!-- Título del panel -->
+              <h3 class="font-display text-lg text-text-primary mb-5 flex items-center gap-2">
                 <app-icon name="settings" size="18" class="text-brand-primary mt-[2px]" />
                 Gestión del paquete
               </h3>
-              <div class="flex flex-col gap-3">
 
-                @if (puedeEditar()) {
-                  <app-button variant="secondary" [fullWidth]="true" iconStart="edit" (buttonClick)="editarPublicacion()">
-                    Editar publicación
-                  </app-button>
+              @switch (paquete()?.estado?.nombre?.toLowerCase().trim()) {
+
+                <!-- ══ ACTIVO ══════════════════════════════════════════ -->
+                @case ('activo') {
+
+                  <!-- ZONA 1: Estado actual -->
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                    <app-icon name="zap" size="13" class="mr-1.5 mt-[1px]" />
+                    Activo
+                  </span>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                    El paquete está abierto. Esperá a que se complete automáticamente cuando se alcance el mínimo de reservas.
+                  </p>
+
+                  <!-- ZONA 3: Acciones secundarias -->
+                  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
+                    <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell" (buttonClick)="notificarCompradores()">
+                      Notificar compradores
+                    </app-button>
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="edit" (buttonClick)="editarPublicacion()">
+                      Editar publicación
+                    </app-button>
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                      Duplicar publicación
+                    </app-button>
+                    <!-- Zona de peligro -->
+                    <div class="mt-4">
+                      <p class="text-xs text-red-500 font-semibold mb-2 flex items-center gap-1">
+                        <app-icon name="alertTriangle" size="12" class="mt-[1px]" />
+                        Acción irreversible
+                      </p>
+                      <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x" (buttonClick)="cancelarPaquete()">
+                        Cancelar y reembolsar
+                      </app-button>
+                    </div>
+                  </div>
+
                 }
 
-                @if (puedeNotificar()) {
-                  <app-button variant="info" [fullWidth]="true" iconStart="bell" (buttonClick)="notificarCompradores()">
-                    Notificar compradores
-                  </app-button>
+                <!-- ══ COMPLETO ════════════════════════════════════════ -->
+                @case ('completo') {
+
+                  <!-- ZONA 1: Estado actual -->
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                    <app-icon name="checkSquare" size="13" class="mr-1.5 mt-[1px]" />
+                    Completo
+                  </span>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                    El paquete alcanzó el mínimo. Acordá la compra con el fabricante y confirmala acá cuando esté cerrada.
+                  </p>
+
+                  <!-- ZONA 2: Acción principal -->
+                  <div class="border-t border-gray-200 pt-4 mt-4">
+                    <app-button variant="success" [fullWidth]="true" size="lg" iconStart="checkCircle"
+                      [loading]="enviandoMail()" [disabled]="enviandoMail()"
+                      (buttonClick)="confirmarCompra()">
+                      Confirmar compra con fabricante
+                    </app-button>
+                  </div>
+
+                  <!-- ZONA 3: Acciones secundarias -->
+                  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                      Duplicar publicación
+                    </app-button>
+                    <!-- Zona de peligro -->
+                    <div class="mt-4">
+                      <p class="text-xs text-red-500 font-semibold mb-2 flex items-center gap-1">
+                        <app-icon name="alertTriangle" size="12" class="mt-[1px]" />
+                        Acción irreversible
+                      </p>
+                      <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x" (buttonClick)="cancelarPaquete()">
+                        Cancelar y reembolsar
+                      </app-button>
+                    </div>
+                  </div>
+
                 }
 
-                @if (puedeConfirmar()) {
-                  <app-button variant="primary" [fullWidth]="true" iconStart="checkCircle"
-                    [loading]="enviandoMail()" [disabled]="enviandoMail()"
-                    (buttonClick)="confirmarCompra()">
-                    Confirmar compra con fabricante
-                  </app-button>
-                }
+                <!-- ══ CONFIRMADO ══════════════════════════════════════ -->
+                @case ('confirmado') {
 
-                @if (puedeMarcarEnCamino()) {
-                  <!-- Panel de selección "en camino" -->
-                  <div class="rounded-xl border border-purple-200 bg-purple-50 p-3">
+                  <!-- ZONA 1: Estado actual -->
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-brand-primary text-white">
+                    <app-icon name="thumbsUp" size="13" class="mr-1.5 mt-[1px]" />
+                    Confirmado
+                  </span>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                    Compra confirmada. Los pedidos pagados están en preparación. Cuando los pedidos salgan físicamente, marcalos en camino desde la tabla.
+                  </p>
+
+                  <!-- Panel checkboxes "marcar en camino" -->
+                  <div class="mt-4 rounded-xl border border-purple-200 bg-purple-50 p-3">
                     <p class="text-xs font-semibold text-purple-700 mb-2 flex items-center gap-1.5">
                       <app-icon name="truck" size="13" class="mt-[1px]" />
                       Pedidos en preparación ({{ pedidosEnPreparacion().length }})
                     </p>
                     @if (pedidosEnPreparacion().length === 0) {
-                      <p class="text-xs text-text-muted">Sin pedidos en preparación actualmente.</p>
+                      <p class="text-xs text-gray-400 italic">Sin pedidos en preparación actualmente.</p>
                     } @else {
-                      <div class="flex flex-col gap-1.5 max-h-40 overflow-y-auto mb-2">
+                      <div class="flex flex-col gap-1.5 max-h-36 overflow-y-auto mb-2">
                         @for (ped of pedidosEnPreparacion(); track ped.id_pedido) {
                           <label class="flex items-center gap-2 cursor-pointer hover:bg-purple-100 rounded-lg px-2 py-1 transition-colors">
                             <input
@@ -327,14 +398,12 @@
                         }
                       </div>
                       <div class="flex gap-1.5 mb-2">
-                        <button (click)="seleccionarTodosPedidosEnCamino()"
-                          class="text-xs text-purple-700 hover:underline">Seleccionar todos</button>
-                        <span class="text-text-muted text-xs">·</span>
-                        <button (click)="limpiarSeleccionEnCamino()"
-                          class="text-xs text-text-muted hover:underline">Limpiar</button>
+                        <button (click)="seleccionarTodosPedidosEnCamino()" class="text-xs text-purple-700 hover:underline">Seleccionar todos</button>
+                        <span class="text-gray-400 text-xs">·</span>
+                        <button (click)="limpiarSeleccionEnCamino()" class="text-xs text-gray-400 hover:underline">Limpiar</button>
                       </div>
                     }
-                    <app-button variant="primary" [fullWidth]="true" iconStart="truck"
+                    <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="truck"
                       [disabled]="pedidosEnPreparacion().length === 0"
                       (buttonClick)="marcarSeleccionEnCamino()">
                       {{ pedidosSeleccionadosEnCamino().size > 0
@@ -342,60 +411,93 @@
                           : 'Marcar todos en camino' }}
                     </app-button>
                   </div>
+
+                  <!-- ZONA 2: Acción principal -->
+                  <div class="border-t border-gray-200 pt-4 mt-4">
+                    <app-button variant="primary" [fullWidth]="true" size="lg" iconStart="package" (buttonClick)="marcarEntregado()">
+                      Marcar como entregado
+                    </app-button>
+                  </div>
+
+                  <!-- ZONA 3: Acciones secundarias -->
+                  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
+                    <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell" (buttonClick)="notificarCompradores()">
+                      Notificar compradores
+                    </app-button>
+                    <app-button variant="ghost" [fullWidth]="true" size="sm" iconStart="fileText" (buttonClick)="descargarParteProveedor()">
+                      Reporte para proveedor
+                    </app-button>
+                    <app-button variant="ghost" [fullWidth]="true" size="sm" iconStart="truck" (buttonClick)="descargarParteLogistica()">
+                      Hoja de ruta / logística
+                    </app-button>
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                      Duplicar publicación
+                    </app-button>
+                  </div>
+
                 }
 
-                @if (puedeEntregar()) {
-                  <app-button variant="success" [fullWidth]="true" iconStart="checkCircle" (buttonClick)="marcarEntregado()">
-                    Marcar como entregado
-                  </app-button>
+                <!-- ══ ENTREGADO ════════════════════════════════════════ -->
+                @case ('entregado') {
+
+                  <!-- ZONA 1: Estado actual -->
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-brand-secondary text-white">
+                    <app-icon name="home" size="13" class="mr-1.5 mt-[1px]" />
+                    Entregado
+                  </span>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                    El paquete fue entregado correctamente. Todos los pedidos pasaron a Recibido.
+                  </p>
+
+                  <!-- ZONA 3: Sin zona 2, solo reportes y duplicar -->
+                  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
+                    <app-button variant="ghost" [fullWidth]="true" size="sm" iconStart="fileText" (buttonClick)="descargarParteProveedor()">
+                      Reporte para proveedor
+                    </app-button>
+                    <app-button variant="ghost" [fullWidth]="true" size="sm" iconStart="truck" (buttonClick)="descargarParteLogistica()">
+                      Hoja de ruta / logística
+                    </app-button>
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                      Duplicar publicación
+                    </app-button>
+                  </div>
+
                 }
 
-                <app-button variant="secondary" [fullWidth]="true" iconStart="copy" (buttonClick)="duplicarPaquete()">
-                  Duplicar publicación
-                </app-button>
+                <!-- ══ CANCELADO ═══════════════════════════════════════ -->
+                @case ('cancelado') {
 
-                @if (puedeCancelar()) {
-                  <app-button variant="danger" [fullWidth]="true" iconStart="x" (buttonClick)="cancelarPaquete()">
-                    Cancelar y reembolsar
-                  </app-button>
+                  <!-- ZONA 1: Estado actual -->
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+                    <app-icon name="xCircle" size="13" class="mr-1.5 mt-[1px]" />
+                    Cancelado
+                  </span>
+                  <p class="text-sm text-gray-600 mt-3 leading-relaxed">
+                    El paquete fue cancelado. Los pagos fueron reembolsados automáticamente.
+                  </p>
+
+                  <!-- ZONA 3: Solo duplicar -->
+                  <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
+                    <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+                      Duplicar publicación
+                    </app-button>
+                  </div>
+
                 }
-              </div>
-            </div>
 
-            <!-- Reportes CSV -->
-            <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default"
-                 [class]="!puedeDescargar() ? 'opacity-60 grayscale' : ''">
-              <h3 class="text-base font-display text-text-primary mb-1 flex items-center gap-2">
-                <app-icon name="fileText" size="18" class="text-brand-secondary mt-[2px]" />
-                Reportes
-              </h3>
-              @if (!puedeDescargar()) {
-                <p class="text-xs text-text-muted mb-4 flex items-center gap-1">
-                  <app-icon name="lock" size="12" class="mt-[2px]" />
-                  Disponibles a partir del estado Confirmado
-                </p>
-              } @else {
-                <p class="text-xs text-success mb-4 flex items-center gap-1 font-medium">
-                  <app-icon name="checkCircle" size="12" class="mt-[2px]" />
-                  Reportes listos para descargar
-                </p>
+                <!-- ══ DEFAULT ═════════════════════════════════════════ -->
+                @default {
+                  <p class="text-sm text-gray-400 text-center py-4">Estado no reconocido.</p>
+                }
+
               }
-              <div class="flex flex-col gap-3">
-                <app-button variant="secondary" [fullWidth]="true" iconStart="package"
-                  [disabled]="!puedeDescargar()" (buttonClick)="descargarParteProveedor()">
-                  Reporte para proveedor
-                </app-button>
-                <app-button variant="secondary" [fullWidth]="true" iconStart="truck"
-                  [disabled]="!puedeDescargar()" (buttonClick)="descargarParteLogistica()">
-                  Hoja de ruta / logística
-                </app-button>
-              </div>
+
             </div>
 
             <!-- Productos del paquete base -->
             @if (paquete()?.paqueteBase?.productos; as pbProductos) {
               @if (pbProductos.length > 0) {
-                <div class="bg-bg-surface rounded-2xl shadow-sm p-5 border border-border-default">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                   <h3 class="text-base font-display text-text-primary mb-4 flex items-center gap-2">
                     <app-icon name="box" size="18" class="text-brand-primary mt-[2px]" />
                     Productos del paquete
