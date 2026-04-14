@@ -413,6 +413,13 @@
               </app-button>
               }
 
+              @if (puedeReembolsar) {
+              <app-button variant="danger" [fullWidth]="true" iconStart="refreshCcw"
+                (buttonClick)="onSolicitarReembolso()">
+                Solicitar reembolso
+              </app-button>
+              }
+
               @if (puedeSalirDelPaquete) {
               <button (click)="onSalirDelPaquete()"
                 class="text-sm text-error hover:text-error-dark font-medium transition-colors py-2 cursor-pointer">

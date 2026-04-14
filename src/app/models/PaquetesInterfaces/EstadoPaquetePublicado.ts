@@ -8,12 +8,11 @@ export interface EstadoPaquetePublicado {
     paquetes?: PaquetePublicado[];
 }
 
-/** Nombres canónicos de estado — usá esto en lugar de strings mágicos */
+/** Nombres canónicos de estado de paquete — usá esto en lugar de strings mágicos */
 export enum EstadoPaqueteNombre {
-    Pendiente     = 'Pendiente',
-    Activo        = 'Activo',
-    EnPreparacion = 'En Preparación',
-    Finalizado    = 'Finalizado',
-    Cancelado     = 'Cancelado',
-    Eliminado     = 'Eliminado',
+    Activo     = 'Activo',
+    Completo   = 'Completo',
+    Confirmado = 'Confirmado',
+    Entregado  = 'Entregado',
+    Cancelado  = 'Cancelado',
 }

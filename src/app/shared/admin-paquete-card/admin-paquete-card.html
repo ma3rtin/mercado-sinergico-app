@@ -1,26 +1,34 @@
 <div (click)="onViewDetail($event)"
     class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300 cursor-pointer hover:ring-2 hover:ring-brand-primary/40"
-    [class]="esEnPreparacion ? 'border-info shadow-info-light' : esCancelado ? 'border-error/30' : esFinalizado ? 'border-brand-secondary/30' : 'border-border-default hover:shadow-md'">
+    [class]="esCompleto ? 'border-info shadow-info-light' : esConfirmado ? 'border-brand-secondary/40' : esCancelado ? 'border-error/30' : esEntregado ? 'border-success/30' : 'border-border-default hover:shadow-md'">
 
-    <!-- Banner: En Preparación -->
-    @if (esEnPreparacion) {
+    <!-- Banner: Completo — esperando confirmación del admin -->
+    @if (esCompleto) {
     <div class="flex items-center justify-between gap-3 bg-info-light border-b border-info/30 px-4 py-2.5">
         <div class="flex items-center gap-2 text-info">
-            <app-icon name="package" size="16" />
-            <span class="text-xs font-bold uppercase tracking-widest">En Preparación — Esperando despacho</span>
+            <app-icon name="checkCircle" size="16" />
+            <span class="text-xs font-bold uppercase tracking-widest">Completo — Confirmar con fabricante</span>
         </div>
-        <app-button variant="primary" size="sm" (buttonClick)="onFinalize()">
+        <app-button variant="primary" size="sm" (buttonClick)="onConfirm()">
             <app-icon name="checkCircle" size="14" class="mr-1" />
-            Completar pedido
+            Confirmar compra
         </app-button>
     </div>
     }
 
-    <!-- Banner: Finalizado -->
-    @if (esFinalizado) {
+    <!-- Banner: Confirmado — en preparación -->
+    @if (esConfirmado) {
+    <div class="flex items-center gap-2 bg-brand-secondary/10 border-b border-brand-secondary/20 px-4 py-2 text-brand-secondary">
+        <app-icon name="package" size="16" />
+        <span class="text-xs font-bold uppercase tracking-widest">Confirmado — Pedidos en preparación</span>
+    </div>
+    }
+
+    <!-- Banner: Entregado -->
+    @if (esEntregado) {
     <div class="flex items-center gap-2 bg-success-light border-b border-success/20 px-4 py-2 text-success-dark">
         <app-icon name="checkCircle" size="16" />
-        <span class="text-xs font-bold uppercase tracking-widest">Finalizado — Despachado</span>
+        <span class="text-xs font-bold uppercase tracking-widest">Entregado — Pedidos recibidos</span>
     </div>
     }
 
@@ -65,8 +73,8 @@
                 {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
             </h3>
             <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <!-- Cierre -->
-                @if (esActivo || esPendiente) {
+                <!-- Cierre (solo para Activo) -->
+                @if (esActivo) {
                 <div class="flex items-center gap-2 text-text-secondary">
                     <app-icon name="clock" size="16" [class]="getUrgenciaColor()" />
                     <span class="text-xs">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
@@ -107,7 +115,7 @@
             class="dropdown-menu-container relative flex-shrink-0 pt-4 lg:pt-0 border-t border-border-default lg:border-none w-full lg:w-auto">
 
             <!-- Solo duplicar: estados terminales -->
-            @if (esFinalizado || esCancelado) {
+            @if (esEntregado || esCancelado) {
             <div class="flex items-center justify-end gap-2">
                 <button (click)="onDuplicate($event)"
                     class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
@@ -117,8 +125,8 @@
             </div>
             }
 
-            <!-- Botón kebab con dropdown para estados activos -->
-            @if (!esFinalizado && !esCancelado) {
+            <!-- Botón kebab con dropdown para estados no terminales -->
+            @if (!esEntregado && !esCancelado) {
             <div class="flex items-center justify-end gap-2">
 
                 <!-- Trigger del dropdown -->
@@ -137,9 +145,9 @@
                 <!-- Panel desplegable -->
                 @if (menuAbierto) {
                 <div
-                    class="absolute right-0 top-full mt-1 z-50 w-60 bg-bg-surface rounded-xl shadow-lg border border-border-default overflow-hidden animate-fade-in">
+                    class="absolute right-0 top-full mt-1 z-50 w-64 bg-bg-surface rounded-xl shadow-lg border border-border-default overflow-hidden animate-fade-in">
 
-                    <!-- Sección: Comunicación -->
+                    <!-- Sección: Comunicación (solo Activo) -->
                     @if (canNotify) {
                     <div class="px-2 pt-2">
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">
@@ -158,9 +166,7 @@
 
                     <!-- Sección: Gestión -->
                     <div class="px-2" [class]="canNotify ? '' : 'pt-2'">
-                        @if (canClose || canDuplicate) {
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">Gestión</p>
-                        }
 
                         <!-- Duplicar — siempre disponible -->
                         <button (click)="onDuplicate($event)"
@@ -168,19 +174,18 @@
                             <app-icon name="copy" size="16" class="text-success flex-shrink-0" />
                             <div class="text-left">
                                 <p class="font-medium text-xs leading-tight">Duplicar publicación</p>
-                                <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este
-                                    paquete</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este paquete</p>
                             </div>
                         </button>
 
-                        <!-- Cerrar pedido (Activo → En Preparación) -->
-                        @if (canClose) {
-                        <button (click)="onClose($event)"
+                        <!-- Confirmar con fabricante (Completo → Confirmado) -->
+                        @if (canConfirm) {
+                        <button (click)="onConfirm($event)"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-info-light hover:text-info transition-colors">
-                            <app-icon name="Lock" size="16" class="text-info flex-shrink-0" />
+                            <app-icon name="checkCircle" size="16" class="text-info flex-shrink-0" />
                             <div class="text-left">
-                                <p class="font-medium text-xs leading-tight">Cerrar inscripciones</p>
-                                <p class="text-[10px] text-text-muted leading-tight">Pasa a estado "En Preparación"</p>
+                                <p class="font-medium text-xs leading-tight">Confirmar compra con fabricante</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Pasa pedidos a "En preparación"</p>
                             </div>
                         </button>
                         }
@@ -190,15 +195,13 @@
                     @if (canCancel) {
                     <div class="my-1 mx-2 border-t border-error/20"></div>
                     <div class="px-2 pb-2">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de
-                            riesgo</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de riesgo</p>
                         <button (click)="onRefund($event)"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
                             <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
                             <div class="text-left">
                                 <p class="font-medium text-xs leading-tight">Cancelar y reembolsar</p>
-                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los
-                                    compradores</p>
+                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los compradores</p>
                             </div>
                         </button>
                     </div>

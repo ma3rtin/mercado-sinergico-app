@@ -458,6 +458,36 @@ export class MisPedidosComponent implements OnInit {
         }
       });
   }
+
+  solicitarReembolso(pedido: PedidoDelUsuario): void {
+    const pedidoId = pedido.id_pedido;
+    if (!pedidoId) return;
+
+    Swal.fire({
+      title: '¿Solicitar reembolso?',
+      html: `<p>¿Seguro que querés pedir el reembolso de tu pedido en <strong>${pedido.paquetePublicado?.paqueteBase?.nombre ?? 'este paquete'}</strong>?</p>
+             <p class="text-sm text-gray-500 mt-2">Si se aprueba, se devolverá el dinero a tu cuenta de Mercado Pago.</p>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, pedir reembolso',
+      confirmButtonColor: '#B92905',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+
+      this.pedidoService.solicitarReembolso(pedidoId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.toast.success('Reembolso solicitado correctamente. Recibirás un email de confirmación.', '¡Listo!');
+            this.cargarPedidos();
+          },
+          error: () => {
+            this.toast.error('No se pudo procesar el reembolso. Intentá más tarde.');
+          }
+        });
+    });
+  }
   // ------------------------------
   // HELPERS
   // ------------------------------
