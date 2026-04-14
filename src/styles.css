@@ -212,6 +212,7 @@
     /* Mantener compatibilidad si es necesario, pero preferir nuevos tokens */
     --color-primary: var(--brand-primary);
     --color-secondary: var(--brand-secondary);
+    --color-secondary-dark: var(--color-amarillo-dark);
     --color-accent: var(--brand-cta);
 }
 

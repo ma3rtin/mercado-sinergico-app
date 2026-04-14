@@ -6,11 +6,14 @@ import { LocalidadService, Localidad } from '@app/services/localidad/localidad.s
 import { CommonModule } from '@angular/common';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent } from '@app/shared/select/select-component';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent, ButtonComponent, IconComponent],
   templateUrl: './perfil.html',
   styleUrls: ['./perfil.css']
 })
@@ -19,13 +22,13 @@ export class Perfil implements OnInit {
   private usuarioService = inject(UsuarioService);
   private localidadService = inject(LocalidadService);
   private fb = inject(FormBuilder);
+  private toast = inject(ToastService);
 
   // 🧠 Signals
   localidades = signal<Localidad[]>([]);
   usuario = signal<Usuario | null>(null);
   cargando = signal(true);
   sesionIniciada = signal(false);
-  mensaje = signal<string | null>(null);
   tieneCambios = signal(false);
   cpSeleccionado = signal('');
   loadingImagen = signal(false);
@@ -52,6 +55,16 @@ export class Perfil implements OnInit {
 
     this.form.valueChanges.subscribe(() => {
       if (!this.inicializando) this.tieneCambios.set(true);
+    });
+
+    this.form.get('localidad')?.valueChanges.subscribe(locationId => {
+      if (locationId) {
+        const locId = Number(locationId);
+        const loc = this.localidades().find(l => l.id_localidad === locId);
+        if (loc) {
+          this.form.patchValue({ cp: loc.codigo_postal }, { emitEvent: false });
+        }
+      }
     });
 
     this.localidadService.getAll().subscribe({
@@ -87,19 +100,27 @@ export class Perfil implements OnInit {
     });
   }
 
-  // 📅 Formatear fecha
+  // 📅 Formatear fecha (evita bug de timezone UTC→local)
   private formatDate(date: any): string {
     if (!date) return '';
+    // Ya está en formato yyyy-MM-dd → usarla directo
     if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+    // Formato dd/MM/yyyy → invertir
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
       const [day, month, year] = date.split('/');
       return `${year}-${month}-${day}`;
     }
+    // ISO string (ej: "1990-05-15T00:00:00.000Z") → extraer solo la parte de fecha
+    // sin convertir a hora local para evitar restar un día en UTC-3
+    if (typeof date === 'string' && date.includes('T')) {
+      return date.substring(0, 10);
+    }
+    // Fallback con getUTC* para no aplicar offset local
     const d = new Date(date);
     if (!isNaN(d.getTime())) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
+      const year = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
     return '';
@@ -109,24 +130,47 @@ export class Perfil implements OnInit {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.mensaje.set('Tenés campos obligatorios sin completar ❌');
+      this.toast.warning('Completá los campos obligatorios antes de guardar.');
       return;
     }
 
     this.loadingImagen.set(true);
+    const v = this.form.value;
 
-    // 📦 Crear FormData para enviar JSON + archivo
-    const formData = new FormData();
-    Object.entries(this.form.value).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) formData.append(key, value as string);
-    });
-    if (this.selectedFile) formData.append('imagen', this.selectedFile);
+    // 📦 Si hay imagen nueva, usar FormData; si no, enviar JSON
+    if (this.selectedFile) {
+      const formData = new FormData();
+      formData.append('telefono', v.telefono ?? '');
+      formData.append('fecha_nac', v.fecha_nac ?? '');
+      if (v.localidad) formData.append('localidad_id', String(v.localidad));
+      if (v.cp) formData.append('cp', String(v.cp));
+      if (v.calle) formData.append('calle', v.calle);
+      if (v.numero) formData.append('numero', String(v.numero));
+      if (v.piso) formData.append('piso', String(v.piso));
+      if (v.dpto) formData.append('dpto', v.dpto);
+      formData.append('imagen', this.selectedFile);
+      this.enviarPerfil(formData);
+    } else {
+      const body: Record<string, any> = {
+        telefono: v.telefono,
+        fecha_nac: v.fecha_nac,
+      };
+      if (v.localidad) body['localidad_id'] = Number(v.localidad);
+      if (v.cp) body['cp'] = v.cp;
+      if (v.calle) body['calle'] = v.calle;
+      if (v.numero) body['numero'] = v.numero;
+      if (v.piso) body['piso'] = v.piso;
+      if (v.dpto) body['dpto'] = v.dpto;
+      this.enviarPerfil(body);
+    }
+  }
 
-    this.usuarioService.updatePerfil(formData).subscribe({
+  private enviarPerfil(data: FormData | Record<string, any>): void {
+    this.usuarioService.updatePerfil(data).subscribe({
       next: (res) => {
         const u = (res as any).usuario ?? res;
         this.usuario.set(u);
-        this.mensaje.set('Perfil actualizado correctamente ✅');
+        this.toast.success('Perfil actualizado correctamente.');
         this.form.markAsPristine();
         this.tieneCambios.set(false);
         this.loadingImagen.set(false);
@@ -134,7 +178,7 @@ export class Perfil implements OnInit {
       },
       error: (err) => {
         console.error('Error al actualizar perfil:', err);
-        this.mensaje.set('Error al actualizar perfil ❌');
+        this.toast.error('No se pudo actualizar el perfil. Intentá nuevamente.', 'Error al guardar');
         this.loadingImagen.set(false);
       }
     });
@@ -159,16 +203,10 @@ export class Perfil implements OnInit {
     reader.readAsDataURL(this.selectedFile);
   }
 
-  // 🏙️ Opciones de localidades para el select
   opcionesLocalidades = computed(() =>
     this.localidades().map(l => ({
       value: l.id_localidad,
       label: l.nombre
     }))
   );
-
-  actualizarCP(id: number) {
-    const loc = this.localidades().find(l => l.id_localidad === id);
-    this.form.patchValue({ cp: loc?.codigo_postal || '' });
-  }
 }

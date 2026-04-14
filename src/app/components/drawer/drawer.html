@@ -93,7 +93,23 @@
                     actividad</p>
             </div>
 
-            <a [routerLink]="profileLink" (click)="closeDrawer.emit()"
+            @if (isAdmin) {
+            <a routerLink="/admin/perfil" (click)="closeDrawer.emit()"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                <div
+                    class="w-8 h-8 rounded-lg bg-yellow-50 text-secondary-dark flex items-center justify-center group-hover:bg-secondary-dark group-hover:text-white transition-colors duration-200">
+                    <app-icon name="Settings" size="18"></app-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="block text-sm font-semibold text-gray-700 truncate">Panel de Control</span>
+                    <span class="block text-[10px] text-gray-400 truncate">Gestionar la plataforma</span>
+                </div>
+                <app-icon name="ChevronRight" size="14"
+                    class="text-gray-300 group-hover:text-secondary-dark transition-all"></app-icon>
+            </a>
+            }
+
+            <a routerLink="/perfil" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
                 <div
                     class="w-8 h-8 rounded-lg bg-brand-secondary/5 text-brand-secondary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">

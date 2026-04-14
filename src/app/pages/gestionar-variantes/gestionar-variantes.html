@@ -7,63 +7,50 @@
   <div class="max-w-7xl mx-auto">
     <!-- 🔙 Header con navegación -->
     <div class="mb-6">
-      <button
-        (click)="volver()"
-        class="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors mb-4"
-      >
+      <button (click)="volver()"
+        class="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors mb-4">
         <app-icon name="arrowLeft" [size]="'20'" class="text-current pt-1" />
         <span class="font-medium">Volver a administrar productos</span>
       </button>
 
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-      >
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-display font-semibold text-gray-900">
             Gestionar Variantes
           </h1>
           @if (productoInfo()) {
-            <p class="text-lg text-gray-600 mt-1">
-              {{ productoInfo()!.producto.nombre }}
-            </p>
-            <p class="text-sm text-gray-500 mt-0.5">
-              Precio base:
-              <span class="font-semibold text-black"
-                >${{ precioBaseProducto() }}</span
-              >
-            </p>
+          <p class="text-lg text-gray-600 mt-1">
+            {{ productoInfo()!.producto.nombre }}
+          </p>
+          <p class="text-sm text-gray-500 mt-0.5">
+            Precio base:
+            <span class="font-semibold text-black">${{ precioBaseProducto() }}</span>
+          </p>
           }
         </div>
 
         <!-- Badges de información -->
         <div class="flex flex-wrap gap-2">
           @if (esProductoEnergico()) {
-            <span
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-secondary-dark rounded-full text-sm font-semibold"
-            >
-              <app-icon name="zap" [size]="'16'" class="text-current pt-1" />
-              Enérgico
-            </span>
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-secondary-dark rounded-full text-sm font-semibold">
+            <app-icon name="zap" [size]="'16'" class="text-current pt-1" />
+            Enérgico
+          </span>
           }
           @if (esProductoSinergico()) {
-            <span
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold"
-            >
-              <app-icon name="users" [size]="'16'" class="text-current pt-1" />
-              Sinérgico
-            </span>
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+            <app-icon name="users" [size]="'16'" class="text-current pt-1" />
+            Sinérgico
+          </span>
           }
           @if (stockTotal() !== null) {
-            <span
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-black rounded-full text-sm font-semibold"
-            >
-              <app-icon
-                name="package"
-                [size]="'16'"
-                class="text-current pt-1"
-              />
-              Stock total: {{ stockTotal() }}
-            </span>
+          <span
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-black rounded-full text-sm font-semibold">
+            <app-icon name="package" [size]="'16'" class="text-current pt-1" />
+            Stock total: {{ stockTotal() }}
+          </span>
           }
         </div>
       </div>
@@ -71,345 +58,222 @@
 
     <!-- ⚠️ Loading State -->
     @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center py-16">
-        <app-icon
-          name="loader"
-          [size]="'32'"
-          class="text-primary animate-spin mb-4 mt-1"
-        />
-        <p class="text-gray-600 text-lg">Cargando variantes...</p>
-      </div>
+    <div class="flex flex-col items-center justify-center py-16">
+      <app-icon name="loader" [size]="'32'" class="text-primary animate-spin mb-4 mt-1" />
+      <p class="text-gray-600 text-lg">Cargando variantes...</p>
+    </div>
     }
 
     <!-- 🔍 BUSCADOR Y FILTROS - SIEMPRE VISIBLES -->
     @if (!isLoading() && variantes().length > 0) {
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <!-- Buscador -->
-        <div class="relative mb-4">
-          <input
-            type="text"
-            [value]="searchTerm()"
-            (input)="onSearchChange($any($event.target).value)"
-            placeholder="Buscar por descripción o SKU..."
-            class="w-full px-4 py-3 pl-11 pr-12 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-primary transition-all duration-200 shadow-sm"
-            autocomplete="off"
-          />
-          <app-icon
-            name="Search"
-            class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-          />
-          @if (searchTerm()) {
-            <button
-              (click)="limpiarBusqueda()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-              title="Limpiar búsqueda"
-            >
-              <app-icon name="x" [size]="'18'" class="text-current" />
-            </button>
-          }
-        </div>
-
-        <!-- Filtros en chips -->
-        <div class="flex flex-wrap items-center gap-2 mb-4">
-          <span class="text-sm font-medium text-gray-700">Filtros:</span>
-
-          <!-- Filtro Estado -->
-          <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-            <button
-              (click)="cambiarFiltroEstado('todas')"
-              [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              Todas
-            </button>
-            <button
-              (click)="cambiarFiltroEstado('activas')"
-              [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'activas' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-              Activas
-            </button>
-            <button
-              (click)="cambiarFiltroEstado('inactivas')"
-              [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'inactivas' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-              Inactivas
-            </button>
-          </div>
-
-          <!-- Filtro Imagen -->
-          <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-            <button
-              (click)="cambiarFiltroImagen('todas')"
-              [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              Todas
-            </button>
-            <button
-              (click)="cambiarFiltroImagen('con')"
-              [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-              Con imagen
-            </button>
-            <button
-              (click)="cambiarFiltroImagen('sin')"
-              [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')"
-            >
-              <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-              Sin imagen
-            </button>
-          </div>
-
-          <!-- Filtro Stock (solo enérgicos) -->
-          @if (esProductoEnergico()) {
-            <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-              <button
-                (click)="cambiarFiltroStock('todas')"
-                [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')"
-              >
-                Todas
-              </button>
-              <button
-                (click)="cambiarFiltroStock('con')"
-                [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')"
-              >
-                <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-                Con stock
-              </button>
-              <button
-                (click)="cambiarFiltroStock('sin')"
-                [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')"
-              >
-                <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-                Sin stock
-              </button>
-            </div>
-          }
-
-          <!-- Botón resetear filtros -->
-          @if (hayFiltrosActivos()) {
-            <button
-              (click)="resetearFiltros()"
-              class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-full transition-all"
-              title="Resetear filtros"
-            >
-              <app-icon name="x" [size]="'14'" class="text-current pt-1" />
-              Limpiar
-            </button>
-          }
-        </div>
-
-        <!-- Contador de resultados -->
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-600">
-            Mostrando <span class="font-semibold text-black">{{ resultadosBusqueda() }}</span>
-            de <span class="font-semibold text-black">{{ variantes().length }}</span> variantes
-          </p>
-
-          <!-- Acciones rápidas -->
-          <div class="flex flex-wrap gap-2 md:gap-3 items-center">
-            @if (esProductoEnergico()) {
-              <app-button
-                type="button"
-                variant="warning"
-                size="sm"
-                (click)="aplicarStockATodas()"
-                class="inline-flex items-center gap-1.5 text-orange-600"
-              >
-                <app-icon
-                  name="sliders"
-                  [size]="'16'"
-                  class="text-current pt-1"
-                />
-                Aplicar stock a todas
-              </app-button>
-            }
-
-            <app-button
-              type="button"
-              variant="success"
-              size="sm"
-              (click)="activarTodas()"
-              class="inline-flex items-center gap-1.5"
-            >
-              <app-icon
-                name="checkCircle"
-                [size]="'16'"
-                class="text-white mt-1"
-              />
-              Activar todas
-            </app-button>
-
-            <app-button
-              type="button"
-              variant="danger"
-              size="sm"
-              (click)="desactivarTodas()"
-              class="inline-flex items-center gap-1.5 !text-orange-600 hover:!text-orange-700"
-            >
-              <app-icon
-                name="MinusCircle"
-                [size]="'16'"
-                class="text-white mt-1"
-              />
-              Desactivar todas
-            </app-button>
-
-            <app-button
-              type="button"
-              variant="info"
-              size="sm"
-              (click)="generarReporte()"
-              class="inline-flex items-center gap-1.5 text-orange-600"
-            >
-              <app-icon
-                name="download"
-                [size]="'16'"
-                class="text-current pt-1"
-              />
-              Reporte
-            </app-button>
-          </div>
-        </div>
+    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <!-- Buscador -->
+      <div class="relative mb-4">
+        <input type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
+          placeholder="Buscar por descripción o SKU..."
+          class="w-full px-4 py-3 pl-11 pr-12 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-primary transition-all duration-200 shadow-sm"
+          autocomplete="off" />
+        <app-icon name="Search"
+          class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+        @if (searchTerm()) {
+        <button (click)="limpiarBusqueda()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+          title="Limpiar búsqueda">
+          <app-icon name="x" [size]="'18'" class="text-current" />
+        </button>
+        }
       </div>
 
-      <!-- Indicador de cambios -->
-      @if (hasChanges()) {
-        <div
-          class="mb-6 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <app-icon
-                name="AlertOctagon"
-                [size]="'20'"
-                class="text-yellow-600 mt-1"
-              />
-              <span class="text-sm font-medium text-yellow-800">
-                Hay cambios sin guardar
-              </span>
-            </div>
-            <div class="flex gap-2">
-              <app-button
-                type="button"
-                variant="danger"
-                size="sm"
-                (click)="resetearCambios()"
-                class="inline-flex items-center gap-1.5"
-              >
-                <app-icon name="x" [size]="'16'" class="text-white mt-1" />
-                Descartar
-              </app-button>
-              <app-button
-                type="button"
-                variant="success"
-                size="sm"
-                [disabled]="isSaving()"
-                (click)="guardarCambios()"
-                class="inline-flex items-center gap-1.5"
-              >
-                <app-icon
-                  [name]="isSaving() ? 'loader' : 'download'"
-                  [size]="'16'"
-                  class="text-current pt-1"
-                  [class.animate-spin]="isSaving()"
-                />
-                {{ isSaving() ? "Guardando..." : "Guardar" }}
-              </app-button>
-            </div>
-          </div>
+      <!-- Filtros en chips -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <span class="text-sm font-medium text-gray-700">Filtros:</span>
+
+        <!-- Filtro Estado -->
+        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
+          <button (click)="cambiarFiltroEstado('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroEstado() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
+            Todas
+          </button>
+          <button (click)="cambiarFiltroEstado('activas')"
+            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroEstado() === 'activas' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
+            Activas
+          </button>
+          <button (click)="cambiarFiltroEstado('inactivas')"
+            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroEstado() === 'inactivas' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
+            Inactivas
+          </button>
         </div>
-      }
 
-      <!-- 📊 TABLA DE VARIANTES -->
-      @if (tieneVariantes()) {
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <!-- Checkbox selección -->
-                <th scope="col" class="px-6 py-3 text-left w-12">
-                  <input
-                    type="checkbox"
-                    [checked]="todasSeleccionadas()"
-                    [indeterminate]="algunaSeleccionada()"
-                    (change)="toggleTodasLasSelecciones()"
-                    class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer"
-                    title="Seleccionar todas"
-                  />
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Imagen
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Variante
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  SKU
-                </th>
+        <!-- Filtro Imagen -->
+        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
+          <button (click)="cambiarFiltroImagen('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroImagen() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
+            Todas
+          </button>
+          <button (click)="cambiarFiltroImagen('con')" [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroImagen() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
+            Con imagen
+          </button>
+          <button (click)="cambiarFiltroImagen('sin')"
+            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                (filtroImagen() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
+            Sin imagen
+          </button>
+        </div>
 
-                @if (esProductoEnergico()) {
-                  <th
-                    scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    STOCK
-                  </th>
-                }
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Precio Extra
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Precio Final
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Estado
-                </th>
-                <th
-                  scope="col"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              @for (
-                variante of variantesFiltradas();
-                track variante.id;
-                let i = $index
-              ) {
-                <tr
-                  [class]="
+        <!-- Filtro Stock (solo enérgicos) -->
+        @if (esProductoEnergico()) {
+        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
+          <button (click)="cambiarFiltroStock('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                  (filtroStock() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
+            Todas
+          </button>
+          <button (click)="cambiarFiltroStock('con')"
+            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                  (filtroStock() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
+            Con stock
+          </button>
+          <button (click)="cambiarFiltroStock('sin')"
+            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
+                  (filtroStock() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
+            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
+            Sin stock
+          </button>
+        </div>
+        }
+
+        <!-- Botón resetear filtros -->
+        @if (hayFiltrosActivos()) {
+        <button (click)="resetearFiltros()"
+          class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-full transition-all"
+          title="Resetear filtros">
+          <app-icon name="x" [size]="'14'" class="text-current pt-1" />
+          Limpiar
+        </button>
+        }
+      </div>
+
+      <!-- Contador de resultados -->
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+          Mostrando <span class="font-semibold text-black">{{ resultadosBusqueda() }}</span>
+          de <span class="font-semibold text-black">{{ variantes().length }}</span> variantes
+        </p>
+
+        <!-- Acciones rápidas -->
+        <div class="flex flex-wrap gap-2 md:gap-3 items-center">
+          @if (esProductoEnergico()) {
+          <app-button type="button" variant="warning" size="sm" (click)="aplicarStockATodas()"
+            class="inline-flex items-center gap-1.5 text-orange-600">
+            <app-icon name="sliders" [size]="'16'" class="text-current pt-1" />
+            Aplicar stock a todas
+          </app-button>
+          }
+
+          <app-button type="button" variant="success" size="sm" (click)="activarTodas()"
+            class="inline-flex items-center gap-1.5">
+            <app-icon name="checkCircle" [size]="'16'" class="text-white mt-1" />
+            Activar todas
+          </app-button>
+
+          <app-button type="button" variant="danger" size="sm" (click)="desactivarTodas()"
+            class="inline-flex items-center gap-1.5 !text-orange-600 hover:!text-orange-700">
+            <app-icon name="MinusCircle" [size]="'16'" class="text-white mt-1" />
+            Desactivar todas
+          </app-button>
+
+          <app-button type="button" variant="info" size="sm" (click)="generarReporte()"
+            class="inline-flex items-center gap-1.5 text-orange-600">
+            <app-icon name="download" [size]="'16'" class="text-current pt-1" />
+            Reporte
+          </app-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicador de cambios -->
+    @if (hasChanges()) {
+    <div class="mb-6 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <app-icon name="AlertOctagon" [size]="'20'" class="text-yellow-600 mt-1" />
+          <span class="text-sm font-medium text-yellow-800">
+            Hay cambios sin guardar
+          </span>
+        </div>
+        <div class="flex gap-2">
+          <app-button type="button" variant="danger" size="sm" (click)="resetearCambios()"
+            class="inline-flex items-center gap-1.5">
+            <app-icon name="x" [size]="'16'" class="text-white mt-1" />
+            Descartar
+          </app-button>
+          <app-button type="button" variant="success" size="sm" [disabled]="isSaving()" (click)="guardarCambios()"
+            class="inline-flex items-center gap-1.5">
+            <app-icon [name]="isSaving() ? 'loader' : 'download'" [size]="'16'" class="text-current pt-1"
+              [class.animate-spin]="isSaving()" />
+            {{ isSaving() ? "Guardando..." : "Guardar" }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- 📊 TABLA DE VARIANTES -->
+    @if (tieneVariantes()) {
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <!-- Checkbox selección -->
+              <th scope="col" class="px-6 py-3 text-left w-12">
+                <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
+                  (change)="toggleTodasLasSelecciones()"
+                  class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer" title="Seleccionar todas" />
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Imagen
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Variante
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                SKU
+              </th>
+
+              @if (esProductoEnergico()) {
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                STOCK
+              </th>
+              }
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Precio Extra
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Precio Final
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Estado
+              </th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (
+            variante of variantesFiltradas();
+            track variante.id;
+            let i = $index
+            ) {
+            <tr [class]="
                     variante.seleccionada
                       ? 'bg-blue-50'
                       : variante.hasChanges
@@ -417,295 +281,199 @@
                         : variante.activo
                           ? ''
                           : 'bg-gray-50 opacity-60'
-                  "
-                >
-                  <!-- Checkbox -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      [checked]="variante.seleccionada"
-                      (click)="toggleSeleccion(i, $event)"
-                      class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer"
-                    />
-                  </td>
+                  ">
+              <!-- Checkbox -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(i, $event)"
+                  class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer" />
+              </td>
 
-                  <!-- Imagen -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div
-                      class="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 group"
-                    >
-                      @if (tieneImagen(variante)) {
-                        <img
-                          [src]="getVarianteImagen(variante)"
-                          [alt]="getVarianteDescripcion(variante)"
-                          class="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          (click)="removeImagen(i)"
-                          class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Eliminar imagen"
-                        >
-                          <app-icon
-                            name="trash2"
-                            [size]="'14'"
-                            class="text-current"
-                          />
-                        </button>
-                      } @else {
-                        <label
-                          class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
-                        >
-                          <app-icon
-                            name="Upload"
-                            [size]="'24'"
-                            class="text-gray-500 mt-1"
-                          />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            (change)="onImagenSelected($event, i)"
-                            class="hidden"
-                          />
-                        </label>
-                      }
-                    </div>
-                  </td>
+              <!-- Imagen -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 group">
+                  @if (tieneImagen(variante)) {
+                  <img [src]="getVarianteImagen(variante)" [alt]="getVarianteDescripcion(variante)"
+                    class="w-full h-full object-cover" />
+                  <button type="button" (click)="removeImagen(i)"
+                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Eliminar imagen">
+                    <app-icon name="trash2" [size]="'14'" class="text-current" />
+                  </button>
+                  } @else {
+                  <label
+                    class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                    <app-icon name="Upload" [size]="'24'" class="text-gray-500 mt-1" />
+                    <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden" />
+                  </label>
+                  }
+                </div>
+              </td>
 
-                  <!-- Descripción -->
-                  <td class="px-6 py-4">
-                    <div class="text-sm font-medium text-gray-900">
-                      {{ getVarianteDescripcion(variante) }}
-                    </div>
-                    @if (variante.hasChanges) {
-                      <span
-                        class="inline-flex items-center gap-1 mt-1 text-xs text-yellow-700"
-                      >
-                        <app-icon
-                          name="alertCircle"
-                          [size]="'12'"
-                          class="text-current pt-1"
-                        />
-                        Modificado
-                      </span>
-                    }
-                  </td>
+              <!-- Descripción -->
+              <td class="px-6 py-4">
+                <div class="text-sm font-medium text-gray-900">
+                  {{ getVarianteDescripcion(variante) }}
+                </div>
+                @if (variante.hasChanges) {
+                <span class="inline-flex items-center gap-1 mt-1 text-xs text-yellow-700">
+                  <app-icon name="alertCircle" [size]="'12'" class="text-current pt-1" />
+                  Modificado
+                </span>
+                }
+              </td>
 
-                  <!-- SKU -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <code
-                      class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-mono"
-                    >
+              <!-- SKU -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <code class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-mono">
                       {{ variante.sku || "N/A" }}
                     </code>
-                  </td>
+              </td>
 
-                  <!-- Stock (solo enérgico) -->
-                  @if (esProductoEnergico()) {
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="number"
-                        [value]="variante.stockFisico"
-                        (input)="onStockChange(i, +$any($event.target).value)"
-                        min="0"
-                        step="1"
-                        placeholder="0"
-                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
-                        [class.border-yellow-400]="variante.hasChanges"
-                      />
-                    </td>
-                  }
+              <!-- Stock (solo enérgico) -->
+              @if (esProductoEnergico()) {
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="number" [value]="variante.stockFisico"
+                  (input)="onStockChange(i, +$any($event.target).value)" min="0" step="1" placeholder="0"
+                  class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
+                  [class.border-yellow-400]="variante.hasChanges" />
+              </td>
+              }
 
-                  <!-- Precio Extra -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-1">
-                      <span class="text-gray-500 text-sm">$</span>
-                      <input
-                        type="number"
-                        [value]="variante.precioExtra"
-                        (input)="
+              <!-- Precio Extra -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-1">
+                  <span class="text-gray-500 text-sm">$</span>
+                  <input type="number" [value]="variante.precioExtra" (input)="
                           onPrecioExtraChange(i, +$any($event.target).value)
-                        "
-                        min="0"
-                        step="0.01"
-                        class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
-                      />
-                    </div>
-                  </td>
+                        " min="0" step="0.01"
+                    class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm" />
+                </div>
+              </td>
 
-                  <!-- Precio Final -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-sm font-semibold text-black">
-                      ${{ calcularPrecioFinal(variante).toFixed(2) }}
-                    </span>
-                  </td>
+              <!-- Precio Final -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-semibold text-black">
+                  ${{ calcularPrecioFinal(variante).toFixed(2) }}
+                </span>
+              </td>
 
-                  <!-- Estado -->
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <button
-                      (click)="toggleVarianteActiva(i)"
-                      [class]="
+              <!-- Estado -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button (click)="toggleVarianteActiva(i)" [class]="
                         'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ' +
                         (variante.activo
                           ? 'bg-green-100 text-green-800 hover:bg-green-200'
                           : 'bg-gray-200 text-gray-600 hover:bg-gray-300')
-                      "
-                    >
-                      <app-icon
-                        [name]="variante.activo ? 'checkCircle' : 'error'"
-                        [size]="'14'"
-                        class="text-current pt-1"
-                      />
-                      {{ variante.activo ? "Activa" : "Inactiva" }}
-                    </button>
-                  </td>
+                      ">
+                  <app-icon [name]="variante.activo ? 'checkCircle' : 'error'" [size]="'14'"
+                    class="text-current pt-1" />
+                  {{ variante.activo ? "Activa" : "Inactiva" }}
+                </button>
+              </td>
 
-                  <!-- Acciones -->
-                  <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <button
-                      type="button"
-                      (click)="eliminarVariante(i)"
-                      class="text-red-600 hover:text-red-800 transition-colors"
-                      title="Eliminar variante"
-                    >
-                      <app-icon
-                        name="trash2"
-                        [size]="'18'"
-                        class="text-current pt-1"
-                      />
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td [attr.colspan]="esProductoEnergico() ? 9 : 8" class="px-6 py-12 text-center">
-                    <app-icon
-                      name="search"
-                      [size]="'48'"
-                      class="text-gray-300 mx-auto mb-3 pt-1"
-                    />
-                    <p class="text-gray-600 font-medium mb-1">No se encontraron variantes</p>
-                    <p class="text-gray-500 text-sm">Intenta ajustar los filtros de búsqueda</p>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              <!-- Acciones -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <button type="button" (click)="eliminarVariante(i)"
+                  class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar variante">
+                  <app-icon name="trash2" [size]="'18'" class="text-current pt-1" />
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td [attr.colspan]="esProductoEnergico() ? 9 : 8" class="px-6 py-12 text-center">
+                <app-icon name="search" [size]="'48'" class="text-gray-300 mx-auto mb-3 pt-1" />
+                <p class="text-gray-600 font-medium mb-1">No se encontraron variantes</p>
+                <p class="text-gray-500 text-sm">Intenta ajustar los filtros de búsqueda</p>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
       </div>
-      }
+    </div>
+    }
     }
 
     <!-- ⚠️ Sin variantes -->
     @if (!isLoading() && !tieneVariantes()) {
-      <div class="bg-white rounded-lg shadow-sm p-12">
-        <div class="text-center">
-          <app-icon
-            name="package"
-            [size]="'48'"
-            class="text-gray-400 mx-auto mb-4 mt-1"
-          />
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
-            Este producto no tiene variantes
-          </h3>
-          <p class="text-gray-600 mb-6">
-            Para gestionar variantes, el producto debe tener una plantilla
-            asignada.
-          </p>
-          <app-button
-            type="button"
-            variant="primary"
-            (click)="volver()"
-            class="inline-flex items-center gap-1.5"
-          >
-            <app-icon
-              name="arrowLeft"
-              [size]="'16'"
-              class="text-current pt-1"
-            />
-            Volver a productos
-          </app-button>
-        </div>
+    <div class="bg-white rounded-lg shadow-sm p-12">
+      <div class="text-center">
+        <app-icon name="package" [size]="'48'" class="text-gray-400 mx-auto mb-4 mt-1" />
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Este producto no tiene variantes
+        </h3>
+        <p class="text-gray-600 mb-6">
+          Para gestionar variantes, el producto debe tener una plantilla
+          asignada.
+        </p>
+        <app-button type="button" variant="primary" (click)="volver()" class="inline-flex items-center gap-1.5">
+          <app-icon name="arrowLeft" [size]="'16'" class="text-current pt-1" />
+          Volver a productos
+        </app-button>
       </div>
+    </div>
     }
 
     <!-- 💾 Botón flotante de guardar (mobile) -->
     @if (hasChanges() && !isLoading()) {
-      <div class="fixed bottom-6 right-6 md:hidden z-50">
-        <app-button
-          type="button"
-          variant="success"
-          size="lg"
-          [disabled]="isSaving()"
-          (click)="guardarCambios()"
-          class="shadow-2xl inline-flex items-center gap-1.5 px-6"
-        >
-          <app-icon
-            [name]="isSaving() ? 'loader' : 'save'"
-            [size]="'18'"
-            class="text-current pt-1"
-            [class.animate-spin]="isSaving()"
-          />
-          {{ isSaving() ? "Guardando..." : "Guardar" }}
-        </app-button>
-      </div>
+    <div class="fixed bottom-6 right-6 md:hidden z-50">
+      <app-button type="button" variant="success" size="lg" [disabled]="isSaving()" (click)="guardarCambios()"
+        class="shadow-2xl inline-flex items-center gap-1.5 px-6">
+        <app-icon [name]="isSaving() ? 'loader' : 'save'" [size]="'18'" class="text-current pt-1"
+          [class.animate-spin]="isSaving()" />
+        {{ isSaving() ? "Guardando..." : "Guardar" }}
+      </app-button>
+    </div>
     }
 
     <!-- 🎯 BARRA FLOTANTE DE SELECCIÓN MÚLTIPLE -->
     @if (cantidadSeleccionadas() > 0) {
-      <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-[slideUp_0.3s_ease-out]">
-        <div class="bg-primary text-white rounded-full shadow-2xl px-6 py-4 flex items-center gap-4">
-          <!-- Contador -->
-          <div class="flex items-center gap-2">
-            <app-icon name="checkCircle" [size]="'20'" class="text-current pt-1" />
-            <span class="font-semibold text-sm pl-2">{{ cantidadSeleccionadas() }} seleccionada(s)</span>
-          </div>
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-[slideUp_0.3s_ease-out]">
+      <div class="bg-primary text-white rounded-full shadow-2xl px-6 py-4 flex items-center gap-4">
+        <!-- Contador -->
+        <div class="flex items-center gap-2">
+          <app-icon name="checkCircle" [size]="'20'" class="text-current pt-1" />
+          <span class="font-semibold text-sm pl-2">{{ cantidadSeleccionadas() }} seleccionada(s)</span>
+        </div>
 
-          <!-- Divisor -->
-          <div class="w-px h-6 bg-white/30"></div>
+        <!-- Divisor -->
+        <div class="w-px h-6 bg-white/30"></div>
 
-          <!-- Acciones -->
-          <div class="flex items-center gap-2">
-            <button
-              (click)="aplicarImagenASeleccionadas()"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-              title="Aplicar imagen"
-            >
-              <app-icon name="upload" [size]="'16'" class="text-current pt-1" />
-              Imagen
-            </button>
+        <!-- Acciones -->
+        <div class="flex items-center gap-2">
+          <button (click)="aplicarImagenASeleccionadas()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
+            title="Aplicar imagen">
+            <app-icon name="upload" [size]="'16'" class="text-current pt-1" />
+            Imagen
+          </button>
 
-            @if (esProductoEnergico()) {
-              <button
-                (click)="aplicarStockASeleccionadas()"
-                class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-                title="Aplicar stock"
-              >
-                <app-icon name="package" [size]="'16'" class="text-current pt-1" />
-                Stock
-              </button>
-            }
+          @if (esProductoEnergico()) {
+          <button (click)="aplicarStockASeleccionadas()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
+            title="Aplicar stock">
+            <app-icon name="package" [size]="'16'" class="text-current pt-1" />
+            Stock
+          </button>
+          }
 
-            <button
-              (click)="aplicarPrecioExtraASeleccionadas()"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-              title="Aplicar precio extra"
-            >
-              <app-icon name="DollarSign" [size]="'16'" class="text-current pt-1" />
-              Precio
-            </button>
+          <button (click)="aplicarPrecioExtraASeleccionadas()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
+            title="Aplicar precio extra">
+            <app-icon name="DollarSign" [size]="'16'" class="text-current pt-1" />
+            Precio
+          </button>
 
-            <button
-              (click)="deseleccionarTodas()"
-              class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-500/80 hover:bg-red-500 rounded-full text-sm font-medium transition-colors"
-              title="Deseleccionar todas"
-            >
-              <app-icon name="x" [size]="'16'" class="text-current pt-1" />
-              Cancelar
-            </button>
-          </div>
+          <button (click)="deseleccionarTodas()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-500/80 hover:bg-red-500 rounded-full text-sm font-medium transition-colors"
+            title="Deseleccionar todas">
+            <app-icon name="x" [size]="'16'" class="text-current pt-1" />
+            Cancelar
+          </button>
         </div>
       </div>
+    </div>
     }
   </div>
 </div>
