@@ -1,11 +1,11 @@
 <div (click)="onViewDetail($event)"
     class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300 cursor-pointer hover:ring-2 hover:ring-brand-primary/40"
-    [class]="esCompleto ? 'border-info shadow-info-light' : esConfirmado ? 'border-brand-secondary/40' : esCancelado ? 'border-error/30' : esEntregado ? 'border-success/30' : 'border-border-default hover:shadow-md'">
+    [class]="esCompleto ? 'border-success/50 shadow-success-light' : esConfirmado ? 'border-brand-secondary/40' : esCancelado ? 'border-error/30' : esEntregado ? 'border-success/30' : 'border-border-default hover:shadow-md'">
 
     <!-- Banner: Completo — esperando confirmación del admin -->
     @if (esCompleto) {
-    <div class="flex items-center justify-between gap-3 bg-info-light border-b border-info/30 px-4 py-2.5">
-        <div class="flex items-center gap-2 text-info">
+    <div class="flex items-center justify-between gap-3 bg-success-light border-b border-success/30 px-4 py-2.5">
+        <div class="flex items-center gap-2 text-success">
             <app-icon name="checkCircle" size="16" />
             <span class="text-xs font-bold uppercase tracking-widest">Completo — Confirmar con fabricante</span>
         </div>
@@ -181,8 +181,8 @@
                         <!-- Confirmar con fabricante (Completo → Confirmado) -->
                         @if (canConfirm) {
                         <button (click)="onConfirm($event)"
-                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-info-light hover:text-info transition-colors">
-                            <app-icon name="checkCircle" size="16" class="text-info flex-shrink-0" />
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success transition-colors">
+                            <app-icon name="checkCircle" size="16" class="text-success flex-shrink-0" />
                             <div class="text-left">
                                 <p class="font-medium text-xs leading-tight">Confirmar compra con fabricante</p>
                                 <p class="text-[10px] text-text-muted leading-tight">Pasa pedidos a "En preparación"</p>

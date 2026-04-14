@@ -94,7 +94,7 @@ export class AdministrarPlantillasComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Duplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9'
+      confirmButtonColor: '#2E608C'
     }).then((result) => {
       if (result.isConfirmed) {
         const copia: Plantilla = {
@@ -123,8 +123,8 @@ export class AdministrarPlantillasComponent implements OnInit {
       text: `Se eliminará la plantilla "${plantilla.nombre}".`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
-      cancelButtonColor: 'rgba(170, 58, 58, 1)',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {

@@ -95,7 +95,7 @@
     /* error-dark */
     --status-info-bg: #eff6ff;
     /* info-light */
-    --status-info-text: #1e40af;
+    --status-info-text: #2E608C;
     /* info-dark */
     --status-neutral-bg: #f3f4f6;
     /* gray-100 */
@@ -243,9 +243,9 @@ p {
 
 /* Success toast */
 [data-sonner-toast][data-type="success"] {
-    background-color: var(--success-light) !important;
-    border: 1px solid var(--success) !important;
-    color: var(--success-dark) !important;
+    background-color: #f0fdf4 !important;
+    border: 1px solid #86efac !important;
+    color: #166534 !important;
 }
 
 /* Error toast */

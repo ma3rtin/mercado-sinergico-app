@@ -88,7 +88,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
-        confirmButtonColor: '#71A8D9',
+        confirmButtonColor: '#2E608C',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
@@ -148,8 +148,10 @@ export class AdministrarPublicacionesComponent implements OnInit {
       Swal.fire({
         title: '¿Enviar notificación a compradores?',
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
-        icon: 'info',
+        icon: 'question',
         showCancelButton: true,
+        confirmButtonColor: '#2E608C',
+        cancelButtonColor: '#9ca3af',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
