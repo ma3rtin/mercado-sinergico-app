@@ -260,8 +260,6 @@ export class IconsService {
     AlertOctagon: featherAlertOctagon,
     Plus: featherPlus,
     MoreVertical: featherMoreVertical,
-
-
   };
 
   /**

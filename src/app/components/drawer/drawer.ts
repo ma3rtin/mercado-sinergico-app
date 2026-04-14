@@ -27,8 +27,7 @@ export class Drawer {
   user = this.authService.user;
 
   // 🔗 Links dinámicos
-  get profileLink(): string {
-    const role = this.authService.getUserRole();
-    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
+  get isAdmin(): boolean {
+    return this.authService.getUserRole()?.toLowerCase() === 'administrador';
   }
 }
