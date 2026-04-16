@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { IconComponent } from "@app/shared/icono/icono";
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-faq-item',
