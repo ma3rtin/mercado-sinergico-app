@@ -16,14 +16,15 @@ import { IconsService } from '@app/services/iconos/icons.service';
   standalone: true,
   imports: [CommonModule, NgIconComponent, NgIconsModule],
   template: `
-    <ng-icon
-      [name]="iconName()"
-      [size]="size()"
-      [strokeWidth]="strokeWidth()"
-      [color]="color()"
-      [class]="'inline-block leading-none align-middle ' + cssClass()"
-    />
-  `,
+  <ng-icon
+    [name]="iconName()"
+    [size]="size()"
+    [strokeWidth]="strokeWidth()"
+    [color]="color()"
+    [class]="'flex items-center justify-center ' + cssClass()"
+    style="display: inline-flex; line-height: 1;"
+  />
+`,
 })
 export class IconComponent {
   // 🎨 INPUTS

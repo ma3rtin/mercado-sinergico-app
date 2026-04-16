@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
@@ -8,8 +8,9 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { ToastService } from '@app/services/toast/toast.service';
-
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
+
+const ITEMS_POR_PAGINA = 5;
 
 @Component({
   selector: 'app-perfil-admin',
@@ -23,71 +24,133 @@ export class PerfilAdmin implements OnInit {
   private paquetePublicadoService = inject(PaquetePublicadoService);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
-  // 📊 Señales principales
-  paquetes = signal<PaquetePublicado[]>([]);
-  paquetesCerrados = signal<PaquetePublicado[]>([]);
+  // 📌 Referencia a la sección de finalizados para scroll
+  @ViewChild('seccionFinalizados') seccionFinalizados?: ElementRef<HTMLElement>;
+
+  // 📊 Señales — Perfil
   usuario = signal<Usuario | null>(null);
-  loading = signal(true);
-  loadingCerrados = signal(true);
-  error = signal<string | null>(null);
-  errorCerrados = signal<string | null>(null);
+
+  // 📊 Señales — Sección 1: Completos (requieren atención)
+  paquetesCompletos = signal<PaquetePublicado[]>([]);
+  loadingCompletos = signal(true);
+  errorCompletos = signal<string | null>(null);
+
+  // 📊 Señales — Sección 2: Finalizados (Recibido + Cancelado)
+  paquetesFinalizados = signal<PaquetePublicado[]>([]);
+  loadingFinalizados = signal(true);
+  errorFinalizados = signal<string | null>(null);
+  paginaActualFinalizados = signal(1);
+
+  // 📐 Computed — Paginación de finalizados
+  readonly totalPaginasFinalizados = computed(() =>
+    Math.ceil(this.paquetesFinalizados().length / ITEMS_POR_PAGINA)
+  );
+
+  readonly paquetesFinalizadosPaginados = computed(() => {
+    const pagina = this.paginaActualFinalizados();
+    const inicio = (pagina - 1) * ITEMS_POR_PAGINA;
+    return this.paquetesFinalizados().slice(inicio, inicio + ITEMS_POR_PAGINA);
+  });
+
+  readonly mostrarPaginacion = computed(() =>
+    this.paquetesFinalizados().length > ITEMS_POR_PAGINA
+  );
+
+  readonly paginasArray = computed(() =>
+    Array.from({ length: this.totalPaginasFinalizados() }, (_, i) => i + 1)
+  );
+
+  // ─────────────────────────────────────────────────────────────
+  // Ciclo de vida
+  // ─────────────────────────────────────────────────────────────
 
   ngOnInit() {
     this.loadPerfil();
-    this.loadPaquetesPorCerrarse();
-    this.loadPaquetesCerrados();
+    this.loadPaquetesCompletos();
+    this.loadPaquetesFinalizados();
   }
 
-  // 👤 Cargar perfil del usuario
+  // ─────────────────────────────────────────────────────────────
+  // Carga de datos
+  // ─────────────────────────────────────────────────────────────
+
   loadPerfil() {
     this.usuarioService.getPerfil().subscribe({
-      next: (usuario) => {
-        this.usuario.set(usuario);
-      },
-      error: (err) => {
-        console.error('Error al cargar perfil:', err);
-        this.error.set('No se pudo cargar el perfil del usuario.');
-      },
+      next: (usuario) => this.usuario.set(usuario),
+      error: (err) => console.error('Error al cargar perfil:', err),
     });
   }
 
-  // 📦 Cargar paquetes próximos a cerrarse
-  loadPaquetesPorCerrarse() {
-    this.loading.set(true);
-    this.error.set(null);
+  loadPaquetesCompletos() {
+    this.loadingCompletos.set(true);
+    this.errorCompletos.set(null);
 
-    this.paquetePublicadoService.getPaquetesPorCerrarse().subscribe({
+    this.paquetePublicadoService.getPaquetesCompletos().subscribe({
       next: (paquetes) => {
-        this.paquetes.set(paquetes);
-        this.loading.set(false);
+        this.paquetesCompletos.set(paquetes);
+        this.loadingCompletos.set(false);
       },
       error: (err) => {
-        console.error('Error al cargar paquetes:', err);
-        this.error.set('Ocurrió un error al cargar los paquetes por cerrarse.');
-        this.loading.set(false);
+        console.error('Error al cargar paquetes completos:', err);
+        this.errorCompletos.set('No se pudieron cargar los paquetes que requieren atención.');
+        this.loadingCompletos.set(false);
       },
     });
   }
 
-  loadPaquetesCerrados() {
-    this.loadingCerrados.set(true);
-    this.errorCerrados.set(null);
+  loadPaquetesFinalizados() {
+    this.loadingFinalizados.set(true);
+    this.errorFinalizados.set(null);
+    this.paginaActualFinalizados.set(1);
 
-    this.paquetePublicadoService.getPaquetesCerrados().subscribe({
-      next: (paquetes: PaquetePublicado[]) => {
-        this.paquetesCerrados.set(paquetes);
-        this.loadingCerrados.set(false);
+    this.paquetePublicadoService.getPaquetesFinalizados().subscribe({
+      next: (paquetes) => {
+        this.paquetesFinalizados.set(paquetes);
+        this.loadingFinalizados.set(false);
       },
-      error: (err: any) => {
-        console.error('Error al cargar paquetes cerrados:', err);
-        this.errorCerrados.set('Ocurrió un error al cargar los paquetes cerrados.');
-        this.loadingCerrados.set(false);
+      error: (err) => {
+        console.error('Error al cargar paquetes finalizados:', err);
+        this.errorFinalizados.set('No se pudieron cargar los paquetes finalizados.');
+        this.loadingFinalizados.set(false);
       },
     });
   }
 
-  // 📥 Exportaciones Excel
+  // ─────────────────────────────────────────────────────────────
+  // Paginación
+  // ─────────────────────────────────────────────────────────────
+
+  cambiarPagina(pagina: number) {
+    const total = this.totalPaginasFinalizados();
+    if (pagina < 1 || pagina > total) return;
+    this.paginaActualFinalizados.set(pagina);
+    this.seccionFinalizados?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Helpers de estado para items finalizados
+  // ─────────────────────────────────────────────────────────────
+
+  esRecibido(paquete: PaquetePublicado): boolean {
+    return paquete.estado?.nombre?.toLowerCase() === 'recibido';
+  }
+
+  esCancelado(paquete: PaquetePublicado): boolean {
+    return paquete.estado?.nombre?.toLowerCase() === 'cancelado';
+  }
+
+  getBadgeClaseEstado(paquete: PaquetePublicado): string {
+    if (this.esRecibido(paquete)) return 'bg-green-100 text-green-700';
+    if (this.esCancelado(paquete)) return 'bg-red-100 text-red-700';
+    return 'bg-gray-100 text-gray-600';
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Exportaciones Excel
+  // ─────────────────────────────────────────────────────────────
+
   descargarPlanillaFabrica(id: number | undefined) {
     if (!id) return;
     this.paquetePublicadoService.exportarFabrica(id).subscribe({
@@ -95,14 +158,11 @@ export class PerfilAdmin implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `plantilla_fabrica_${id}.xlsx`;
+        a.download = `reporte_proveedor_${id}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: (err) => {
-        console.error('Error al descargar plantilla fábrica:', err);
-        alert('Ocurrió un error al descargar la plantilla para fábrica.');
-      }
+      error: () => this.toastService.error('Error al descargar el reporte del proveedor.'),
     });
   }
 
@@ -113,64 +173,49 @@ export class PerfilAdmin implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `plantilla_logistica_${id}.xlsx`;
+        a.download = `hoja_de_ruta_${id}.xlsx`;
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: (err) => {
-        console.error('Error al descargar plantilla logística:', err);
-        alert('Ocurrió un error al descargar la plantilla para logística.');
-      }
+      error: () => this.toastService.error('Error al descargar la hoja de ruta.'),
     });
   }
 
-  // 🎨 Métodos de estilo y helpers
+  // ─────────────────────────────────────────────────────────────
+  // Helpers de formato
+  // ─────────────────────────────────────────────────────────────
 
-  formatearFecha(fecha?: Date): string {
+  formatearFecha(fecha?: Date | string): string {
     if (!fecha) return 'N/A';
     return new Date(fecha).toLocaleDateString('es-AR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
-  // --- Acciones de la Card ---
+  // ─────────────────────────────────────────────────────────────
+  // Acciones de la AdminPaqueteCard
+  // ─────────────────────────────────────────────────────────────
 
-  private toastService = inject(ToastService);
-
-  editarPaquete(paquete: PaquetePublicado) {
-    console.log('✏️ Editando publicación desde perfil:', paquete.id_paquete_publicado);
-    this.router.navigate(['/admin/publicar-paquete'], { queryParams: { id: paquete.id_paquete_publicado, edit: true } });
-  }
-
-  notificarCierre(paquete: PaquetePublicado) {
-    console.log('🔔 Notificando cierre de:', paquete.paqueteBase?.nombre);
-  }
-
-  cerrarPaqueteDesdeCard(paquete: PaquetePublicado) {
-    // Cierre desde el perfil: navega a administrar-publicaciones con el paquete destacado
-    this.navigateToPublicacionDetalle(paquete.id_paquete_publicado!);
-  }
-
-  finalizarPaquete(paquete: PaquetePublicado) {
+  confirmarPaquete(paquete: PaquetePublicado) {
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
-        title: '¿Finalizar paquete?',
-        text: `Se marcará "${paquete.paqueteBase?.nombre}" como completado.`,
+        title: '¿Confirmar compra?',
+        text: `Se confirmará la compra de "${paquete.paqueteBase?.nombre}" al fabricante.`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí, finalizar',
-        cancelButtonText: 'Cancelar'
-      }).then(result => {
+        confirmButtonText: 'Sí, confirmar',
+        cancelButtonText: 'Cancelar',
+      }).then((result) => {
         if (result.isConfirmed) {
-          console.log('✅ Finalizando paquete:', paquete.id_paquete_publicado);
-          this.paquetePublicadoService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
+          this.paquetePublicadoService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
             next: () => {
-              this.toastService.success('Paquete finalizado con éxito');
-              this.loadPaquetesPorCerrarse();
+              this.toastService.success('Compra confirmada con éxito');
+              this.loadPaquetesCompletos();
+              this.loadPaquetesFinalizados();
             },
-            error: () => this.toastService.error('Error al finalizar el paquete')
+            error: () => this.toastService.error('Error al confirmar la compra'),
           });
         }
       });
@@ -184,18 +229,18 @@ export class PerfilAdmin implements OnInit {
         text: 'ESTO DEVOLVERÁ EL DINERO A TODOS LOS USUARIOS. Acción irreversible.',
         icon: 'error',
         showCancelButton: true,
-        confirmButtonColor: '#E53935',
+        confirmButtonColor: '#B92905',
         confirmButtonText: 'SÍ, REEMBOLSAR',
-        cancelButtonText: 'No, volver'
-      }).then(result => {
+        cancelButtonText: 'No, volver',
+      }).then((result) => {
         if (result.isConfirmed) {
-          console.log('🚨 Iniciando reembolso para:', paquete.id_paquete_publicado);
           this.paquetePublicadoService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
             next: () => {
               this.toastService.success('Paquete cancelado y reembolsos procesados');
-              this.loadPaquetesPorCerrarse();
+              this.loadPaquetesCompletos();
+              this.loadPaquetesFinalizados();
             },
-            error: () => this.toastService.error('Error al procesar el reembolso')
+            error: () => this.toastService.error('Error al procesar el reembolso'),
           });
         }
       });
@@ -203,52 +248,29 @@ export class PerfilAdmin implements OnInit {
   }
 
   duplicarPaquete(paquete: PaquetePublicado) {
-    console.log('📋 Duplicando publicación desde perfil:', paquete.id_paquete_publicado);
     this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
       next: () => {
         this.toastService.success('Publicación duplicada con éxito');
-        this.loadPaquetesPorCerrarse();
+        this.loadPaquetesCompletos();
       },
-      error: () => this.toastService.error('Error al duplicar la publicación')
+      error: () => this.toastService.error('Error al duplicar la publicación'),
     });
   }
 
-  // 🧭 Navegaciones
-
-  navigateToAdminProducts() {
-    this.router.navigate(['/admin/administrar-productos']);
+  navigateToPublicacionDetalle(paquete: PaquetePublicado) {
+    this.router.navigate(['/admin/administrar-publicacion', paquete.id_paquete_publicado]);
   }
 
-  navigateToAdminPackages() {
-    this.router.navigate(['/admin/administrar-paquetes']);
-  }
+  // ─────────────────────────────────────────────────────────────
+  // Navegaciones
+  // ─────────────────────────────────────────────────────────────
 
-  navigateToAdminPublicaciones() {
-    this.router.navigate(['/admin/administrar-publicaciones']);
-  }
-
-  /** Navega directamente al detalle de la publicación */
-  navigateToPublicacionDetalle(id: number) {
-    this.router.navigate(['/admin/administrar-publicacion', id]);
-  }
-
-  navigateToAdminTemplates() {
-    this.router.navigate(['/admin/administrar-plantillas']);
-  }
-
-  navigateToAdminPostPackages() {
-    this.router.navigate(['/admin/publicar-paquete']);
-  }
-
-  crearProducto() {
-    this.router.navigate(['/admin/crear-producto']);
-  }
-
-  crearPaquete() {
-    this.router.navigate(['/admin/crear-paquete']);
-  }
-
-  navigateToImportarProductos() {
-    this.router.navigate(['/admin/importar-productos']);
-  }
+  navigateToAdminProducts() { this.router.navigate(['/admin/administrar-productos']); }
+  navigateToAdminPackages() { this.router.navigate(['/admin/administrar-paquetes']); }
+  navigateToAdminPublicaciones() { this.router.navigate(['/admin/administrar-publicaciones']); }
+  navigateToAdminTemplates() { this.router.navigate(['/admin/administrar-plantillas']); }
+  navigateToAdminPostPackages() { this.router.navigate(['/admin/publicar-paquete']); }
+  crearProducto() { this.router.navigate(['/admin/crear-producto']); }
+  crearPaquete() { this.router.navigate(['/admin/crear-paquete']); }
+  navigateToImportarProductos() { this.router.navigate(['/admin/importar-productos']); }
 }

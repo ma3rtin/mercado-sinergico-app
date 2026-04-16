@@ -11,12 +11,15 @@
 
     <!-- 🎨 Icono inicial (si existe) -->
     @if (iconStart() && !iconOnly()) {
-    <app-icon [name]="iconStart()!" [class]="iconClasses() + ' transition-transform group-hover:scale-110'" />
+    <app-icon [name]="iconStart()!" [size]="iconSize()" [class]="iconClasses() + ' transition-transform group-hover:scale-110'" />
     }
 
     <!-- 📝 Contenido del botón -->
     @if (!loading()) {
-    <div [ngClass]="{ 'flex flex-col items-center justify-center max-w-[140px] px-2 h-10': direction() === 'column' }">
+    <div [ngClass]="{ 
+      'flex flex-col items-center justify-center max-w-[140px] px-2 h-10': direction() === 'column',
+      'flex items-center': direction() === 'row'
+    }">
       <!-- Si hay label -->
       @if (label()) {
       <span [class.whitespace-nowrap]="direction() === 'row'" [class.leading-tight]="direction() === 'column'">
@@ -33,19 +36,19 @@
 
     <!-- Icono único (si solo es icono) -->
     @if (iconOnly() && iconStart()) {
-    <app-icon [name]="iconStart()!" [class]="iconClasses()" />
+    <app-icon [name]="iconStart()!" [size]="iconSize()" [class]="iconClasses()" />
     }
     }
     <!-- 🔄 Loading spinner -->
     @else {
-    <span class="animate-spin">
-      <app-icon name="loader" [class]="iconClasses()" />
+    <span class="animate-spin flex items-center justify-center">
+      <app-icon name="loader" [size]="iconSize()" [class]="iconClasses()" />
     </span>
     }
 
     <!-- 🎨 Icono final (si existe y no está cargando) -->
     @if (iconEnd() && !loading() && !iconOnly()) {
-    <app-icon [name]="iconEnd()!" [class]="iconClasses() + ' transition-transform group-hover:translate-x-1'" />
+    <app-icon [name]="iconEnd()!" [size]="iconSize()" [class]="iconClasses() + ' transition-transform group-hover:translate-x-1'" />
     }
   </span>
 

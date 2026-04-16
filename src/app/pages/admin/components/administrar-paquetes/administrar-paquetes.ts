@@ -81,7 +81,7 @@ export class AdministrarPaquetesComponent implements OnInit {
       text: `Se eliminará "${paquete.nombre}" y sus asociaciones.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#E53935',
+      confirmButtonColor: '#B92905',
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar'
     }).then(result => {

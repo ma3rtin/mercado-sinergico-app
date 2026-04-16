@@ -13,6 +13,8 @@ export enum EstadoPaqueteNombre {
     Activo     = 'Activo',
     Completo   = 'Completo',
     Confirmado = 'Confirmado',
+    Recibido   = 'Recibido',
     Entregado  = 'Entregado',
     Cancelado  = 'Cancelado',
+    Eliminado  = 'Eliminado',
 }

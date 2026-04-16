@@ -514,7 +514,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseFloat(value) < 0) {
           return 'Ingresá un precio válido';
@@ -574,7 +574,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -784,7 +784,7 @@ export class GestionarVariantesComponent implements OnInit {
       html: `Se actualizarán <strong>${variantesConCambios.length}</strong> variante(s)`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, guardar',
       cancelButtonText: 'Cancelar',
@@ -883,7 +883,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, descartar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -920,7 +920,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -966,7 +966,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -1006,7 +1006,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#2D7A3E',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, activar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1033,7 +1033,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#D28509',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, desactivar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1126,7 +1126,7 @@ export class GestionarVariantesComponent implements OnInit {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#B92905',
-        cancelButtonColor: '#6c757d',
+        cancelButtonColor: '#9ca3af',
         confirmButtonText: 'Sí, salir',
         cancelButtonText: 'Cancelar',
       }).then((result) => {

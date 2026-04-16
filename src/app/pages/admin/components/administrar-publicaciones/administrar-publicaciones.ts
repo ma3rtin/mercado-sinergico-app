@@ -88,12 +88,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
-        confirmButtonColor: '#71A8D9',
+        confirmButtonColor: '#2E608C',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
         this.paqueteService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
-          next: (res: any) => {
+          next: () => {
             this.toast.success(`"${paquete.paqueteBase?.nombre}" confirmado con el fabricante`, 'Compra confirmada');
             this.loadPaquetes();
           },
@@ -148,8 +148,10 @@ export class AdministrarPublicacionesComponent implements OnInit {
       Swal.fire({
         title: '¿Enviar notificación a compradores?',
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
-        icon: 'info',
+        icon: 'question',
         showCancelButton: true,
+        confirmButtonColor: '#2E608C',
+        cancelButtonColor: '#9ca3af',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
@@ -175,12 +177,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
   getEstadoClasses(estado?: EstadoPaquetePublicado): string {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     switch (estado.nombre?.toLowerCase().trim()) {
-      case 'activo':     return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'completo':   return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
+      case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'completo': return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
       case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
-      case 'entregado':  return 'bg-green-50 text-green-700 border-green-300';
-      case 'cancelado':  return 'bg-red-50 text-red-700 border-red-200';
-      default:           return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+      case 'entregado': return 'bg-green-50 text-green-700 border-green-300';
+      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
+      default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }
 
