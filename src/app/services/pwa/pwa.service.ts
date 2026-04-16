@@ -1,26 +1,30 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PwaService {
   private deferredPrompt: any;
+  private platformId = inject(PLATFORM_ID);
   showInstallButton = signal<boolean>(false);
 
   constructor() {
-    console.log('PwaService iniciado, esperando evento...');
-    window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('✅ Evento beforeinstallprompt capturado!');
-      e.preventDefault();
-      this.deferredPrompt = e;
-      this.showInstallButton.set(true);
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      console.log('PwaService iniciado, esperando evento...');
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('✅ Evento beforeinstallprompt capturado!');
+        e.preventDefault();
+        this.deferredPrompt = e;
+        this.showInstallButton.set(true);
+      });
 
-    window.addEventListener('appinstalled', () => {
-      console.log('⭐ PWA instalada correctamente');
-      this.deferredPrompt = null;
-      this.showInstallButton.set(false);
-    });
+      window.addEventListener('appinstalled', () => {
+        console.log('⭐ PWA instalada correctamente');
+        this.deferredPrompt = null;
+        this.showInstallButton.set(false);
+      });
+    }
   }
 
   installPwa(): void {

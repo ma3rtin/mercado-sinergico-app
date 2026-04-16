@@ -9,21 +9,36 @@
   "icons": [
     {
       "src": "assets/icons/icon-192x192.png",
-      "sizes": "192x192",
+      "sizes": "640x640",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "assets/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "sizes": "640x640",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "assets/icons/icon-512x512.png",
-      "sizes": "512x512",
+      "sizes": "640x640",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/images/pwa-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Panel de Mercado Sinérgico"
+    },
+    {
+      "src": "assets/images/pwa-mobile.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "label": "App Móvil de Compras Colectivas"
     }
   ]
 }
