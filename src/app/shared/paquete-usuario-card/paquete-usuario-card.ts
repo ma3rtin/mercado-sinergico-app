@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -31,6 +31,13 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   public readonly TipoPaquete = TipoPaquete;
   isActualizando = signal(false);
+  isMobile = signal(window.innerWidth < 768);
+  isModalOpen = signal(false);
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile.set(window.innerWidth < 768);
+  }
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -191,7 +198,15 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
 
   onToggleExpansion(): void {
-    this.toggleExpansion.emit();
+    if (this.isMobile()) {
+      this.isModalOpen.set(!this.isModalOpen());
+    } else {
+      this.toggleExpansion.emit();
+    }
+  }
+
+  closeModal(): void {
+    this.isModalOpen.set(false);
   }
 
   onAumentarCantidad(prod: any): void {
