@@ -370,8 +370,8 @@
           </h4>
 
           <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-             <!-- ... Stats ... -->
-             <div class="p-3 rounded-xl bg-bg-app border border-border-default">
+            <!-- ... Stats ... -->
+            <div class="p-3 rounded-xl bg-bg-app border border-border-default">
               <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mb-1">Cierra en</p>
               <div class="flex items-center gap-2">
                 <app-icon name="clock" size="16" [class]="esUrgente ? 'text-error' : 'text-brand-primary'" />
@@ -385,45 +385,42 @@
               <div class="flex items-center gap-2">
                 <app-icon name="package" size="16" class="text-brand-primary" />
                 <p class="text-base font-bold text-text-primary">
-                  {{ paquete.cant_productos_reservados || 0 }} <span class="text-text-muted font-normal text-xs">/ {{
-                    paquete.cant_productos || 0 }}</span>
+                  {{ paquete.cant_productos_reservados || 0 }}
+                  <span class="text-text-muted font-normal text-xs">/ {{ paquete.cant_productos || 0 }}</span>
                 </p>
               </div>
             </div>
           </div>
 
-<!-- BOTONES -->
-<div class="flex flex-col gap-3 pt-6">
+          <!-- BOTONES -->
+          <div class="flex flex-col gap-3 pt-6">
+            @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
+              <app-button
+                variant="primary"
+                label="Completar compra"
+                [fullWidth]="true"
+                (buttonClick)="onFinalizarCompra()"
+                class="shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-transform">
+              </app-button>
+            }
 
-  @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-  <app-button 
-    variant="primary" 
-    label="Completar compra"
-    [fullWidth]="true"
-    (buttonClick)="onFinalizarCompra()"
-    class="shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-transform">
-  </app-button>
-  }
+            @if (puedeReembolsar) {
+              <app-button
+                variant="danger"
+                [fullWidth]="true"
+                iconStart="refreshCcw"
+                (buttonClick)="onSolicitarReembolso()">
+                Solicitar reembolso
+              </app-button>
+            }
 
-  @if (puedeReembolsar) {
-  <app-button 
-    variant="danger" 
-    [fullWidth]="true" 
-    iconStart="refreshCcw"
-    (buttonClick)="onSolicitarReembolso()">
-    Solicitar reembolso
-  </app-button>
-  }
-
-  @if (puedeSalirDelPaquete) {
-  <button 
-    (click)="onSalirDelPaquete()"
-    class="text-sm text-error hover:text-error-dark font-medium transition-colors py-2 cursor-pointer">
-    Abandonar este paquete
-  </button>
-  }
-
-</div>
+            @if (puedeSalirDelPaquete) {
+              <button
+                (click)="onSalirDelPaquete()"
+                class="text-sm text-error hover:text-error-dark font-medium transition-colors py-2 cursor-pointer">
+                Abandonar este paquete
+              </button>
+            }
           </div>
         </div>
       </div>

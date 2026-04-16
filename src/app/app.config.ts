@@ -91,7 +91,6 @@ import {
   featherMinusCircle,
   featherAlertOctagon,
   featherFilePlus,
-  featherFileText,
   featherHelpCircle,
   featherLifeBuoy,
   featherMessageCircle,
@@ -195,13 +194,11 @@ export const appConfig: ApplicationConfig = {
         featherHelpCircle,
         featherLifeBuoy,
         featherMessageCircle,
-        featherShield
-        featherLock,
+        featherShield,
         featherInbox,
         featherImage,
         featherTruck,
         featherThumbsUp,
-        featherFileText,
         featherXCircle,
         featherHash,
       })
