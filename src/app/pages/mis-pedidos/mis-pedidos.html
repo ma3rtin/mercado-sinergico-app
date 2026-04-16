@@ -41,7 +41,7 @@
     <div class="flex flex-col md:flex-row gap-4 mb-6">
       <!-- Búsqueda por texto -->
       <div class="flex-1 relative">
-        <input type="text" [ngModel]="terminoBusqueda()" (ngModelChange)="terminoBusqueda.set($event)"
+        <input type="text" [ngModel]="terminoBusqueda()" (ngModelChange)="cambiarBusqueda($event)"
           placeholder="Buscar por paquete o ID..."
           class="w-full px-4 py-2.5 pl-11 pr-4 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
         <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
@@ -53,27 +53,36 @@
 
       <!-- Filtro por Estado -->
       <div class="w-full md:w-64">
-        <select [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)"
+        <select [ngModel]="estadoFiltro()" (ngModelChange)="cambiarEstadoFiltro($event)"
           class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none cursor-pointer"
           style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236B7280%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem top 50%; background-size: 0.65rem auto;">
           <option value="Todos">Todos los estados</option>
           <option value="Pendiente">Pendiente</option>
-          <option value="En Preparación">En Preparación</option>
-          <option value="Enviado">Enviado</option>
-          <option value="Entregado">Entregado</option>
-          <option value="Cancelado">Cancelado</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Reembolsado">Reembolsado</option>
+          <option value="En preparación">En preparación</option>
+          <option value="En camino">En camino</option>
+          <option value="Recibido">Recibido</option>
         </select>
+      </div>
+    </div>
+
+    <!-- CABECERA RESULTADOS -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
+      <div class="text-sm text-gray-500 font-medium w-full text-left">
+        Mostrando {{ pedidosPaginados().length }} pedidos de {{ pedidosFiltrados().length }}
       </div>
     </div>
 
     <!-- GRID -->
     <div class="flex flex-col gap-6">
 
-      @for (pedido of pedidosFiltrados(); track pedido.id_pedido) {
+      @for (pedido of pedidosPaginados(); track pedido.id_pedido) {
       <app-paquete-usuario-card [pedido]="pedido" (toggleExpansion)="toggleExpansion(pedido)"
         (aumentarCantidad)="aumentarCantidad(pedido, $event)" (disminuirCantidad)="disminuirCantidad(pedido, $event)"
         (eliminarProducto)="eliminarProducto(pedido, $event)" (salirDelPaquete)="salirDelPaquete(pedido)"
-        (finalizarCompra)="finalizarCompra(pedido)" (imageError)="onImageError($event)">
+        (finalizarCompra)="finalizarCompra(pedido)" (solicitarReembolso)="solicitarReembolso(pedido)"
+        (imageError)="onImageError($event)">
       </app-paquete-usuario-card>
       }
 
@@ -96,6 +105,17 @@
       }
 
     </div>
+
+    <!-- PAGINACIÓN -->
+    @if (pedidosPaginados().length > 0) {
+      <app-pagination
+        [totalItems]="totalItemsPaginacion()"
+        [itemsPerPage]="itemsPorPagina()"
+        [currentPage]="paginaActual()"
+        (pageChange)="onPageChange($event)"
+      />
+    }
+
     }
   </app-delayed-skeleton>
 

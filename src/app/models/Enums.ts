@@ -1,13 +1,13 @@
 export enum EstadoPaquete {
-    ABIERTO = 'Abierto',
-    CERRADO = 'Cerrado',
-    CANCELADO = 'Cancelado',
-    INCOMPLETO = 'Incompleto',
-    PENDIENTE = 'Pendiente',
+    ACTIVO     = 'Activo',
+    COMPLETO   = 'Completo',
+    CONFIRMADO = 'Confirmado',
+    ENTREGADO  = 'Entregado',
+    CANCELADO  = 'Cancelado',
 }
 
 export enum TipoPaquete {
-  SINERGICO = 'SINERGICO',
-  ENERGICO = 'Enérgico',
+  SINERGICO  = 'SINERGICO',
+  ENERGICO   = 'ENERGICO',
   POR_DEFINIR = 'POR_DEFINIR',
 }

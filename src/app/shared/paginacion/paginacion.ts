@@ -2,20 +2,7 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-/**
- * 🎯 Componente de Paginación Reutilizable (CUSTOM)
- *
- * Este componente implementa paginación manual sin usar el pipe de ngx-pagination.
- * Esto nos da más control y evita problemas con el manejo de estado.
- *
- * @example
- * <app-pagination
- *   [totalItems]="productos.length"
- *   [itemsPerPage]="12"
- *   [currentPage]="paginaActual()"
- *   (pageChange)="onPageChange($event)"
- * />
- */
+
 @Component({
   selector: 'app-pagination',
   standalone: true,
@@ -172,18 +159,19 @@ export class PaginationComponent {
     return this.maxSize();
   }
 
-  // 🎨 Helper para clases de botones
-  getButtonClass(isActive: boolean, isDisabled: boolean): string {
-    const base = 'px-3 py-2 min-w-[2.5rem] text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2  focus:ring-offset-1';
-
-    if (isDisabled) {
-      return `${base} opacity-40 cursor-not-allowed bg-gray-200 text-gray-500 border border-gray-300`;
-    }
+  // 🎨 Helper para botones de números
+  getNumberButtonClass(isActive: boolean): string {
+    const base = 'min-w-[2.25rem] h-9 flex items-center justify-center text-sm transition-colors focus:outline-none px-2 rounded-md cursor-pointer border-2';
 
     if (isActive) {
-      return `${base} bg-secondary text-white border border-secondary shadow-md font-bold hover:bg-secondary-dark hover:border-secondary-dark transform scale-110`;
+      return `${base} border-primary text-gray-900 font-semibold bg-white cursor-default`;
     }
 
-    return `${base} border border-gray-300 bg-white text-gray-700 hover:bg-primary-light hover:border-primary hover:text-primary-dark hover:transform hover:scale-105 cursor-pointer`;
+    return `${base} border-transparent text-gray-500 hover:text-primary font-medium bg-transparent`;
+  }
+
+  // 🎨 Helper para botones Anterior/Siguiente
+  getNavButtonClass(): string {
+    return 'flex items-center justify-center text-sm font-medium transition-colors focus:outline-none px-2 py-1 rounded-md text-gray-500 hover:text-blue-600 cursor-pointer bg-transparent border border-transparent';
   }
 }

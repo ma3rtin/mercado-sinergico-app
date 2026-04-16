@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
@@ -14,7 +14,7 @@ import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-c
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminPaqueteCard],
+  imports: [CommonModule, RouterModule, ButtonComponent, IconComponent, AdminPaqueteCard],
   templateUrl: './perfil-admin.html',
   styleUrl: './perfil-admin.css',
 })
@@ -75,11 +75,11 @@ export class PerfilAdmin implements OnInit {
     this.errorCerrados.set(null);
 
     this.paquetePublicadoService.getPaquetesCerrados().subscribe({
-      next: (paquetes) => {
+      next: (paquetes: PaquetePublicado[]) => {
         this.paquetesCerrados.set(paquetes);
         this.loadingCerrados.set(false);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar paquetes cerrados:', err);
         this.errorCerrados.set('Ocurrió un error al cargar los paquetes cerrados.');
         this.loadingCerrados.set(false);

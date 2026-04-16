@@ -29,7 +29,7 @@ export interface PaqueteDisponible {
 export interface ProductoVariante {
   id: number;
   sku?: string;
-  stockFisico: number | null; // null = sinérgico, número = energético
+  stockFisico: number | null; // null = sinérgico, número = enérgico
   precioExtra?: number;
   activo: boolean;
   imagen_url?: string | null;
@@ -329,7 +329,7 @@ export class VarianteService extends ApiService {
     // Si stockFisico es null, es sinérgico (siempre disponible)
     if (variante.stockFisico === null) return true;
 
-    // Si es energético, verificar que haya stock
+    // Si es enérgico, verificar que haya stock
     return variante.stockFisico > 0;
   }
 

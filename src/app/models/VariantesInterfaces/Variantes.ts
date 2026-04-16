@@ -21,7 +21,7 @@ export interface VarianteOpcion {
 export interface ProductoVariante {
   id: number;
   sku?: string;
-  stockFisico: number | null; // null = sinérgico, número = energético
+  stockFisico: number | null; // null = sinérgico, número = enérgico
   precioExtra?: number;
   activo: boolean;
   opciones: VarianteOpcion[];

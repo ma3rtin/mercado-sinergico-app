@@ -100,16 +100,16 @@ export class ButtonComponent {
       'half': 'w-1/2',
     };
 
-    // Variantes (Adaptadas a tu paleta de colores)
+    // Variantes (Adaptadas usando variables CSS conectadas con styles.css)
     const variants: Record<ButtonVariant, string> = {
-      'primary': 'bg-[#FFD562] text-gray-900 hover:bg-[#FFB800] active:bg-[#FF9D00] focus:ring-2 focus:ring-[#FFE899] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
-      'secondary': 'bg-[#71A8D9] text-white hover:bg-[#4b87bd] active:bg-[#2E608C] focus:ring-2 focus:ring-[#A8C5E0] shadow-md hover:shadow-lg active:shadow-sm',
-      'tertiary': 'border-2 border-[#2E608C] text-[#2E608C] hover:bg-[#E6F0F8] active:bg-[#D9E9F6] focus:ring-2 focus:ring-[#71A8D9]',
-      'warning': 'border-2 border-[#D28509] text-[#D28509] hover:bg-[#FEF3E6] active:bg-[#FEE5C8] focus:ring-2 focus:ring-[#E6BE6B]',
-      'danger': 'bg-[#B92905] text-white hover:bg-[#8A1F03] active:bg-[#6B1702] focus:ring-2 focus:ring-[#D26B47] shadow-md hover:shadow-lg active:shadow-sm',
-      'success': 'bg-[#4CAF50] text-white hover:bg-[#2E7D32] active:bg-[#1B5E20] focus:ring-2 focus:ring-[#81C784] shadow-md hover:shadow-lg active:shadow-sm',
-      'info': 'bg-[#2E608C] text-white hover:bg-[#1B3A58] active:bg-[#0F2741] focus:ring-2 focus:ring-[#4E7FA8] shadow-md hover:shadow-lg active:shadow-sm',
-      'ghost': 'text-[#2E608C] hover:bg-[#D9E9F6] active:bg-[#D9E9F6] focus:ring-2 focus:ring-[#71A8D9]',
+      'primary': 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:bg-[var(--btn-primary-hover)] active:bg-[var(--btn-primary-active)] focus:ring-2 focus:ring-[var(--btn-primary-ring)] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
+      'secondary': 'bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-hover)] active:bg-[var(--btn-secondary-active)] focus:ring-2 focus:ring-[var(--btn-secondary-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'tertiary': 'bg-[var(--btn-tertiary-bg)] border-2 border-[var(--btn-tertiary-border)] text-[var(--btn-tertiary-text)] hover:bg-[var(--btn-tertiary-hover)] active:bg-[var(--btn-tertiary-active)] focus:ring-2 focus:ring-[var(--btn-tertiary-ring)]',
+      'warning': 'bg-[var(--btn-warning-bg)] border-2 border-[var(--btn-warning-border)] text-[var(--btn-warning-text)] hover:bg-[var(--btn-warning-hover)] active:bg-[var(--btn-warning-active)] focus:ring-2 focus:ring-[var(--btn-warning-ring)]',
+      'danger': 'bg-[var(--btn-danger-bg)] text-[var(--btn-danger-text)] hover:bg-[var(--btn-danger-hover)] active:bg-[var(--btn-danger-active)] focus:ring-2 focus:ring-[var(--btn-danger-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'success': 'bg-[var(--btn-success-bg)] text-[var(--btn-success-text)] hover:bg-[var(--btn-success-hover)] active:bg-[var(--btn-success-active)] focus:ring-2 focus:ring-[var(--btn-success-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'info': 'bg-[var(--btn-info-bg)] text-[var(--btn-info-text)] hover:bg-[var(--btn-info-hover)] active:bg-[var(--btn-info-active)] focus:ring-2 focus:ring-[var(--btn-info-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'ghost': 'bg-[var(--btn-ghost-bg)] text-[var(--btn-ghost-text)] hover:bg-[var(--btn-ghost-hover)] active:bg-[var(--btn-ghost-active)] focus:ring-2 focus:ring-[var(--btn-ghost-ring)]',
     };
 
     // Estado disabled

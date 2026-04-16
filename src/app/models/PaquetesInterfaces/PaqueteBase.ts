@@ -1,3 +1,4 @@
+import { TipoPaquete } from '../Enums';
 import { Categoria } from '../Producto-Paquete/Categoria';
 import { Marca } from '../Producto-Paquete/Marca';
 import { PaqueteBaseProducto } from './PaqueteBaseProducto';
@@ -11,5 +12,6 @@ export interface PaqueteBase {
   marcaId?: number;
   marca?: Marca;
   categoria?: Categoria;
+  tipo?: TipoPaquete;
   productos?: PaqueteBaseProducto[];
 }

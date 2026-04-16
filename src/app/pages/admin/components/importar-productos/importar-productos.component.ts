@@ -5,6 +5,7 @@ import { toast } from 'ngx-sonner';
 import { environment } from '../../../../../environments/environment';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 interface ImportResult {
     success: boolean;
@@ -22,7 +23,7 @@ interface ImportResult {
 @Component({
     selector: 'app-importar-productos',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent],
+    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent, AdminBackButtonComponent],
     templateUrl: './importar-productos.component.html',
     styleUrls: ['./importar-productos.component.css'],
 })
@@ -116,7 +117,20 @@ export class ImportarProductosComponent {
                 error: (error) => {
                     this.isUploading.set(false);
                     console.error('Error al importar:', error);
-                    toast.error('Error al importar productos. Por favor, intenta nuevamente.');
+                    
+                    // Si el backend devolvió nuestro objeto ImportResult con un código de error (ej: 400)
+                    if (error.error && typeof error.error === 'object' && 'success' in error.error) {
+                        const result = error.error as ImportResult;
+                        this.importResult.set(result);
+                        toast.error(`❌ Error: ${result.message}`);
+                    } else {
+                        // Error de red, 500 server error genérico, o algo que no está en el formato esperado
+                        toast.error(error.error?.message || 'Error al importar productos. Por favor, intenta de nuevo.');
+                        this.importResult.set({
+                            success: false,
+                            message: error.error?.message || 'Error al comunicarse con el servidor.'
+                        });
+                    }
                 },
             });
     }

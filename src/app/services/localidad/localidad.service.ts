@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { ApiService } from '../api.service';
 
 export interface Localidad {
@@ -11,11 +11,17 @@ export interface Localidad {
 @Injectable({ providedIn: 'root' })
 export class LocalidadService {
   private readonly endpoint = '/localidades';
+  private cachedLocalidades$: Observable<Localidad[]> | null = null;
 
   constructor(private api: ApiService) {}
 
   getAll(): Observable<Localidad[]> {
-    return this.api.get<Localidad[]>(this.endpoint);
+    if (!this.cachedLocalidades$) {
+      this.cachedLocalidades$ = this.api.get<Localidad[]>(this.endpoint).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.cachedLocalidades$;
   }
 
   getById(id: number): Observable<Localidad> {

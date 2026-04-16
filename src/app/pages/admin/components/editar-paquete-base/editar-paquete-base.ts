@@ -45,8 +45,8 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
-      titulo: 'Energético',
+    energico: {
+      titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente.',
       items: ['Control preciso', 'Evita sobreventa']
@@ -114,6 +114,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         this.categoriaSeleccionada.set(p.categoria_id);
         this.marcaSeleccionada.set(p.marcaId || null);
         this.imagenUrl.set(p.imagen_url);
+        this.tipoPaquete.set(p.tipo || TipoPaquete.SINERGICO);
         
         // Cargar productos del paquete
         this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe(prods => {
@@ -159,6 +160,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
       descripcion: this.descripcion(),
       categoria_id: this.categoriaSeleccionada()!,
       marcaId: this.marcaSeleccionada()!,
+      tipo: this.tipoPaquete(),
       productos: this.productosSeleccionados().map(p => p.id_producto!)
     };
 

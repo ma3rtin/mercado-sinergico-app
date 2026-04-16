@@ -27,6 +27,17 @@ export class Drawer implements OnInit {
   isLoggedIn = this.authService.isAuthenticated;
   userProfile = signal<Usuario | null>(null);
 
+  // 🔗 Links dinámicos
+  profileLink = computed(() => {
+    const role = this.authService.getUserRole();
+    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
+  });
+
+  // 👮 Verificar si es admin
+  get isAdmin(): boolean {
+    return this.authService.getUserRole()?.toLowerCase() === 'administrador';
+  }
+
   constructor() {
     // 🔄 Efecto para cargar el perfil si cambia el estado de login
     effect(() => {
@@ -51,12 +62,6 @@ export class Drawer implements OnInit {
       error: (err) => console.error('Error al cargar perfil en drawer:', err)
     });
   }
-
-  // 🔗 Links dinámicos
-  profileLink = computed(() => {
-    const role = this.authService.getUserRole();
-    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
-  });
 
   // 🔐 Acciones
   async onSignOut(): Promise<void> {

@@ -73,7 +73,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
-  itemsPorPagina = signal<number>(4); // 12 paquetes por página (óptimo para e-commerce)
+  itemsPorPagina = signal<number>(12); // 12 paquetes por página (óptimo para e-commerce)
 
   // 📊 COMPUTED: Paquetes paginados
   paquetesPaginados = computed(() => {

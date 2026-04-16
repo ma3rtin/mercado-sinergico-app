@@ -1,6 +1,5 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 
@@ -31,6 +30,14 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
+    createPaqueteFormData(formData: FormData): Observable<PaquetePublicado> {
+        return this.http.post<PaquetePublicado>(this.buildUrl(this.apiUrl), formData);
+    }
+
+    updatePaqueteFormData(id: number, formData: FormData): Observable<PaquetePublicado> {
+        return this.http.put<PaquetePublicado>(this.buildUrl(`${this.apiUrl}/${id}`), formData);
+    }
+
     deletePaquete(id: number): Observable<PaquetePublicado> {
         return this.delete<PaquetePublicado>(`${this.apiUrl}/${id}`);
     }
@@ -39,12 +46,12 @@ export class PaquetePublicadoService extends ApiService {
         return this.get<PaquetePublicado[]>(`${this.apiUrl}/por-cerrarse`);
     }
 
-    getRelacionados(id: number): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(`${this.apiUrl}/relacionados/${id}`);
+    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/cerrados`);
     }
 
-    getPaquetesDelUsuario(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(`${this.apiUrl}/mis-pedidos`);
+    getRelacionados(id: number): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}/relacionados/${id}`);
     }
 
     getByProductId(productoId: number): Observable<PaquetePublicado[]> {
@@ -58,10 +65,50 @@ export class PaquetePublicadoService extends ApiService {
         return this.get<PaquetePublicado[]>(this.apiUrl);
     }
 
-    /** Admin: confirma compra con fabricante */
-    confirmarCompra(id: number): Observable<{ message: string }> {
+    /** Admin: Activo → Completo (manual, para casos de borde) */
+    completarPaquete(id: number): Observable<{ message: string }> {
         return this.post<{ message: string }>(
+            `${this.apiUrl}/${id}/completar`,
+            {}
+        );
+    }
+
+    /** Admin: Completo (o Activo) → Confirmado. Notifica compradores y pasa pedidos a En preparación */
+    confirmarCompra(id: number): Observable<{ message: string; notificados: number }> {
+        return this.post<{ message: string; notificados: number }>(
             `${this.apiUrl}/${id}/confirmar`,
+            {}
+        );
+    }
+
+    /** Admin: Confirmado → Entregado. Pasa todos los pedidos a Recibido */
+    marcarEntregado(id: number): Observable<{ message: string }> {
+        return this.post<{ message: string }>(
+            `${this.apiUrl}/${id}/entregar`,
+            {}
+        );
+    }
+
+    /** Admin: Marca pedidos seleccionados como En camino y envía email. */
+    marcarEnCamino(id: number, pedidoIds: number[] = []): Observable<{ message: string; notificados: number }> {
+        return this.post<{ message: string; notificados: number }>(
+            `${this.apiUrl}/${id}/marcar-en-camino`,
+            { pedidoIds }
+        );
+    }
+
+    /** Admin/Auto: Cancela el paquete y reembolsa todos los pedidos Pagados */
+    cancelarPaquete(id: number): Observable<PaquetePublicado> {
+        return this.post<PaquetePublicado>(
+            `${this.apiUrl}/${id}/cancelar`,
+            {}
+        );
+    }
+
+    /** Admin: Envía email de aviso a los compradores activos */
+    notificarCompradores(id: number): Observable<{ mensaje: string; notificados: number }> {
+        return this.http.post<{ mensaje: string; notificados: number }>(
+            this.buildUrl(`${this.apiUrl}/${id}/notificar`),
             {}
         );
     }
@@ -70,42 +117,6 @@ export class PaquetePublicadoService extends ApiService {
         return this.post<PaquetePublicado>(
             `${this.apiUrl}/${id}/duplicar`,
             {}
-        );
-    }
-
-    completarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(
-            `${this.apiUrl}/${id}/completar`,
-            {}
-        );
-    }
-
-    cancelarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(
-            `${this.apiUrl}/${id}/cancelar`,
-            {}
-        );
-    }
-
-    /** Cierra el paquete y lo pasa a "En Preparación" */
-    cerrarPaquete(id: number): Observable<PaquetePublicado> {
-        return this.post<PaquetePublicado>(
-            `${this.apiUrl}/${id}/cerrar`,
-            {}
-        );
-    }
-
-    notificarCompradores(id: number): Observable<{ mensaje: string; notificados: number }> {
-        return this.http.post<{ mensaje: string; notificados: number }>(
-            `${this.apiUrl}/${id}/notificar`,
-            {}
-        );
-    }
-
-    /** Obtener paquetes cerrados (filtrado en frontend) */
-    getPaquetesCerrados(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
-            map(paquetes => paquetes.filter(p => p.estado.nombre === 'Cerrado'))
         );
     }
 

@@ -27,6 +27,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() eliminarProducto = new EventEmitter<ProductoEnPedido>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
+  @Output() solicitarReembolso = new EventEmitter<void>();
   @Output() imageError = new EventEmitter<Event>();
 
   public readonly TipoPaquete = TipoPaquete;
@@ -123,7 +124,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   getTipoPaqueteIcono(tipo?: string | TipoPaquete) {
-    if (!tipo) tipo = this.paquete?.tipoPaquete;
+    if (!tipo) tipo = this.paquete?.tipo;
 
     const t = String(tipo).toLowerCase();
 
@@ -134,12 +135,12 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   obtenerTextoTipo(tipo?: string | TipoPaquete): string {
-    if (!tipo) tipo = this.paquete?.tipoPaquete;
+    if (!tipo) tipo = this.paquete?.tipo;
 
     const t = String(tipo).toLowerCase();
 
     if (t.includes('sin')) return 'Sinérgico';
-    if (t.includes('ener')) return 'Energético';
+    if (t.includes('ener')) return 'Enérgico';
 
     return 'Por definir';
   }
@@ -153,15 +154,16 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!estado) return 'text-status-neutral-text bg-status-neutral-bg border-border-default';
     const e = estado.toLowerCase();
 
-    const estilos = {
-      'confirmado': 'text-status-info-text bg-status-info-bg border-brand-primary',
-      'pendiente': 'text-status-pending-text bg-status-pending-bg border-warning',
-      'pagado': 'text-status-active-text bg-status-active-bg border-success',
-      'enviado': 'text-status-info-text bg-status-info-bg border-brand-primary',
-      'activo': 'text-status-active-text bg-status-active-bg border-success'
+    const estilos: Record<string, string> = {
+      'pendiente':      'text-status-pending-text bg-status-pending-bg border-warning',
+      'pagado':         'text-status-active-text bg-status-active-bg border-success',
+      'reembolsado':    'text-text-secondary bg-status-neutral-bg border-border-default',
+      'en preparación': 'text-blue-700 bg-blue-50 border-blue-200',
+      'en camino':      'text-purple-700 bg-purple-50 border-purple-200',
+      'recibido':       'text-green-700 bg-green-50 border-green-200',
     };
 
-    return Object.entries(estilos).find(([k]) => e.includes(k))?.[1]
+    return Object.entries(estilos).find(([k]) => e === k)?.[1]
       ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
@@ -169,11 +171,12 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();
 
-    if (e.includes('en preparación')) return 'Package';
-    if (e.includes('enviado')) return 'Truck';
-    if (e.includes('entregado')) return 'CheckCircle';
-    if (e.includes('cancelado')) return 'error';
-    if (e.includes('activo')) return 'CheckCircle';
+    if (e === 'pagado')         return 'CheckCircle';
+    if (e === 'en preparación') return 'Package';
+    if (e === 'en camino')      return 'Truck';
+    if (e === 'recibido')       return 'CheckCircle';
+    if (e === 'reembolsado')    return 'RefreshCcw';
+    if (e === 'cancelado')      return 'XCircle';
 
     return 'Clock'; // Pendiente u otros
   }
@@ -238,12 +241,23 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     return estado === 'pendiente';
   }
 
+  /** El usuario puede solicitar reembolso solo si el pedido está Pagado y el paquete está Activo */
+  get puedeReembolsar(): boolean {
+    const estadoPedido = this.pedido?.estado?.nombre?.toLowerCase();
+    const estadoPaquete = this.paquete?.estado?.nombre?.toLowerCase();
+    return estadoPedido === 'pagado' && estadoPaquete === 'activo';
+  }
+
   onSalirDelPaquete(): void {
     this.salirDelPaquete.emit();
   }
 
   onFinalizarCompra(): void {
     this.finalizarCompra.emit();
+  }
+
+  onSolicitarReembolso(): void {
+    this.solicitarReembolso.emit();
   }
 
   onEliminarProducto(prod: ProductoEnPedido): void {

@@ -19,9 +19,23 @@
             Gestionar <span class="text-brand-primary">Variantes</span>
           </h1>
           @if (productoInfo()) {
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-brand-primary rounded-full"></span>
-            <p class="text-sm md:text-base text-text-muted font-medium italic">{{ productoInfo()!.producto.nombre }}</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-brand-primary rounded-full"></span>
+              <p class="text-sm md:text-base text-text-muted font-medium italic">{{ productoInfo()!.producto.nombre }}</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 text-xs text-text-muted font-medium">
+              <span>
+                Precio base:
+                <strong class="text-text-primary">${{ precioBaseProducto() }}</strong>
+              </span>
+              @if (stockTotal() !== null) {
+              <span>
+                • Stock total:
+                <strong class="text-text-primary">{{ stockTotal() }}</strong>
+              </span>
+              }
+            </div>
           </div>
           }
         </div>
@@ -35,11 +49,22 @@
             <span class="text-[10px] font-black uppercase tracking-widest">Energético</span>
           </div>
           }
+          @if (esProductoSinergico()) {
           <div
-            class="flex items-center gap-2 px-4 py-1.5 bg-white text-text-muted rounded-full border border-gray-100 shadow-sm">
-            <app-icon name="package" size="14" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Stock Total: {{ stockTotal() || 0 }}</span>
+            class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100 shadow-sm">
+            <app-icon name="users" size="14" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Sinérgico</span>
           </div>
+          }
+          @if (stockTotal() !== null) {
+          <div
+            class="flex items-center gap-2 px-4 py-1.5 bg-bg-surface border border-border-default rounded-full shadow-sm">
+            <app-icon name="package" size="14" class="text-brand-primary" />
+            <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+              Stock: {{ stockTotal() }}
+            </span>
+          </div>
+          }
         </div>
       </div>
     </header>
@@ -101,6 +126,8 @@
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">TODAS</button>
             <button (click)="cambiarFiltroEstado('activas')"
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'activas' ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">ACTIVAS</button>
+            <button (click)="cambiarFiltroEstado('inactivas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'inactivas' ? 'bg-gray-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">INACTIVAS</button>
           </div>
 
           <!-- Imagen -->
@@ -111,6 +138,8 @@
               TODO</button>
             <button (click)="cambiarFiltroImagen('con')"
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'con' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">CON</button>
+            <button (click)="cambiarFiltroImagen('sin')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'sin' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">SIN</button>
           </div>
 
           <!-- Stock -->
@@ -122,6 +151,9 @@
               TODO</button>
             <button (click)="cambiarFiltroStock('con')"
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroStock() === 'con' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">CON
+              STOCK</button>
+            <button (click)="cambiarFiltroStock('sin')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroStock() === 'sin' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">SIN
               STOCK</button>
           </div>
           }
