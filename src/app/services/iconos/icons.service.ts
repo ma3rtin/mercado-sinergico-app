@@ -116,6 +116,10 @@ import {
   featherTruck,
   featherInbox,
   featherImage,
+  featherLifeBuoy,
+  featherMessageCircle,
+  featherShield,
+  featherHelpCircle,
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -219,6 +223,10 @@ export class IconsService {
     truck: featherTruck,
     inbox: featherInbox,
     image: featherImage,
+    support: featherLifeBuoy,
+    contact: featherMessageCircle,
+    legal: featherShield,
+    helpCircle: featherHelpCircle,
 
     // 📋 Documentos
     file: featherFile,

@@ -91,7 +91,11 @@ import {
   featherMinusCircle,
   featherAlertOctagon,
   featherFilePlus,
+  featherFileText,
   featherHelpCircle,
+  featherLifeBuoy,
+  featherMessageCircle,
+  featherShield,
 } from '@ng-icons/feather-icons';
 
 export const appConfig: ApplicationConfig = {
@@ -179,8 +183,12 @@ export const appConfig: ApplicationConfig = {
         featherMinusCircle,
         featherAlertOctagon,
         featherFilePlus,
+        featherFileText,
         featherLock,
-        featherHelpCircle
+        featherHelpCircle,
+        featherLifeBuoy,
+        featherMessageCircle,
+        featherShield
       })
     ),
   ],
