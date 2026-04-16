@@ -62,8 +62,8 @@ export class Drawer implements OnInit {
   // 🔄 Cargar perfil desde el backend
   private loadProfile(): void {
     this.usuarioService.getPerfil().subscribe({
-      next: (profile) => this.userProfile.set(profile),
-      error: (err) => console.error('Error al cargar perfil en drawer:', err)
+      next: (profile: any) => this.userProfile.set(profile),
+      error: (err: Error) => console.error('Error al cargar perfil en drawer:', err)
     });
   }
 
