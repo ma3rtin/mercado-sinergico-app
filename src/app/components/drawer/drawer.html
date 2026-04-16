@@ -22,7 +22,8 @@
             <div
                 class="w-10 h-10 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white/50 shadow-sm overflow-hidden shrink-0">
                 @if (userProfile()?.imagen_url || user()?.photoURL) {
-                <img [src]="userProfile()?.imagen_url || user()?.photoURL" alt="Profile" class="w-full h-full object-cover">
+                <img [src]="userProfile()?.imagen_url || user()?.photoURL" alt="Profile"
+                    class="w-full h-full object-cover">
                 } @else {
                 <app-icon name="User" size="18"></app-icon>
                 }
@@ -54,126 +55,157 @@
         }
     </div>
 
-    <!-- ── CUERPO + FOOTER (flex justify-between para no scrollear) ── -->
-    <div class="flex-1 flex flex-col justify-between overflow-hidden px-3 py-3">
-
+    <!-- ── CUERPO (Scrollable) ── -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-3">
         <!-- Nav -->
         <nav class="space-y-1">
-            <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 ml-1 opacity-80">Menú Principal</p>
+            <!-- Instalar App PWA -->
+            @if (showInstallButton()) {
+            <div class="px-1 pb-4">
+                <button (click)="installApp()"
+                    class="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-blue-50 border border-blue-100 text-brand-secondary hover:bg-blue-100 transition-all active:scale-[0.98] cursor-pointer shadow-sm">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-brand-secondary text-white flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                        <app-icon name="Download" size="17"></app-icon>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <span class="block text-sm font-bold truncate">Instalar App</span>
+                        <span class="block text-[10px] text-gray-400 truncate">Acceso directo y mejor experiencia</span>
+                    </div>
+                    <app-icon name="ChevronRight" size="13" class="text-gray-300"></app-icon>
+                </button>
+            </div>
+            }
+
+            <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 ml-1 opacity-80">Menú
+                Principal</p>
 
             <!-- Paquetes -->
             <a routerLink="/paquetes" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
                     <app-icon name="Package" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Paquetes</span>
                     <span class="block text-[10px] text-gray-400 truncate">Ofertas del momento</span>
                 </div>
-                <app-icon name="ChevronRight" size="13" class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
             <!-- Dudas / FAQ -->
             <a routerLink="/faq" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
                     <app-icon name="HelpCircle" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Dudas</span>
                     <span class="block text-[10px] text-gray-400 truncate">Cómo funciona todo</span>
                 </div>
-                <app-icon name="ChevronRight" size="13" class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
             <!-- Soporte -->
             <a routerLink="/soporte" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
                     <app-icon name="lifeBuoy" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Soporte</span>
                     <span class="block text-[10px] text-gray-400 truncate">Centro de ayuda</span>
                 </div>
-                <app-icon name="ChevronRight" size="13" class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
             <!-- Contacto WhatsApp -->
             <a href="https://wa.me/5491123053347?text=Hola!%20Vengo%20desde%20la%20web%20y%20necesito%20ayuda."
                 target="_blank" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
                     <app-icon name="messageCircle" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Contacto</span>
                     <span class="block text-[10px] text-gray-400 truncate">WhatsApp directo</span>
                 </div>
-                <app-icon name="externalLink" size="13" class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+                <app-icon name="externalLink" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
             <!-- Sección Mi Actividad (solo logueado) -->
             @if (isLoggedIn()) {
             <div class="pt-2 pb-1">
-                <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1 ml-1 opacity-80">Mi actividad</p>
+                <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1 ml-1 opacity-80">Mi
+                    actividad</p>
             </div>
 
             <!-- Panel de Control (solo admin) -->
             @if (isAdmin) {
             <a routerLink="/admin/perfil" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-200">
                     <app-icon name="Settings" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Panel de Control</span>
                     <span class="block text-[10px] text-gray-400 truncate">Gestionar la plataforma</span>
                 </div>
-                <app-icon name="ChevronRight" size="13" class="text-gray-300 group-hover:text-yellow-500 transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-yellow-500 transition-all"></app-icon>
             </a>
             }
 
             <!-- Mis Compras -->
             <a routerLink="/mis-pedidos" (click)="closeDrawer.emit()"
                 class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                <div
+                    class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
                     <app-icon name="ShoppingBag" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Mis Compras</span>
                     <span class="block text-[10px] text-gray-400 truncate">Seguimiento de pedidos</span>
                 </div>
-                <app-icon name="ChevronRight" size="13" class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
             }
         </nav>
+    </div>
 
-        <!-- ── FOOTER ── -->
-        <div class="border-t border-gray-100 pt-3 space-y-2.5">
-            <!-- Links legales -->
-            <div class="flex items-center justify-center gap-3">
-                <a routerLink="/terminos-y-condiciones" (click)="closeDrawer.emit()"
-                    class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Términos</a>
-                <span class="text-gray-200">·</span>
-                <a routerLink="/politica-de-privacidad" (click)="closeDrawer.emit()"
-                    class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Privacidad</a>
-                <span class="text-gray-200">·</span>
-                <a routerLink="/politica-de-devoluciones" (click)="closeDrawer.emit()"
-                    class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Devoluciones</a>
-            </div>
-
-            <!-- Cerrar sesión / copyright -->
-            @if (isLoggedIn()) {
-            <button (click)="onSignOut()"
-                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-red-100 text-red-500 font-medium text-xs active:scale-95 transition-all hover:bg-red-50 cursor-pointer">
-                <app-icon name="LogOut" size="13"></app-icon>
-                <span>Cerrar Sesión</span>
-            </button>
-            } @else {
-            <p class="text-center text-[9px] text-gray-300 uppercase tracking-widest font-medium">Mercado Sinérgico v2.0</p>
-            }
+    <!-- ── FOOTER (Fijo al fondo) ── -->
+    <div class="shrink-0 border-t border-gray-100 px-4 py-3 bg-gray-50/50 space-y-2.5">
+        <!-- Links legales -->
+        <div class="flex items-center justify-center gap-3">
+            <a routerLink="/terminos-y-condiciones" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Términos</a>
+            <span class="text-gray-200">·</span>
+            <a routerLink="/politica-de-privacidad" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Privacidad</a>
+            <span class="text-gray-200">·</span>
+            <a routerLink="/politica-de-devoluciones" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Devoluciones</a>
         </div>
+
+        <!-- Cerrar sesión / copyright -->
+        @if (isLoggedIn()) {
+        <button (click)="onSignOut()"
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-100 bg-white text-red-500 font-bold text-xs active:scale-95 transition-all hover:bg-red-50 cursor-pointer shadow-sm">
+            <app-icon name="LogOut" size="13"></app-icon>
+            <span>Cerrar Sesión</span>
+        </button>
+        } @else {
+        <p class="text-center text-[9px] text-gray-300 uppercase tracking-widest font-medium">Mercado Sinérgico v2.0</p>
+        }
     </div>
 </aside>

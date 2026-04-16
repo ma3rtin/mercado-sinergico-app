@@ -3,7 +3,7 @@ import {
   provideZonelessChangeDetection,
   provideAppInitializer,
   inject,
-  importProvidersFrom,
+  importProvidersFrom, isDevMode,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -103,6 +103,7 @@ import {
   featherXCircle,
   featherHash,
 } from '@ng-icons/feather-icons';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -202,6 +203,9 @@ export const appConfig: ApplicationConfig = {
         featherXCircle,
         featherHash,
       })
-    ),
+    ), provideServiceWorker('ngsw-worker.js', {
+            enabled: true,
+            registrationStrategy: 'registerWhenStable:30000'
+          }),
   ],
 };

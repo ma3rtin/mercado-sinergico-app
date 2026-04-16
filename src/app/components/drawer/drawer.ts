@@ -5,6 +5,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AuthService } from '../../services/auth/auth.service';
 import { UsuarioService } from '../../services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
+import { PwaService } from '../../services/pwa/pwa.service';
 
 @Component({
   selector: 'app-drawer',
@@ -18,6 +19,9 @@ export class Drawer implements OnInit {
   private authService = inject(AuthService);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
+  private pwaService = inject(PwaService);
+
+  showInstallButton = this.pwaService.showInstallButton;
 
   // 📤 Outputs
   @Output() closeDrawer = new EventEmitter<void>();
@@ -76,5 +80,10 @@ export class Drawer implements OnInit {
   navigateAndClose(path: string): void {
     this.closeDrawer.emit();
     this.router.navigate([path]);
+  }
+
+  installApp(): void {
+    this.pwaService.installPwa();
+    this.closeDrawer.emit();
   }
 }
