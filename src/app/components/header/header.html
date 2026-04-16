@@ -1,4 +1,4 @@
-<header class="w-full font-body sticky top-0 z-50 shadow-sm">
+<header class="w-full font-body fixed top-0 left-0 z-50 bg-white shadow-sm">
   <!-- Top bar -->
   <div class="bg-primary">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
@@ -6,7 +6,7 @@
       <!-- MOBILE -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="md:hidden flex items-center justify-center relative h-10">
-        <!-- Hamburguesa (en el extremo izquierdo) -->
+        <!-- Hamburguesa -->
         <button (click)="toggleDrawer()"
           class="absolute left-0 flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
           aria-label="Abrir menú">
@@ -28,7 +28,7 @@
           <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
         </a>
 
-        <!-- ✅ BUSCADOR DESKTOP (Componente) -->
+        <!-- ✅ BUSCADOR DESKTOP -->
         <div class="flex justify-center items-center min-w-0 flex-1 max-w-2xl mx-auto w-full">
           <app-buscador-header variant="desktop" class="w-full" />
         </div>
@@ -41,15 +41,9 @@
             <app-icon name="User" class="w-7 h-7 translate-y-[1px]"></app-icon>
           </button>
 
-          <!-- ✅ MENÚ DESKTOP -->
           @if (profileMenuOpen() && isLoggedIn()) {
           <div class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
-            style="
-              z-index: 9999 !important;
-              position: absolute;
-              top: 100%;
-              right: 0;
-            ">
+            style="z-index: 9999 !important; position: absolute; top: 100%; right: 0;">
             <a [routerLink]="profileLink" (click)="profileMenuOpen.set(false)"
               class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
               <app-icon name="User"></app-icon> Mi perfil
@@ -65,12 +59,7 @@
     </div>
   </div>
 
-  <!-- ✅ BUSCADOR MÓVIL (barra debajo del header) -->
-  <div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
-    <app-buscador-header variant="mobile" />
-  </div>
-
-  <!-- NAVBAR (desktop) -->
+  <!-- NAVBAR (desktop/mobile) -->
   <app-navbar></app-navbar>
 
   <!-- DRAWER (mobile) -->
@@ -78,6 +67,14 @@
   <app-drawer (closeDrawer)="toggleDrawer()"></app-drawer>
   }
 </header>
+
+<!-- Espaciador para el header fijo (solo la barra superior) -->
+<div class="h-[64px] md:h-[135px]"></div>
+
+<!-- ✅ BUSCADOR MÓVIL (No fijo, scrollea con el contenido) -->
+<div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
+  <app-buscador-header variant="mobile" />
+</div>
 
 <style>
   /* Asegurar que nada bloquee el menú */
