@@ -144,7 +144,7 @@ filteredProductos = computed(() => {
     `,
     width: '600px',
     confirmButtonText: 'Cerrar',
-    confirmButtonColor: '#71A8D9'
+    confirmButtonColor: '#2E608C'
   });
 }
 
@@ -156,7 +156,8 @@ duplicateProducto(producto: Producto): void {
     showCancelButton: true,
     confirmButtonText: 'Duplicar',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#71A8D9'
+    confirmButtonColor: '#2E608C',
+    cancelButtonColor: '#9ca3af'
   }).then((result) => {
     if (result.isConfirmed) {
       this.productosService.duplicateProduct(producto.id_producto!).subscribe({
@@ -183,8 +184,9 @@ duplicateProducto(producto: Producto): void {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
-      confirmButtonColor: '#E53935',
+      confirmButtonColor: '#B92905',
       cancelButtonText: 'Cancelar',
+      cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (result.isConfirmed) {
         this.productosService.deleteProducto(producto.id_producto??0).subscribe({

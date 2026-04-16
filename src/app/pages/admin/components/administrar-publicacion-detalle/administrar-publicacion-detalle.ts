@@ -34,9 +34,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   filtrEstadoPedido = signal<number | null>(null);
   pedidoSeleccionado = signal<Pedido | null>(null);
 
-  // ── Selección para "en camino" ───────────────────────────────
-  pedidosSeleccionadosEnCamino = signal<Set<number>>(new Set());
-
   // ── Señas Computadas ──────────────────────────────────────────
 
   stockPct = computed(() => {
@@ -52,20 +49,20 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   });
 
   // ── Estado del paquete ───────────────────────────────────────
-  esActivo    = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'activo');
-  esCompleto  = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'completo');
+  esActivo = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'activo');
+  esCompleto = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'completo');
   esConfirmado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'confirmado');
   esEntregado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'entregado');
   esCancelado = computed(() => this.paquete()?.estado?.nombre?.toLowerCase().trim() === 'cancelado');
 
   // ── Permisos de acción ───────────────────────────────────────
-  puedeEditar     = computed(() => this.esActivo());
-  puedeNotificar  = computed(() => this.esActivo());
-  puedeConfirmar  = computed(() => this.esCompleto() || this.esActivo());
-  puedeEntregar   = computed(() => this.esConfirmado());
+
+  puedeNotificar = computed(() => this.esActivo());
+  puedeConfirmar = computed(() => this.esCompleto() || this.esActivo());
+  puedeEntregar = computed(() => this.esConfirmado());
   puedeMarcarEnCamino = computed(() => this.esConfirmado());
-  puedeCancelar   = computed(() => !this.esCancelado() && !this.esEntregado());
-  puedeDescargar  = computed(() => this.esConfirmado() || this.esEntregado());
+  puedeCancelar = computed(() => !this.esCancelado() && !this.esEntregado());
+  puedeDescargar = computed(() => this.esConfirmado() || this.esEntregado());
 
   montoTotal = computed(() => {
     const p = this.paquete();
@@ -75,17 +72,17 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   urgenciaColor = computed(() => {
     const dias = this.diasRestantes();
-    if (dias <= 0)  return 'text-error';
-    if (dias <= 3)  return 'text-warning';
-    if (dias <= 7)  return 'text-brand-cta-hover';
+    if (dias <= 0) return 'text-error';
+    if (dias <= 3) return 'text-warning';
+    if (dias <= 7) return 'text-brand-cta-hover';
     return 'text-text-secondary';
   });
 
   urgenciaBg = computed(() => {
     const dias = this.diasRestantes();
-    if (dias <= 0)  return 'bg-error';
-    if (dias <= 3)  return 'bg-warning';
-    if (dias <= 7)  return 'bg-brand-cta';
+    if (dias <= 0) return 'bg-error';
+    if (dias <= 3) return 'bg-warning';
+    if (dias <= 7) return 'bg-brand-cta';
     return 'bg-brand-secondary';
   });
 
@@ -142,13 +139,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     this.pedidoSeleccionado.set(null);
   }
 
-  // ── Acciones de gestión de paquete ──────────────────────────
-
-  editarPublicacion() {
-    const id = this.paquete()?.id_paquete_publicado;
-    if (!id) return;
-    this.router.navigate(['/admin/publicar-paquete'], { queryParams: { id, edit: true } });
-  }
 
   /** Completo (o Activo) → Confirmado */
   confirmarCompra() {
@@ -170,7 +160,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
         </p>
       `,
       icon: 'question',
-      iconColor: '#71A8D9',
+      iconColor: '#2E608C',
       showCancelButton: true,
       confirmButtonText: '📧 Confirmar y notificar',
       cancelButtonText: 'Cancelar',
@@ -203,8 +193,10 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       title: '¿Marcar como Entregado?',
       html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Entregado</strong>.</p>
              <p class="text-sm text-gray-500 mt-2">Todos los pedidos pasarán a estado <strong>Recibido</strong>. Esta acción no se puede deshacer.</p>`,
-      icon: 'success',
+      icon: 'question',
       showCancelButton: true,
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, marcar como entregado',
       cancelButtonText: 'Cancelar'
     }).then(result => {
@@ -219,36 +211,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     });
   }
 
-  /** Marcar pedidos seleccionados (o todos) como En camino */
-  marcarEnCamino(pedidoIds: number[] = []) {
+  /** Ir a la vista de Gestión de Envíos */
+  irAGestionEnvios() {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
-
-    const cantidad = pedidoIds.length > 0 ? pedidoIds.length : this.pedidosEnPreparacion().length;
-    const texto = pedidoIds.length > 0
-      ? `${cantidad} pedido/s seleccionado/s`
-      : `todos los pedidos en preparación (${cantidad})`;
-
-    Swal.fire({
-      title: '¿Marcar pedidos en camino?',
-      html: `<p>Se marcarán <strong>${texto}</strong> como <strong>En camino</strong>.</p>
-             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un email avisando que su pedido llega hoy.</p>`,
-      icon: 'info',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, marcar en camino',
-      confirmButtonColor: '#7c3aed',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      this.paqueteService.marcarEnCamino(p.id_paquete_publicado!, pedidoIds).subscribe({
-        next: (res) => {
-          this.toast.success(`${res.notificados} comprador/es notificado/s`, 'Pedidos en camino');
-          this.pedidosSeleccionadosEnCamino.set(new Set());
-          this.loadPaquete(p.id_paquete_publicado!);
-        },
-        error: () => this.toast.error('Error al marcar pedidos en camino.', 'Error')
-      });
-    });
+    this.router.navigate(['/admin/administrar-publicacion', p.id_paquete_publicado, 'envios']);
   }
 
   cancelarPaquete() {
@@ -292,8 +259,10 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     Swal.fire({
       title: '¿Enviar notificación a compradores?',
       text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${p.paqueteBase?.nombre}".`,
-      icon: 'info',
+      icon: 'question',
       showCancelButton: true,
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, enviar',
       cancelButtonText: 'Cancelar'
     }).then(result => {
@@ -305,38 +274,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     });
   }
 
-  // ── Selección de pedidos en camino ──────────────────────────
 
-  togglePedidoEnCamino(pedidoId: number) {
-    this.pedidosSeleccionadosEnCamino.update(set => {
-      const nuevo = new Set(set);
-      if (nuevo.has(pedidoId)) {
-        nuevo.delete(pedidoId);
-      } else {
-        nuevo.add(pedidoId);
-      }
-      return nuevo;
-    });
-  }
-
-  seleccionarTodosPedidosEnCamino() {
-    const todos = this.pedidosEnPreparacion().map(p => p.id_pedido!);
-    this.pedidosSeleccionadosEnCamino.set(new Set(todos));
-  }
-
-  limpiarSeleccionEnCamino() {
-    this.pedidosSeleccionadosEnCamino.set(new Set());
-  }
-
-  esPedidoSeleccionadoEnCamino(pedidoId: number): boolean {
-    return this.pedidosSeleccionadosEnCamino().has(pedidoId);
-  }
-
-  /** Ejecuta marcarEnCamino usando la selección actual (o todos si no hay selección) */
-  marcarSeleccionEnCamino() {
-    const seleccionados = Array.from(this.pedidosSeleccionadosEnCamino());
-    this.marcarEnCamino(seleccionados);
-  }
 
   // ── Reportes CSV ──────────────────────────────────────────────
 
@@ -478,12 +416,12 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   getEstadoClasses(estado?: EstadoPaquetePublicado): string {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text';
     switch (estado.nombre?.toLowerCase().trim()) {
-      case 'activo':     return 'bg-status-active-bg text-status-active-text';
-      case 'completo':   return 'bg-status-info-bg text-status-info-text';
+      case 'activo': return 'bg-status-active-bg text-status-active-text';
+      case 'completo': return 'bg-status-info-bg text-status-info-text';
       case 'confirmado': return 'bg-status-neutral-bg text-brand-secondary';
-      case 'entregado':  return 'bg-green-50 text-green-700';
-      case 'cancelado':  return 'bg-error-light text-error';
-      default:           return 'bg-status-neutral-bg text-status-neutral-text';
+      case 'entregado': return 'bg-success-light text-success';
+      case 'cancelado': return 'bg-error-light text-error';
+      default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
 
@@ -492,9 +430,9 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       case 1: return 'bg-status-pending-bg text-status-pending-text';   // Pendiente
       case 2: return 'bg-status-active-bg text-status-active-text';     // Pagado
       case 3: return 'bg-status-neutral-bg text-text-secondary';        // Reembolsado
-      case 4: return 'bg-blue-50 text-blue-700';                        // En preparación
-      case 5: return 'bg-purple-50 text-purple-700';                    // En camino
-      case 6: return 'bg-green-50 text-green-700';                      // Recibido
+      case 4: return 'bg-brand-primary-light text-brand-secondary border border-brand-primary/30 whitespace-nowrap'; // En preparación
+      case 5: return 'bg-brand-primary/20 text-brand-primary-hover border border-brand-primary/30 whitespace-nowrap'; // En camino
+      case 6: return 'bg-success-light text-success border border-success/30 whitespace-nowrap'; // Recibido
       default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
@@ -533,12 +471,12 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
   getEstadoClasesStr(estadoNombre?: string): string {
     switch (estadoNombre?.toLowerCase().trim()) {
-      case 'activo':     return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'completo':   return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
-      case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
-      case 'entregado':  return 'bg-green-50 text-green-700 border-green-300';
-      case 'cancelado':  return 'bg-red-50 text-red-700 border-red-200';
-      default:           return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
+      case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
+      case 'completo': return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
+      case 'confirmado': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'entregado': return 'bg-success-light text-success border-success/30';
+      case 'cancelado': return 'bg-error-light text-error border-error/30';
+      default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }
 }

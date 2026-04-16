@@ -120,6 +120,8 @@ import {
   featherMessageCircle,
   featherShield,
   featherHelpCircle,
+  featherThumbsUp,
+  featherXCircle,
 } from '@ng-icons/feather-icons';
 
 @Injectable({
@@ -161,6 +163,8 @@ export class IconsService {
     alert: featherAlertCircle,
     alertTriangle: featherAlertTriangle,
     info: featherInfo,
+    xCircle: featherXCircle,
+    thumbsUp: featherThumbsUp,
 
     // 👤 Usuario
     user: featherUser,
@@ -268,6 +272,9 @@ export class IconsService {
     AlertOctagon: featherAlertOctagon,
     Plus: featherPlus,
     MoreVertical: featherMoreVertical,
+    Inbox: featherInbox,
+
+
   };
 
   /**

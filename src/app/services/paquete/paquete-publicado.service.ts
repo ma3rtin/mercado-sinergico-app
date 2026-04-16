@@ -1,5 +1,6 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 
@@ -63,6 +64,26 @@ export class PaquetePublicadoService extends ApiService {
     /** Admin: obtiene TODOS los paquetes publicados */
     getAllPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
+    }
+
+    /** Admin: obtiene paquetes en estado Completo o Confirmado (requieren acción del admin) */
+    getPaquetesCompletos(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
+            map(paquetes => paquetes.filter(p => {
+                const nombre = p.estado?.nombre?.toLowerCase();
+                return nombre === 'completo' || nombre === 'confirmado';
+            }))
+        );
+    }
+
+    /** Admin: obtiene paquetes finalizados (Recibido + Cancelado) */
+    getPaquetesFinalizados(): Observable<PaquetePublicado[]> {
+        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
+            map(paquetes => paquetes.filter(p => {
+                const nombre = p.estado?.nombre?.toLowerCase();
+                return nombre === 'recibido' || nombre === 'cancelado';
+            }))
+        );
     }
 
     /** Admin: Activo → Completo (manual, para casos de borde) */
