@@ -5,45 +5,17 @@
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- MOBILE -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="md:hidden grid grid-cols-[auto_1fr_auto] items-center gap-3">
-        <!-- Hamburguesa -->
+      <div class="md:hidden flex items-center justify-center relative h-10">
+        <!-- Hamburguesa (en el extremo izquierdo) -->
         <button (click)="toggleDrawer()"
-          class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+          class="absolute left-0 inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
           aria-label="Abrir menú">
           <app-icon name="Menu" class="w-5 h-5"></app-icon>
         </button>
 
-        <!-- Logo + Texto -->
-        <div class="min-w-0 flex items-center justify-center gap-2 cursor-pointer" (click)="navigateToHome()">
+        <!-- Logo Centrado -->
+        <div class="cursor-pointer" (click)="navigateToHome()">
           <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
-          <span
-            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis leading-tight text-base min-[380px]:text-lg min-[420px]:text-xl">
-            Mercado Sinérgico
-          </span>
-        </div>
-
-        <!-- Usuario MÓVIL -->
-        <div class="relative profile-menu-area">
-          <button (click)="toggleProfileMenu()"
-            class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-            aria-label="Mi perfil">
-            <app-icon name="User" class="w-8 h-8"></app-icon>
-          </button>
-
-          <!-- ✅ MENÚ MÓVIL -->
-          @if (profileMenuOpen() && isLoggedIn()) {
-          <div class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
-            style="z-index: 9999 !important">
-            <a [routerLink]="profileLink" (click)="profileMenuOpen.set(false)"
-              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
-              <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
-            </a>
-            <button (click)="signOut()" type="button"
-              class="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-150 rounded-b-lg font-medium">
-              <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
-            </button>
-          </div>
-          }
         </div>
       </div>
 
@@ -103,7 +75,7 @@
 
   <!-- DRAWER (mobile) -->
   @if (drawerOpen()) {
-  <app-drawer [isLoggedIn]="isLoggedIn()" (closeDrawer)="toggleDrawer()" (signOut)="signOut()"></app-drawer>
+  <app-drawer (closeDrawer)="toggleDrawer()"></app-drawer>
   }
 </header>
 
