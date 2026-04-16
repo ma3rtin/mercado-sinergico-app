@@ -15,15 +15,23 @@ import { IconsService } from '@app/services/iconos/icons.service';
   selector: 'app-icon',
   standalone: true,
   imports: [CommonModule, NgIconComponent, NgIconsModule],
+  styles: [`
+    :host {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+  `],
   template: `
     <ng-icon
       [name]="iconName()"
       [size]="size()"
       [strokeWidth]="strokeWidth()"
       [color]="color()"
-      [class]="'inline-block leading-none align-middle ' + cssClass()"
+      [class]="'leading-none ' + cssClass()"
     />
-  `,
+  `
 })
 export class IconComponent {
   // 🎨 INPUTS

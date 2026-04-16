@@ -1,4 +1,4 @@
-<header class="w-full font-body relative z-40">
+<header class="w-full font-body sticky top-0 z-50 shadow-sm">
   <!-- Top bar -->
   <div class="bg-primary">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
@@ -8,9 +8,9 @@
       <div class="md:hidden flex items-center justify-center relative h-10">
         <!-- Hamburguesa (en el extremo izquierdo) -->
         <button (click)="toggleDrawer()"
-          class="absolute left-0 inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+          class="absolute left-0 flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
           aria-label="Abrir menú">
-          <app-icon name="Menu" class="w-5 h-5"></app-icon>
+          <app-icon name="Menu" size="20"></app-icon>
         </button>
 
         <!-- Logo Centrado -->
