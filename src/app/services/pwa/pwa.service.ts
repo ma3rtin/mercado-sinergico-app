@@ -8,20 +8,18 @@ export class PwaService {
   showInstallButton = signal<boolean>(false);
 
   constructor() {
+    console.log('PwaService iniciado, esperando evento...');
     window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevenir que el navegador muestre el prompt automáticamente
+      console.log('✅ Evento beforeinstallprompt capturado!');
       e.preventDefault();
-      // Guardar el evento para dispararlo luego
       this.deferredPrompt = e;
-      // Mostrar el botón de instalación en la UI
       this.showInstallButton.set(true);
     });
 
     window.addEventListener('appinstalled', () => {
-      // Limpiar el prompt guardado
+      console.log('⭐ PWA instalada correctamente');
       this.deferredPrompt = null;
       this.showInstallButton.set(false);
-      console.log('PWA instalada correctamente');
     });
   }
 

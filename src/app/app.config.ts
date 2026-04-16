@@ -3,7 +3,7 @@ import {
   provideZonelessChangeDetection,
   provideAppInitializer,
   inject,
-  importProvidersFrom, isDevMode,
+  importProvidersFrom,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -204,8 +204,8 @@ export const appConfig: ApplicationConfig = {
         featherHash,
       })
     ), provideServiceWorker('ngsw-worker.js', {
-            enabled: true,
-            registrationStrategy: 'registerWhenStable:30000'
-          }),
+      enabled: true,
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
 };
