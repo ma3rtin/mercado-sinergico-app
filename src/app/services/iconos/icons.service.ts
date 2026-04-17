@@ -12,6 +12,7 @@ import {
   featherX,
   featherHome,
   featherPlus,
+  featherMinus,
   featherMoreVertical,
 
 
@@ -109,7 +110,6 @@ import {
   featherAward,
   featherGrid,
   featherList,
-  featherMinusCircle,
   featherAlertOctagon,
   featherLock,
   featherHash,
@@ -142,6 +142,7 @@ export class IconsService {
     close: featherX,
     home: featherHome,
     plus: featherPlus,
+    minus: featherMinus,
     moreVertical: featherMoreVertical,
 
     // 🔍 Búsqueda
@@ -268,7 +269,6 @@ export class IconsService {
     Award: featherAward,
     Grid: featherGrid,
     List: featherList,
-    MinusCircle: featherMinusCircle,
     AlertOctagon: featherAlertOctagon,
     Plus: featherPlus,
     MoreVertical: featherMoreVertical,
