@@ -234,47 +234,6 @@
 
 
 
-<!-- TEMPLATE PARA DESKTOP -->
-@if (pedido.expandido && !isMobile()) {
-<article
-  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-
-  <!-- HEADER (Desktop) -->
-  <div (click)="onToggleExpansion()"
-    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default">
-
-    <!-- Imagen -->
-    <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-bg-app overflow-hidden border border-border-default">
-      <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain p-2"
-        (error)="onImageError($event)">
-    </div>
-
-    <!-- Info -->
-    <div class="flex-1 min-w-0">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="font-display text-xl text-text-primary font-bold">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
-          <p class="text-xs text-text-secondary mt-1">Detalles de tu participación en este paquete</p>
-        </div>
-
-        <div class="flex items-center gap-4">
-          <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
-            {{ pedido.estado?.nombre }}
-          </span>
-          <app-icon name="chevronUp" size="24" class="text-text-muted" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-bg-app">
-    <ng-container *ngTemplateOutlet="expandedContent"></ng-container>
-  </div>
-</article>
-}
-
 <!-- TEMPLATE REUTILIZABLE (Desktop Layout Full) -->
 <ng-template #expandedContent>
   <div class="p-4 sm:p-6 pb-12">
