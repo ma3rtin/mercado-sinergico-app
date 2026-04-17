@@ -167,24 +167,54 @@
 
           <div class="space-y-4">
             @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
-            <div class="flex items-center gap-4 py-1 border-b border-border-default/30 last:border-0 pb-4 last:pb-0">
+            <div class="flex gap-3 py-3 border-b border-border-default/30 last:border-0 last:pb-0">
               <!-- Imagen Mini -->
-              <div class="w-14 h-14 rounded-xl bg-bg-app border border-border-default overflow-hidden flex-shrink-0 flex items-center justify-center">
-                <img [src]="producto.imagen_url" class="w-full h-full object-contain p-1" (error)="onImageError($event)">
+              <div class="w-16 h-16 rounded-xl bg-bg-app border border-border-default overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <img [src]="producto.imagen_url" class="w-full h-full object-contain p-2" (error)="onImageError($event)">
               </div>
               
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold text-text-primary truncate leading-tight">{{ producto.nombre }}</p>
-                <div class="flex flex-wrap items-center gap-2 mt-1">
-                  <span class="text-xs text-text-secondary">Cant: <span class="text-text-primary font-bold">{{ producto.cantidad }}</span></span>
-                  @if (producto.variante?.opciones?.length) {
-                    <span class="text-xs text-text-muted">• {{ producto.variante.opciones[0].opcion?.nombre }}</span>
-                  }
+              <div class="flex-1 min-w-0 flex flex-col">
+                <div class="flex justify-between items-start mb-1 gap-2">
+                  <p class="text-sm font-bold text-text-primary leading-tight line-clamp-2 pr-1">{{ producto.nombre }}</p>
+                  <p class="text-sm font-bold text-brand-primary whitespace-nowrap">{{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}</p>
                 </div>
-              </div>
-              
-              <div class="text-right flex-shrink-0">
-                <p class="text-sm font-bold text-brand-primary">{{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}</p>
+                
+                @if (producto.variante?.opciones?.length) {
+                  <span class="text-[11px] text-text-muted mb-3 font-medium block leading-none">• {{ producto.variante.opciones[0].opcion?.nombre }}</span>
+                } @else {
+                  <div class="mb-3"></div>
+                }
+
+                @if (puedeEditarCantidades) {
+                  <div class="flex items-center justify-between mt-auto">
+                    <!-- Controles de cantidad: Botones circulares en píldora -->
+                    <div class="flex items-center gap-1 bg-bg-app rounded-full p-1 border border-border-default shadow-inner">
+                      <button type="button" (click)="onDisminuirCantidad(producto)"
+                        class="w-7 h-7 flex items-center justify-center rounded-full bg-bg-surface text-text-primary shadow-sm active:scale-90 transition-all">
+                        <app-icon name="minus" size="12" />
+                      </button>
+                      <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                        class="w-8 h-6 mx-0.5 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 focus:bg-white rounded [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        style="-moz-appearance: textfield; appearance: textfield;" />
+                      <button type="button" (click)="onAumentarCantidad(producto)"
+                        class="w-7 h-7 flex items-center justify-center rounded-full bg-brand-cta text-text-on-dark shadow-sm active:scale-90 transition-all">
+                        <app-icon name="plus" color="black" size="12" />
+                      </button>
+                    </div>
+                    
+                    <!-- Botón eliminar más cómodo -->
+                    <button (click)="onEliminarProducto(producto)" 
+                      class="w-9 h-9 flex items-center justify-center rounded-lg text-error bg-error/5 border border-error/10 active:scale-95 transition-all">
+                      <app-icon name="trash2" size="16" />
+                    </button>
+                  </div>
+                } @else {
+                  <div class="mt-auto">
+                    <span class="px-3 py-1.5 rounded-lg bg-bg-raised text-text-muted font-bold border border-border-default text-[11px]">
+                      Cant: {{ producto.cantidad }}
+                    </span>
+                  </div>
+                }
               </div>
             </div>
             } @empty {
@@ -288,14 +318,14 @@
               <div class="flex items-center gap-1.5">
                 @if (puedeEditarCantidades) {
                   <button type="button" (click)="onDisminuirCantidad(producto)"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default active:scale-90">
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default active:scale-90 cursor-pointer">
                     <app-icon name="minus" size="12" />
                   </button>
-                  <span class="w-6 text-center font-bold text-sm">
-                    {{ producto.cantidad }}
-                  </span>
+                  <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                    class="w-8 h-7 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 rounded focus:bg-white [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    style="-moz-appearance: textfield; appearance: textfield;" />
                   <button type="button" (click)="onAumentarCantidad(producto)"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark shadow-sm active:scale-90">
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark shadow-sm active:scale-90 cursor-pointer">
                     <app-icon name="plus" color="black" size="12" />
                   </button>
                 } @else {
@@ -312,7 +342,7 @@
           
           @if (puedeEditarCantidades) {
             <div class="mt-2 pt-2 border-t border-border-default flex justify-end">
-              <button (click)="onEliminarProducto(producto)" class="flex items-center gap-1.5 text-[10px] font-bold text-error uppercase tracking-wider px-2 py-1 rounded hover:bg-error/5 transition-colors active:scale-95">
+              <button (click)="onEliminarProducto(producto)" class="flex items-center gap-1.5 text-[10px] font-bold text-error uppercase tracking-wider px-2 py-1 rounded hover:bg-error/5 transition-colors active:scale-95 cursor-pointer">
                 <app-icon name="trash2" size="12" />
                 Eliminar de la reserva
               </button>

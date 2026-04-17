@@ -80,6 +80,7 @@
       @for (pedido of pedidosPaginados(); track pedido.id_pedido) {
       <app-paquete-usuario-card [pedido]="pedido" (toggleExpansion)="toggleExpansion(pedido)"
         (aumentarCantidad)="aumentarCantidad(pedido, $event)" (disminuirCantidad)="disminuirCantidad(pedido, $event)"
+        (setCantidadManual)="setCantidadManual(pedido, $event)"
         (eliminarProducto)="eliminarProducto(pedido, $event)" (salirDelPaquete)="salirDelPaquete(pedido)"
         (finalizarCompra)="finalizarCompra(pedido)" (solicitarReembolso)="solicitarReembolso(pedido)"
         (imageError)="onImageError($event)">

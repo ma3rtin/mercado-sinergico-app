@@ -24,6 +24,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() toggleExpansion = new EventEmitter<void>();
   @Output() aumentarCantidad = new EventEmitter<any>();
   @Output() disminuirCantidad = new EventEmitter<any>();
+  @Output() setCantidadManual = new EventEmitter<any>();
   @Output() eliminarProducto = new EventEmitter<ProductoEnPedido>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
@@ -234,6 +235,26 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     };
 
     this.disminuirCantidad.emit(limpio);
+  }
+
+  onCambiarCantidadManual(prod: any, event: Event): void {
+    if (!this.puedeEditarCantidades) return;
+    const input = event.target as HTMLInputElement;
+    let valor = parseInt(input.value, 10);
+    
+    if (isNaN(valor) || valor < 1) {
+      input.value = '1';
+      valor = 1;
+    }
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id,
+      nuevaCantidad: valor
+    };
+    
+    this.setCantidadManual.emit(limpio);
   }
 
   get puedeSalirDelPaquete(): boolean {
