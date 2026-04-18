@@ -97,7 +97,34 @@ export class FiltrosComponent {
   error = signal<string | null>(null);
   isDrawerOpen = signal<boolean>(false);
 
-  // 📊 COMPUTED
+  // 📂 ESTADO DE ACORDEONES (Secciones expandidas)
+  expandedSections = signal<Record<string, boolean>>({
+    Categoria: true,
+    Marca: true,
+    TipoPaquete: true,
+    RangoPrecio: true,
+    Ordenamiento: true,
+    Estados: true
+  });
+
+  // 🔍 BUSCADORES INTERNOS
+  searchCategoria = signal<string>('');
+  searchMarca = signal<string>('');
+
+  // 📊 COMPUTED DE FILTRADO PARA LOS BUSCADORES
+  filteredCategorias = computed(() => {
+    const query = this.searchCategoria().toLowerCase().trim();
+    if (!query) return this.categorias();
+    return this.categorias().filter(c => c.nombre.toLowerCase().includes(query));
+  });
+
+  filteredMarcas = computed(() => {
+    const query = this.searchMarca().toLowerCase().trim();
+    if (!query) return this.marcas();
+    return this.marcas().filter(m => m.nombre.toLowerCase().includes(query));
+  });
+
+  // 📊 COMPUTED ESTADOS
   tieneCategoriasSeleccionadas = computed(() => this.categoriasSeleccionadas().length > 0);
   tieneMarcasSeleccionadas = computed(() => this.marcasSeleccionadas().length > 0);
   tieneTiposPaqueteSeleccionados = computed(() => this.tiposPaqueteSeleccionados().length > 0);
@@ -129,6 +156,18 @@ export class FiltrosComponent {
   private platformId = inject(PLATFORM_ID);
 
   constructor() {
+    // 📱 En mobile, colapsar la mayoría por defecto
+    if (isPlatformBrowser(this.platformId) && window.innerWidth < 1024) {
+      this.expandedSections.set({
+        Categoria: false, // Ahora todo colapsado por defecto
+        Marca: false,
+        TipoPaquete: false,
+        RangoPrecio: false,
+        Ordenamiento: false,
+        Estados: false
+      });
+    }
+
     effect(() => {
       const cfg = this.config();
       if (cfg && isPlatformBrowser(this.platformId)) {
@@ -273,6 +312,18 @@ export class FiltrosComponent {
 
   closeDrawer(): void {
     this.isDrawerOpen.set(false);
+  }
+
+  // 📂 MANEJO DE ACORDEONES
+  toggleSection(section: string): void {
+    this.expandedSections.update(sections => ({
+      ...sections,
+      [section]: !sections[section]
+    }));
+  }
+
+  isSectionExpanded(section: string): boolean {
+    return this.expandedSections()[section] ?? false;
   }
 
   // 🎯 APLICAR Y LIMPIAR FILTROS

@@ -7,7 +7,7 @@ import { IconComponent } from '@app/shared/icono/icono';
  */
 export type ButtonVariant =
   | 'primary'      // Amarillo - acción principal
-  | 'secondary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info' | 'ghost';       // Otros
+  | 'secondary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info' | 'ghost' | 'success-outline';       // Otros
 
 /**
  * Tamaños del botón
@@ -108,6 +108,7 @@ export class ButtonComponent {
       'warning': 'bg-[var(--btn-warning-bg)] border-2 border-[var(--btn-warning-border)] text-[var(--btn-warning-text)] hover:bg-[var(--btn-warning-hover)] active:bg-[var(--btn-warning-active)] focus:ring-2 focus:ring-[var(--btn-warning-ring)]',
       'danger': 'bg-[var(--btn-danger-bg)] text-[var(--btn-danger-text)] hover:bg-[var(--btn-danger-hover)] active:bg-[var(--btn-danger-active)] focus:ring-2 focus:ring-[var(--btn-danger-ring)] shadow-md hover:shadow-lg active:shadow-sm',
       'success': 'bg-[var(--btn-success-bg)] text-[var(--btn-success-text)] hover:bg-[var(--btn-success-hover)] active:bg-[var(--btn-success-active)] focus:ring-2 focus:ring-[var(--btn-success-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'success-outline': 'bg-white border-2 border-[var(--btn-success-bg)] text-[var(--btn-success-bg)] hover:bg-green-50 active:bg-green-100 focus:ring-2 focus:ring-[var(--btn-success-ring)] shadow-sm font-semibold',
       'info': 'bg-[var(--btn-info-bg)] text-[var(--btn-info-text)] hover:bg-[var(--btn-info-hover)] active:bg-[var(--btn-info-active)] focus:ring-2 focus:ring-[var(--btn-info-ring)] shadow-md hover:shadow-lg active:shadow-sm',
       'ghost': 'bg-[var(--btn-ghost-bg)] text-[var(--btn-ghost-text)] hover:bg-[var(--btn-ghost-hover)] active:bg-[var(--btn-ghost-active)] focus:ring-2 focus:ring-[var(--btn-ghost-ring)]',
     };
@@ -135,6 +136,22 @@ export class ButtonComponent {
     const variantClass = variants[this.variant()];
 
     return `${base} ${sizeClass} ${shapeClass} ${widthClass} ${variantClass} ${disabledClasses} ${selectedClasses} ${fullWidthClass} ${hFullClass} ${uppercaseClass}`.trim();
+  });
+
+  // 🎨 COMPUTED: Tamaño del icono en px
+  iconSize = computed(() => {
+    if (this.direction() === 'column') return '32';
+
+    const sizeMap: Record<ButtonSize, string> = {
+      'xs': '12',
+      'sm': '16',
+      'md': '20',
+      'lg': '24',
+      'xl': '28',
+      '2xl': '32',
+    };
+
+    return sizeMap[this.size()];
   });
 
   // 🎨 COMPUTED: Clases del icono

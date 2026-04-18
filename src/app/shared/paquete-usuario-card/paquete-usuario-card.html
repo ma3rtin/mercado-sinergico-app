@@ -1,11 +1,11 @@
 <!-- CARD COLAPSADO: Mostrar PaqueteCard -->
-@if (!pedido.expandido) {
+@if (!pedido.expandido || isMobile()) {
 <div
-  class="w-full bg-bg-surface rounded-xl border border-border-default shadow-sm hover:shadow-md transition cursor-pointer p-4 flex gap-4 items-center"
+  class="w-full bg-bg-surface rounded-2xl border border-border-default shadow-sm hover:shadow-md transition-all cursor-pointer p-3 sm:p-4 flex gap-3 sm:gap-4 items-center group"
   (click)="onToggleExpansion()">
 
   <!-- Imagen -->
-  <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-bg-app overflow-hidden border border-border-default">
+  <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl bg-bg-app overflow-hidden border border-border-default group-hover:scale-105 transition-transform">
     <img [src]="paquete.paqueteBase?.imagen_url" (error)="onImageError($event)"
       class="w-full h-full object-contain p-2">
   </div>
@@ -14,39 +14,39 @@
   <div class="flex-1 min-w-0 flex flex-col">
 
     <!-- Título + flecha -->
-    <div class="flex justify-between items-start">
-      <h3 class="font-display text-lg text-text-primary truncate">
+    <div class="flex justify-between items-center mb-1">
+      <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
         {{ paquete.paqueteBase?.nombre }}
       </h3>
 
-      <app-icon name="chevronDown" size="20" class="text-text-muted" />
-    </div>
-
-    <!-- TAGS -->
-    <div class="flex flex-wrap gap-2 mt-2 text-xs">
-      <span class="px-2 py-1 rounded-full bg-brand-primary text-text-on-dark font-medium">
-        {{ getMarcaNombre() }}
-      </span>
-
-      <span class="px-2 py-1 rounded-full bg-bg-raised text-text-secondary font-medium border border-border-default">
-        {{ getCategoriaNombre() }}
-      </span>
-
-      <span class="px-2 py-1 rounded-full border border-border-default text-text-secondary">
-        {{ obtenerTextoTipo() }}
-      </span>
-
-      <span [class]="'px-2 py-1 rounded-full border ' + getEstadoClass(pedido.estado?.nombre)">
-        {{ pedido.estado?.nombre }}
-      </span>
+      <div class="flex items-center gap-2">
+        <!-- Estado Badge (Minimalista) -->
+        <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ' + getEstadoClass(pedido.estado?.nombre)">
+          {{ pedido.estado?.nombre }}
+        </span>
+        <app-icon name="chevronRight" size="18" class="text-text-muted group-hover:translate-x-1 transition-transform" />
+      </div>
     </div>
 
     <!-- PROGRESO + META -->
-    <div class="mt-3">
+    <div class="mt-2 text-xs">
+      <!-- Texto -->
+      <div class="flex justify-between items-end mb-1.5 px-0.5">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Progreso del paquete</span>
+          <span class="text-xs text-text-secondary">
+            <strong class="text-text-primary">{{ paquete?.cant_productos_reservados ?? 0 }}</strong>
+            / {{ paquete?.cant_productos ?? 0 }} prod.
+          </span>
+        </div>
+        <span class="font-bold text-sm text-brand-primary">
+          {{ porcentajeReservado }}%
+        </span>
+      </div>
 
       <!-- Barra -->
-      <div class="w-full bg-bg-app rounded-full h-1.5 overflow-hidden border border-border-default shadow-inner">
-        <div class="h-1.5 rounded-full transition-all" [ngClass]="{
+      <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden border border-border-default shadow-inner">
+        <div class="h-2 rounded-full transition-all duration-500" [ngClass]="{
         'bg-success': porcentajeReservado < 50,
         'bg-brand-pta': porcentajeReservado >= 50 && porcentajeReservado < 80,
         'bg-brand-primary': porcentajeReservado >= 50,
@@ -54,384 +54,365 @@
       }" [style.width.%]="porcentajeReservado">
         </div>
       </div>
-
-      <!-- Texto -->
-      <div class="flex justify-between items-center mt-1 text-xs text-text-secondary">
-        <span class="flex gap-4">
-          <span>
-            <strong class="text-text-primary">{{ paquete?.cant_productos_reservados ?? 0 }}</strong>
-            / {{ paquete?.cant_productos ?? 0 }}
-            productos
-          </span>
-          <span class="flex items-center gap-1">
-            <app-icon name="users" size="12" />
-            <strong class="text-text-primary">{{ paquete?.cant_usuarios_registrados ?? 0 }}</strong>
-            compradores
-          </span>
-        </span>
-
-        <span class="font-bold text-brand-primary">
-          {{ porcentajeReservado }}%
-        </span>
-      </div>
     </div>
   </div>
 </div>
 }
 
-<!-- CARD EXPANDIDO: Vista detallada con productos -->
-@else {
-
+<!-- CARD EXPANDIDO: Solo para Desktop -->
+@if (pedido.expandido && !isMobile()) {
 <article
-  class="bg-bg-surface rounded-xl shadow-md border border-border-default overflow-hidden transition-all duration-300 hover:shadow-lg">
+  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default overflow-hidden animate-in fade-in zoom-in-95 duration-300">
 
-  <!-- HEADER -->
+  <!-- HEADER (Desktop) -->
   <div (click)="onToggleExpansion()"
-    class="cursor-pointer px-4 py-5 flex items-center gap-4 hover:bg-bg-app transition border-b border-border-default">
+    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default">
 
     <!-- Imagen -->
-    <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-bg-app overflow-hidden border border-border-default">
+    <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-bg-app overflow-hidden border border-border-default">
       <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain p-2"
         (error)="onImageError($event)">
     </div>
 
     <!-- Info -->
     <div class="flex-1 min-w-0">
-
-      <div class="flex justify-between items-start">
-        <h3 class="font-display text-xl text-text-primary truncate">
-          {{ paquete.paqueteBase?.nombre }}
-        </h3>
-
-        <!-- Flecha invertida -->
-        <app-icon name="chevronUp" size="20" class="text-text-muted" />
-      </div>
-
-      <div class="flex justify-between items-center mt-2 text-xs gap-3">
-
-        <!-- TAGS -->
-        <div class="flex flex-wrap gap-2">
-          <div class="relative group">
-            <span class="px-2 py-1 rounded-full bg-brand-primary text-text-on-dark font-medium cursor-default">
-              {{ getMarcaNombre() }}
-            </span>
-          </div>
-
-          <div class="relative group">
-            <span
-              class="px-2 py-1 rounded-full bg-bg-raised text-text-secondary border border-border-default cursor-default font-medium">
-              {{ getCategoriaNombre() }}
-            </span>
-          </div>
-
-          <div class="relative group">
-            <span class="px-2 py-1 rounded-full border border-border-default text-text-secondary cursor-default">
-              {{ obtenerTextoTipo() }}
-            </span>
-          </div>
-
-          <div class="relative group">
-            <span
-              [class]="'px-2 py-1 rounded-full border ' + getEstadoClass(pedido.estado?.nombre) + ' cursor-default font-bold'">
-              {{ pedido.estado?.nombre }}
-            </span>
-          </div>
-
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="font-display text-xl text-text-primary font-bold">
+            {{ paquete.paqueteBase?.nombre }}
+          </h3>
+          <p class="text-xs text-text-secondary mt-1">Detalles de tu participación en este paquete</p>
         </div>
 
-        <!-- CONTADOR -->
-        <div class="text-text-secondary whitespace-nowrap" [ngClass]="{
-    'text-success font-semibold': cantidadProductosUsuario >= paquete?.cant_productos * 0.8
-  }"> <span class="font-bold text-text-primary">
-            {{ cantidadProductosUsuario }}
+        <div class="flex items-center gap-4">
+          <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
+            {{ pedido.estado?.nombre }}
           </span>
-          /
-          {{ paquete?.cant_productos ?? 0 }}
-          productos
+          <app-icon name="chevronUp" size="24" class="text-text-muted" />
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Contenido expandido -->
   <div class="bg-bg-app">
-    <div class="p-6">
-      <div class="flex flex-col lg:flex-row gap-6">
+    <ng-container *ngTemplateOutlet="expandedContent"></ng-container>
+  </div>
+</article>
+}
 
-        <!-- IZQUIERDA -->
-        <div class="flex-1 space-y-4">
+<!-- MODAL PARA MOBILE -->
+@if (isMobile() && isModalOpen()) {
+<div class="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-[2px] animate-fade-in"
+  (click)="closeModal()">
+  <div class="bg-bg-surface w-full max-h-[92vh] overflow-hidden rounded-t-[32px] shadow-2xl animate-slide-up flex flex-col"
+    (click)="$event.stopPropagation()">
+    
+    <!-- Header / Drag Handle Compacto -->
+    <!-- Header / Drag Handle Rectificado (Tamaños Mobile Estándar) -->
+    <div class="w-full flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border-default/50">
+      <div class="flex items-center gap-4 min-w-0">
+        <div class="w-14 h-14 rounded-2xl bg-bg-app border border-border-default overflow-hidden flex-shrink-0 p-1.5 shadow-sm">
+          <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain" (error)="onImageError($event)">
+        </div>
+        <div class="min-w-0 font-body">
+          <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
+            {{ paquete.paqueteBase?.nombre }}
+          </h3>
+          <p class="text-xs text-text-muted font-bold uppercase tracking-wider">Detalle del Pedido</p>
+        </div>
+      </div>
+      
+      <button (click)="closeModal()" 
+        class="w-10 h-10 rounded-full bg-bg-raised flex items-center justify-center text-text-muted active:scale-90 transition-all">
+        <app-icon name="x" size="20" />
+      </button>
+    </div>
 
-          <h4 class="font-display text-lg text-text-primary mb-3">
-            Estás sumado con:
-          </h4>
-
-          @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
-
-          <div class="bg-bg-surface rounded-lg p-4 shadow-sm border border-border-default">
-
-            <div class="flex items-center gap-4">
-
-              <!-- Imagen -->
-              <div class="w-16 h-16 flex-shrink-0 bg-bg-app rounded-lg overflow-hidden border border-border-default">
-                @if (producto.imagen_url) {
-                <img [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-contain p-1"
-                  (error)="onImageError($event)">
-                } @else {
-                <div class="w-full h-full flex items-center justify-center">
-                  <app-icon name="image" size="24" class="text-text-muted" />
-                </div>
-                }
-              </div>
-
-              <!-- Info -->
-              <div class="flex-1 min-w-0">
-                <p class="font-medium text-text-primary truncate">
-                  {{ producto.nombre }}
-                </p>
-
-                @if (producto.variante?.opciones?.length) {
-                <div class="flex flex-wrap gap-2 mt-1">
-                  @for (op of producto.variante.opciones; track op.id) {
-                  <span
-                    class="px-2 py-0.5 text-[10px] rounded-md bg-bg-raised text-text-secondary border border-border-default">
-                    {{ op.caracteristica?.nombre }}: {{ op.opcion?.nombre }}
-                  </span>
-                  }
-                </div>
-                }
-
-
-                <!-- PRECIO CON DESCUENTO -->
-                <div class="flex flex-col mt-1">
-
-                  <!-- Si hay descuento -->
-                  @if (pedido.descuento > 0) {
-
-                  <!-- Precio original tachado -->
-                  <span class="text-xs text-text-muted line-through">
-                    {{ formatPrice(producto.precio) }}
-                  </span>
-
-                  <!-- Precio final -->
-                  <span class="text-sm font-bold text-brand-primary">
-                    {{ formatPrice(producto.precioConDescuento ?? producto.precio) }} c/u
-                  </span>
-
-                  <!-- Etiqueta de descuento -->
-                  <span class="text-[10px] text-success font-bold">
-                    {{ pedido.descuento }}% OFF
-                  </span>
-
-                  } @else {
-
-                  <!-- Si NO hay descuento -->
-                  <span class="text-sm font-bold text-brand-primary">
-                    {{ formatPrice(producto.precio) }} c/u
-                  </span>
-
-                  }
-                </div>
-
-              </div>
-
-              <!-- Cantidad -->
-              <div class="flex items-center gap-2">
-
-                @if (puedeEditarCantidades) {
-
-                <!-- Botón - -->
-                <button type="button" (click)="onDisminuirCantidad(producto)"
-                  class="w-8 h-8 flex items-center justify-center rounded-xl
-                   bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default cursor-pointer">
-                  <app-icon name="minus" size="14" />
-                </button>
-
-                <span class="w-10 text-center font-bold text-lg text-text-primary">
-                  {{ producto.cantidad }}
-                </span>
-
-                <!-- Botón + -->
-                <button type="button" (click)="onAumentarCantidad(producto)" class="w-8 h-8 flex items-center justify-center rounded-xl
-                   bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark transition-colors shadow-sm cursor-pointer">
-                  <app-icon name="plus" size="14" />
-                </button>
-
-                } @else {
-
-                <!-- Estado NO editable (solo mostrar cantidad) -->
-                <span
-                  class="px-3 py-1 rounded-lg bg-bg-raised text-text-muted font-bold select-none border border-border-default">
-                  {{ producto.cantidad }}
-                </span>
-                }
-              </div>
-
-              <!-- Subtotal -->
-              <div class="text-right flex-shrink-0 min-w-[90px]">
-                <p class="text-[10px] text-text-secondary uppercase tracking-tight">Subtotal</p>
-                <p class="font-bold text-base text-text-primary">
-                  {{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}
-                </p>
-              </div>
-
-              @if (puedeEditarCantidades) {
-
-              <!-- Tachito -->
-              <button type="button" (click)="onEliminarProducto(producto)" class="ml-2 w-8 h-8 flex items-center justify-center rounded-xl
-           bg-error/10 hover:bg-error/20 text-error transition cursor-pointer border border-error/20">
-                <app-icon name="trash2" size="14" />
-              </button>
-              }
-
-            </div>
+    <!-- Modal body -->
+    <div class="flex-1 overflow-y-auto bg-bg-app custom-scrollbar pb-6 px-4">
+      <div class="py-4 space-y-5">
+        
+        <!-- RESUMEN RÁPIDO (Celdas más grandes y legibles) -->
+        <div class="grid grid-cols-4 gap-2.5">
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
+            <app-icon name="clock" size="18" [class]="esUrgente ? 'text-error mx-auto mb-1.5' : 'text-brand-primary mx-auto mb-1.5'" />
+            <p class="text-[10px] text-text-muted font-bold uppercase">Cierre</p>
+            <p class="text-xs font-bold truncate" [ngClass]="{'text-error': esUrgente}">{{ tiempoRestante }}</p>
           </div>
-
-          } @empty {
-
-          <div class="bg-bg-surface rounded-xl p-8 text-center border-2 border-dashed border-border-default">
-            <app-icon name="inbox" size="40" class="text-text-muted mx-auto mb-2" />
-            <p class="text-text-secondary">No hay productos en este pedido</p>
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
+            <app-icon name="package" size="18" class="text-brand-primary mx-auto mb-1.5" />
+            <p class="text-[10px] text-text-muted font-bold uppercase">Reserva</p>
+            <p class="text-xs font-bold">{{ porcentajeReservado }}%</p>
           </div>
-          }
-
-          <div class="flex justify-center py-2">
-            <button type="button"
-              class="text-sm text-brand-primary hover:text-brand-secondary font-medium transition-colors cursor-pointer"
-              (click)="verProductosDisponibles()">
-              Ver todos los productos disponibles del paquete
-            </button>
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
+            <app-icon name="users" size="18" class="text-brand-primary mx-auto mb-1.5" />
+            <p class="text-[10px] text-text-muted font-bold uppercase">Gente</p>
+            <p class="text-xs font-bold">{{ paquete.cant_usuarios_registrados || 0 }}</p>
           </div>
-
-          <!-- Resumen -->
-          @if (pedido.precioSubtotal !== undefined) {
-
-          <div class="bg-bg-surface rounded-xl p-4 shadow-sm border border-border-default">
-
-            <div class="space-y-2">
-
-              <div class="flex justify-between items-center text-sm">
-                <span class="text-text-secondary">Subtotal</span>
-                <span class="font-semibold text-text-primary">
-                  {{ formatPrice(pedido.precioSubtotal) }}
-                </span>
-              </div>
-
-              @if (pedido.descuento > 0) {
-              <div class="flex justify-between items-center text-sm">
-                <span class="text-text-secondary">
-                  Descuento ({{ pedido.descuento }}%)
-                </span>
-                <span class="font-bold text-success">
-                  -{{ formatPrice(pedido.precioSubtotal * (pedido.descuento / 100)) }}
-                </span>
-              </div>
-              }
-
-              <div class="flex justify-between items-center pt-3 border-t border-border-default">
-                <span class="text-base font-bold text-text-primary uppercase tracking-tight">Total del pedido</span>
-                <span class="text-xl font-display text-brand-primary">
-                  {{ formatPrice(pedido.precioFinal || pedido.precioSubtotal) }}
-                </span>
-              </div>
-
-            </div>
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
+            <app-icon name="info" size="18" class="text-brand-primary mx-auto mb-1.5" />
+            <p class="text-[10px] text-text-muted font-bold uppercase">Estado</p>
+            <p class="text-xs font-bold truncate leading-none mt-1">{{ pedido.estado?.nombre || 'OK' }}</p>
           </div>
-          }
         </div>
 
-        <!-- INFORMACIÓN -->
-        <div class="w-full lg:w-80">
-          <div class="bg-bg-surface rounded-xl p-5 shadow-sm border border-border-default sticky top-4">
+        <!-- LISTA DE PRODUCTOS (Legibilidad Mejorada) -->
+        <section class="bg-white rounded-3xl p-5 shadow-sm border border-border-default">
+          <div class="flex justify-between items-center mb-4">
+            <h4 class="font-display text-sm text-text-primary font-bold uppercase tracking-wider">Tu Selección</h4>
+            <span class="text-xs font-bold text-brand-primary bg-brand-primary/5 px-3 py-1 rounded-full">
+              {{ cantidadProductosUsuario }} productos
+            </span>
+          </div>
 
-            <h4 class="font-display text-lg text-text-primary mb-4">
-              Información
-            </h4>
-
-            <div class="flex flex-col gap-4">
-
-              <!-- Estado -->
-              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
-                <app-icon name="info" size="18" class="text-text-muted mt-0.5" />
-
-                <div class="flex-1 min-w-0">
-                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Estado</p>
-                  <span
-                    [class]="'inline-block px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
-                    {{ pedido.estado?.nombre || 'Pendiente' }}
-                  </span>
-                </div>
+          <div class="space-y-4">
+            @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
+            <div class="flex gap-3 py-3 border-b border-border-default/30 last:border-0 last:pb-0">
+              <!-- Imagen Mini -->
+              <div class="w-16 h-16 rounded-xl bg-bg-app border border-border-default overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <img [src]="producto.imagen_url" class="w-full h-full object-contain p-2" (error)="onImageError($event)">
               </div>
-
-              <!-- Tiempo restante -->
-              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
-                <app-icon name="clock" size="18" class="text-text-muted mt-0.5" />
-
-                <div class="flex-1 min-w-0">
-                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Cierra en</p>
-                  <p class="text-lg font-display" [ngClass]="{
-                        'text-error': esUrgente,
-                        'text-text-primary': !esUrgente
-                      }">
-                    {{ tiempoRestante }}
-                  </p>
+              
+              <div class="flex-1 min-w-0 flex flex-col">
+                <div class="flex justify-between items-start mb-1 gap-2">
+                  <p class="text-sm font-bold text-text-primary leading-tight line-clamp-2 pr-1">{{ producto.nombre }}</p>
+                  <p class="text-sm font-bold text-brand-primary whitespace-nowrap">{{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}</p>
                 </div>
-              </div>
+                
+                @if (producto.variante?.opciones?.length) {
+                  <span class="text-[11px] text-text-muted mb-3 font-medium block leading-none">• {{ producto.variante.opciones[0].opcion?.nombre }}</span>
+                } @else {
+                  <div class="mb-3"></div>
+                }
 
-              <!-- Productos del paquete -->
-              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
-                <app-icon name="package" size="18" class="text-text-muted mt-0.5" />
-
-                <div class="flex-1 min-w-0">
-                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Stock del paquete
-                  </p>
-
-                  <p class="text-lg font-bold text-text-primary">
-                    {{ paquete.cant_productos_reservados || 0 }} <span class="text-text-muted font-normal text-sm">/ {{
-                      paquete.cant_productos || 0 }}</span>
-                  </p>
-                </div>
-              </div>
-
-              <!-- Compradores -->
-              <div class="flex items-start gap-3 p-3 rounded-xl bg-bg-app border border-border-default">
-                <app-icon name="users" size="18" class="text-text-muted mt-0.5" />
-
-                <div class="flex-1 min-w-0">
-                  <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-1">Involucrados</p>
-                  <p class="text-lg font-bold text-text-primary">
-                    {{ paquete.cant_usuarios_registrados || 0 }}
-                  </p>
-                </div>
+                @if (puedeEditarCantidades) {
+                  <div class="flex items-center justify-between mt-auto">
+                    <!-- Controles de cantidad: Botones circulares en píldora -->
+                    <div class="flex items-center gap-1 bg-bg-app rounded-full p-1 border border-border-default shadow-inner">
+                      <button type="button" (click)="onDisminuirCantidad(producto)"
+                        class="w-7 h-7 flex items-center justify-center rounded-full bg-bg-surface text-text-primary shadow-sm active:scale-90 transition-all">
+                        <app-icon name="minus" size="12" />
+                      </button>
+                      <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                        class="w-8 h-6 mx-0.5 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 focus:bg-white rounded [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        style="-moz-appearance: textfield; appearance: textfield;" />
+                      <button type="button" (click)="onAumentarCantidad(producto)"
+                        class="w-7 h-7 flex items-center justify-center rounded-full bg-brand-cta text-text-on-dark shadow-sm active:scale-90 transition-all">
+                        <app-icon name="plus" color="black" size="12" />
+                      </button>
+                    </div>
+                    
+                    <!-- Botón eliminar más cómodo -->
+                    <button (click)="onEliminarProducto(producto)" 
+                      class="w-9 h-9 flex items-center justify-center rounded-lg text-error bg-error/5 border border-error/10 active:scale-95 transition-all">
+                      <app-icon name="trash2" size="16" />
+                    </button>
+                  </div>
+                } @else {
+                  <div class="mt-auto">
+                    <span class="px-3 py-1.5 rounded-lg bg-bg-raised text-text-muted font-bold border border-border-default text-[11px]">
+                      Cant: {{ producto.cantidad }}
+                    </span>
+                  </div>
+                }
               </div>
             </div>
+            } @empty {
+              <p class="text-sm text-text-muted text-center py-4 italic">No hay productos reservados</p>
+            }
+          </div>
 
-            <!-- BOTONES -->
-            <div class="flex flex-col gap-3 pt-6">
-              @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
-              <app-button variant="primary" label="Completar compra" [fullWidth]="true"
-                (buttonClick)="onFinalizarCompra()">
-              </app-button>
+          <button (click)="verProductosDisponibles(); closeModal()" 
+            class="w-full mt-4 py-3 text-xs font-bold text-brand-primary uppercase tracking-widest border-t border-border-default/50 pt-4 active:scale-95 transition-all">
+            Ver Catálogo
+          </button>
+        </section>
+
+        <!-- RESUMEN DE PAGO (Tarjeta con jerarquía Clara) -->
+        @if (pedido.precioSubtotal !== undefined) {
+        <section class="bg-brand-secondary text-white rounded-[32px] p-6 shadow-lg relative overflow-hidden">
+          <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+          
+          <div class="relative z-10 flex justify-between items-center">
+            <div class="space-y-1">
+              <p class="text-xs font-bold text-white/50 uppercase tracking-widest leading-none">Total estimado</p>
+              <h2 class="text-2xl font-display font-bold leading-none">{{ formatPrice(pedido.precioFinal || pedido.precioSubtotal) }}</h2>
+            </div>
+            
+            <div class="flex items-center gap-3">
+              @if (puedeSalirDelPaquete) {
+                <button (click)="onSalirDelPaquete(); closeModal()" 
+                  class="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center text-white/60 active:scale-95 transition-all">
+                  <app-icon name="trash2" size="18" />
+                </button>
               }
+              @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
+                <button (click)="onFinalizarCompra(); closeModal()" 
+                  class="bg-brand-cta text-brand-secondary px-6 py-3 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-all">
+                  Completar
+                </button>
+              }
+            </div>
+          </div>
+        </section>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+}
 
-              @if (puedeReembolsar) {
-              <app-button variant="danger" [fullWidth]="true" iconStart="refreshCcw"
+
+
+<!-- TEMPLATE REUTILIZABLE (Desktop Layout Full) -->
+<ng-template #expandedContent>
+  <div class="p-4 sm:p-6 pb-12">
+    <div class="flex flex-col lg:flex-row gap-6">
+
+      <!-- IZQUIERDA: Productos -->
+      <div class="flex-1 space-y-4">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="font-display text-lg text-text-primary font-bold">
+            Tu reserva:
+          </h4>
+          <span class="text-xs text-text-secondary font-medium">
+            <strong class="text-text-primary">{{ cantidadProductosUsuario }}</strong> / {{ paquete?.cant_productos ?? 0 }} prod.
+          </span>
+        </div>
+
+        @for (producto of productosEnPedido; track producto.id_detalle || producto.id_producto) {
+        <div class="bg-bg-surface rounded-2xl p-3 shadow-sm border border-border-default hover:border-brand-primary/30 transition-colors">
+          <div class="flex flex-row items-center gap-3">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-bg-app rounded-xl overflow-hidden border border-border-default">
+              @if (producto.imagen_url) {
+              <img [src]="producto.imagen_url" [alt]="producto.nombre" class="w-full h-full object-contain p-1"
+                (error)="onImageError($event)">
+              } @else {
+              <div class="w-full h-full flex items-center justify-center bg-bg-raised">
+                <app-icon name="image" size="24" class="text-text-muted" />
+              </div>
+              }
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-sm text-text-primary leading-tight line-clamp-2">
+                {{ producto.nombre }}
+              </p>
+              @if (producto.variante?.opciones?.length) {
+              <div class="flex flex-wrap gap-1 mt-1.5">
+                @for (op of producto.variante.opciones; track op.id) {
+                <span class="px-1.5 py-0.5 text-[9px] rounded bg-bg-raised text-text-secondary border border-border-default">
+                  {{ op.opcion?.nombre }}
+                </span>
+                }
+              </div>
+              }
+              <div class="mt-1">
+                <span class="text-[10px] font-bold text-brand-primary bg-brand-primary/5 px-1.5 py-0.5 rounded">
+                  {{ formatPrice(producto.precioConDescuento ?? producto.precio) }} c/u
+                </span>
+              </div>
+            </div>
+            
+            <div class="flex flex-col items-end gap-2 shrink-0">
+              <div class="flex items-center gap-1.5">
+                @if (puedeEditarCantidades) {
+                  <button type="button" (click)="onDisminuirCantidad(producto)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default active:scale-90 cursor-pointer">
+                    <app-icon name="minus" size="12" />
+                  </button>
+                  <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                    class="w-8 h-7 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 rounded focus:bg-white [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    style="-moz-appearance: textfield; appearance: textfield;" />
+                  <button type="button" (click)="onAumentarCantidad(producto)"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-brand-cta hover:bg-brand-cta-hover text-text-on-dark shadow-sm active:scale-90 cursor-pointer">
+                    <app-icon name="plus" color="black" size="12" />
+                  </button>
+                } @else {
+                  <span class="px-2 py-1 rounded-lg bg-bg-raised text-text-muted font-bold border border-border-default text-xs">
+                    x{{ producto.cantidad }}
+                  </span>
+                }
+              </div>
+              <p class="font-bold text-sm text-text-primary">
+                {{ formatPrice((producto.precioConDescuento ?? producto.precio) * producto.cantidad) }}
+              </p>
+            </div>
+          </div>
+          
+          @if (puedeEditarCantidades) {
+            <div class="mt-2 pt-2 border-t border-border-default flex justify-end">
+              <button (click)="onEliminarProducto(producto)" class="flex items-center gap-1.5 text-[10px] font-bold text-error uppercase tracking-wider px-2 py-1 rounded hover:bg-error/5 transition-colors active:scale-95 cursor-pointer">
+                <app-icon name="trash2" size="12" />
+                Eliminar de la reserva
+              </button>
+            </div>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="w-full lg:w-80 space-y-4">
+        <div class="bg-bg-surface rounded-2xl p-5 shadow-sm border border-border-default lg:sticky lg:top-4">
+          <h4 class="font-display text-base text-text-primary font-bold mb-4 uppercase tracking-wider">
+            Información del Paquete
+          </h4>
+
+          <div class="grid grid-cols-2 lg:grid-cols-1 gap-3">
+            <!-- ... Stats ... -->
+            <div class="p-3 rounded-xl bg-bg-app border border-border-default">
+              <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mb-1">Cierra en</p>
+              <div class="flex items-center gap-2">
+                <app-icon name="clock" size="16" [class]="esUrgente ? 'text-error' : 'text-brand-primary'" />
+                <p class="text-base font-bold" [ngClass]="{'text-error': esUrgente, 'text-text-primary': !esUrgente}">
+                  {{ tiempoRestante }}
+                </p>
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-bg-app border border-border-default">
+              <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mb-1">Reserva Global</p>
+              <div class="flex items-center gap-2">
+                <app-icon name="package" size="16" class="text-brand-primary" />
+                <p class="text-base font-bold text-text-primary">
+                  {{ paquete.cant_productos_reservados || 0 }}
+                  <span class="text-text-muted font-normal text-xs">/ {{ paquete.cant_productos || 0 }}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTONES -->
+          <div class="flex flex-col gap-3 pt-6">
+            @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
+              <app-button
+                variant="primary"
+                label="Completar compra"
+                [fullWidth]="true"
+                (buttonClick)="onFinalizarCompra()"
+                class="shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-transform">
+              </app-button>
+            }
+
+            @if (puedeReembolsar) {
+              <app-button
+                variant="danger"
+                [fullWidth]="true"
+                iconStart="refreshCcw"
                 (buttonClick)="onSolicitarReembolso()">
                 Solicitar reembolso
               </app-button>
-              }
+            }
 
-              @if (puedeSalirDelPaquete) {
-              <button (click)="onSalirDelPaquete()"
+            @if (puedeSalirDelPaquete) {
+              <button
+                (click)="onSalirDelPaquete()"
                 class="text-sm text-error hover:text-error-dark font-medium transition-colors py-2 cursor-pointer">
                 Abandonar este paquete
               </button>
-              }
-            </div>
+            }
           </div>
         </div>
       </div>
     </div>
   </div>
-
-</article>
-}
+</ng-template>

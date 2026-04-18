@@ -88,11 +88,23 @@ import {
   featherClipboard,
   featherList,
   featherGrid,
-  featherMinusCircle,
+  featherMinus,
+  featherPlus,
   featherAlertOctagon,
-featherFilePlus,
-
+  featherFilePlus,
+  featherHelpCircle,
+  featherLifeBuoy,
+  featherMessageCircle,
+  featherShield,
+  featherInbox,
+  featherImage,
+  featherTruck,
+  featherThumbsUp,
+  featherFileText,
+  featherXCircle,
+  featherHash,
 } from '@ng-icons/feather-icons';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -176,11 +188,26 @@ export const appConfig: ApplicationConfig = {
         featherClipboard,
         featherList,
         featherGrid,
-        featherMinusCircle,
+        featherMinus,
+        featherPlus,
         featherAlertOctagon,
         featherFilePlus,
-        featherLock
+        featherFileText,
+        featherLock,
+        featherHelpCircle,
+        featherLifeBuoy,
+        featherMessageCircle,
+        featherShield,
+        featherInbox,
+        featherImage,
+        featherTruck,
+        featherThumbsUp,
+        featherXCircle,
+        featherHash,
       })
-    ),
+    ), provideServiceWorker('ngsw-worker.js', {
+      enabled: true,
+      registrationStrategy: 'registerImmediately'
+    }),
   ],
 };

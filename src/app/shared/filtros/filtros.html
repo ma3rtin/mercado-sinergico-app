@@ -40,8 +40,9 @@
             <h2 class="font-display text-2xl font-bold text-gray-900">{{ titulo() }}</h2>
             <p class="text-xs text-gray-500 font-medium mt-0.5">Personalizá tu búsqueda</p>
         </div>
-        <button (click)="closeDrawer()" class="p-2.5 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-full transition-colors">
-          <app-icon name="X" size="20"></app-icon>
+        <button (click)="closeDrawer()" 
+          class="w-10 h-10 flex items-center justify-center bg-gray-100/80 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-full transition-all active:scale-95 shadow-sm">
+          <app-icon name="X" size="24"></app-icon>
         </button>
       </div>
 
@@ -109,160 +110,261 @@
 
 <!-- 🧩 TEMPLATE COMPARTIDO DE CONTENIDO -->
 <ng-template #filterContentTemplate>
-  <div class="space-y-10">
+  <div class="space-y-6">
 
     <!-- 📂 CATEGORÍAS -->
     @if (mostrarFiltro('mostrarCategoria')) {
-      <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('Categoria') }}
-        </label>
-        <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-          @for (categoria of categorias(); track categoria.id) {
-            <label
-              class="flex items-center justify-between group cursor-pointer p-3 rounded-xl border-2 transition-all duration-200"
-              [class]="esCategoriaSeleccionada(categoria.id) ? 'border-brand-primary bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
-              <div class="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  [checked]="esCategoriaSeleccionada(categoria.id)"
-                  (change)="toggleCategoria(categoria.id)"
-                  class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg focus:ring-0 cursor-pointer">
-                <span [class]="'text-sm font-medium transition-colors ' + (esCategoriaSeleccionada(categoria.id) ? 'text-brand-primary' : 'text-gray-600')">
-                  {{ categoria.nombre }}
-                </span>
-              </div>
-            </label>
-          }
-        </div>
+      <div class="filter-group bg-white rounded-2xl">
+        <button (click)="toggleSection('Categoria')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('Categoria') }}
+          </label>
+          <div class="flex items-center gap-2">
+            @if (categoriasSeleccionadas().length > 0) {
+              <span class="w-5 h-5 flex items-center justify-center bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-full">
+                {{ categoriasSeleccionadas().length }}
+              </span>
+            }
+            <app-icon [name]="isSectionExpanded('Categoria') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+          </div>
+        </button>
+
+        @if (isSectionExpanded('Categoria')) {
+          <div class="pt-4 animate-fade-in">
+            <!-- Buscador interno -->
+            <div class="relative mb-4">
+              <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
+              <input type="text" 
+                     [value]="searchCategoria()"
+                     (input)="searchCategoria.set($any($event.target).value)"
+                     placeholder="Buscar categoría..."
+                     class="w-full pl-9 pr-3 py-2 bg-gray-50 border-transparent rounded-xl text-xs focus:bg-white focus:border-brand-primary/20 focus:ring-0 transition-all outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              @for (categoria of filteredCategorias(); track categoria.id) {
+                <label
+                  class="flex items-center justify-between group cursor-pointer p-2.5 rounded-xl border-2 transition-all duration-200"
+                  [class]="esCategoriaSeleccionada(categoria.id) ? 'border-brand-primary/20 bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      [checked]="esCategoriaSeleccionada(categoria.id)"
+                      (change)="toggleCategoria(categoria.id)"
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-0 cursor-pointer">
+                    <span [class]="'text-sm transition-colors ' + (esCategoriaSeleccionada(categoria.id) ? 'text-brand-primary font-bold' : 'text-gray-600 font-medium')">
+                      {{ categoria.nombre }}
+                    </span>
+                  </div>
+                </label>
+              }
+              @if (filteredCategorias().length === 0) {
+                <p class="text-[10px] text-gray-400 text-center py-4">No se encontraron resultados</p>
+              }
+            </div>
+          </div>
+        }
       </div>
+      <div class="h-px bg-gray-100 w-full"></div>
     }
 
     <!-- 🏷️ MARCAS -->
     @if (mostrarFiltro('mostrarMarca')) {
-      <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('Marca') }}
-        </label>
-        <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-          @for (marca of marcas(); track marca.id) {
-            <label
-              class="flex items-center justify-between group cursor-pointer p-3 rounded-xl border-2 transition-all duration-200"
-              [class]="esMarcaSeleccionada(marca.id) ? 'border-brand-primary bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
-              <div class="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  [checked]="esMarcaSeleccionada(marca.id)"
-                  (change)="toggleMarca(marca.id)"
-                  class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg focus:ring-0 cursor-pointer">
-                <span [class]="'text-sm font-medium transition-colors ' + (esMarcaSeleccionada(marca.id) ? 'text-brand-primary' : 'text-gray-600')">
-                  {{ marca.nombre }}
-                </span>
-              </div>
-            </label>
-          }
-        </div>
+      <div class="filter-group bg-white rounded-2xl">
+        <button (click)="toggleSection('Marca')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('Marca') }}
+          </label>
+          <div class="flex items-center gap-2">
+            @if (marcasSeleccionadas().length > 0) {
+              <span class="w-5 h-5 flex items-center justify-center bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-full">
+                {{ marcasSeleccionadas().length }}
+              </span>
+            }
+            <app-icon [name]="isSectionExpanded('Marca') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+          </div>
+        </button>
+
+        @if (isSectionExpanded('Marca')) {
+          <div class="pt-4 animate-fade-in">
+            <!-- Buscador interno -->
+            <div class="relative mb-4">
+              <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
+              <input type="text" 
+                     [value]="searchMarca()"
+                     (input)="searchMarca.set($any($event.target).value)"
+                     placeholder="Buscar marca..."
+                     class="w-full pl-9 pr-3 py-2 bg-gray-50 border-transparent rounded-xl text-xs focus:bg-white focus:border-brand-primary/20 focus:ring-0 transition-all outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              @for (marca of filteredMarcas(); track marca.id) {
+                <label
+                  class="flex items-center justify-between group cursor-pointer p-2.5 rounded-xl border-2 transition-all duration-200"
+                  [class]="esMarcaSeleccionada(marca.id) ? 'border-brand-primary/20 bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      [checked]="esMarcaSeleccionada(marca.id)"
+                      (change)="toggleMarca(marca.id)"
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-0 cursor-pointer">
+                    <span [class]="'text-sm transition-colors ' + (esMarcaSeleccionada(marca.id) ? 'text-brand-primary font-bold' : 'text-gray-600 font-medium')">
+                      {{ marca.nombre }}
+                    </span>
+                  </div>
+                </label>
+              }
+              @if (filteredMarcas().length === 0) {
+                <p class="text-[10px] text-gray-400 text-center py-4">No se encontraron resultados</p>
+              }
+            </div>
+          </div>
+        }
       </div>
+      <div class="h-px bg-gray-100 w-full"></div>
     }
 
     <!-- 📦 TIPO DE PAQUETE -->
     @if (mostrarFiltro('mostrarTipoPaquete')) {
       <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('TipoPaquete') }}
-        </label>
-        <div class="grid grid-cols-1 gap-3">
-          @for (tipo of obtenerOpciones('TipoPaquete'); track tipo.id) {
-            <label
-              class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 transition-all"
-              [class]="esTipoPaqueteSeleccionado(tipo.valor) ? 'border-brand-primary bg-brand-primary/5' : 'border-gray-100 hover:border-gray-200'">
-              <input
-                type="checkbox"
-                [checked]="esTipoPaqueteSeleccionado(tipo.valor)"
-                (change)="toggleTipoPaquete(tipo.valor)"
-                class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg focus:ring-0 cursor-pointer">
-              <span [class]="'text-sm font-bold ' + (esTipoPaqueteSeleccionado(tipo.valor) ? 'text-brand-primary' : 'text-gray-700')">
-                {{ tipo.nombre }}
+        <button (click)="toggleSection('TipoPaquete')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('TipoPaquete') }}
+          </label>
+          <div class="flex items-center gap-2">
+            @if (tiposPaqueteSeleccionados().length > 0) {
+              <span class="w-5 h-5 flex items-center justify-center bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-full">
+                {{ tiposPaqueteSeleccionados().length }}
               </span>
-            </label>
-          }
-        </div>
+            }
+            <app-icon [name]="isSectionExpanded('TipoPaquete') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+          </div>
+        </button>
+
+        @if (isSectionExpanded('TipoPaquete')) {
+          <div class="pt-4 grid grid-cols-1 gap-3 animate-fade-in">
+            @for (tipo of obtenerOpciones('TipoPaquete'); track tipo.id) {
+              <label
+                class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 transition-all"
+                [class]="esTipoPaqueteSeleccionado(tipo.valor) ? 'border-brand-primary bg-brand-primary/5' : 'border-gray-100 hover:border-gray-200'">
+                <input
+                  type="checkbox"
+                  [checked]="esTipoPaqueteSeleccionado(tipo.valor)"
+                  (change)="toggleTipoPaquete(tipo.valor)"
+                  class="w-5 h-5 text-brand-primary border-gray-300 rounded focus:ring-0 cursor-pointer">
+                <span [class]="'text-sm font-bold ' + (esTipoPaqueteSeleccionado(tipo.valor) ? 'text-brand-primary' : 'text-gray-700')">
+                  {{ tipo.nombre }}
+                </span>
+              </label>
+            }
+          </div>
+        }
       </div>
+      <div class="h-px bg-gray-100 w-full"></div>
     }
 
     <!-- 💰 RANGO DE PRECIO -->
     @if (mostrarFiltro('mostrarRangoPrecio')) {
       <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('RangoPrecio') }}
-        </label>
-        <div class="flex flex-col gap-3">
-          <div class="relative group">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
-                <app-icon name="DollarSign" size="16"></app-icon>
-            </span>
-            <input
-              type="number"
-              placeholder="Min"
-              [value]="precioMin() || ''"
-              (input)="cambiarPrecioMin($any($event.target).value ? +$any($event.target).value : null)"
-              class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-medium">
+        <button (click)="toggleSection('RangoPrecio')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('RangoPrecio') }}
+          </label>
+          <app-icon [name]="isSectionExpanded('RangoPrecio') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+        </button>
+
+        @if (isSectionExpanded('RangoPrecio')) {
+          <div class="pt-4 flex flex-col gap-3 animate-fade-in">
+            <div class="relative group">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                  <app-icon name="DollarSign" size="16"></app-icon>
+              </span>
+              <input
+                type="number"
+                placeholder="Min"
+                [value]="precioMin() || ''"
+                (input)="cambiarPrecioMin($any($event.target).value ? +$any($event.target).value : null)"
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-medium">
+            </div>
+            <div class="relative group">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
+                  <app-icon name="DollarSign" size="16"></app-icon>
+              </span>
+              <input
+                type="number"
+                placeholder="Max"
+                [value]="precioMax() || ''"
+                (input)="cambiarPrecioMax($any($event.target).value ? +$any($event.target).value : null)"
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-medium">
+            </div>
           </div>
-          <div class="relative group">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
-                <app-icon name="DollarSign" size="16"></app-icon>
-            </span>
-            <input
-              type="number"
-              placeholder="Max"
-              [value]="precioMax() || ''"
-              (input)="cambiarPrecioMax($any($event.target).value ? +$any($event.target).value : null)"
-              class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-medium">
-          </div>
-        </div>
+        }
       </div>
+      <div class="h-px bg-gray-100 w-full"></div>
     }
 
     <!-- 📋 ORDENAMIENTO -->
     @if (mostrarFiltro('mostrarOrdenamiento')) {
       <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('Ordenamiento') }}
-        </label>
-        <select
-          [value]="ordenSeleccionado()"
-          (change)="cambiarOrdenamiento($any($event.target).value)"
-          class="w-full p-4 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-bold text-gray-700 cursor-pointer appearance-none">
-          <option value="">Destacados</option>
-          @for (opcion of obtenerOpciones('Ordenamiento'); track opcion.id) {
-            <option [value]="opcion.valor">{{ opcion.nombre }}</option>
-          }
-        </select>
+        <button (click)="toggleSection('Ordenamiento')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('Ordenamiento') }}
+          </label>
+          <app-icon [name]="isSectionExpanded('Ordenamiento') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+        </button>
+
+        @if (isSectionExpanded('Ordenamiento')) {
+          <div class="pt-4 animate-fade-in">
+            <select
+              [value]="ordenSeleccionado()"
+              (change)="cambiarOrdenamiento($any($event.target).value)"
+              class="w-full p-4 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all outline-none text-sm font-bold text-gray-700 cursor-pointer appearance-none">
+              <option value="">Destacados</option>
+              @for (opcion of obtenerOpciones('Ordenamiento'); track opcion.id) {
+                <option [value]="opcion.valor">{{ opcion.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
       </div>
+      <div class="h-px bg-gray-100 w-full"></div>
     }
 
     <!-- 🔖 ESTADOS -->
     @if (mostrarFiltro('mostrarEstados')) {
       <div class="filter-group">
-        <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest mb-4">
-          {{ obtenerTitulo('Estados') }}
-        </label>
-        <div class="grid grid-cols-1 gap-3">
-          @for (estado of obtenerOpciones('Estados'); track estado.id) {
-            <label
-              class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 transition-all"
-              [class]="esEstadoSeleccionado(estado.valor) ? 'border-success bg-success/5' : 'border-gray-100 hover:border-gray-200'">
-              <input
-                type="checkbox"
-                [checked]="esEstadoSeleccionado(estado.valor)"
-                (change)="toggleEstado(estado.valor)"
-                class="w-5 h-5 text-success border-gray-300 rounded-lg focus:ring-0 cursor-pointer">
-              <span [class]="'text-sm font-bold ' + (esEstadoSeleccionado(estado.valor) ? 'text-success-dark' : 'text-gray-700')">
-                {{ estado.nombre }}
+        <button (click)="toggleSection('Estados')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('Estados') }}
+          </label>
+          <div class="flex items-center gap-2">
+            @if (estadosSeleccionados().length > 0) {
+              <span class="w-5 h-5 flex items-center justify-center bg-success/10 text-success text-[10px] font-bold rounded-full">
+                {{ estadosSeleccionados().length }}
               </span>
-            </label>
-          }
-        </div>
+            }
+            <app-icon [name]="isSectionExpanded('Estados') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+          </div>
+        </button>
+
+        @if (isSectionExpanded('Estados')) {
+          <div class="pt-4 grid grid-cols-1 gap-3 animate-fade-in">
+            @for (estado of obtenerOpciones('Estados'); track estado.id) {
+              <label
+                class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 transition-all"
+                [class]="esEstadoSeleccionado(estado.valor) ? 'border-success bg-success/5' : 'border-gray-100 hover:border-gray-200'">
+                <input
+                  type="checkbox"
+                  [checked]="esEstadoSeleccionado(estado.valor)"
+                  (change)="toggleEstado(estado.valor)"
+                  class="w-5 h-5 text-success border-gray-300 rounded focus:ring-0 cursor-pointer">
+                <span [class]="'text-sm font-bold ' + (esEstadoSeleccionado(estado.valor) ? 'text-success-dark' : 'text-gray-700')">
+                  {{ estado.nombre }}
+                </span>
+              </label>
+            }
+          </div>
+        }
       </div>
     }
 

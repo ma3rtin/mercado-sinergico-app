@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { LocationModalComponent } from './components/location-modal/location-modal.component';
 import { LocationStateService } from './services/localidad/location-state.service';
 import { NgxSonnerToaster } from 'ngx-sonner';
+import { PwaService } from './services/pwa/pwa.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ export class App {
   private locationState = inject(LocationStateService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private pwaService = inject(PwaService); // 🚀 Inicilizamos para capturar el evento PWA temprano
 
   showLocationModal = signal(false);
 

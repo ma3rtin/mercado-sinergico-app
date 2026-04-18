@@ -29,6 +29,7 @@ import { AdministrarPaquetesComponent } from './pages/admin/components/administr
 import { EditarPaqueteBaseComponent } from './pages/admin/components/editar-paquete-base/editar-paquete-base';
 import { AdministrarPublicacionesComponent } from './pages/admin/components/administrar-publicaciones/administrar-publicaciones';
 import { AdministrarPublicacionDetalleComponent } from './pages/admin/components/administrar-publicacion-detalle/administrar-publicacion-detalle';
+import { SoporteComponent } from './pages/soporte/soporte';
 
 export const routes: Routes = [
 
@@ -48,6 +49,7 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent },
       { path: 'paquetes', component: PaquetesPublicosComponent },
       { path: 'faq', component: FaqComponent },
+      { path: 'soporte', component: SoporteComponent },
 
       // 📜 Legales
       { path: 'terminos-y-condiciones', component: TerminosCondiciones },
@@ -82,6 +84,7 @@ export const routes: Routes = [
           { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent },
           { path: 'administrar-publicaciones', component: AdministrarPublicacionesComponent },
           { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent },
+          { path: 'administrar-publicacion/:id/envios', loadComponent: () => import('./pages/admin/components/gestion-envios/gestion-envios').then(m => m.GestionEnviosComponent) },
           { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) }
         ]
       }
