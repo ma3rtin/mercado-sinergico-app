@@ -1,222 +1,228 @@
 <!-- ============================================ -->
 <!-- GESTIONAR-VARIANTES.COMPONENT.HTML -->
-<!-- Template completo con búsqueda, filtros y selección múltiple -->
 <!-- ============================================ -->
 
-<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
-  <div class="max-w-7xl mx-auto">
-    <!-- 🔙 Header con navegación -->
-    <div class="mb-6">
+<div class="min-h-screen bg-bg-app pb-24 font-body text-text-primary">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <!-- 📱 HEADER -->
+    <header class="py-6 flex flex-col gap-5">
       <button (click)="volver()"
-        class="inline-flex items-center gap-2 text-primary hover:text-primary-dark transition-colors mb-4">
-        <app-icon name="arrowLeft" [size]="'20'" class="text-current pt-1" />
-        <span class="font-medium">Volver a administrar productos</span>
+        class="flex items-center gap-2 text-brand-primary font-bold text-xs uppercase tracking-widest active:scale-95 transition-all w-fit group">
+        <app-icon name="arrowLeft" size="16" class="group-hover:-translate-x-1 transition-transform" />
+        Volver a productos
       </button>
 
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-display font-semibold text-gray-900">
-            Gestionar Variantes
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="space-y-2">
+          <h1 class="text-3xl md:text-4xl font-display font-black tracking-tight leading-tight">
+            Gestionar <span class="text-brand-primary">Variantes</span>
           </h1>
           @if (productoInfo()) {
-          <p class="text-lg text-gray-600 mt-1">
-            {{ productoInfo()!.producto.nombre }}
-          </p>
-          <p class="text-sm text-gray-500 mt-0.5">
-            Precio base:
-            <span class="font-semibold text-black">${{ precioBaseProducto() }}</span>
-          </p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-brand-primary rounded-full"></span>
+              <p class="text-sm md:text-base text-text-muted font-medium italic">{{ productoInfo()!.producto.nombre }}</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 text-xs text-text-muted font-medium">
+              <span>
+                Precio base:
+                <strong class="text-text-primary">${{ precioBaseProducto() }}</strong>
+              </span>
+              @if (stockTotal() !== null) {
+              <span>
+                • Stock total:
+                <strong class="text-text-primary">{{ stockTotal() }}</strong>
+              </span>
+              }
+            </div>
+          </div>
           }
         </div>
 
-        <!-- Badges de información -->
-        <div class="flex flex-wrap gap-2">
+        <!-- Meta info badges -->
+        <div class="flex flex-wrap gap-2 sm:gap-3">
           @if (esProductoEnergico()) {
-          <span
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-secondary-dark rounded-full text-sm font-semibold">
-            <app-icon name="zap" [size]="'16'" class="text-current pt-1" />
-            Enérgico
-          </span>
+          <div
+            class="flex items-center gap-2 px-4 py-1.5 bg-yellow-50 text-yellow-700 rounded-full border border-yellow-100 shadow-sm">
+            <app-icon name="zap" size="14" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Energético</span>
+          </div>
           }
           @if (esProductoSinergico()) {
-          <span
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-            <app-icon name="users" [size]="'16'" class="text-current pt-1" />
-            Sinérgico
-          </span>
+          <div
+            class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100 shadow-sm">
+            <app-icon name="users" size="14" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Sinérgico</span>
+          </div>
           }
           @if (stockTotal() !== null) {
-          <span
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-black rounded-full text-sm font-semibold">
-            <app-icon name="package" [size]="'16'" class="text-current pt-1" />
-            Stock total: {{ stockTotal() }}
-          </span>
+          <div
+            class="flex items-center gap-2 px-4 py-1.5 bg-bg-surface border border-border-default rounded-full shadow-sm">
+            <app-icon name="package" size="14" class="text-brand-primary" />
+            <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+              Stock: {{ stockTotal() }}
+            </span>
+          </div>
           }
         </div>
       </div>
-    </div>
+    </header>
 
-    <!-- ⚠️ Loading State -->
+    <!-- ⏳ LOADING STATE -->
     @if (isLoading()) {
-    <div class="flex flex-col items-center justify-center py-16">
-      <app-icon name="loader" [size]="'32'" class="text-primary animate-spin mb-4 mt-1" />
-      <p class="text-gray-600 text-lg">Cargando variantes...</p>
+    <div class="flex flex-col items-center justify-center py-24 animate-pulse">
+      <div class="relative w-20 h-20 mb-8">
+        <div class="absolute inset-0 border-4 border-brand-primary/10 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-brand-primary border-t-transparent rounded-full animate-spin">
+        </div>
+        <app-icon name="loader" size="32" class="absolute inset-0 m-auto text-brand-primary animate-bounce" />
+      </div>
+      <h3 class="text-sm font-black text-text-muted uppercase tracking-[0.3em] animate-pulse">Sincronizando datos</h3>
     </div>
     }
 
-    <!-- 🔍 BUSCADOR Y FILTROS - SIEMPRE VISIBLES -->
-    @if (!isLoading() && variantes().length > 0) {
-    <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <!-- Buscador -->
-      <div class="relative mb-4">
+    <!-- ✅ CONTENIDO PRINCIPAL -->
+    @if (!isLoading()) {
+
+    <!-- 🔍 SECCIÓN DE PANEL DE CONTROL -->
+    @if (variantes().length > 0) {
+    <section class="space-y-6 mb-8 animate-[fadeIn_0.6s_ease-out]">
+
+      <!-- Búsqueda inteligente -->
+      <div class="relative group">
+        <div
+          class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-primary transition-colors">
+          <app-icon name="search" size="22" />
+        </div>
         <input type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
-          placeholder="Buscar por descripción o SKU..."
-          class="w-full px-4 py-3 pl-11 pr-12 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-primary transition-all duration-200 shadow-sm"
-          autocomplete="off" />
-        <app-icon name="Search"
-          class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          placeholder="Buscar por SKU o descripción..."
+          class="w-full bg-white border border-transparent rounded-[24px] py-5 pl-14 pr-14 shadow-xl shadow-black/[0.03] text-sm font-bold placeholder:text-gray-300 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary outline-none transition-all" />
         @if (searchTerm()) {
         <button (click)="limpiarBusqueda()"
-          class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-          title="Limpiar búsqueda">
-          <app-icon name="x" [size]="'18'" class="text-current" />
+          class="absolute right-5 top-1/2 -translate-y-1/2 p-2 bg-gray-50 text-gray-400 hover:text-red-500 rounded-xl active:scale-90 transition-all">
+          <app-icon name="x" size="18" />
         </button>
         }
       </div>
 
-      <!-- Filtros en chips -->
-      <div class="flex flex-wrap items-center gap-2 mb-4">
-        <span class="text-sm font-medium text-gray-700">Filtros:</span>
-
-        <!-- Filtro Estado -->
-        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-          <button (click)="cambiarFiltroEstado('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
-            Todas
+      <!-- Filtros Horizontales (Mobile-First) -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between px-2">
+          <h4 class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Filtros Rápidos</h4>
+          @if (hayFiltrosActivos()) {
+          <button (click)="resetearFiltros()"
+            class="text-[10px] font-black text-red-600 hover:bg-red-50 px-3 py-1 rounded-full border border-red-100 transition-all uppercase tracking-widest">
+            Resetear
           </button>
-          <button (click)="cambiarFiltroEstado('activas')"
-            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'activas' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-            Activas
-          </button>
-          <button (click)="cambiarFiltroEstado('inactivas')"
-            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroEstado() === 'inactivas' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-            Inactivas
-          </button>
-        </div>
-
-        <!-- Filtro Imagen -->
-        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-          <button (click)="cambiarFiltroImagen('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
-            Todas
-          </button>
-          <button (click)="cambiarFiltroImagen('con')" [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-            Con imagen
-          </button>
-          <button (click)="cambiarFiltroImagen('sin')"
-            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                (filtroImagen() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-            Sin imagen
-          </button>
-        </div>
-
-        <!-- Filtro Stock (solo enérgicos) -->
-        @if (esProductoEnergico()) {
-        <div class="inline-flex items-center gap-1 border border-gray-300 rounded-full p-0.5">
-          <button (click)="cambiarFiltroStock('todas')" [class]="'px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'todas' ? 'bg-gray-200 text-gray-700' : 'text-gray-700 hover:bg-gray-100')">
-            Todas
-          </button>
-          <button (click)="cambiarFiltroStock('con')"
-            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'con' ? 'bg-primary-light text-primary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="checkCircle" [size]="'14'" class="text-current pt-1" />
-            Con stock
-          </button>
-          <button (click)="cambiarFiltroStock('sin')"
-            [class]="'inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-full transition-all ' +
-                  (filtroStock() === 'sin' ? 'bg-secondary-light text-secondary-dark' : 'text-gray-700 hover:bg-gray-100')">
-            <app-icon name="MinusCircle" [size]="'14'" class="text-current pt-1" />
-            Sin stock
-          </button>
-        </div>
-        }
-
-        <!-- Botón resetear filtros -->
-        @if (hayFiltrosActivos()) {
-        <button (click)="resetearFiltros()"
-          class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-full transition-all"
-          title="Resetear filtros">
-          <app-icon name="x" [size]="'14'" class="text-current pt-1" />
-          Limpiar
-        </button>
-        }
-      </div>
-
-      <!-- Contador de resultados -->
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-gray-600">
-          Mostrando <span class="font-semibold text-black">{{ resultadosBusqueda() }}</span>
-          de <span class="font-semibold text-black">{{ variantes().length }}</span> variantes
-        </p>
-
-        <!-- Acciones rápidas -->
-        <div class="flex flex-wrap gap-2 md:gap-3 items-center">
-          @if (esProductoEnergico()) {
-          <app-button type="button" variant="warning" size="sm" (click)="aplicarStockATodas()"
-            class="inline-flex items-center gap-1.5 text-orange-600">
-            <app-icon name="sliders" [size]="'16'" class="text-current pt-1" />
-            Aplicar stock a todas
-          </app-button>
           }
+        </div>
 
-          <app-button type="button" variant="success" size="sm" (click)="activarTodas()"
-            class="inline-flex items-center gap-1.5">
-            <app-icon name="checkCircle" [size]="'16'" class="text-white mt-1" />
-            Activar todas
-          </app-button>
+        <div class="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+          <!-- Estado -->
+          <div
+            class="flex items-center gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-[20px] border border-gray-100 shadow-sm shrink-0">
+            <button (click)="cambiarFiltroEstado('todas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">TODAS</button>
+            <button (click)="cambiarFiltroEstado('activas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'activas' ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">ACTIVAS</button>
+            <button (click)="cambiarFiltroEstado('inactivas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'inactivas' ? 'bg-gray-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">INACTIVAS</button>
+          </div>
 
-          <app-button type="button" variant="danger" size="sm" (click)="desactivarTodas()"
-            class="inline-flex items-center gap-1.5 !text-orange-600 hover:!text-orange-700">
-            <app-icon name="MinusCircle" [size]="'16'" class="text-white mt-1" />
-            Desactivar todas
-          </app-button>
+          <!-- Imagen -->
+          <div
+            class="flex items-center gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-[20px] border border-gray-100 shadow-sm shrink-0">
+            <button (click)="cambiarFiltroImagen('todas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">IMAGEN:
+              TODO</button>
+            <button (click)="cambiarFiltroImagen('con')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'con' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">CON</button>
+            <button (click)="cambiarFiltroImagen('sin')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'sin' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">SIN</button>
+          </div>
 
-          <app-button type="button" variant="info" size="sm" (click)="generarReporte()"
-            class="inline-flex items-center gap-1.5 text-orange-600">
-            <app-icon name="download" [size]="'16'" class="text-current pt-1" />
-            Reporte
-          </app-button>
+          <!-- Stock -->
+          @if (esProductoEnergico()) {
+          <div
+            class="flex items-center gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-[20px] border border-gray-100 shadow-sm shrink-0">
+            <button (click)="cambiarFiltroStock('todas')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroStock() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">STOCK:
+              TODO</button>
+            <button (click)="cambiarFiltroStock('con')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroStock() === 'con' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">CON
+              STOCK</button>
+            <button (click)="cambiarFiltroStock('sin')"
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroStock() === 'sin' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">SIN
+              STOCK</button>
+          </div>
+          }
         </div>
       </div>
-    </div>
 
-    <!-- Indicador de cambios -->
-    @if (hasChanges()) {
-    <div class="mb-6 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-lg">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <app-icon name="AlertOctagon" [size]="'20'" class="text-yellow-600 mt-1" />
-          <span class="text-sm font-medium text-yellow-800">
-            Hay cambios sin guardar
-          </span>
+      <!-- Acciones en Bloque y Resumen -->
+      <div class="bg-white rounded-[32px] p-6 md:p-8 border border-gray-100 shadow-xl shadow-black/[0.02] space-y-6">
+        <div class="flex items-center justify-between">
+          <div class="space-y-1">
+            <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] leading-none">Resultados del
+              filtro</p>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-display font-black text-text-primary">{{ resultadosBusqueda() }}</span>
+              <span class="text-xs font-bold text-text-muted uppercase tracking-widest">variantes</span>
+            </div>
+          </div>
+          <button (click)="generarReporte()"
+            class="w-14 h-14 flex items-center justify-center bg-blue-50 text-blue-600 rounded-[22px] active:scale-90 hover:bg-blue-100 transition-all border border-blue-100 shadow-sm shadow-blue-500/10">
+            <app-icon name="download" size="24" />
+          </button>
         </div>
-        <div class="flex gap-2">
-          <app-button type="button" variant="danger" size="sm" (click)="resetearCambios()"
-            class="inline-flex items-center gap-1.5">
-            <app-icon name="x" [size]="'16'" class="text-white mt-1" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <button (click)="activarTodas()"
+            class="flex items-center justify-center gap-2 py-4 bg-green-50 text-green-700 rounded-[20px] text-[10px] font-black uppercase tracking-[0.1em] border border-green-100 active:scale-95 hover:bg-green-100 transition-all">
+            <app-icon name="checkCircle" size="16" />
+            Activar Todas
+          </button>
+          <button (click)="desactivarTodas()"
+            class="flex items-center justify-center gap-2 py-4 bg-red-50 text-red-700 rounded-[20px] text-[10px] font-black uppercase tracking-[0.1em] border border-red-100 active:scale-95 hover:bg-red-100 transition-all">
+            <app-icon name="minusCircle" size="16" />
+            Desactivar
+          </button>
+        </div>
+
+        @if (esProductoEnergico()) {
+        <button (click)="aplicarStockATodas()"
+          class="w-full flex items-center justify-center gap-3 py-5 bg-yellow-50 text-yellow-800 rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] border border-yellow-200 active:scale-95 hover:bg-yellow-100 transition-all shadow-sm">
+          <app-icon name="sliders" size="18" />
+          Sincronizar Stock Global
+        </button>
+        }
+      </div>
+    </section>
+    }
+
+    <!-- 🔔 INDICADOR DE CAMBIOS PENDIENTES -->
+    @if (hasChanges()) {
+    <div class="mb-8 p-5 bg-orange-50 border-2 border-orange-100 rounded-[28px] animate-bounce shrink-0">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-12 h-12 bg-orange-200 text-orange-700 rounded-2xl flex items-center justify-center border border-orange-300">
+            <app-icon name="alertOctagon" size="24" />
+          </div>
+          <div>
+            <h4 class="text-sm font-black text-orange-900 uppercase tracking-widest">¡Atención!</h4>
+            <p class="text-xs font-bold text-orange-700 uppercase">Tienes cambios sin guardar en la lista</p>
+          </div>
+        </div>
+        <div class="flex gap-3 w-full sm:w-auto">
+          <app-button type="button" variant="danger" size="sm" (click)="resetearCambios()" class="flex-1 sm:flex-none">
+            <app-icon name="x" size="16" class="mr-2" />
             Descartar
           </app-button>
           <app-button type="button" variant="success" size="sm" [disabled]="isSaving()" (click)="guardarCambios()"
-            class="inline-flex items-center gap-1.5">
-            <app-icon [name]="isSaving() ? 'loader' : 'download'" [size]="'16'" class="text-current pt-1"
+            class="flex-1 sm:flex-none">
+            <app-icon [name]="isSaving() ? 'loader' : 'download'" size="16" class="mr-2"
               [class.animate-spin]="isSaving()" />
             {{ isSaving() ? "Guardando..." : "Guardar" }}
           </app-button>
@@ -225,166 +231,103 @@
     </div>
     }
 
-    <!-- 📊 TABLA DE VARIANTES -->
+    <!-- 📊 LISTADO DE VARIANTES (Mobile-First) -->
     @if (tieneVariantes()) {
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+
+    <!-- Vista Desktop (Tabla) -->
+    <div
+      class="hidden md:block bg-white rounded-[32px] shadow-2xl shadow-black/[0.03] overflow-hidden border border-gray-100">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50/50">
             <tr>
-              <!-- Checkbox selección -->
-              <th scope="col" class="px-6 py-3 text-left w-12">
+              <th scope="col" class="px-8 py-5 text-left w-12">
                 <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
                   (change)="toggleTodasLasSelecciones()"
-                  class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer" title="Seleccionar todas" />
+                  class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer transition-all" />
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Imagen
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Variante
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                SKU
-              </th>
-
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Img</th>
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                Descripción</th>
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">SKU</th>
               @if (esProductoEnergico()) {
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                STOCK
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Stock
               </th>
               }
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio Extra
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Extra
+                ($)</th>
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Final
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio Final
+              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Estado
               </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Estado
-              </th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
-              </th>
+              <th class="px-6 py-5 text-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                Acciones</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            @for (
-            variante of variantesFiltradas();
-            track variante.id;
-            let i = $index
-            ) {
-            <tr [class]="
-                    variante.seleccionada
-                      ? 'bg-blue-50'
-                      : variante.hasChanges
-                        ? 'bg-yellow-50'
-                        : variante.activo
-                          ? ''
-                          : 'bg-gray-50 opacity-60'
-                  ">
-              <!-- Checkbox -->
-              <td class="px-6 py-4 whitespace-nowrap">
+          <tbody class="bg-white divide-y divide-gray-50">
+            @for (variante of variantesFiltradas(); track variante.id; let i = $index) {
+            <tr
+              [class]="'hover:bg-gray-50/50 transition-colors ' + (variante.seleccionada ? 'bg-brand-primary-light/30' : (variante.hasChanges ? 'bg-yellow-50/50' : ''))">
+              <td class="px-8 py-6">
                 <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(i, $event)"
-                  class="w-4 h-4 text-primary border-gray-300 rounded  cursor-pointer" />
+                  class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer" />
               </td>
-
-              <!-- Imagen -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border-2 border-gray-200 group">
+              <td class="px-6 py-6">
+                <div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden relative group">
                   @if (tieneImagen(variante)) {
-                  <img [src]="getVarianteImagen(variante)" [alt]="getVarianteDescripcion(variante)"
-                    class="w-full h-full object-cover" />
-                  <button type="button" (click)="removeImagen(i)"
-                    class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Eliminar imagen">
-                    <app-icon name="trash2" [size]="'14'" class="text-current" />
+                  <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
+                  <button (click)="removeImagen(i)"
+                    class="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <app-icon name="trash2" size="18" />
                   </button>
                   } @else {
                   <label
-                    class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
-                    <app-icon name="Upload" [size]="'24'" class="text-gray-500 mt-1" />
-                    <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden" />
+                    class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                    <app-icon name="upload" size="20" class="text-gray-300" />
+                    <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden">
                   </label>
                   }
                 </div>
               </td>
-
-              <!-- Descripción -->
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">
-                  {{ getVarianteDescripcion(variante) }}
-                </div>
+              <td class="px-6 py-6">
+                <p class="text-sm font-black text-text-primary leading-tight">{{ getVarianteDescripcion(variante) }}</p>
                 @if (variante.hasChanges) {
-                <span class="inline-flex items-center gap-1 mt-1 text-xs text-yellow-700">
-                  <app-icon name="alertCircle" [size]="'12'" class="text-current pt-1" />
-                  Modificado
-                </span>
+                <span class="text-[9px] font-black text-yellow-600 uppercase tracking-widest mt-1 inline-block">●
+                  Pendiente de guardado</span>
                 }
               </td>
-
-              <!-- SKU -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <code class="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs font-mono">
-                      {{ variante.sku || "N/A" }}
-                    </code>
+              <td class="px-6 py-6">
+                <code
+                  class="px-2 py-1 bg-gray-50 text-text-muted rounded-lg text-[10px] font-black font-mono border border-gray-100">{{ variante.sku || '---' }}</code>
               </td>
-
-              <!-- Stock (solo enérgico) -->
               @if (esProductoEnergico()) {
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-6 py-6">
                 <input type="number" [value]="variante.stockFisico"
-                  (input)="onStockChange(i, +$any($event.target).value)" min="0" step="1" placeholder="0"
-                  class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm"
-                  [class.border-yellow-400]="variante.hasChanges" />
+                  (input)="onStockChange(i, +$any($event.target).value)"
+                  class="w-24 px-4 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary outline-none text-sm font-bold">
               </td>
               }
-
-              <!-- Precio Extra -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-1">
-                  <span class="text-gray-500 text-sm">$</span>
-                  <input type="number" [value]="variante.precioExtra" (input)="
-                          onPrecioExtraChange(i, +$any($event.target).value)
-                        " min="0" step="0.01"
-                    class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2  focus:border-primary text-sm" />
+              <td class="px-6 py-6">
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                  <input type="number" [value]="variante.precioExtra"
+                    (input)="onPrecioExtraChange(i, +$any($event.target).value)"
+                    class="w-24 pl-7 pr-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary outline-none text-sm font-bold">
                 </div>
               </td>
-
-              <!-- Precio Final -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-semibold text-black">
-                  ${{ calcularPrecioFinal(variante).toFixed(2) }}
-                </span>
+              <td class="px-6 py-6 font-black text-sm text-text-primary">${{ calcularPrecioFinal(variante).toFixed(2) }}
               </td>
-
-              <!-- Estado -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <button (click)="toggleVarianteActiva(i)" [class]="
-                        'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ' +
-                        (variante.activo
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300')
-                      ">
-                  <app-icon [name]="variante.activo ? 'checkCircle' : 'error'" [size]="'14'"
-                    class="text-current pt-1" />
-                  {{ variante.activo ? "Activa" : "Inactiva" }}
+              <td class="px-6 py-6">
+                <button (click)="toggleVarianteActiva(i)"
+                  [class]="'px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ' + (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
+                  {{ variante.activo ? 'ACTIVA' : 'INACTIVA' }}
                 </button>
               </td>
-
-              <!-- Acciones -->
-              <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <button type="button" (click)="eliminarVariante(i)"
-                  class="text-red-600 hover:text-red-800 transition-colors" title="Eliminar variante">
-                  <app-icon name="trash2" [size]="'18'" class="text-current pt-1" />
+              <td class="px-6 py-6 text-center">
+                <button (click)="eliminarVariante(i)"
+                  class="text-gray-300 hover:text-red-500 active:scale-90 transition-all p-2 bg-gray-50 rounded-xl">
+                  <app-icon name="trash2" size="20" />
                 </button>
-              </td>
-            </tr>
-            } @empty {
-            <tr>
-              <td [attr.colspan]="esProductoEnergico() ? 9 : 8" class="px-6 py-12 text-center">
-                <app-icon name="search" [size]="'48'" class="text-gray-300 mx-auto mb-3 pt-1" />
-                <p class="text-gray-600 font-medium mb-1">No se encontraron variantes</p>
-                <p class="text-gray-500 text-sm">Intenta ajustar los filtros de búsqueda</p>
               </td>
             </tr>
             }
@@ -392,88 +335,187 @@
         </table>
       </div>
     </div>
-    }
-    }
 
-    <!-- ⚠️ Sin variantes -->
-    @if (!isLoading() && !tieneVariantes()) {
-    <div class="bg-white rounded-lg shadow-sm p-12">
-      <div class="text-center">
-        <app-icon name="package" [size]="'48'" class="text-gray-400 mx-auto mb-4 mt-1" />
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Este producto no tiene variantes
-        </h3>
-        <p class="text-gray-600 mb-6">
-          Para gestionar variantes, el producto debe tener una plantilla
-          asignada.
-        </p>
-        <app-button type="button" variant="primary" (click)="volver()" class="inline-flex items-center gap-1.5">
-          <app-icon name="arrowLeft" [size]="'16'" class="text-current pt-1" />
-          Volver a productos
-        </app-button>
+    <!-- Vista Móvil (Cards) -->
+    <div class="md:hidden space-y-5">
+      <!-- Toggle selección global -->
+      <div
+        class="flex items-center gap-4 px-6 py-4 bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden relative">
+        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-brand-primary"></div>
+        <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
+          (change)="toggleTodasLasSelecciones()"
+          class="w-6 h-6 text-brand-primary border-gray-300 rounded-lg cursor-pointer" id="select-all-mobile" />
+        <label for="select-all-mobile"
+          class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Seleccionar todas las
+          variantes</label>
       </div>
+
+      @for (variante of variantesFiltradas(); track variante.id; let i = $index) {
+      <article
+        [class]="'bg-white rounded-[32px] p-6 border shadow-xl transition-all duration-300 ' + (variante.seleccionada ? 'border-brand-primary ring-4 ring-brand-primary/5' : 'border-gray-100 text-gray-900')">
+
+        <div class="flex items-start gap-4 mb-6">
+          <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(i, $event)"
+            class="w-6 h-6 text-brand-primary border-gray-300 rounded-lg shrink-0 mt-1" />
+
+          <div
+            class="w-20 h-20 rounded-[22px] bg-gray-50 border border-gray-100 overflow-hidden relative shrink-0 shadow-inner">
+            @if (tieneImagen(variante)) {
+            <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
+            <button (click)="removeImagen(i)"
+              class="absolute top-1 right-1 w-7 h-7 bg-red-600 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
+              <app-icon name="x" size="14" />
+            </button>
+            } @else {
+            <label class="w-full h-full flex items-center justify-center cursor-pointer active:bg-gray-100">
+              <app-icon name="upload" size="24" class="text-gray-300" />
+              <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden">
+            </label>
+            }
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start">
+              <p class="text-base font-black text-text-primary leading-snug truncate">{{
+                getVarianteDescripcion(variante) }}</p>
+              <button (click)="eliminarVariante(i)" class="text-gray-300 active:text-red-500 -mt-1 -mr-2 p-2">
+                <app-icon name="trash2" size="20" />
+              </button>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 mt-2">
+              <span
+                class="text-[9px] font-black font-mono text-text-muted bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100 leading-none">{{
+                variante.sku || 'SIN SKU' }}</span>
+              @if (variante.hasChanges) {
+              <span
+                class="text-[9px] font-black text-yellow-600 bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100 uppercase tracking-widest leading-none">PENDIENTE</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs Group -->
+        <div class="grid grid-cols-2 gap-4 py-5 border-y border-gray-50">
+          <div class="space-y-2">
+            <label class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">Precio Extra
+              (+)</label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+              <input type="number" [value]="variante.precioExtra"
+                (input)="onPrecioExtraChange(i, +$any($event.target).value)"
+                class="w-full pl-9 pr-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
+            </div>
+          </div>
+
+          @if (esProductoEnergico()) {
+          <div class="space-y-2">
+            <label class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">Stock Actual</label>
+            <input type="number" [value]="variante.stockFisico" (input)="onStockChange(i, +$any($event.target).value)"
+              class="w-full px-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
+          </div>
+          }
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="flex items-center justify-between pt-5">
+          <div class="space-y-0.5">
+            <p class="text-[9px] font-black text-text-muted uppercase tracking-widest leading-none">Precio Final</p>
+            <p class="text-2xl font-display font-black text-text-primary tracking-tight">${{
+              calcularPrecioFinal(variante).toFixed(2) }}</p>
+          </div>
+
+          <button (click)="toggleVarianteActiva(i)"
+            [class]="'flex items-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.1em] transition-all active:scale-95 border-2 ' + 
+                   (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
+            <app-icon [name]="variante.activo ? 'checkCircle' : 'xCircle'" size="18" />
+            {{ variante.activo ? 'Activa' : 'Inactiva' }}
+          </button>
+        </div>
+      </article>
+      } @empty {
+      <div class="py-20 text-center bg-white rounded-[32px] border-2 border-dashed border-gray-100">
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <app-icon name="search" size="32" class="text-gray-200" />
+        </div>
+        <h4 class="text-sm font-black text-text-primary uppercase tracking-widest">Sin coincidencias</h4>
+        <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-2">Prueba ajustando los filtros o
+          la búsqueda</p>
+      </div>
+      }
     </div>
     }
 
-    <!-- 💾 Botón flotante de guardar (mobile) -->
+    <!-- ⚠️ ESTADO VACÍO (Si no hay variantes iniciales) -->
+    @if (!isLoading() && !tieneVariantes()) {
+    <div
+      class="bg-white rounded-[40px] shadow-2xl p-12 text-center border border-gray-100 animate-[zoomIn_0.4s_ease-out]">
+      <div class="w-24 h-24 bg-gray-50 rounded-[32px] flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <app-icon name="package" size="48" class="text-gray-200" />
+      </div>
+      <h3 class="font-display text-2xl text-text-primary font-black mb-4 tracking-tight">Sin variantes registradas</h3>
+      <p class="text-sm text-text-muted mb-10 max-w-xs mx-auto font-medium">Es necesario asignar una plantilla de
+        atributos al producto para poder generar y gestionar sus variantes.</p>
+      <app-button type="button" variant="primary" (click)="volver()" class="w-full sm:w-auto px-10">
+        <app-icon name="arrowLeft" size="18" class="mr-3" />
+        Volver a Productos
+      </app-button>
+    </div>
+    }
+    }
+
+    <!-- 💾 BOTÓN FLOTANTE EN MÓVIL (SAVE) -->
     @if (hasChanges() && !isLoading()) {
-    <div class="fixed bottom-6 right-6 md:hidden z-50">
+    <div class="fixed bottom-6 right-6 md:hidden z-50 animate-bounce">
       <app-button type="button" variant="success" size="lg" [disabled]="isSaving()" (click)="guardarCambios()"
-        class="shadow-2xl inline-flex items-center gap-1.5 px-6">
-        <app-icon [name]="isSaving() ? 'loader' : 'save'" [size]="'18'" class="text-current pt-1"
-          [class.animate-spin]="isSaving()" />
-        {{ isSaving() ? "Guardando..." : "Guardar" }}
+        class="shadow-[0_20px_50px_rgba(76,175,80,0.3)] rounded-[24px] px-8 border-4 border-white">
+        <app-icon [name]="isSaving() ? 'loader' : 'save'" size="20" [class.animate-spin]="isSaving()" class="mr-2" />
+        <span class="font-black uppercase tracking-widest">{{ isSaving() ? "Guardando" : "Guardar" }}</span>
       </app-button>
     </div>
     }
 
-    <!-- 🎯 BARRA FLOTANTE DE SELECCIÓN MÚLTIPLE -->
+    <!-- 🎯 BARRA MULTI-SELECCIÓN (Mobile/Desktop Balanced) -->
     @if (cantidadSeleccionadas() > 0) {
-    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-[slideUp_0.3s_ease-out]">
-      <div class="bg-primary text-white rounded-full shadow-2xl px-6 py-4 flex items-center gap-4">
-        <!-- Contador -->
-        <div class="flex items-center gap-2">
-          <app-icon name="checkCircle" [size]="'20'" class="text-current pt-1" />
-          <span class="font-semibold text-sm pl-2">{{ cantidadSeleccionadas() }} seleccionada(s)</span>
+    <div
+      class="fixed bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 animate-[slideUp_0.5s_cubic-bezier(0.19,1,0.22,1)]">
+      <div
+        class="bg-brand-secondary text-white rounded-[40px] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] p-3 sm:p-5 flex items-center gap-4 border border-white/20 backdrop-blur-md">
+        <div
+          class="flex flex-col sm:flex-row items-center gap-1 sm:gap-3 px-4 sm:px-6 py-2 bg-white/10 rounded-[28px] shrink-0">
+          <span class="text-2xl sm:text-3xl font-display font-black leading-none">{{ cantidadSeleccionadas() }}</span>
+          <span class="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Selecc.</span>
         </div>
 
-        <!-- Divisor -->
-        <div class="w-px h-6 bg-white/30"></div>
-
-        <!-- Acciones -->
-        <div class="flex items-center gap-2">
+        <div class="flex-1 flex items-center gap-3 overflow-x-auto scrollbar-hide py-1 pr-4">
           <button (click)="aplicarImagenASeleccionadas()"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-            title="Aplicar imagen">
-            <app-icon name="upload" [size]="'16'" class="text-current pt-1" />
-            Imagen
+            class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
+            <app-icon name="image" size="20" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Imagen</span>
           </button>
 
           @if (esProductoEnergico()) {
           <button (click)="aplicarStockASeleccionadas()"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-            title="Aplicar stock">
-            <app-icon name="package" [size]="'16'" class="text-current pt-1" />
-            Stock
+            class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
+            <app-icon name="package" size="20" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Stock</span>
           </button>
           }
 
           <button (click)="aplicarPrecioExtraASeleccionadas()"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm font-medium transition-colors"
-            title="Aplicar precio extra">
-            <app-icon name="DollarSign" [size]="'16'" class="text-current pt-1" />
-            Precio
+            class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
+            <app-icon name="dollarSign" size="20" />
+            <span class="text-[10px] font-black uppercase tracking-widest">Precio</span>
           </button>
 
           <button (click)="deseleccionarTodas()"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-500/80 hover:bg-red-500 rounded-full text-sm font-medium transition-colors"
-            title="Deseleccionar todas">
-            <app-icon name="x" [size]="'16'" class="text-current pt-1" />
-            Cancelar
+            class="flex items-center justify-center w-12 h-12 sm:w-auto sm:px-8 bg-red-500/90 hover:bg-red-600 rounded-[20px] transition-all shrink-0 border border-white/20 shadow-lg">
+            <app-icon name="x" size="20" />
+            <span class="hidden sm:inline-block ml-3 text-[10px] font-black uppercase tracking-widest">Cancelar</span>
           </button>
         </div>
       </div>
     </div>
     }
+
   </div>
 </div>

@@ -1,0 +1,56 @@
+<app-catalogo-wrapper [titulo]="'Centro de Soporte'"
+    [subtitulo]="'Estamos acá para ayudarte. Encontrá respuestas rápidas o contactate con nuestro equipo.'">
+
+    <div class="max-w-6xl mx-auto px-4 py-8 md:py-16 space-y-16">
+        
+        <!-- Categorías de Ayuda -->
+        <section>
+            <h2 class="font-display text-2xl md:text-3xl text-text-primary mb-8 text-center">Explorá por categorías</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div *ngFor="let cat of categories" 
+                     class="bg-bg-surface border border-border-default rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:border-brand-primary group cursor-pointer">
+                    <div class="w-12 h-12 bg-brand-primary-light rounded-xl flex items-center justify-center mb-4 group-hover:bg-brand-primary transition-colors">
+                        <i [class]="cat.icon" class="text-brand-primary text-xl group-hover:text-white transition-colors"></i>
+                    </div>
+                    <h3 class="font-display text-lg text-text-primary mb-2">{{ cat.title }}</h3>
+                    <p class="text-text-secondary text-sm leading-relaxed">{{ cat.description }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Canales de Contacto Directo -->
+        <section class="bg-brand-secondary-light rounded-3xl p-8 md:p-12 relative overflow-hidden">
+            <!-- Círculos decorativos -->
+            <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand-primary opacity-10 rounded-full"></div>
+            <div class="absolute -bottom-8 -left-8 w-32 h-32 bg-brand-cta opacity-10 rounded-full"></div>
+
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                <div class="text-center md:text-left max-w-md">
+                    <h2 class="font-display text-3xl md:text-4xl text-brand-secondary mb-4">¿No encontrás lo que buscás?</h2>
+                    <p class="text-text-secondary text-lg">Nuestro equipo de soporte está disponible de Lunes a Viernes de 9 a 18 hs para ayudarte con lo que necesites.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                    <a *ngFor="let opt of contactOptions" 
+                       [href]="opt.action"
+                       class="flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-bold transition-all duration-300 transform hover:-translate-y-1 shadow-lg w-full sm:w-64"
+                       [ngClass]="opt.primary ? 'bg-brand-cta text-text-primary hover:bg-brand-cta-hover' : 'bg-white text-brand-secondary hover:bg-gray-50 border border-border-default'">
+                        <i [class]="opt.icon" class="text-xl"></i>
+                        {{ opt.buttonText }}
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ CTA -->
+        <section class="text-center pb-12">
+            <p class="text-text-secondary mb-6">¿Tenés dudas generales sobre el funcionamiento?</p>
+            <a routerLink="/faq" class="inline-flex items-center gap-2 text-brand-primary font-bold hover:underline group">
+                Ver Preguntas Frecuentes
+                <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </a>
+        </section>
+
+    </div>
+
+</app-catalogo-wrapper>

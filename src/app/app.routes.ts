@@ -29,6 +29,7 @@ import { AdministrarPaquetesComponent } from './pages/admin/components/administr
 import { EditarPaqueteBaseComponent } from './pages/admin/components/editar-paquete-base/editar-paquete-base';
 import { AdministrarPublicacionesComponent } from './pages/admin/components/administrar-publicaciones/administrar-publicaciones';
 import { AdministrarPublicacionDetalleComponent } from './pages/admin/components/administrar-publicacion-detalle/administrar-publicacion-detalle';
+import { SoporteComponent } from './pages/soporte/soporte';
 
 export const routes: Routes = [
 
@@ -48,6 +49,7 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent },
       { path: 'paquetes', component: PaquetesPublicosComponent },
       { path: 'faq', component: FaqComponent },
+      { path: 'soporte', component: SoporteComponent },
 
       // 📜 Legales
       { path: 'terminos-y-condiciones', component: TerminosCondiciones },

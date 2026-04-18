@@ -311,6 +311,44 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  setCantidadManual(pedido: PedidoDelUsuario, payload: any) {
+    const nuevaCantidad = payload.nuevaCantidad;
+    const productoOriginal = pedido.productosSeleccionados.find(p => p.id_detalle === payload.id_detalle);
+    if (!productoOriginal) return;
+    
+    const cantidadAnterior = productoOriginal.cantidad;
+
+    // 1. Reemplazar array sin mutar objetos
+    pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+      (p: ProductoEnPedido) =>
+        p.id_detalle === payload.id_detalle
+          ? { ...p, cantidad: nuevaCantidad }
+          : p
+    );
+
+    // 2. Recalcular
+    this.recalcularPedido(pedido);
+
+    // 3. Update backend
+    this.pedidoService.actualizarCantidad(
+      pedido.id_pedido!,
+      payload.id_detalle,
+      { cantidad: nuevaCantidad }
+    ).subscribe({
+      error: () => {
+        // revertir
+        pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+          (p: ProductoEnPedido) =>
+            p.id_detalle === payload.id_detalle
+              ? { ...p, cantidad: cantidadAnterior }
+              : p
+        );
+        this.recalcularPedido(pedido);
+        this.toast.error('No se pudo actualizar la cantidad.');
+      }
+    });
+  }
+
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
 
     const esUltimoProducto = pedido.productosSeleccionados.length === 1;

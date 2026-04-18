@@ -45,10 +45,10 @@
 
         <!-- 📦 PRODUCTO SELECCIONADO (Columna Izquierda - Sticky con scroll propio) -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl shadow-md sticky top-6 overflow-hidden">
+          <div class="bg-white rounded-xl shadow-md lg:sticky lg:top-6 overflow-hidden">
 
-            <!-- Contenedor con altura máxima y scroll -->
-            <div class="max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+            <!-- Contenedor con altura máxima y scroll (SOLO EN DESKTOP) -->
+            <div class="lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto custom-scrollbar">
               <div class="p-4 sm:p-6">
 
                 <!-- Título de sección -->
@@ -72,20 +72,17 @@
                 <!-- Información adicional -->
                 <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
 
-
-
                   <!-- Características destacadas -->
                   @if (productoSeleccionado()!.descripcion) {
                     <div class="space-y-2">
-                      @if (productoSeleccionado()!.descripcion) {
-                        <div class="flex items-center flex-col gap-2 text-sm text-gray-700">
-                          <span class="font-medium w-full">Descripción de tu producto:</span>
-                          <span class="flex items-center shadow-md rounded-lg p-4 m-2">{{ productoSeleccionado()!.descripcion }}</span>
-                        </div>
-                      }
+                      <div class="flex flex-col gap-2 text-sm text-gray-700">
+                        <span class="font-medium w-full">Descripción de tu producto:</span>
+                        <span class="flex items-center shadow-md rounded-lg p-4 bg-gray-50">{{ productoSeleccionado()!.descripcion }}</span>
+                      </div>
                     </div>
                   }
-                                    <!-- Precio base con tooltip -->
+
+                  <!-- Precio base con tooltip -->
                   <div class="bg-blue-50 rounded-lg p-4">
                     <div class="flex items-start gap-3">
                       <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
@@ -119,22 +116,28 @@
             <p class="text-sm sm:text-base text-gray-600">
               Estos son los paquetes disponibles para tu producto:
             </p>
-            <!--Elegir entre paquete sinergico o energico-->
-         <div class="flex flex-row space-between align-center p-1">
-            <app-button class="m-2 "
-              [variant]="'tertiary'"
-              (buttonClick)="recargarDatos()">
-              <app-icon name="Users" size="18"></app-icon>
-              Sinérgico
-            </app-button>
-                        <app-button class="m-2 "
-              [variant]="'tertiary'"
-              (buttonClick)="recargarDatos()">
-              <app-icon name="Zap" size="18"></app-icon>
-              Enérgico
-            </app-button>
+            
+            <!-- Elegir entre paquete sinergico o energico -->
+            <div class="flex flex-col sm:flex-row justify-start items-center gap-2 mt-4">
+              <app-button class="w-full sm:w-auto"
+                [variant]="'tertiary'"
+                (buttonClick)="recargarDatos()">
+                <div class="flex items-center gap-2">
+                  <app-icon name="Users" size="18"></app-icon>
+                  <span>Sinérgico</span>
+                </div>
+              </app-button>
+              <app-button class="w-full sm:w-auto"
+                [variant]="'tertiary'"
+                (buttonClick)="recargarDatos()">
+                <div class="flex items-center gap-2">
+                  <app-icon name="Zap" size="18"></app-icon>
+                  <span>Enérgico</span>
+                </div>
+              </app-button>
             </div>
           </div>
+
 
           <!-- Grid de Paquetes -->
           @if (hayPaquetesDisponibles()) {

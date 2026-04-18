@@ -5,147 +5,203 @@
 <!-- Drawer Content -->
 <aside
     class="fixed left-0 top-0 z-50 h-full w-[80%] max-w-[320px] bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out font-body">
-    <!-- Header: User Info / Welcome (Fondo Celeste) -->
-    <div class="px-5 py-5 border-b border-white/10 bg-primary">
-        <div class="flex items-center justify-between mb-4">
-            <img src="/assets/images/Logo2.png" alt="Logo" class="h-7 w-auto brightness-0 invert">
+
+    <!-- ── HEADER ── -->
+    <div class="px-5 py-4 border-b border-white/10 bg-primary shrink-0">
+        <div class="flex items-center justify-between mb-3">
+            <img src="/assets/images/Logo2.png" alt="Logo" class="h-6 w-auto brightness-0 invert">
             <button (click)="closeDrawer.emit()"
                 class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 text-white active:scale-90 transition-all cursor-pointer shadow-sm">
-                <app-icon name="X" size="18"></app-icon>
+                <app-icon name="X" size="16"></app-icon>
             </button>
         </div>
 
-        @if (isLoggedIn && user()) {
-        <div class="flex items-center gap-3">
+        @if (isLoggedIn()) {
+        <a [routerLink]="profileLink()" (click)="closeDrawer.emit()"
+            class="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
             <div
-                class="w-11 h-11 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white/50 shadow-sm overflow-hidden shrink-0">
-                @if (user()?.photoURL) {
-                <img [src]="user()?.photoURL" alt="Profile" class="w-full h-full object-cover">
+                class="w-10 h-10 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white/50 shadow-sm overflow-hidden shrink-0">
+                @if (userProfile()?.imagen_url || user()?.photoURL) {
+                <img [src]="userProfile()?.imagen_url || user()?.photoURL" alt="Profile"
+                    class="w-full h-full object-cover">
                 } @else {
-                <app-icon name="User" size="20"></app-icon>
+                <app-icon name="User" size="18"></app-icon>
                 }
             </div>
             <div class="min-w-0">
-                <p class="font-display text-base text-white truncate leading-tight">
-                    {{ user()?.displayName || 'Usuario' }}
+                <p class="font-display text-sm text-white truncate leading-tight">
+                    {{ userProfile()?.nombre || user()?.displayName || 'Mi Perfil' }}
                 </p>
-                <p class="text-[10px] text-white/80 truncate uppercase tracking-wider">{{ user()?.email }}</p>
+                <p class="text-[9px] text-white/80 truncate uppercase tracking-wider">
+                    {{ userProfile()?.email || user()?.email || 'Sesión Iniciada' }}
+                </p>
             </div>
-        </div>
+        </a>
         } @else {
         <div class="flex flex-col">
-            <h3 class="font-display text-lg text-white leading-tight">¡Hola! Bienvenid&#64;</h3>
-            <p class="text-[11px] text-white/80 mb-3">Sumate a la compra colectiva</p>
+            <h3 class="font-display text-base text-white leading-tight">¡Hola! Bienvenid&#64;</h3>
+            <p class="text-[10px] text-white/80 mb-2.5">Sumate a la compra colectiva</p>
             <div class="flex gap-2">
-                <a routerLink="/login" (click)="closeDrawer.emit()"
-                    class="flex-1 bg-brand-cta text-brand-secondary py-2 rounded-lg text-center font-bold text-xs shadow-md active:scale-95 transition-all">
+                <button (click)="navigateAndClose('/login')"
+                    class="flex-1 bg-brand-cta text-brand-secondary py-1.5 rounded-lg text-center font-bold text-xs shadow-md active:scale-95 transition-all cursor-pointer">
                     Entrar
-                </a>
-                <a routerLink="/registrarse" (click)="closeDrawer.emit()"
-                    class="flex-1 bg-white/10 border border-white/30 text-white py-2 rounded-lg text-center font-semibold text-xs active:scale-95 transition-all backdrop-blur-sm">
+                </button>
+                <button (click)="navigateAndClose('/registrarse')"
+                    class="flex-1 bg-white/10 border border-white/30 text-white py-1.5 rounded-lg text-center font-semibold text-xs active:scale-95 transition-all backdrop-blur-sm cursor-pointer">
                     Crear cuenta
-                </a>
+                </button>
             </div>
         </div>
         }
     </div>
 
-    <!-- Navigation Body -->
-    <div class="flex-1 overflow-y-auto px-3 py-4">
-        <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3 ml-1 opacity-80">Menú
-            Principal</p>
+    <!-- ── CUERPO (Scrollable) ── -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-3">
+        <!-- Nav -->
+        <nav class="space-y-1">
+            <!-- Instalar App PWA -->
+            @if (showInstallButton()) {
+            <div class="px-1 pb-4">
+                <button (click)="installApp()"
+                    class="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-blue-50 border border-blue-100 text-brand-secondary hover:bg-blue-100 transition-all active:scale-[0.98] cursor-pointer shadow-sm">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-brand-secondary text-white flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+                        <app-icon name="Download" size="17"></app-icon>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <span class="block text-sm font-bold truncate">Instalar App</span>
+                        <span class="block text-[10px] text-gray-400 truncate">Acceso directo y mejor experiencia</span>
+                    </div>
+                    <app-icon name="ChevronRight" size="13" class="text-gray-300"></app-icon>
+                </button>
+            </div>
+            }
 
-        <nav class="space-y-1.5">
+            <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 ml-1 opacity-80">Menú
+                Principal</p>
+
             <!-- Paquetes -->
             <a routerLink="/paquetes" (click)="closeDrawer.emit()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
                 <div
-                    class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
-                    <app-icon name="Package" size="18"></app-icon>
+                    class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                    <app-icon name="Package" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Paquetes</span>
                     <span class="block text-[10px] text-gray-400 truncate">Ofertas del momento</span>
                 </div>
-                <app-icon name="ChevronRight" size="14"
+                <app-icon name="ChevronRight" size="13"
                     class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
-            <!-- FAQ -->
+            <!-- Dudas / FAQ -->
             <a routerLink="/faq" (click)="closeDrawer.emit()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
                 <div
-                    class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
-                    <app-icon name="HelpCircle" size="18"></app-icon>
+                    class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                    <app-icon name="HelpCircle" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Dudas</span>
                     <span class="block text-[10px] text-gray-400 truncate">Cómo funciona todo</span>
                 </div>
-                <app-icon name="ChevronRight" size="14"
+                <app-icon name="ChevronRight" size="13"
                     class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
 
-            <!-- Perfil (if logged) -->
-            @if (isLoggedIn) {
-            <div class="pt-3 pb-1">
-                <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 ml-1 opacity-80">Mi
+            <!-- Soporte -->
+            <a routerLink="/soporte" (click)="closeDrawer.emit()"
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                <div
+                    class="w-8 h-8 rounded-lg bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                    <app-icon name="lifeBuoy" size="17"></app-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="block text-sm font-semibold text-gray-700 truncate">Soporte</span>
+                    <span class="block text-[10px] text-gray-400 truncate">Centro de ayuda</span>
+                </div>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+            </a>
+
+            <!-- Contacto WhatsApp -->
+            <a href="https://wa.me/5491123053347?text=Hola!%20Vengo%20desde%20la%20web%20y%20necesito%20ayuda."
+                target="_blank" (click)="closeDrawer.emit()"
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                <div
+                    class="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                    <app-icon name="messageCircle" size="17"></app-icon>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <span class="block text-sm font-semibold text-gray-700 truncate">Contacto</span>
+                    <span class="block text-[10px] text-gray-400 truncate">WhatsApp directo</span>
+                </div>
+                <app-icon name="externalLink" size="13"
+                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
+            </a>
+
+            <!-- Sección Mi Actividad (solo logueado) -->
+            @if (isLoggedIn()) {
+            <div class="pt-2 pb-1">
+                <p class="px-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-1 ml-1 opacity-80">Mi
                     actividad</p>
             </div>
 
+            <!-- Panel de Control (solo admin) -->
             @if (isAdmin) {
             <a routerLink="/admin/perfil" (click)="closeDrawer.emit()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
                 <div
-                    class="w-8 h-8 rounded-lg bg-yellow-50 text-secondary-dark flex items-center justify-center group-hover:bg-secondary-dark group-hover:text-white transition-colors duration-200">
-                    <app-icon name="Settings" size="18"></app-icon>
+                    class="w-8 h-8 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-200">
+                    <app-icon name="Settings" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-gray-700 truncate">Panel de Control</span>
                     <span class="block text-[10px] text-gray-400 truncate">Gestionar la plataforma</span>
                 </div>
-                <app-icon name="ChevronRight" size="14"
-                    class="text-gray-300 group-hover:text-secondary-dark transition-all"></app-icon>
+                <app-icon name="ChevronRight" size="13"
+                    class="text-gray-300 group-hover:text-yellow-500 transition-all"></app-icon>
             </a>
             }
 
-            <a routerLink="/perfil" (click)="closeDrawer.emit()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
-                <div
-                    class="w-8 h-8 rounded-lg bg-brand-secondary/5 text-brand-secondary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
-                    <app-icon name="User" size="18"></app-icon>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <span class="block text-sm font-semibold text-gray-700 truncate">Mi Perfil</span>
-                    <span class="block text-[10px] text-gray-400 truncate">Gestionar mis datos</span>
-                </div>
-                <app-icon name="ChevronRight" size="14"
-                    class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
-            </a>
-
+            <!-- Mis Compras -->
             <a routerLink="/mis-pedidos" (click)="closeDrawer.emit()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
+                class="flex items-center gap-3 px-3 py-2 rounded-xl bg-white border border-transparent hover:bg-gray-50 active:bg-gray-100 transition-all group active:scale-[0.98]">
                 <div
-                    class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
-                    <app-icon name="ShoppingBag" size="18"></app-icon>
+                    class="w-8 h-8 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center shrink-0 group-hover:bg-brand-primary group-hover:text-white transition-colors duration-200">
+                    <app-icon name="ShoppingBag" size="17"></app-icon>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <span class="block text-sm font-semibold text-gray-700 truncate">Compras</span>
+                    <span class="block text-sm font-semibold text-gray-700 truncate">Mis Compras</span>
                     <span class="block text-[10px] text-gray-400 truncate">Seguimiento de pedidos</span>
                 </div>
-                <app-icon name="ChevronRight" size="14"
+                <app-icon name="ChevronRight" size="13"
                     class="text-gray-300 group-hover:text-brand-primary transition-all"></app-icon>
             </a>
             }
         </nav>
     </div>
 
-    <!-- Footer: Actions -->
-    <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/30">
-        @if (isLoggedIn) {
-        <button (click)="signOut.emit()"
-            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-red-100 text-red-500 font-medium text-xs active:scale-95 transition-all hover:bg-red-50 cursor-pointer">
-            <app-icon name="LogOut" size="14"></app-icon>
+    <!-- ── FOOTER (Fijo al fondo) ── -->
+    <div class="shrink-0 border-t border-gray-100 px-4 py-3 bg-gray-50/50 space-y-2.5">
+        <!-- Links legales -->
+        <div class="flex items-center justify-center gap-3">
+            <a routerLink="/terminos-y-condiciones" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Términos</a>
+            <span class="text-gray-200">·</span>
+            <a routerLink="/politica-de-privacidad" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Privacidad</a>
+            <span class="text-gray-200">·</span>
+            <a routerLink="/politica-de-devoluciones" (click)="closeDrawer.emit()"
+                class="text-[9px] text-gray-400 hover:text-brand-primary transition-colors">Devoluciones</a>
+        </div>
+
+        <!-- Cerrar sesión / copyright -->
+        @if (isLoggedIn()) {
+        <button (click)="onSignOut()"
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-100 bg-white text-red-500 font-bold text-xs active:scale-95 transition-all hover:bg-red-50 cursor-pointer shadow-sm">
+            <app-icon name="LogOut" size="13"></app-icon>
             <span>Cerrar Sesión</span>
         </button>
         } @else {

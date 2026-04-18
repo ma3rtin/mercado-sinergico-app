@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -24,6 +24,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   @Output() toggleExpansion = new EventEmitter<void>();
   @Output() aumentarCantidad = new EventEmitter<any>();
   @Output() disminuirCantidad = new EventEmitter<any>();
+  @Output() setCantidadManual = new EventEmitter<any>();
   @Output() eliminarProducto = new EventEmitter<ProductoEnPedido>();
   @Output() salirDelPaquete = new EventEmitter<void>();
   @Output() finalizarCompra = new EventEmitter<void>();
@@ -32,6 +33,13 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   public readonly TipoPaquete = TipoPaquete;
   isActualizando = signal(false);
+  isMobile = signal(window.innerWidth < 768);
+  isModalOpen = signal(false);
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile.set(window.innerWidth < 768);
+  }
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -194,7 +202,15 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
 
   onToggleExpansion(): void {
-    this.toggleExpansion.emit();
+    if (this.isMobile()) {
+      this.isModalOpen.set(!this.isModalOpen());
+    } else {
+      this.toggleExpansion.emit();
+    }
+  }
+
+  closeModal(): void {
+    this.isModalOpen.set(false);
   }
 
   onAumentarCantidad(prod: any): void {
@@ -219,6 +235,26 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     };
 
     this.disminuirCantidad.emit(limpio);
+  }
+
+  onCambiarCantidadManual(prod: any, event: Event): void {
+    if (!this.puedeEditarCantidades) return;
+    const input = event.target as HTMLInputElement;
+    let valor = parseInt(input.value, 10);
+    
+    if (isNaN(valor) || valor < 1) {
+      input.value = '1';
+      valor = 1;
+    }
+
+    const limpio = {
+      ...prod,
+      id_producto: prod.productoId ?? prod.id_producto,
+      id_detalle: prod.id_detalle ?? prod.id,
+      nuevaCantidad: valor
+    };
+    
+    this.setCantidadManual.emit(limpio);
   }
 
   get puedeSalirDelPaquete(): boolean {
