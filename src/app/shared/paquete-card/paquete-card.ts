@@ -81,10 +81,10 @@ export class PaqueteCard implements OnInit {
     const estado = this.paquete.estado?.nombre || '';
 
     const mapEstados: { [key: string]: { clase: string; emoji: string } } = {
-      'Abierto': { clase: 'bg-green-100 text-green-800', emoji: '🟢' },
-      'Cerrado': { clase: 'bg-red-100 text-red-800', emoji: '🔴' },
-      'Pendiente': { clase: 'bg-yellow-100 text-yellow-800', emoji: '🟡' },
-      'Activo': { clase: 'bg-blue-100 text-blue-800', emoji: '✨' },
+      'Abierto': { clase: 'bg-success-light text-success', emoji: '🟢' },
+      'Cerrado': { clase: 'bg-error-light text-error', emoji: '🔴' },
+      'Pendiente': { clase: 'bg-warning-light text-warning', emoji: '🟡' },
+      'Activo': { clase: 'bg-brand-primary-light text-brand-secondary', emoji: '✨' },
     };
 
     return mapEstados[estado] || { clase: 'bg-gray-100 text-gray-800', emoji: '❓' };

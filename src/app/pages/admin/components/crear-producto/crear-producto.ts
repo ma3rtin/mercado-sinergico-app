@@ -548,7 +548,7 @@ if (tipoBackend) {
             title: 'Producto creado',
             html: `
               <p class="mb-2">El producto se creó correctamente.</p>
-              <p class="text-sm text-red-600">
+              <p class="text-sm text-error">
                 ⚠️ Pero hubo un error al generar las variantes:
                 <br><strong>${err.error?.message || 'Error desconocido'}</strong>
               </p>
@@ -687,7 +687,7 @@ console.log('🎨 Plantilla:', plantilla);
 
   private scrollToFirstError(): void {
     setTimeout(() => {
-      const firstError = document.querySelector('.border-red-500, .text-red-600');
+      const firstError = document.querySelector('.border-error, .text-error');
       if (firstError) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }

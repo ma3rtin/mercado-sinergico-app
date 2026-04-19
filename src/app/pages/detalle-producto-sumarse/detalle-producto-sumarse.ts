@@ -313,8 +313,8 @@ export class DetalleProductoSumarse implements OnInit {
     if (!estado) return 'text-gray-600';
     const clases: Record<string, string> = {
       'abierto': 'text-primary', 'activo': 'text-primary',
-      'cerrado': 'text-red-600', 'próximo a cerrar': 'text-secondary-dark',
-      'pendiente': 'text-yellow-600'
+      'cerrado': 'text-error', 'próximo a cerrar': 'text-secondary-dark',
+      'pendiente': 'text-warning'
     };
     return clases[estado.toLowerCase()] || 'text-gray-600';
   }
@@ -323,8 +323,8 @@ export class DetalleProductoSumarse implements OnInit {
     if (!estado) return 'w-3 h-3 bg-gray-400 rounded-full';
     const clases: Record<string, string> = {
       'abierto': 'w-3 h-3 bg-primary rounded-full', 'activo': 'w-3 h-3 bg-primary rounded-full',
-      'cerrado': 'w-3 h-3 bg-red-500 rounded-full', 'próximo a cerrar': 'w-3 h-3 bg-yellow-500 rounded-full',
-      'pendiente': 'w-3 h-3 bg-yellow-400 rounded-full'
+      'cerrado': 'w-3 h-3 bg-error rounded-full', 'próximo a cerrar': 'w-3 h-3 bg-warning rounded-full',
+      'pendiente': 'w-3 h-3 bg-warning rounded-full'
     };
     return clases[estado.toLowerCase()] || 'w-3 h-3 bg-gray-400 rounded-full';
   }

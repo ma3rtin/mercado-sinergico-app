@@ -3,8 +3,8 @@
         <!-- Banner Edición / Duplicado -->
         @if (isEditMode()) {
         <div class="mb-6 p-4 rounded-lg flex items-start gap-3" 
-             [class.bg-blue-50]="!isDuplicate()" [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
-             [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()" [class.text-amber-800]="isDuplicate()">
+             [class.bg-info-light]="!isDuplicate()" [class.border-brand-primary-light]="!isDuplicate()" [class.text-brand-secondary]="!isDuplicate()"
+             [class.bg-warning-light]="isDuplicate()" [class.border-warning-light]="isDuplicate()" [class.text-warning]="isDuplicate()">
             <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
             <div>
                 <p class="font-bold text-sm">
@@ -33,7 +33,7 @@
             <label class="block text-gray-700 font-body mb-1">Paquete base</label>
             <input #inputBusqueda type="text" [(ngModel)]="busqueda" (input)="buscarPaquetes()" (focus)="abrirLista()"
                 placeholder="Buscar paquete base..."
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600" />
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary text-gray-600" />
             <!-- ... resto del buscador ... -->
 
             <!-- Lista desplegable -->
@@ -61,7 +61,7 @@
         <div class="mb-6">
             <label class="block text-gray-700 font-body mb-1">Estado</label>
             <select title="Elegí un estado" [(ngModel)]="estadoSeleccionado"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary text-gray-600">
                 <option value="" disabled selected hidden>Elegí un estado</option>
                 @for (estado of estados; track estado.id_estado) {
                 <option [value]="estado.id_estado">{{ estado.nombre }}</option>
@@ -73,7 +73,7 @@
         <div class="mb-6">
             <label class="block text-gray-700 font-body mb-1">Zona</label>
             <select title="Elegí una zona" [(ngModel)]="zonaSeleccionada"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600">
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary text-gray-600">
                 <option value="" disabled selected hidden>Elegí una zona</option>
                 @for (zona of zonas(); track zona.id_zona) {
                 <option [value]="zona.id_zona">{{ zona.nombre }}</option>
@@ -86,12 +86,12 @@
             <div>
                 <label class="block text-gray-700 font-body mb-1">Fecha de inicio</label>
                 <input title="Fecha de inicio" [(ngModel)]="fechaInicio" type="date"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary" />
             </div>
             <div>
                 <label class="block text-gray-700 font-body mb-1">Fecha de fin</label>
                 <input title="Fecha de fin" [(ngModel)]="fechaFin" type="date"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary" />
             </div>
         </div>
 
@@ -99,7 +99,7 @@
         <div class="mb-6">
             <label class="block text-gray-700 font-body mb-1">Cantidad total de productos</label>
             <input [(ngModel)]="cantProductos" type="number" min="1" placeholder="Ejemplo: 30"
-                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 placeholder-gray-400" />
+                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-primary placeholder-gray-400" />
         </div>
 
         <!-- Botón -->

@@ -129,14 +129,14 @@
 
         @if (isLoading()) {
         <div class="flex justify-center py-20">
-            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-brand-primary-light border-t-blue-600"></div>
         </div>
         } @else if (errorMessage()) {
-        <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg mb-8">
-            <h3 class="text-red-800 font-bold text-lg mb-2">Error al cargar paquetes</h3>
-            <p class="text-red-700 mb-4">{{ errorMessage() }}</p>
+        <div class="bg-error-light border-l-4 border-error p-6 rounded-lg mb-8">
+            <h3 class="text-error font-bold text-lg mb-2">Error al cargar paquetes</h3>
+            <p class="text-error mb-4">{{ errorMessage() }}</p>
             <button (click)="recargarPaquetes()"
-                class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                class="bg-error hover:bg-error text-white px-6 py-2 rounded-lg font-medium transition-colors">
                 Intentar de nuevo
             </button>
         </div>

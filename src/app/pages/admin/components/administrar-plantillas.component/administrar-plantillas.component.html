@@ -28,14 +28,14 @@
                     </svg>
                 </div>
                 <input type="text"
-                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
                     placeholder="Buscar plantillas por nombre" [value]="searchTerm()"
                     (input)="searchTerm.set($event.target.value)" />
             </div>
         </div>
         <div class="sm:w-64">
             <select
-                class="block w-full px-3 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="block w-full px-3 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
                 [value]="sortOrder()">
                 <option value="asc">Ordenar A-Z</option>
                 <option value="desc">Ordenar Z-A</option>
@@ -52,23 +52,23 @@
                 <div class="flex space-x-2">
                     <!-- Duplicar -->
                     <button (click)="duplicatePlantilla(plantilla)"
-                        class="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors"
+                        class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
                         title="Duplicar">
-                        <app-icon name="Layers" [size]="'20'" class="text-red-500" />
+                        <app-icon name="Layers" [size]="'20'" class="text-error" />
                     </button>
 
                     <!-- Editar -->
                     <button (click)="openEditModal(plantilla)"
-                        class="p-2 text-gray-500 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                        class="p-2 text-gray-500 hover:text-warning hover:bg-warning-light rounded-lg transition-colors"
                         title="Editar">
-                        <app-icon name="Edit2" [size]="'20'" class="text-yellow-500" />
+                        <app-icon name="Edit2" [size]="'20'" class="text-warning" />
                     </button>
 
                     <!-- Eliminar -->
                     <button (click)="deletePlantilla(plantilla)"
-                        class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        class="p-2 text-gray-500 hover:text-error hover:bg-error-light rounded-lg transition-colors"
                         title="Eliminar">
-                        <app-icon name="trash" [size]="'20'" class="text-red-500" />
+                        <app-icon name="trash" [size]="'20'" class="text-error" />
                     </button>
                 </div>
             </div>

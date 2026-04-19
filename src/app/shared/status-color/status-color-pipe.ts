@@ -14,17 +14,17 @@ export class StatusColorPipe implements PipeTransform {
       case 'Pendiente':
         return 'text-secondary-dark';
       case 'En Preparación':
-        return 'text-blue-600';
+        return 'text-brand-secondary';
       case 'Enviado':
         return 'text-purple-600';
       case 'Entregado':
-        return 'text-green-600';
+        return 'text-success';
       case 'Cancelado':
-        return 'text-red-500';
+        return 'text-error';
       case 'Cerrado':
-        return 'text-red-600';
+        return 'text-error';
       case 'Completo':
-        return 'text-green-600';
+        return 'text-success';
       default:
         return 'text-gray-600';
     }

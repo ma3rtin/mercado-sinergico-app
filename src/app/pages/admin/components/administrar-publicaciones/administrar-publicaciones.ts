@@ -73,8 +73,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
   cerrarPaquete(paquete: PaquetePublicado) {
     const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
     const avisoFaltantes = faltan > 0
-      ? `<p class="text-red-500 font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
-      : '<p class="text-green-600 font-bold mt-2">¡El paquete está lleno!</p>';
+      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
 
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
@@ -109,7 +109,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
       Swal.fire({
         title: '¿Completar pedido?',
         html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
-               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+               <div class="mt-4 p-3 bg-info-light border border-brand-primary-light rounded text-sm text-brand-secondary text-left">
                  <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
                  <p class="mt-1">Al completar este paquete podrás <strong>descargar los partes de logística y de proveedor</strong> desde la vista de detalles.</p>
                </div>
@@ -205,9 +205,9 @@ export class AdministrarPublicacionesComponent implements OnInit {
     switch (estado.nombre?.toLowerCase().trim()) {
       case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
       case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
-      case 'en preparación': return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'en preparación': return 'bg-brand-primary-light text-brand-secondary border-focus';
       case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
-      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
+      case 'cancelado': return 'bg-error-light text-error border-error-light';
       case 'eliminado': return 'bg-status-closed-bg text-status-closed-text border-transparent';
       default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }

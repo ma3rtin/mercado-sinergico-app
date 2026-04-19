@@ -18,7 +18,7 @@
       <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div class="mb-4">
           <h3 class="text-lg font-medium text-gray-900 mb-2">
-            Tipo de Producto <span class="text-red-500">*</span>
+            Tipo de Producto <span class="text-error">*</span>
           </h3>
           <p class="text-sm text-gray-600">
             El tipo de producto determina cómo se gestiona el stock.
@@ -32,8 +32,8 @@
             (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
             [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
               (tipoProducto() === TipoPaquete.ENERGICO
-                ? 'border-secondary-dark bg-yellow-50 ring-2 ring-secondary-dark ring-offset-2'
-                : 'border-gray-300 hover:border-secondary-dark hover:bg-yellow-50')"
+                ? 'border-secondary-dark bg-warning-light ring-2 ring-secondary-dark ring-offset-2'
+                : 'border-gray-300 hover:border-secondary-dark hover:bg-warning-light')"
           >
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-3">
@@ -61,8 +61,8 @@
             (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
             [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
               (tipoProducto() === TipoPaquete.SINERGICO
-                ? 'border-primary bg-blue-50 ring-2 ring-offset-2'
-                : 'border-gray-300 hover:border-primary hover:bg-blue-50')"
+                ? 'border-primary bg-info-light ring-2 ring-offset-2'
+                : 'border-gray-300 hover:border-primary hover:bg-info-light')"
           >
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center gap-3">
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Info adicional -->
-        <div class="mt-4 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
+        <div class="mt-4 p-4 bg-info-light border-l-4 border-primary rounded-r-lg">
           <div class="flex items-start gap-3">
             <app-icon name="info" size="16" class="text-primary flex-shrink-0"></app-icon>
             <div class="flex-1">
@@ -130,14 +130,14 @@
             <!-- Marca -->
             <div>
               <label class="block text-lg font-medium text-black mb-2">
-                Marca <span class="text-red-500">*</span>
+                Marca <span class="text-error">*</span>
               </label>
               <select
                 formControlName="marca_id"
                 [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
                   (isFieldInvalid('marca_id')
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')"
+                    ? 'border-error focus:ring-error focus:border-error'
+                    : 'border-gray-300 focus:ring-brand-primary-hover focus:border-focus')"
               >
                 <option value="">Elegí una marca</option>
                 @for (marca of marcas(); track marca.id_marca) {
@@ -145,21 +145,21 @@
                 }
               </select>
               @if (isFieldInvalid('marca_id')) {
-                <p class="mt-1 text-sm text-red-600">{{ getErrorMessage("marca_id") }}</p>
+                <p class="mt-1 text-sm text-error">{{ getErrorMessage("marca_id") }}</p>
               }
             </div>
 
             <!-- Categoría -->
             <div>
               <label class="block text-lg font-medium text-black mb-2">
-                Categoría <span class="text-red-500">*</span>
+                Categoría <span class="text-error">*</span>
               </label>
               <select
                 formControlName="categoria_id"
                 [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
                   (isFieldInvalid('categoria_id')
-                    ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500')"
+                    ? 'border-error focus:ring-error focus:border-error'
+                    : 'border-gray-300 focus:ring-brand-primary-hover focus:border-focus')"
               >
                 <option value="">Elegí una categoría</option>
                 @for (categoria of categorias(); track categoria.id_categoria) {
@@ -167,7 +167,7 @@
                 }
               </select>
               @if (isFieldInvalid('categoria_id')) {
-                <p class="mt-1 text-sm text-red-600">{{ getErrorMessage("categoria_id") }}</p>
+                <p class="mt-1 text-sm text-error">{{ getErrorMessage("categoria_id") }}</p>
               }
             </div>
 
@@ -178,7 +178,7 @@
                 formControlName="descripcion"
                 placeholder="Descripción de tu producto..."
                 rows="4"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical placeholder-gray-500"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus resize-vertical placeholder-gray-500"
               ></textarea>
             </div>
           </div>
@@ -188,13 +188,13 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
           <div class="mb-4">
             <h3 class="text-lg font-medium text-gray-900 mb-2">
-              Imágenes <span class="text-red-500">*</span>
+              Imágenes <span class="text-error">*</span>
             </h3>
             <p class="text-sm text-gray-600">
               Insertá las imágenes de tu producto. Podés arrastrarlas para reordenarlas.
             </p>
             @if (formSubmitted() && !hasMainImage()) {
-              <p class="mt-2 text-sm text-red-600 font-medium">⚠️ La imagen principal es obligatoria</p>
+              <p class="mt-2 text-sm text-error font-medium">⚠️ La imagen principal es obligatoria</p>
             }
           </div>
 
@@ -208,10 +208,10 @@
                 (dragend)="onDragEnd()"
                 class="aspect-square rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden transition-all"
                 [ngClass]="{
-                  'border-solid border-3 border-secondary-dark hover:shadow-md hover:shadow-secondary-dark hover:bg-yellow-100 bg-yellow-50': $index === 0 && !slot.preview,
+                  'border-solid border-3 border-secondary-dark hover:shadow-md hover:shadow-secondary-dark hover:bg-warning-light bg-warning-light': $index === 0 && !slot.preview,
                   'bg-gray-100 border-2 border-dashed border-gray-300 hover:bg-gray-50': !slot.preview && $index !== 0,
-                  'border-2 border-blue-400 shadow-lg scale-105': draggedIndex() === $index,
-                  'ring-2 ring-red-500': formSubmitted() && $index === 0 && !slot.preview
+                  'border-2 border-focus shadow-lg scale-105': draggedIndex() === $index,
+                  'ring-2 ring-error': formSubmitted() && $index === 0 && !slot.preview
                 }"
               >
                 @if (slot.preview) {
@@ -221,7 +221,7 @@
                   <button
                     type="button"
                     (click)="removeImage($index, $event)"
-                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-10 transition-colors pointer-events-auto"
+                    class="absolute top-2 right-2 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-error z-10 transition-colors pointer-events-auto"
                   >×</button>
 
                   <!-- Badge imagen principal -->
@@ -231,7 +231,7 @@
 
                   <!-- Badge imagen existente -->
                   @if (slot.isExisting && !slot.file) {
-                    <span class="absolute bottom-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded z-10">Guardada</span>
+                    <span class="absolute bottom-2 left-2 bg-brand-secondary text-white text-xs font-semibold px-2 py-0.5 rounded z-10">Guardada</span>
                   }
 
                   <!-- Indicador drag -->
@@ -285,7 +285,7 @@
               />
             } @else {
               <!-- Mensaje informativo -->
-              <div class="flex items-start gap-3 p-4 bg-blue-50 border-l-4 border-primary rounded-r-lg">
+              <div class="flex items-start gap-3 p-4 bg-info-light border-l-4 border-primary rounded-r-lg">
                 <app-icon name="info" size="16" class="text-primary flex-shrink-0 mt-1"></app-icon>
                 <div class="flex-1">
                   <p class="text-sm text-black font-medium mb-1">
@@ -398,7 +398,7 @@
                         />
                         <span [class]="'px-3 py-1.5 text-sm rounded-full cursor-pointer transition-colors ' +
                           (isAttributeSelected(caracteristica.nombre, opcion.nombre) ?
-                            'bg-yellow-100 text-secondary-dark border-2 border-secondary-dark' :
+                            'bg-warning-light text-secondary-dark border-2 border-secondary-dark' :
                             'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200')">
                           {{ opcion.nombre }}
                         </span>

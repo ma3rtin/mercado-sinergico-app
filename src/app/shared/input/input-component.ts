@@ -149,9 +149,9 @@ export class InputComponent implements ControlValueAccessor, OnInit {
     const rightPadding = (this.suffix() || this.clearable()) ? 'pr-10' : '';
 
     const state = this.currentError()
-      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+      ? 'border-error focus:border-error focus:ring-2 focus:ring-error-light'
       : this.successMessage()
-        ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+        ? 'border-success focus:border-success focus:ring-2 focus:ring-success-light'
         : this.isFocused()
           ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
           : 'border-gray-300 hover:border-gray-400';

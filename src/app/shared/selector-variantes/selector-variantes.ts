@@ -266,7 +266,7 @@ export class SelectorVariantesComponent {
     const seleccionada = this.estaSeleccionada(caracteristicaId, opcionId);
 
     if (seleccionada) {
-      return `${base} border-secondary-dark bg-yellow-50 text-secondary-dark shadow-md`;
+      return `${base} border-brand-primary bg-brand-primary-light text-brand-secondary shadow-md`;
     }
 
     return `${base} ${hover} border-gray-300 text-gray-700 bg-white`;

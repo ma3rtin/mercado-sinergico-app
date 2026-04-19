@@ -120,8 +120,8 @@
                 </div>
             } @else if (error()) {
                 <div class="text-center py-12">
-                    <app-icon name="alertCircle" size="64" class="text-red-400 mx-auto mb-4" />
-                    <p class="text-red-600 font-medium">{{ error() }}</p>
+                    <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4" />
+                    <p class="text-error font-medium">{{ error() }}</p>
                 </div>
             } @else if (paquetes().length > 0) {
                 <div class="grid grid-cols-1 gap-4">

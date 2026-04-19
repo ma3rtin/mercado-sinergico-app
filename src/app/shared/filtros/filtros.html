@@ -11,7 +11,7 @@
       @if (tieneFiltrosActivos()) {
         <button
           (click)="limpiarFiltros()"
-          class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors flex items-center gap-1"
+          class="text-sm text-brand-secondary hover:text-brand-secondary font-medium transition-colors flex items-center gap-1"
           title="Limpiar filtros">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -23,8 +23,8 @@
 
     <!-- 📊 Contador de filtros activos -->
     @if (tieneFiltrosActivos()) {
-      <div class="mb-4 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-        <p class="text-sm text-blue-700 font-medium">
+      <div class="mb-4 px-3 py-2 bg-info-light border border-brand-primary-light rounded-lg">
+        <p class="text-sm text-brand-secondary font-medium">
           {{ contadorFiltrosActivos() }} filtro(s) activo(s)
         </p>
       </div>
@@ -39,8 +39,8 @@
 
     <!-- ❌ Error State -->
     @else if (error()) {
-      <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
-        <p class="text-sm text-red-600">{{ error() }}</p>
+      <div class="p-4 bg-error-light border border-error-light rounded-lg">
+        <p class="text-sm text-error">{{ error() }}</p>
       </div>
     }
 
@@ -62,7 +62,7 @@
                     type="checkbox"
                     [checked]="esCategoriaSeleccionada(categoria.id)"
                     (change)="toggleCategoria(categoria.id)"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                    class="w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary-hover cursor-pointer">
 
                     <span class="text-sm text-gray-700 group-hover:text-gray-900">
                     {{ categoria.nombre }}
@@ -89,7 +89,7 @@
                     type="checkbox"
                     [checked]="esMarcaSeleccionada(marca.id)"
                     (change)="toggleMarca(marca.id)"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                    class="w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary-hover cursor-pointer">
                   <span class="text-sm text-gray-700 group-hover:text-gray-900">
                     {{ marca.nombre }}
                   </span>
@@ -112,14 +112,14 @@
                 <label
                   [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
                     (esTipoPaqueteSeleccionado(tipo.valor)
-                      ? 'border-blue-500 bg-blue-50'
+                      ? 'border-focus bg-info-light'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
                   <input
                     type="checkbox"
                     [checked]="esTipoPaqueteSeleccionado(tipo.valor)"
                     (change)="toggleTipoPaquete(tipo.valor)"
-                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer">
-                  <span [class]="'text-sm font-medium ' + (esTipoPaqueteSeleccionado(tipo.valor) ? 'text-blue-700' : 'text-gray-700')">
+                    class="w-4 h-4 text-brand-secondary border-gray-300 rounded focus:ring-2 focus:ring-brand-primary-hover cursor-pointer">
+                  <span [class]="'text-sm font-medium ' + (esTipoPaqueteSeleccionado(tipo.valor) ? 'text-brand-secondary' : 'text-gray-700')">
                     {{ tipo.nombre }}
                   </span>
                 </label>
@@ -144,7 +144,7 @@
                   placeholder="Mínimo"
                   [value]="precioMin() || ''"
                   (input)="cambiarPrecioMin($any($event.target).value ? +$any($event.target).value : null)"
-                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all">
+                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-brand-primary focus:border-focus transition-all">
               </div>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"><app-icon name="DollarSign" size="14"></app-icon></span>
@@ -153,7 +153,7 @@
                   placeholder="Máximo"
                   [value]="precioMax() || ''"
                   (input)="cambiarPrecioMax($any($event.target).value ? +$any($event.target).value : null)"
-                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all">
+                  class="w-full pl-8 pr-3 py-2.5 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-brand-primary focus:border-focus transition-all">
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@
             <select
               [value]="ordenSeleccionado()"
               (change)="cambiarOrdenamiento($any($event.target).value)"
-              class="w-full p-3 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all cursor-pointer">
+              class="w-full p-3 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md focus:ring-2 focus:ring-brand-primary focus:border-focus transition-all cursor-pointer">
               <option value="">Seleccionar orden</option>
               @for (opcion of obtenerOpciones('Ordenamiento'); track opcion.id) {
                 <option [value]="opcion.valor">{{ opcion.nombre }}</option>
@@ -188,14 +188,14 @@
                 <label
                   [class]="'flex items-center space-x-2 cursor-pointer p-3 rounded-lg border-2 transition-all ' +
                     (esEstadoSeleccionado(estado.valor)
-                      ? 'border-green-500 bg-green-50'
+                      ? 'border-success bg-success-light'
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')">
                   <input
                     type="checkbox"
                     [checked]="esEstadoSeleccionado(estado.valor)"
                     (change)="toggleEstado(estado.valor)"
-                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500 cursor-pointer">
-                  <span [class]="'text-sm font-medium ' + (esEstadoSeleccionado(estado.valor) ? 'text-green-700' : 'text-gray-700')">
+                    class="w-4 h-4 text-success border-gray-300 rounded focus:ring-2 focus:ring-success cursor-pointer">
+                  <span [class]="'text-sm font-medium ' + (esEstadoSeleccionado(estado.valor) ? 'text-success' : 'text-gray-700')">
                     {{ estado.nombre }}
                   </span>
                 </label>
@@ -237,7 +237,7 @@
         d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
     </svg>
     @if (tieneFiltrosActivos()) {
-      <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+      <span class="absolute -top-1 -right-1 bg-error text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
         {{ contadorFiltrosActivos() }}
       </span>
     }

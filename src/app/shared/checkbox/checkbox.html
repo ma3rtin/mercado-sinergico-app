@@ -21,7 +21,7 @@
       <label [for]="checkboxId()" [class]="labelClasses()">
         {{ label() }}
         @if (required()) {
-        <span class="text-red-500 ml-1">*</span>
+        <span class="text-error ml-1">*</span>
         }
       </label>
       }
@@ -35,7 +35,7 @@
       }
 
       @if (currentError()) {
-      <p class="text-sm text-red-600 mt-1 flex items-start gap-1">
+      <p class="text-sm text-error mt-1 flex items-start gap-1">
         <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path
             fill-rule="evenodd"
@@ -81,7 +81,7 @@
       <label [for]="checkboxId()" [class]="labelClasses()">
         {{ label() }}
         @if (required()) {
-        <span class="text-red-500 ml-1">*</span>
+        <span class="text-error ml-1">*</span>
         }
       </label>
       }
@@ -106,7 +106,7 @@
   </div>
 
   @if (currentError()) {
-  <p class="text-sm text-red-600 mt-1">{{ currentError() }}</p>
+  <p class="text-sm text-error mt-1">{{ currentError() }}</p>
   }
   }
 
@@ -131,7 +131,7 @@
       <label [for]="checkboxId()" [class]="labelClasses()">
         {{ label() }}
         @if (required()) {
-        <span class="text-red-500 ml-1">*</span>
+        <span class="text-error ml-1">*</span>
         }
       </label>
       }
@@ -155,7 +155,7 @@
   </div>
 
   @if (currentError()) {
-  <p class="text-sm text-red-600 mt-1">{{ currentError() }}</p>
+  <p class="text-sm text-error mt-1">{{ currentError() }}</p>
   }
   }
 </div>

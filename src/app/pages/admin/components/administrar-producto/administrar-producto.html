@@ -140,21 +140,21 @@
 
                   <!-- Precio -->
                   <span
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-primary rounded-full text-sm font-medium"
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-primary rounded-full text-sm font-medium"
                   >
                     {{ formatPrice(producto.precio) }}
                   </span>
 
                   <!-- Marca -->
                   <span
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-black rounded-full text-sm font-medium"
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-warning-light text-black rounded-full text-sm font-medium"
                   >
                     {{ getMarcaNombre(producto) }}
                   </span>
 
                   <!-- Badge de variantes (si tiene) -->
                   @if (producto.tieneVariantes) {
-                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
                       <app-icon name="layers" [size]="'12'" class="text-current pt-1" />
                       {{ producto.cantidadVariantes }} variantes
                     </span>
@@ -169,7 +169,7 @@
                 <!-- Duplicar producto -->
                 <button
                   (click)="duplicateProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-primary hover:bg-blue-50 rounded-lg transition-colors"
+                  class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
                   title="Duplicar"
                 >
                   <app-icon
@@ -184,7 +184,7 @@
                   (click)="gestionarVariantes(producto)"
                   [class]="'p-2 rounded-lg transition-colors ' +
                     (producto.tieneVariantes
-                      ? 'text-primary hover:bg-blue-50'
+                      ? 'text-primary hover:bg-info-light'
                       : 'text-gray-300 cursor-not-allowed')"
                   [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'"
                 >
@@ -198,7 +198,7 @@
                 <!-- Ver detalles -->
                 <button
                   (click)="viewProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-yellow-100 rounded-lg transition-colors"
+                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-warning-light rounded-lg transition-colors"
                   title="Ver detalles"
                 >
                   <app-icon
@@ -211,7 +211,7 @@
                 <!-- Editar -->
                 <button
                   (click)="editProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-yellow-100 rounded-lg transition-colors"
+                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-warning-light rounded-lg transition-colors"
                   title="Editar"
                 >
                   <app-icon
@@ -224,7 +224,7 @@
                 <!-- Eliminar -->
                 <button
                   (click)="deleteProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  class="p-2 text-gray-500 hover:text-error hover:bg-error-light rounded-lg transition-colors"
                   title="Eliminar"
                 >
                   <app-icon
