@@ -2,386 +2,333 @@
 <!-- BUSCADOR DESKTOP -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 @if (!esMobile()) {
-  <div class="w-full relative" #searchContainer>
-    <div class="relative">
-      <input
-        #searchInput
-        type="text"
-        [value]="searchTerm()"
-        (input)="onSearchChange($any($event.target).value)"
-        (focus)="onSearchFocus()"
-        (click)="onInputClick($event)"
-        placeholder="Buscar productos, paquetes, categorías..."
-        class="w-full px-6 py-3 pl-12 pr-6 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
-        aria-label="Buscar en Mercado Sinérgico"
-        autocomplete="off"
-      />
-      <app-icon
-        name="Search"
-        class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-      />
+<div class="w-full relative" #searchContainer>
+  <div class="relative">
+    <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
+      (focus)="onSearchFocus()" (click)="onInputClick($event)" placeholder="Buscar productos, paquetes, categorías..."
+      class="w-full px-6 py-3 pl-12 pr-6 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
+      aria-label="Buscar en Mercado Sinérgico" autocomplete="off" />
+    <app-icon name="Search"
+      class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DROPDOWN DE RESULTADOS (DESKTOP) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  @if (searchOpen()) {
+  <div
+    class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 max-h-[70vh] overflow-y-auto z-50 animate-[slideDown_0.2s_ease-out]">
+
+    <!-- Filtros -->
+    <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2 z-10">
+      <button (click)="cambiarTipoBusqueda('todo')"
+        [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+              (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')">
+        <app-icon name="Layers" size="24" />
+        Todo
+      </button>
+      <button (click)="cambiarTipoBusqueda('productos')"
+        [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+              (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')">
+        <app-icon name="Box" size="24" />
+        Productos
+      </button>
+      <button (click)="cambiarTipoBusqueda('paquetes')"
+        [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+              (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')">
+        <app-icon name="Package" size="24" />
+        Paquetes
+      </button>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- DROPDOWN DE RESULTADOS (DESKTOP) -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    @if (searchOpen()) {
-      <div class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 max-h-[70vh] overflow-y-auto z-50 animate-[slideDown_0.2s_ease-out]">
+    <!-- Loading -->
+    @if (resultados().cargando) {
+    <div class="flex flex-col items-center justify-center py-8">
+      <app-icon name="Loader" class="w-8 h-8 text-primary mb-3 animate-spin" />
+      <span class="text-gray-600 font-medium">Buscando...</span>
+    </div>
+    }
 
-        <!-- Filtros -->
-        <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2 z-10">
-          <button
-            (click)="cambiarTipoBusqueda('todo')"
-            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-              (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-          >
-            <app-icon name="Layers" size="24" />
-            Todo
+    <!-- Estado inicial -->
+    @else if (!searchTerm().trim()) {
+    <div class="text-center py-8 px-4">
+      <app-icon name="Search" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
+      <p class="text-gray-600 font-medium">¿Qué estás buscando?</p>
+      <p class="text-gray-500 text-sm mt-1">Escribí para buscar productos o paquetes</p>
+    </div>
+    }
+
+    <!-- Sin resultados -->
+    @else if (!hayResultados()) {
+    <div class="text-center py-8 px-4">
+      <app-icon name="Meh" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
+      <p class="text-gray-600 font-medium">No encontramos resultados</p>
+      <p class="text-gray-500 text-sm mt-1">Intenta con otros términos</p>
+    </div>
+    }
+
+    <!-- Resultados -->
+    @else {
+    <div class="p-4">
+
+      <!-- PRODUCTOS -->
+      @if (mostrarProductos() && resultados().productos.length > 0) {
+      <div class="mb-4">
+        <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
+          <app-icon name="Box" class="text-primary" size="24" />
+          Productos ({{ resultados().productos.length }})
+        </h3>
+        <div class="space-y-1">
+          @for (producto of resultados().productos; track producto.id_producto) {
+          <button (click)="verProducto(producto)"
+            class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
+            <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+              <img [src]="obtenerImagenProducto(producto)" [alt]="producto.nombre"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
+                {{ producto.nombre }}
+              </p>
+              <p class="text-xs text-gray-500 flex items-center gap-1">
+                <app-icon name="Tag" size="12" class="flex-shrink-0" />
+                {{ producto.marca || 'Sin marca' }}
+              </p>
+              <p class="text-sm font-bold text-primary mt-1 flex items-center gap-1">
+                <app-icon name="dollar" size="12" />
+                {{ formatearPrecio(producto.precio) }}
+              </p>
+            </div>
+            <app-icon name="ChevronRight"
+              class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
           </button>
-          <button
-            (click)="cambiarTipoBusqueda('productos')"
-            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-              (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-          >
-            <app-icon name="Box" size="24" />
-            Productos
-          </button>
-          <button
-            (click)="cambiarTipoBusqueda('paquetes')"
-            [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-              (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50')"
-          >
-            <app-icon name="Package" size="24"/>
-            Paquetes
-          </button>
+          }
         </div>
-
-        <!-- Loading -->
-        @if (resultados().cargando) {
-          <div class="flex flex-col items-center justify-center py-8">
-            <app-icon name="Loader" class="w-8 h-8 text-primary mb-3 animate-spin" />
-            <span class="text-gray-600 font-medium">Buscando...</span>
-          </div>
-        }
-
-        <!-- Estado inicial -->
-        @else if (!searchTerm().trim()) {
-          <div class="text-center py-8 px-4">
-            <app-icon name="Search" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
-            <p class="text-gray-600 font-medium">¿Qué estás buscando?</p>
-            <p class="text-gray-500 text-sm mt-1">Escribí para buscar productos o paquetes</p>
-          </div>
-        }
-
-        <!-- Sin resultados -->
-        @else if (!hayResultados()) {
-          <div class="text-center py-8 px-4">
-            <app-icon name="Meh" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
-            <p class="text-gray-600 font-medium">No encontramos resultados</p>
-            <p class="text-gray-500 text-sm mt-1">Intenta con otros términos</p>
-          </div>
-        }
-
-        <!-- Resultados -->
-        @else {
-          <div class="p-4">
-
-            <!-- PRODUCTOS -->
-            @if (mostrarProductos() && resultados().productos.length > 0) {
-              <div class="mb-4">
-                <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-                  <app-icon name="Box" class="text-primary" size="24" />
-                  Productos ({{ resultados().productos.length }})
-                </h3>
-                <div class="space-y-1">
-                  @for (producto of resultados().productos; track producto.id_producto) {
-                    <button
-                      (click)="verProducto(producto)"
-                      class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
-                    >
-                      <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          [src]="obtenerImagenProducto(producto)"
-                          [alt]="producto.nombre"
-                          class="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
-                          {{ producto.nombre }}
-                        </p>
-                        <p class="text-xs text-gray-500 flex items-center gap-1">
-                          <app-icon name="Tag" size="12" class="flex-shrink-0" />
-                          {{ producto.marca || 'Sin marca' }}
-                        </p>
-                        <p class="text-sm font-bold text-primary mt-1 flex items-center gap-1">
-                          <app-icon name="dollar" size="12"  />
-                          {{ formatearPrecio(producto.precio) }}
-                        </p>
-                      </div>
-                      <app-icon name="ChevronRight" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-
-            <!-- PAQUETES -->
-            @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
-              <div>
-                <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-                  <app-icon name="Package" class="w-4 h-4 text-primary" />
-                  Paquetes ({{ resultados().paquetes.length }})
-                </h3>
-                <div class="space-y-1">
-                  @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
-                    <button
-                      (click)="verPaquete(paquete)"
-                      class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
-                    >
-                      <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                        <img
-                          [src]="obtenerImagenPaquete(paquete)"
-                          [alt]="paquete.paqueteBase?.nombre"
-                          class="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                          <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                            <app-icon name="Package" size="12" class="flex-shrink-0" />
-                            Paquete
-                          </span>
-                          <span class="text-xs text-gray-500">{{ paquete.estado.nombre || 'Sin estado' }}</span>
-                        </div>
-                        <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
-                          {{ paquete.paqueteBase?.nombre }}
-                        </p>
-                        <p class="text-xs text-gray-500 flex items-center gap-1">
-                          <app-icon name="Box" size="12" />
-                          {{ paquete.cant_productos }} productos
-                        </p>
-                      </div>
-                      <app-icon name="ChevronRight" class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
-                    </button>
-                  }
-                </div>
-              </div>
-            }
-
-            <!-- Ver todos -->
-            @if (hayResultados() && totalResultados() > 6) {
-              <button
-                (click)="verTodosResultados()"
-                class="w-full mt-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
-              >
-                Ver todos los resultados ({{ totalResultados() }})
-                <app-icon name="arrowRight" size="24" />
-              </button>
-            }
-          </div>
-        }
       </div>
+      }
+
+      <!-- PAQUETES -->
+      @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
+      <div>
+        <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
+          <app-icon name="Package" class="w-4 h-4 text-primary" />
+          Paquetes ({{ resultados().paquetes.length }})
+        </h3>
+        <div class="space-y-1">
+          @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
+          <button (click)="verPaquete(paquete)"
+            class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
+            <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+              <img [src]="obtenerImagenPaquete(paquete)" [alt]="paquete.paqueteBase?.nombre"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
+                  <app-icon name="Package" size="12" class="flex-shrink-0" />
+                  Paquete
+                </span>
+                <span class="text-xs text-gray-500">{{ paquete.estado?.nombre || 'Sin estado' }}</span>
+              </div>
+              <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
+                {{ paquete.paqueteBase?.nombre }}
+              </p>
+              <p class="text-xs text-gray-500 flex items-center gap-1">
+                <app-icon name="Box" size="12" />
+                {{ paquete.cant_productos }} productos
+              </p>
+            </div>
+            <app-icon name="ChevronRight"
+              class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Ver todos -->
+      @if (hayResultados() && totalResultados() > 6) {
+      <button (click)="verTodosResultados()"
+        class="w-full mt-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+        Ver todos los resultados ({{ totalResultados() }})
+        <app-icon name="arrowRight" size="24" />
+      </button>
+      }
+    </div>
     }
   </div>
+  }
+</div>
 }
 
 <!-- ══════════════════════════════════════════════════════════════ -->
 <!-- BUSCADOR MÓVIL (Input simple que abre overlay) -->
 <!-- ══════════════════════════════════════════════════════════════ -->
 @else {
-  <div class="relative">
-    <input
-      type="text"
-      [value]="searchTerm()"
-      (focus)="openSearch()"
-      placeholder="Buscar productos, paquetes..."
-      class="w-full px-4 py-2.5 pl-11 pr-4 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus transition-all duration-200"
-      aria-label="Buscar"
-      readonly
-    />
-    <app-icon name="Search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-  </div>
+<div class="relative">
+  <input type="text" [value]="searchTerm()" (focus)="openSearch()" placeholder="Buscar productos, paquetes..."
+    class="w-full px-4 py-2.5 pl-11 pr-4 border border-gray-300 rounded-full bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus transition-all duration-200"
+    aria-label="Buscar" readonly />
+  <app-icon name="Search"
+    class="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+</div>
 
-  <!-- OVERLAY FULLSCREEN MÓVIL -->
-  @if (searchOpen()) {
-    <div class="fixed inset-0 z-50 bg-white">
-      <div class="flex flex-col h-full">
+<!-- OVERLAY FULLSCREEN MÓVIL -->
+@if (searchOpen()) {
+<div class="fixed inset-0 z-50 bg-white">
+  <div class="flex flex-col h-full">
 
-        <!-- Header -->
-        <div class="bg-white border-b border-gray-200 px-4 py-3">
-          <div class="flex items-center gap-3">
-            <button
-              (click)="closeSearch(); limpiarBusqueda()"
-              class="flex-shrink-0 p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              aria-label="Volver"
-            >
-              <app-icon name="ChevronLeft" class="w-6 h-6" />
-            </button>
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200 px-4 py-3">
+      <div class="flex items-center gap-3">
+        <button (click)="closeSearch(); limpiarBusqueda()"
+          class="flex-shrink-0 p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition" aria-label="Volver">
+          <app-icon name="ChevronLeft" class="w-6 h-6" />
+        </button>
 
-            <div class="flex-1 relative">
-              <input
-                #searchInput
-                type="text"
-                [value]="searchTerm()"
-                (input)="onSearchChange($any($event.target).value)"
-                placeholder="¿Qué estás buscando?"
-                class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
-                autocomplete="off"
-              />
-              <app-icon name="Search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-
-          <!-- Filtros móvil -->
-          <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
-            <button
-              (click)="cambiarTipoBusqueda('todo')"
-              [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              <app-icon name="Layers" size="24" />
-              Todo
-            </button>
-            <button
-              (click)="cambiarTipoBusqueda('productos')"
-              [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              <app-icon name="Box" size="24" />
-              Productos
-            </button>
-            <button
-              (click)="cambiarTipoBusqueda('paquetes')"
-              [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
-                (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')"
-            >
-              <app-icon name="Package" size="24" />
-              Paquetes
-            </button>
-          </div>
-        </div>
-
-        <!-- Contenido móvil -->
-        <div class="flex-1 overflow-y-auto">
-          @if (!searchTerm().trim()) {
-            <div class="text-center py-16 px-4">
-              <app-icon name="Search" class="w-20 h-20 text-gray-300 mx-auto mb-4" />
-              <h3 class="text-lg font-semibold text-gray-700 mb-2">¿Qué estás buscando?</h3>
-              <p class="text-gray-500 text-sm">Escribí para buscar productos o paquetes</p>
-            </div>
-          }
-
-          @else if (resultados().cargando) {
-            <div class="flex flex-col items-center justify-center py-16">
-              <app-icon name="Loader" class="w-10 h-10 text-brand-secondary mb-3 animate-spin" />
-              <span class="text-gray-600 font-medium">Buscando...</span>
-            </div>
-          }
-
-          @else if (!hayResultados()) {
-            <div class="text-center py-16 px-4">
-              <app-icon name="Frown" class="w-20 h-20 text-gray-300 mx-auto mb-4" />
-              <h3 class="text-lg font-semibold text-gray-700 mb-2">No encontramos resultados</h3>
-              <p class="text-gray-500 text-sm">Intenta con otros términos</p>
-            </div>
-          }
-
-          @else {
-            <div class="p-4">
-              <!-- Productos móvil -->
-              @if (mostrarProductos() && resultados().productos.length > 0) {
-                <div class="mb-6">
-                  <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <app-icon name="Box" class=" text-primary" size="24" />
-                    Productos ({{ resultados().productos.length }})
-                  </h3>
-                  <div class="space-y-2">
-                    @for (producto of resultados().productos; track producto.id_producto) {
-                      <button
-                        (click)="verProducto(producto)"
-                        class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left"
-                      >
-                        <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            [src]="obtenerImagenProducto(producto)"
-                            [alt]="producto.nombre"
-                            class="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                            {{ producto.nombre }}
-                          </p>
-                          <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
-                            <app-icon name="Tag" size="12" />
-                            {{ producto.marca || 'Sin marca' }}
-                          </p>
-                          <p class="text-base font-bold text-primary flex items-center gap-1">
-                            <app-icon name="dollar" size="12" />
-                            {{ formatearPrecio(producto.precio) }}
-                          </p>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Paquetes móvil -->
-              @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
-                <div>
-                  <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <app-icon name="Package" class=" text-primary" size="24" />
-                    Paquetes ({{ resultados().paquetes.length }})
-                  </h3>
-                  <div class="space-y-2">
-                    @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
-                      <button
-                        (click)="verPaquete(paquete)"
-                        class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left"
-                      >
-                        <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            [src]="obtenerImagenPaquete(paquete)"
-                            [alt]="paquete.paqueteBase?.nombre"
-                            class="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <div class="flex items-center gap-2 mb-1">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
-                              <app-icon name="Package" size="12" />
-                              Paquete
-                            </span>
-                          </div>
-                          <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                            {{ paquete.paqueteBase?.nombre }}
-                          </p>
-                          <p class="text-xs text-gray-500 flex items-center gap-1">
-                            <app-icon name="Box" size="12" />
-                            {{ paquete.cant_productos }} productos
-                          </p>
-                        </div>
-                      </button>
-                    }
-                  </div>
-                </div>
-              }
-
-              @if (hayResultados() && totalResultados() > 6) {
-                <button
-                  (click)="verTodosResultados()"
-                  class="w-full mt-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
-                >
-                  Ver todos los resultados ({{ totalResultados() }})
-                  <app-icon name="arrowRight" size="24" />
-                </button>
-              }
-            </div>
-          }
+        <div class="flex-1 relative">
+          <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
+            placeholder="¿Qué estás buscando?"
+            class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
+            autocomplete="off" />
+          <app-icon name="Search"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
         </div>
       </div>
+
+      <!-- Filtros móvil -->
+      <div class="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
+        <button (click)="cambiarTipoBusqueda('todo')"
+          [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+                (tipoBusqueda() === 'todo' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')">
+          <app-icon name="Layers" size="24" />
+          Todo
+        </button>
+        <button (click)="cambiarTipoBusqueda('productos')"
+          [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+                (tipoBusqueda() === 'productos' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')">
+          <app-icon name="Box" size="24" />
+          Productos
+        </button>
+        <button (click)="cambiarTipoBusqueda('paquetes')"
+          [class]="'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-full transition-all whitespace-nowrap ' +
+                (tipoBusqueda() === 'paquetes' ? 'bg-primary-light text-primary-dark border-primary' : 'bg-white text-gray-700 border-gray-300')">
+          <app-icon name="Package" size="24" />
+          Paquetes
+        </button>
+      </div>
     </div>
-  }
+
+    <!-- Contenido móvil -->
+    <div class="flex-1 overflow-y-auto">
+      @if (!searchTerm().trim()) {
+      <div class="text-center py-16 px-4">
+        <app-icon name="Search" class="w-20 h-20 text-gray-300 mx-auto mb-4" />
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">¿Qué estás buscando?</h3>
+        <p class="text-gray-500 text-sm">Escribí para buscar productos o paquetes</p>
+      </div>
+      }
+
+      @else if (resultados().cargando) {
+      <div class="flex flex-col items-center justify-center py-16">
+        <app-icon name="Loader" class="w-10 h-10 text-brand-secondary mb-3 animate-spin" />
+        <span class="text-gray-600 font-medium">Buscando...</span>
+      </div>
+      }
+
+      @else if (!hayResultados()) {
+      <div class="text-center py-16 px-4">
+        <app-icon name="Frown" class="w-20 h-20 text-gray-300 mx-auto mb-4" />
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">No encontramos resultados</h3>
+        <p class="text-gray-500 text-sm">Intenta con otros términos</p>
+      </div>
+      }
+
+      @else {
+      <div class="p-4">
+        <!-- Productos móvil -->
+        @if (mostrarProductos() && resultados().productos.length > 0) {
+        <div class="mb-6">
+          <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <app-icon name="Box" class=" text-primary" size="24" />
+            Productos ({{ resultados().productos.length }})
+          </h3>
+          <div class="space-y-2">
+            @for (producto of resultados().productos; track producto.id_producto) {
+            <button (click)="verProducto(producto)"
+              class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left">
+              <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                <img [src]="obtenerImagenProducto(producto)" [alt]="producto.nombre"
+                  class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                  {{ producto.nombre }}
+                </p>
+                <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                  <app-icon name="Tag" size="12" />
+                  {{ producto.marca || 'Sin marca' }}
+                </p>
+                <p class="text-base font-bold text-primary flex items-center gap-1">
+                  <app-icon name="dollar" size="12" />
+                  {{ formatearPrecio(producto.precio) }}
+                </p>
+              </div>
+            </button>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Paquetes móvil -->
+        @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
+        <div>
+          <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <app-icon name="Package" class=" text-primary" size="24" />
+            Paquetes ({{ resultados().paquetes.length }})
+          </h3>
+          <div class="space-y-2">
+            @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
+            <button (click)="verPaquete(paquete)"
+              class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left">
+              <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                <img [src]="obtenerImagenPaquete(paquete)" [alt]="paquete.paqueteBase?.nombre"
+                  class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-dark text-xs font-semibold rounded-full">
+                    <app-icon name="Package" size="12" />
+                    Paquete
+                  </span>
+                </div>
+                <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+                  {{ paquete.paqueteBase?.nombre }}
+                </p>
+                <p class="text-xs text-gray-500 flex items-center gap-1">
+                  <app-icon name="Box" size="12" />
+                  {{ paquete.cant_productos }} productos
+                </p>
+              </div>
+            </button>
+            }
+          </div>
+        </div>
+        }
+
+        @if (hayResultados() && totalResultados() > 6) {
+        <button (click)="verTodosResultados()"
+          class="w-full mt-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+          Ver todos los resultados ({{ totalResultados() }})
+          <app-icon name="arrowRight" size="24" />
+        </button>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</div>
+}
 }

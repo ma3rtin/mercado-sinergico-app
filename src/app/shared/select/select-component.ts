@@ -51,12 +51,11 @@ export interface SelectGroup {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectComponent implements ControlValueAccessor, OnInit {
-  // 🧩 Inyecciones
   private destroyRef = inject(DestroyRef);
-  private injector = inject(Injector); // 👈 NUEVO
-  public ngControl: NgControl | null = null; // 👈 NUEVO
+  private injector = inject(Injector);
+  public ngControl: NgControl | null = null;
 
-  // 🎨 Configuración visual - Signals
+  // 🎨 Configuración visual
   label = signal<string>('');
   placeholder = signal<string>('Seleccionar...');
   helperText = signal<string>('');
@@ -64,38 +63,38 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   successMessage = signal<string>('');
   size = signal<SelectSize>('md');
 
-  // 🔧 Configuración funcional - Signals
+  // 🔧 Configuración funcional
   selectId = signal<string>(`select-${Math.random().toString(36).substr(2, 9)}`);
   required = signal<boolean>(false);
   multiple = signal<boolean>(false);
   searchable = signal<boolean>(false);
   clearable = signal<boolean>(false);
 
-  // 📋 Opciones - Signals
+  // 📋 Opciones
   options = signal<SelectOption[]>([]);
   groups = signal<SelectGroup[]>([]);
 
-  // 🎯 Búsqueda
+  // 🎯 Búsqueda y dropdown
   searchTerm = signal<string>('');
   showDropdown = signal<boolean>(false);
 
   // ♿ Accesibilidad
   ariaLabel = signal<string>('');
 
-  // 🎭 Estados internos
+  // 🎭 Estados
   isDisabled = signal<boolean>(false);
   isTouched = signal<boolean>(false);
   isFocused = signal<boolean>(false);
   isLoading = signal<boolean>(false);
+
+  // ✅ FIX: internalValue como signal para que zoneless detecte cambios
+  internalValue = signal<any>(null);
 
   // 📤 Eventos
   @Output() valueChange = new EventEmitter<any>();
   @Output() onBlur = new EventEmitter<FocusEvent>();
   @Output() onFocus = new EventEmitter<FocusEvent>();
   @Output() searchChange = new EventEmitter<string>();
-
-  // 🧠 Control interno
-  internalValue: any = null;
 
   // Control de formulario
   private onChange: (value: any) => void = () => { };
@@ -107,9 +106,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   filteredOptions = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const opts = this.options();
-
     if (!term) return opts;
-
     return opts.filter(opt =>
       opt.label.toLowerCase().includes(term) ||
       opt.value?.toString().toLowerCase().includes(term)
@@ -119,9 +116,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   filteredGroups = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const grps = this.groups();
-
     if (!term) return grps;
-
     return grps.map(group => ({
       ...group,
       options: group.options.filter(opt =>
@@ -132,12 +127,11 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   });
 
   selectedLabel = computed(() => {
-    const value = this.internalValue;
+    const value = this.internalValue();
     if (value === null || value === undefined || value === '') {
       return this.placeholder();
     }
 
-    // Multi-select
     if (this.multiple() && Array.isArray(value)) {
       if (value.length === 0) return this.placeholder();
       if (value.length === 1) {
@@ -147,26 +141,19 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       return `${value.length} seleccionados`;
     }
 
-    // Single select
     const option = this.findOptionByValue(value);
     return option?.label || value?.toString() || this.placeholder();
   });
 
   currentError = computed(() => {
-    if (!this.isTouched() || !this.ngControl?.control) {
-      return '';
-    }
+    if (!this.isTouched() || !this.ngControl?.control) return '';
 
     const control = this.ngControl.control;
-
-    if (this.errorMessage()) {
-      return this.errorMessage();
-    }
+    if (this.errorMessage()) return this.errorMessage();
 
     if (control.invalid && control.touched) {
       const errors = control.errors;
       if (!errors) return '';
-
       if (errors['required']) return `${this.label() || 'Este campo'} es requerido`;
     }
 
@@ -188,6 +175,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       lg: 'px-5 py-4 text-lg'
     };
 
+    // ✅ FIX: usar secondary (azul) en lugar de warning (naranja)
     const state = this.currentError()
       ? 'border-error focus:border-error focus:ring-2 focus:ring-error-light'
       : this.successMessage()
@@ -214,8 +202,8 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       ? 'opacity-100 translate-y-0 pointer-events-auto'
       : 'opacity-0 -translate-y-2 pointer-events-none';
   });
+
   constructor() {
-    // Solo binds UI (click outside), nada de ngControl acá
     if (typeof document !== 'undefined') {
       effect(() => {
         if (this.showDropdown()) {
@@ -226,7 +214,6 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
               this.closeDropdown();
             }
           };
-
           document.addEventListener('click', handleClickOutside);
           return () => document.removeEventListener('click', handleClickOutside);
         }
@@ -244,10 +231,10 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
         this.ngControl.control?.valueChanges
           ?.pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe(value => {
-            this.internalValue = value !== null && value !== undefined ? Number(value) : null;
+            // ✅ FIX: usar .set() para que los computed se recalculen
+            this.internalValue.set(value !== null && value !== undefined ? value : null);
           });
       }
-
     } catch (e) {
       console.warn('SelectComponent: No se pudo obtener NgControl', e);
     }
@@ -272,7 +259,8 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
 
   // 🔄 ControlValueAccessor
   writeValue(value: any): void {
-    this.internalValue = value !== null && value !== undefined ? Number(value) : null;
+    // ✅ FIX: usar .set() para disparar reactividad
+    this.internalValue.set(value !== null && value !== undefined ? value : null);
   }
 
   registerOnChange(fn: any): void {
@@ -290,9 +278,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   // 🎯 Handlers
   toggleDropdown(): void {
     if (this.isDisabled() || this.isLoading()) return;
-
     this.showDropdown.update(v => !v);
-
     if (this.showDropdown()) {
       this.isFocused.set(true);
       this.onFocus.emit();
@@ -312,33 +298,29 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
     if (option.disabled) return;
 
     if (this.multiple()) {
-      const currentValues = Array.isArray(this.internalValue) ? [...this.internalValue] : [];
+      const currentValues = Array.isArray(this.internalValue()) ? [...this.internalValue()] : [];
       const index = currentValues.indexOf(option.value);
-
       if (index > -1) {
         currentValues.splice(index, 1);
       } else {
         currentValues.push(option.value);
       }
-
-      this.internalValue = currentValues;
+      this.internalValue.set(currentValues);
     } else {
-      this.internalValue = Number(option.value);
+      this.internalValue.set(option.value);
       this.closeDropdown();
     }
 
-    this.onChange(this.internalValue);
-    this.valueChange.emit(this.internalValue);
+    this.onChange(this.internalValue());
+    this.valueChange.emit(this.internalValue());
   }
 
   clearValue(event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    this.internalValue = this.multiple() ? [] : null;
-    this.onChange(this.internalValue);
-    this.valueChange.emit(this.internalValue);
+    if (event) event.stopPropagation();
+    const empty = this.multiple() ? [] : null;
+    this.internalValue.set(empty);
+    this.onChange(empty);
+    this.valueChange.emit(empty);
   }
 
   onSearchInput(term: string): void {
@@ -348,29 +330,23 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
 
   isOptionSelected(option: SelectOption): boolean {
     if (this.multiple()) {
-      return Array.isArray(this.internalValue) && this.internalValue.includes(option.value);
+      return Array.isArray(this.internalValue()) && this.internalValue().includes(option.value);
     }
-    return Number(this.internalValue) === Number(option.value);
+    return String(this.internalValue()) === String(option.value);
   }
 
   private findOptionByValue(value: any): SelectOption | undefined {
-    // Buscar en opciones planas
-    let found = this.options().find(opt => Number(opt.value) === Number(value));
+    let found = this.options().find(opt => String(opt.value) === String(value));
     if (found) return found;
-
-    // Buscar en grupos
     for (const group of this.groups()) {
-      found = group.options.find(opt => Number(opt.value) === Number(value));
+      found = group.options.find(opt => String(opt.value) === String(value));
       if (found) return found;
     }
-
     return undefined;
   }
 
-  // 🎹 Keyboard navigation
   onKeyDown(event: KeyboardEvent): void {
     if (this.isDisabled()) return;
-
     switch (event.key) {
       case 'Enter':
       case ' ':
@@ -384,14 +360,11 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       case 'ArrowDown':
       case 'ArrowUp':
         event.preventDefault();
-        if (!this.showDropdown()) {
-          this.toggleDropdown();
-        }
+        if (!this.showDropdown()) this.toggleDropdown();
         break;
     }
   }
 
-  // 🎹 Helpers
   isEmptyArray(value: any): boolean {
     return Array.isArray(value) && value.length === 0;
   }

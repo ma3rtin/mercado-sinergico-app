@@ -30,6 +30,8 @@ import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-
 import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
 import { ErrorState } from '@app/shared/error-state/error-state';
 
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+
 // ------------------------------
 // MODELOS INTERNOS
 // ------------------------------
@@ -51,7 +53,8 @@ interface PedidoDelUsuario extends Pedido {
     PaqueteUsuarioCardComponent,
     CatalogoWrapperComponent,
     DelayedSkeleton,
-    ErrorState
+    ErrorState,
+    PaginationComponent
   ],
   templateUrl: './mis-pedidos.html'
 })
@@ -72,6 +75,10 @@ export class MisPedidosComponent implements OnInit {
   errorMessage = signal('');
   terminoBusqueda = signal<string>('');
   estadoFiltro = signal<string>('Todos');
+
+  // 📄 SIGNALS DE PAGINACIÓN
+  paginaActual = signal<number>(1);
+  itemsPorPagina = signal<number>(10);
 
   pedidosFiltrados = computed(() => {
     const lista = this.pedidos();
@@ -97,9 +104,30 @@ export class MisPedidosComponent implements OnInit {
     return filtrados;
   });
 
+  pedidosPaginados = computed(() => {
+    const page = this.paginaActual();
+    const perPage = this.itemsPorPagina();
+    const filtrados = this.pedidosFiltrados();
 
+    const start = (page - 1) * perPage;
+    return filtrados.slice(start, start + perPage);
+  });
 
+  totalItemsPaginacion = computed(() => this.pedidosFiltrados().length);
 
+  cambiarBusqueda(texto: string) {
+    this.terminoBusqueda.set(texto);
+    this.paginaActual.set(1);
+  }
+
+  cambiarEstadoFiltro(estado: string) {
+    this.estadoFiltro.set(estado);
+    this.paginaActual.set(1);
+  }
+
+  onPageChange(page: number): void {
+    this.paginaActual.set(page);
+  }
 
   // ------------------------------
   // INIT
@@ -283,6 +311,44 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  setCantidadManual(pedido: PedidoDelUsuario, payload: any) {
+    const nuevaCantidad = payload.nuevaCantidad;
+    const productoOriginal = pedido.productosSeleccionados.find(p => p.id_detalle === payload.id_detalle);
+    if (!productoOriginal) return;
+    
+    const cantidadAnterior = productoOriginal.cantidad;
+
+    // 1. Reemplazar array sin mutar objetos
+    pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+      (p: ProductoEnPedido) =>
+        p.id_detalle === payload.id_detalle
+          ? { ...p, cantidad: nuevaCantidad }
+          : p
+    );
+
+    // 2. Recalcular
+    this.recalcularPedido(pedido);
+
+    // 3. Update backend
+    this.pedidoService.actualizarCantidad(
+      pedido.id_pedido!,
+      payload.id_detalle,
+      { cantidad: nuevaCantidad }
+    ).subscribe({
+      error: () => {
+        // revertir
+        pedido.productosSeleccionados = pedido.productosSeleccionados.map(
+          (p: ProductoEnPedido) =>
+            p.id_detalle === payload.id_detalle
+              ? { ...p, cantidad: cantidadAnterior }
+              : p
+        );
+        this.recalcularPedido(pedido);
+        this.toast.error('No se pudo actualizar la cantidad.');
+      }
+    });
+  }
+
   eliminarProducto(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
 
     const esUltimoProducto = pedido.productosSeleccionados.length === 1;
@@ -304,7 +370,7 @@ export class MisPedidosComponent implements OnInit {
         showCancelButton: true,
         confirmButtonText: 'Sí, eliminar pedido',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#d33'
+        confirmButtonColor: '#B92905'
       }).then(result => {
         if (!result.isConfirmed) return;
 
@@ -342,7 +408,9 @@ export class MisPedidosComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#B92905',
+      cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -384,7 +452,9 @@ export class MisPedidosComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, salir',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#B92905',
+      cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -429,6 +499,36 @@ export class MisPedidosComponent implements OnInit {
           console.error('Error al crear preferencia:', err);
         }
       });
+  }
+
+  solicitarReembolso(pedido: PedidoDelUsuario): void {
+    const pedidoId = pedido.id_pedido;
+    if (!pedidoId) return;
+
+    Swal.fire({
+      title: '¿Solicitar reembolso?',
+      html: `<p>¿Seguro que querés pedir el reembolso de tu pedido en <strong>${pedido.paquetePublicado?.paqueteBase?.nombre ?? 'este paquete'}</strong>?</p>
+             <p class="text-sm text-gray-500 mt-2">Si se aprueba, se devolverá el dinero a tu cuenta de Mercado Pago.</p>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, pedir reembolso',
+      confirmButtonColor: '#B92905',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (!result.isConfirmed) return;
+
+      this.pedidoService.solicitarReembolso(pedidoId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.toast.success('Reembolso solicitado correctamente. Recibirás un email de confirmación.', '¡Listo!');
+            this.cargarPedidos();
+          },
+          error: () => {
+            this.toast.error('No se pudo procesar el reembolso. Intentá más tarde.');
+          }
+        });
+    });
   }
   // ------------------------------
   // HELPERS

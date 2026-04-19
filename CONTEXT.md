@@ -1007,4 +1007,4 @@ getEstadoClases(nombre?: string): string {
 
 **P: ¿stopFisico null qué significa?**
 - `stockFisico: null` → producto **SINÉRGICO** (sin límite de stock físico)
-- `stockFisico: number` → producto **ENERGÉTICO** (stock físico limitado)
+- `stockFisico: number` → producto **ENÉRGICO** (stock físico limitado)

@@ -57,7 +57,7 @@ export class PaqueteBannerComponent {
 
   // Tipo de paquete
   tipoPaquete = computed(() => {
-    return this.paquete()?.tipoPaquete || TipoPaquete.POR_DEFINIR;
+    return this.paquete()?.tipo || TipoPaquete.POR_DEFINIR;
   });
 
   // Icono del tipo de paquete
@@ -72,7 +72,7 @@ export class PaqueteBannerComponent {
   textoTipo = computed(() => {
     const tipo = this.tipoPaquete();
     if (tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (tipo === TipoPaquete.ENERGICO) return 'Energético';
+    if (tipo === TipoPaquete.ENERGICO) return 'Enérgico';
     return 'Por Definir';
   });
 

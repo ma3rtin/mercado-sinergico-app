@@ -28,6 +28,7 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 import Swal from 'sweetalert2';
 
@@ -48,7 +49,8 @@ interface ImageSlot {
     CrearPlantillaModalComponent,
     IconComponent,
     SelectorTipoCardComponent,
-    AdminCreateWrapperComponent
+    AdminCreateWrapperComponent,
+    AdminBackButtonComponent
 ],
   standalone: true
 })
@@ -66,8 +68,8 @@ export class CrearProductoComponent implements OnInit {
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
-      titulo: 'Energético',
+    energico: {
+      titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
       items: [
@@ -132,10 +134,10 @@ readonly tipoMap: Record<TipoPaquete, string> = {
     // ❌ Sinérgico → no stock
     if (tipo === TipoPaquete.SINERGICO) return false;
 
-    // ❌ Energético + plantilla → stock por variantes
+    // ❌ Enérgico + plantilla → stock por variantes
     if (tipo === TipoPaquete.ENERGICO && tienePlantilla) return false;
 
-    // ✅ Energético sin plantilla → mostrar stock
+    // ✅ Enérgico sin plantilla → mostrar stock
     return true;
   });
 
@@ -405,7 +407,7 @@ isAttributeSelected(attributeName: string, value: string): boolean {
 
     // ✅ Validar tipo de producto si tiene plantilla
     if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
-      this.toast.error('Debés seleccionar el tipo de producto (Energético o Sinérgico)');
+      this.toast.error('Debés seleccionar el tipo de producto (Enérgico o Sinérgico)');
       this.mostrarSeleccionTipo.set(true);
       return;
     }
@@ -522,8 +524,8 @@ if (tipoBackend) {
             `,
             icon: 'success',
             showCancelButton: true,
-            confirmButtonColor: '#71A8D9',
-            cancelButtonColor: '#6c757d',
+            confirmButtonColor: '#2E608C',
+            cancelButtonColor: '#9ca3af',
             confirmButtonText: 'Sí, configurar',
             cancelButtonText: 'Más tarde'
           }).then((result) => {
@@ -557,7 +559,7 @@ if (tipoBackend) {
               </p>
             `,
             icon: 'warning',
-            confirmButtonColor: '#71A8D9',
+            confirmButtonColor: '#2E608C',
             confirmButtonText: 'Entendido'
           }).then(() => {
             this.router.navigate(['/admin/administrar-productos']);
@@ -635,8 +637,8 @@ console.log('🎨 Plantilla:', plantilla);
       text: 'El producto quedará sin plantilla asociada',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
-      cancelButtonColor: '#d33',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, deseleccionar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {

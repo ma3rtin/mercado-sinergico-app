@@ -88,8 +88,8 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
         text: 'Perderás todos los cambios no guardados',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#71A8D9',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#2E608C',
+        cancelButtonColor: '#B92905',
         confirmButtonText: 'Sí, cerrar',
         cancelButtonText: 'Continuar editando'
       }).then((result) => {
@@ -252,8 +252,8 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
         text: 'Perderás todos los cambios no guardados',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#71A8D9',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#2E608C',
+        cancelButtonColor: '#B92905',
         confirmButtonText: 'Sí, salir',
         cancelButtonText: 'Continuar editando'
       }).then((result) => {

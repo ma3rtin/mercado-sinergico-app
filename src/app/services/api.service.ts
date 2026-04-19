@@ -9,7 +9,7 @@ import { environment } from '@environments/environment.js';
 export class ApiService {
     protected http = inject(HttpClient);
 
-    private baseUrl = environment.apiUrl;
+    protected baseUrl = environment.apiUrl;
 
     protected buildUrl(path: string): string {
         const cleanedPath = path.startsWith('/') ? path.substring(1) : path;

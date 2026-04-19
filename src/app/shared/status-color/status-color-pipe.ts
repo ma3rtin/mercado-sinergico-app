@@ -1,4 +1,3 @@
-// status-color.pipe.ts
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
@@ -7,10 +6,19 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class StatusColorPipe implements PipeTransform {
   transform(estado: string): string {
-
     switch (estado) {
-      case 'Abierto':
-        return 'text-primary';
+      // Estados de paquete
+      case 'Activo':
+        return 'text-status-active-text';
+      case 'Completo':
+        return 'text-status-info-text';
+      case 'Confirmado':
+        return 'text-brand-secondary';
+      case 'Entregado':
+        return 'text-success';
+      case 'Cancelado':
+        return 'text-error';
+      // Estados de pedido
       case 'Pendiente':
         return 'text-secondary-dark';
       case 'En Preparación':

@@ -11,17 +11,18 @@ export interface PaquetePublicado {
   zonaId: number;
   fecha_inicio: Date;
   fecha_fin: Date;
+  nombre?: string;               // nombre propio de la publicación
   cant_productos?: number;
   cant_productos_reservados?: number;
   cant_usuarios_registrados?: number;
   monto_total?: number;
   descuento?: number;
   imagen_url?: string;
-  tipoPaquete?: TipoPaquete;
+  tipo?: TipoPaquete;
 
   // Relaciones
   paqueteBase?: PaqueteBase;
-  estado: EstadoPaquetePublicado;
+  estado?: EstadoPaquetePublicado;
   zona?: Zona;
   pedidos?: Pedido[];
 }

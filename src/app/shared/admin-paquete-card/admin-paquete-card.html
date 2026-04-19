@@ -1,56 +1,66 @@
 <div (click)="onViewDetail($event)"
     class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300 cursor-pointer hover:ring-2 hover:ring-brand-primary/40"
-    [class]="esEnPreparacion ? 'border-info shadow-info-light' : esCancelado ? 'border-error/30' : esFinalizado ? 'border-brand-secondary/30' : 'border-border-default hover:shadow-md'">
+    [class]="esCompleto ? 'border-success/50 shadow-success-light' : esConfirmado ? 'border-brand-secondary/40' : esCancelado ? 'border-error/30' : esEntregado ? 'border-success/30' : 'border-border-default hover:shadow-md'">
 
-    <!-- Banner: En Preparación -->
-    @if (esEnPreparacion) {
-        <div class="flex items-center justify-between gap-3 bg-info-light border-b border-info/30 px-4 py-2.5">
-            <div class="flex items-center gap-2 text-info">
-                <app-icon name="package" size="16" />
-                <span class="text-xs font-bold uppercase tracking-widest">En Preparación — Esperando despacho</span>
-            </div>
-            <app-button variant="primary" size="sm" (buttonClick)="onFinalize()">
-                <app-icon name="checkCircle" size="14" class="mr-1" />
-                Completar pedido
-            </app-button>
+    <!-- Banner: Completo — esperando confirmación del admin -->
+    @if (esCompleto) {
+    <div class="flex items-center justify-between gap-3 bg-success-light border-b border-success/30 px-4 py-2.5">
+        <div class="flex items-center gap-2 text-success">
+            <app-icon name="checkCircle" size="16" />
+            <span class="text-xs font-bold uppercase tracking-widest">Completo — Confirmar con fabricante</span>
         </div>
+        <app-button variant="primary" size="sm" (buttonClick)="onConfirm()">
+            <app-icon name="checkCircle" size="14" class="mr-1" />
+            Confirmar compra
+        </app-button>
+    </div>
     }
 
-    <!-- Banner: Finalizado -->
-    @if (esFinalizado) {
-        <div class="flex items-center gap-2 bg-success-light border-b border-success/20 px-4 py-2 text-success-dark">
-            <app-icon name="checkCircle" size="16" />
-            <span class="text-xs font-bold uppercase tracking-widest">Finalizado — Despachado</span>
-        </div>
+    <!-- Banner: Confirmado — en preparación -->
+    @if (esConfirmado) {
+    <div class="flex items-center gap-2 bg-brand-secondary/10 border-b border-brand-secondary/20 px-4 py-2 text-brand-secondary">
+        <app-icon name="package" size="16" />
+        <span class="text-xs font-bold uppercase tracking-widest">Confirmado — Pedidos en preparación</span>
+    </div>
+    }
+
+    <!-- Banner: Entregado -->
+    @if (esEntregado) {
+    <div class="flex items-center gap-2 bg-success-light border-b border-success/20 px-4 py-2 text-success-dark">
+        <app-icon name="checkCircle" size="16" />
+        <span class="text-xs font-bold uppercase tracking-widest">Entregado — Pedidos recibidos</span>
+    </div>
     }
 
     <!-- Banner: Cancelado -->
     @if (esCancelado) {
-        <div class="flex items-center gap-2 bg-error-light border-b border-error/20 px-4 py-2 text-error">
-            <app-icon name="x" size="16" />
-            <span class="text-xs font-bold uppercase tracking-widest">Cancelado — Reembolso ejecutado</span>
-        </div>
+    <div class="flex items-center gap-2 bg-error-light border-b border-error/20 px-4 py-2 text-error">
+        <app-icon name="x" size="16" />
+        <span class="text-xs font-bold uppercase tracking-widest">Cancelado — Reembolso ejecutado</span>
+    </div>
     }
 
     <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 p-4">
         <!-- Miniatura -->
-        <div class="w-full lg:w-24 h-48 lg:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-bg-raised border border-border-default relative z-0">
+        <div
+            class="w-full lg:w-24 h-48 lg:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-bg-raised border border-border-default relative z-0">
             @if (paquete.paqueteBase?.imagen_url || paquete.imagen_url) {
-                <img [src]="paquete.paqueteBase?.imagen_url || paquete.imagen_url"
-                     [alt]="paquete.paqueteBase?.nombre || 'Paquete'"
-                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <img [src]="paquete.paqueteBase?.imagen_url || paquete.imagen_url"
+                [alt]="paquete.paqueteBase?.nombre || 'Paquete'"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
             } @else {
-                <div class="w-full h-full flex items-center justify-center text-text-muted">
-                    <app-icon name="package" size="32" />
-                </div>
+            <div class="w-full h-full flex items-center justify-center text-text-muted">
+                <app-icon name="package" size="32" />
+            </div>
             }
         </div>
 
         <!-- Info Principal -->
         <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1">
-                <span [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
-                    {{ paquete.estado.nombre || 'Sin estado' }}
+                <span
+                    [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
+                    {{ paquete.estado?.nombre || 'Sin estado' }}
                 </span>
                 <span class="w-1 h-1 rounded-full bg-border-default"></span>
                 <span class="text-xs text-text-muted flex items-center gap-1">
@@ -58,39 +68,42 @@
                     {{ paquete.zona?.nombre || 'Sin zona' }}
                 </span>
             </div>
-            <h3 class="text-lg font-display text-text-primary truncate mb-2 group-hover:text-brand-primary transition-colors">
-                {{ paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
+            <h3
+                class="text-lg font-display text-text-primary truncate mb-2 group-hover:text-brand-primary transition-colors">
+                {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete Publicado' }}
             </h3>
-
             <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <!-- Cierre -->
-                @if (esActivo || esPendiente) {
-                    <div class="flex items-center gap-2 text-text-secondary">
-                        <app-icon name="clock" size="16" [class]="getUrgenciaColor()" />
-                        <span class="text-xs">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
-                        @if (tiempoRestante() !== 'Vencido' && tiempoRestante() !== 'N/A') {
-                            <span [class]="'text-[10.5px] font-bold px-2 py-0.5 rounded tabular-nums min-w-[75px] text-center ' + getUrgenciaBg() + ' ' + getUrgenciaColor()">
-                                {{ tiempoRestante() }}
-                            </span>
-                        } @else {
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-error-light text-error">Vencido</span>
-                        }
-                    </div>
+                <!-- Cierre (solo para Activo) -->
+                @if (esActivo) {
+                <div class="flex items-center gap-2 text-text-secondary">
+                    <app-icon name="clock" size="16" [class]="getUrgenciaColor()" />
+                    <span class="text-xs">Cierra: {{ formatearFecha(paquete.fecha_fin) }}</span>
+                    @if (tiempoRestante() !== 'Vencido' && tiempoRestante() !== 'N/A') {
+                    <span
+                        [class]="'text-[10.5px] font-bold px-2 py-0.5 rounded tabular-nums min-w-[75px] text-center ' + getUrgenciaBg() + ' ' + getUrgenciaColor()">
+                        {{ tiempoRestante() }}
+                    </span>
+                    } @else {
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-error-light text-error">Vencido</span>
+                    }
+                </div>
                 }
                 <!-- Compradores -->
                 <div class="flex items-center gap-2 text-text-secondary">
                     <app-icon name="users" size="16" class="text-brand-primary" />
-                    <span class="font-medium text-text-primary text-xs">{{ paquete.cant_usuarios_registrados || 0 }}</span>
+                    <span class="font-medium text-text-primary text-xs">{{ paquete.cant_usuarios_registrados || 0
+                        }}</span>
                     <span class="text-[10px]">Compradores</span>
                 </div>
                 <!-- Reservados -->
                 <div class="flex items-center gap-2 text-text-secondary">
                     <app-icon name="package" size="16" class="text-brand-secondary" />
-                    <span class="font-medium text-text-primary text-xs">{{ paquete.cant_productos_reservados ?? 0 }}/{{ paquete.cant_productos ?? 0 }}</span>
+                    <span class="font-medium text-text-primary text-xs">{{ paquete.cant_productos_reservados ?? 0 }}/{{
+                        paquete.cant_productos ?? 0 }}</span>
                     <span class="text-[10px]">Reservados</span>
                     <div class="w-16 bg-bg-raised rounded-full h-1.5 overflow-hidden">
                         <div class="h-1.5 rounded-full bg-brand-primary transition-all"
-                             [style.width]="getStockPercentage() + '%'"></div>
+                            [style.width]="getStockPercentage() + '%'"></div>
                     </div>
                 </div>
             </div>
@@ -98,107 +111,106 @@
 
         <!-- Menú Desplegable de Acciones -->
         @if (hayAcciones) {
-            <div class="dropdown-menu-container relative flex-shrink-0 pt-4 lg:pt-0 border-t border-border-default lg:border-none w-full lg:w-auto">
+        <div
+            class="dropdown-menu-container relative flex-shrink-0 pt-4 lg:pt-0 border-t border-border-default lg:border-none w-full lg:w-auto">
 
-                <!-- Solo duplicar: estados terminales -->
-                @if (esFinalizado || esCancelado) {
-                    <div class="flex items-center justify-end gap-2">
-                        <button (click)="onDuplicate($event)"
-                            class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
-                            <app-icon name="copy" size="15" />
-                            Duplicar publicación
-                        </button>
-                    </div>
-                }
+            <!-- Solo duplicar: estados terminales -->
+            @if (esEntregado || esCancelado) {
+            <div class="flex items-center justify-end gap-2">
+                <button (click)="onDuplicate($event)"
+                    class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
+                    <app-icon name="copy" size="15" />
+                    Duplicar publicación
+                </button>
+            </div>
+            }
 
-                <!-- Botón kebab con dropdown para estados activos -->
-                @if (!esFinalizado && !esCancelado) {
-                    <div class="flex items-center justify-end gap-2">
+            <!-- Botón kebab con dropdown para estados no terminales -->
+            @if (!esEntregado && !esCancelado) {
+            <div class="flex items-center justify-end gap-2">
 
-                        <!-- Trigger del dropdown -->
-                        <button
-                            (click)="toggleMenu($event)"
-                            class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all"
-                            [class]="menuAbierto
+                <!-- Trigger del dropdown -->
+                <button (click)="toggleMenu($event)"
+                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all"
+                    [class]="menuAbierto
                                 ? 'bg-bg-raised text-text-primary border-border-default'
                                 : 'bg-bg-surface text-text-secondary border-border-default hover:border-brand-primary/50 hover:bg-brand-primary-light'"
-                            title="Acciones">
-                            <app-icon name="sliders" size="14" />
-                            <span class="text-xs">Acciones</span>
-                            <app-icon name="chevronDown" size="14"
-                                class="transition-transform duration-200"
-                                [class]="menuAbierto ? 'rotate-180' : ''" />
+                    title="Acciones">
+                    <app-icon name="sliders" size="14" />
+                    <span class="text-xs">Acciones</span>
+                    <app-icon name="chevronDown" size="14" class="transition-transform duration-200"
+                        [class]="menuAbierto ? 'rotate-180' : ''" />
+                </button>
+
+                <!-- Panel desplegable -->
+                @if (menuAbierto) {
+                <div
+                    class="absolute right-0 top-full mt-1 z-50 w-64 bg-bg-surface rounded-xl shadow-lg border border-border-default overflow-hidden animate-fade-in">
+
+                    <!-- Sección: Comunicación (solo Activo) -->
+                    @if (canNotify) {
+                    <div class="px-2 pt-2">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">
+                            Comunicación</p>
+                        <button (click)="onNotify($event)"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-warning-light hover:text-warning transition-colors">
+                            <app-icon name="bell" size="16" class="text-warning flex-shrink-0" />
+                            <div class="text-left">
+                                <p class="font-medium text-xs leading-tight">Notificar compradores</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Enviar email de aviso de cierre</p>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="my-1 mx-2 border-t border-border-default"></div>
+                    }
+
+                    <!-- Sección: Gestión -->
+                    <div class="px-2" [class]="canNotify ? '' : 'pt-2'">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">Gestión</p>
+
+                        <!-- Duplicar — siempre disponible -->
+                        <button (click)="onDuplicate($event)"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success-dark transition-colors">
+                            <app-icon name="copy" size="16" class="text-success flex-shrink-0" />
+                            <div class="text-left">
+                                <p class="font-medium text-xs leading-tight">Duplicar publicación</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este paquete</p>
+                            </div>
                         </button>
 
-                        <!-- Panel desplegable -->
-                        @if (menuAbierto) {
-                            <div class="absolute right-0 top-full mt-1 z-50 w-60 bg-bg-surface rounded-xl shadow-lg border border-border-default overflow-hidden animate-fade-in">
-
-                                <!-- Sección: Comunicación -->
-                                @if (canNotify) {
-                                    <div class="px-2 pt-2">
-                                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">Comunicación</p>
-                                        <button (click)="onNotify($event)"
-                                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-warning-light hover:text-warning transition-colors">
-                                            <app-icon name="bell" size="16" class="text-warning flex-shrink-0" />
-                                            <div class="text-left">
-                                                <p class="font-medium text-xs leading-tight">Notificar compradores</p>
-                                                <p class="text-[10px] text-text-muted leading-tight">Enviar email de aviso de cierre</p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div class="my-1 mx-2 border-t border-border-default"></div>
-                                }
-
-                                <!-- Sección: Gestión -->
-                                <div class="px-2" [class]="canNotify ? '' : 'pt-2'">
-                                    @if (canClose || canDuplicate) {
-                                        <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">Gestión</p>
-                                    }
-
-                                    <!-- Duplicar — siempre disponible -->
-                                    <button (click)="onDuplicate($event)"
-                                        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success-dark transition-colors">
-                                        <app-icon name="copy" size="16" class="text-success flex-shrink-0" />
-                                        <div class="text-left">
-                                            <p class="font-medium text-xs leading-tight">Duplicar publicación</p>
-                                            <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este paquete</p>
-                                        </div>
-                                    </button>
-
-                                    <!-- Cerrar pedido (Activo → En Preparación) -->
-                                    @if (canClose) {
-                                        <button (click)="onClose($event)"
-                                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-info-light hover:text-info transition-colors">
-                                            <app-icon name="Lock" size="16" class="text-info flex-shrink-0" />
-                                            <div class="text-left">
-                                                <p class="font-medium text-xs leading-tight">Cerrar inscripciones</p>
-                                                <p class="text-[10px] text-text-muted leading-tight">Pasa a estado "En Preparación"</p>
-                                            </div>
-                                        </button>
-                                    }
-                                </div>
-
-                                <!-- Sección: Zona de peligro -->
-                                @if (canCancel) {
-                                    <div class="my-1 mx-2 border-t border-error/20"></div>
-                                    <div class="px-2 pb-2">
-                                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de riesgo</p>
-                                        <button (click)="onRefund($event)"
-                                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
-                                            <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
-                                            <div class="text-left">
-                                                <p class="font-medium text-xs leading-tight">Cancelar y reembolsar</p>
-                                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los compradores</p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                }
+                        <!-- Confirmar con fabricante (Completo → Confirmado) -->
+                        @if (canConfirm) {
+                        <button (click)="onConfirm($event)"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success transition-colors">
+                            <app-icon name="checkCircle" size="16" class="text-success flex-shrink-0" />
+                            <div class="text-left">
+                                <p class="font-medium text-xs leading-tight">Confirmar compra con fabricante</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Pasa pedidos a "En preparación"</p>
                             </div>
+                        </button>
                         }
                     </div>
+
+                    <!-- Sección: Zona de peligro -->
+                    @if (canCancel) {
+                    <div class="my-1 mx-2 border-t border-error/20"></div>
+                    <div class="px-2 pb-2">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de riesgo</p>
+                        <button (click)="onRefund($event)"
+                            class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
+                            <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
+                            <div class="text-left">
+                                <p class="font-medium text-xs leading-tight">Cancelar y reembolsar</p>
+                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los compradores</p>
+                            </div>
+                        </button>
+                    </div>
+                    }
+                </div>
                 }
             </div>
+            }
+        </div>
         }
     </div>
 </div>

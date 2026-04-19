@@ -12,6 +12,11 @@
 
     <!-- ✅ Contenido principal -->
     @if (!isLoading() || productoOriginal()) {
+      <!-- Botón Volver -->
+      <div class="mb-4">
+        <app-admin-back-button label="Volver" />
+      </div>
+
       <h1 class="text-2xl text-gray-900 mb-2 font-display">Editar producto</h1>
 
       <!-- 🎯 Tipo de Producto -->
@@ -26,7 +31,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Opción Energético -->
+          <!-- Opción Enérgico -->
           <button
             type="button"
             (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
@@ -42,7 +47,7 @@
                   <app-icon name="Zap" size="24"></app-icon>
                 </div>
                 <div class="text-left">
-                  <h4 class="text-lg font-semibold text-gray-900">Energético</h4>
+                  <h4 class="text-lg font-semibold text-gray-900">Enérgico</h4>
                   <p class="text-xs text-gray-500">Con stock físico</p>
                 </div>
               </div>

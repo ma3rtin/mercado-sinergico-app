@@ -1,14 +1,22 @@
-<div
-  class="min-h-screen bg-[#F5F5F5] px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body"
->
+<div class="min-h-screen bg-[#F5F5F5] px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body">
   <div class="max-w-7xl mx-auto">
+    <!-- Botón Volver -->
+    <div class="mb-4">
+      <app-admin-back-button label="Volver al panel" />
+    </div>
+
     <!-- Header con título y botón crear -->
-    <div
-      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
-    >
-      <h1 class="text-3xl md:text-4xl lg:text-4xl font-display">
-        Administrar productos
-      </h1>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl md:text-4xl lg:text-4xl font-display">
+          Administrar productos
+        </h1>
+        <button (click)="mostrarGuiaSimbolos()"
+          class="w-10 h-10 flex items-center justify-center bg-brand-primary text-white rounded-full shadow-xl hover:scale-110 transition-all active:scale-95 shrink-0 border-2 border-white"
+          title="Guía de símbolos">
+          <app-icon name="helpCircle" size="22" />
+        </button>
+      </div>
       <app-button variant="primary" (click)="navigateToCreate()">
         Crear producto
       </app-button>
@@ -19,35 +27,21 @@
       <!-- Buscador -->
       <div class="flex-1">
         <div class="relative">
-          <app-icon
-            name="search"
-            [size]="'20'"
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
-          <input
-            type="text"
-            [value]="searchTerm()"
-            (input)="searchTerm.set($any($event.target).value)"
+          <app-icon name="search" [size]="'20'"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)"
             placeholder="Buscar productos por nombre, marca o categoría"
-            class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#71A8D9] transition-colors"
-          />
+            class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#71A8D9] transition-colors" />
         </div>
       </div>
 
       <!-- Selector de ordenamiento -->
       <div class="w-full md:w-80">
         <div class="relative">
-          <app-icon
-            name="sliders"
-            [size]="'16'"
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-          />
-          <select
-            title="Orden"
-            [value]="sortOrder()"
-            (change)="sortOrder.set($any($event.target).value)"
-            class="w-full pl-12 pr-10 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 appearance-none focus:outline-none focus:border-[#71A8D9] transition-colors cursor-pointer"
-          >
+          <app-icon name="sliders" [size]="'16'"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <select title="Orden" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)"
+            class="w-full pl-12 pr-10 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 appearance-none focus:outline-none focus:border-[#71A8D9] transition-colors cursor-pointer">
             <option value="nombre-asc">Ordenar: Nombre A-Z</option>
             <option value="nombre-desc">Ordenar: Nombre Z-A</option>
             <option value="precio-asc">Ordenar: Precio menor a mayor</option>
@@ -57,187 +51,159 @@
             <option value="stock-asc">Ordenar: Stock menor a mayor</option>
             <option value="stock-desc">Ordenar: Stock mayor a menor</option>
           </select>
-          <app-icon
-            name="chevron-down"
-            [size]="'16'"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none pt-1"
-          />
+          <app-icon name="chevron-down" [size]="'16'"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none pt-1" />
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
     @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center py-20">
-        <div
-          class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#71A8D9] mb-4"
-        ></div>
-        <p class="text-gray-600 text-lg">Cargando productos...</p>
-      </div>
+    <div class="flex flex-col items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-[#71A8D9] mb-4"></div>
+      <p class="text-gray-600 text-lg">Cargando productos...</p>
+    </div>
     }
 
     <!-- Empty State -->
     @else if (filteredProductos().length === 0 && !isLoading()) {
-      <div
-        class="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center"
-      >
-        <app-icon name="package" [size]="'48'" class="text-gray-400 mx-auto mb-4 pt-1" />
-        <h3 class="text-2xl font-bold text-gray-700 mb-2">
-          @if (searchTerm()) {
-            No se encontraron productos
-          } @else {
-            No hay productos registrados
-          }
-        </h3>
-        <p class="text-gray-500 mb-6">
-          @if (searchTerm()) {
-            Intentá con otros términos de búsqueda
-          } @else {
-            Comenzá creando tu primer producto
-          }
-        </p>
-        @if (!searchTerm()) {
-          <app-button variant="primary" (click)="navigateToCreate()">
-            <app-icon name="plus" [size]="'16'" class="mr-2 pt-1" />
-            Crear primer producto
-          </app-button>
+    <div class="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center">
+      <app-icon name="package" [size]="'48'" class="text-gray-400 mx-auto mb-4 pt-1" />
+      <h3 class="text-2xl font-bold text-gray-700 mb-2">
+        @if (searchTerm()) {
+        No se encontraron productos
+        } @else {
+        No hay productos registrados
         }
-      </div>
+      </h3>
+      <p class="text-gray-500 mb-6">
+        @if (searchTerm()) {
+        Intentá con otros términos de búsqueda
+        } @else {
+        Comenzá creando tu primer producto
+        }
+      </p>
+      @if (!searchTerm()) {
+      <app-button variant="primary" (click)="navigateToCreate()">
+        <app-icon name="plus" [size]="'16'" class="mr-2 pt-1" />
+        Crear primer producto
+      </app-button>
+      }
+    </div>
     }
 
     <!-- Lista de Productos -->
     @else {
-      <div class="space-y-4">
-        @for (producto of filteredProductos(); track producto.id_producto) {
-          <div
-            class="bg-white rounded-2xl border-2 border-gray-200 hover:border-[#71A8D9] transition-all duration-300 overflow-hidden"
-          >
-            <div class="flex items-center p-4 md:p-6 gap-4 md:gap-6">
+    <div class="grid grid-cols-1 gap-4">
+      @for (producto of filteredProductos(); track producto.id_producto) {
+      <div
+        class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
+        <!-- Mobile Layout (Vertical-ish) - Desktop Layout (Horizontal) -->
+        <div class="flex flex-col sm:flex-row sm:items-center p-5 gap-5">
 
-              <!-- Imagen del Producto -->
-              <div
-                class="w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden"
-              >
-                <img
-                  [src]="getImagenUrl(producto)"
-                  [alt]="producto.nombre"
-                  class="w-full h-full object-cover"
-                  (error)="$event.target.src = '/assets/placeholder.png'"
-                />
-              </div>
+          <!-- Left Section: Image and Basic Info -->
+          <div class="flex items-center sm:items-start gap-4 flex-1 min-w-0">
+            <!-- Imagen del Producto -->
+            <div
+              class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-50 rounded-2xl flex-shrink-0 overflow-hidden border border-gray-100 p-1">
+              <img [src]="getImagenUrl(producto)" [alt]="producto.nombre" class="w-full h-full object-contain"
+                (error)="$event.target.src = '/assets/placeholder.png'" />
+            </div>
 
-              <!-- Información del Producto -->
-              <div class="flex-1 min-w-0">
-                <div
-                  class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4"
-                >
-                  <!-- Nombre -->
-                  <h3
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-black rounded-full text-md font-medium"
-                  >
-                    {{ producto.nombre }}
-                  </h3>
+            <!-- Info Principal -->
+            <div class="flex-1 min-w-0">
+              <h3 class="font-display text-base sm:text-lg text-gray-900 font-bold truncate mb-1">
+                {{ producto.nombre }}
+              </h3>
 
-                  <!-- Precio -->
-                  <span
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-primary rounded-full text-sm font-medium"
-                  >
-                    {{ formatPrice(producto.precio) }}
-                  </span>
+              <!-- Precio -->
+              <span
+                class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-primary rounded-full text-sm font-medium">
+                {{ formatPrice(producto.precio) }}
+              </span>
 
-                  <!-- Marca -->
-                  <span
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-warning-light text-black rounded-full text-sm font-medium"
-                  >
-                    {{ getMarcaNombre(producto) }}
-                  </span>
+              <!-- Marca -->
+              <span
+                class="inline-flex items-center gap-1 px-2 py-1 bg-warning-light text-black rounded-full text-sm font-medium">
+                {{ getMarcaNombre(producto) }}
+              </span>
 
-                  <!-- Badge de variantes (si tiene) -->
-                  @if (producto.tieneVariantes) {
-                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
-                      <app-icon name="layers" [size]="'12'" class="text-current pt-1" />
-                      {{ producto.cantidadVariantes }} variantes
-                    </span>
-                  }
-                </div>
-              </div>
-
-              <!-- Botones de acción -->
-              <div
-                class="flex items-center gap-2 flex-shrink-0 sm:flex-col sm:gap-2 md:gap-4 md:flex-row"
-              >
-                <!-- Duplicar producto -->
-                <button
-                  (click)="duplicateProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
-                  title="Duplicar"
-                >
-                  <app-icon
-                    name="copy"
-                    [size]="'20'"
-                    class="text-current mt-1"
-                  />
-                </button>
-
-                <!-- Gestionar variantes -->
-                <button
-                  (click)="gestionarVariantes(producto)"
-                  [class]="'p-2 rounded-lg transition-colors ' +
-                    (producto.tieneVariantes
-                      ? 'text-primary hover:bg-info-light'
-                      : 'text-gray-300 cursor-not-allowed')"
-                  [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'"
-                >
-                  <app-icon
-                    name="layers"
-                    [size]="'20'"
-                    class="text-current mt-1"
-                  />
-                </button>
-
-                <!-- Ver detalles -->
-                <button
-                  (click)="viewProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-warning-light rounded-lg transition-colors"
-                  title="Ver detalles"
-                >
-                  <app-icon
-                    name="eye"
-                    [size]="'20'"
-                    class="text-current mt-1"
-                  />
-                </button>
-
-                <!-- Editar -->
-                <button
-                  (click)="editProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-secondary-dark hover:bg-warning-light rounded-lg transition-colors"
-                  title="Editar"
-                >
-                  <app-icon
-                    name="edit2"
-                    [size]="'20'"
-                    class="text-current mt-1"
-                  />
-                </button>
-
-                <!-- Eliminar -->
-                <button
-                  (click)="deleteProducto(producto)"
-                  class="p-2 text-gray-500 hover:text-error hover:bg-error-light rounded-lg transition-colors"
-                  title="Eliminar"
-                >
-                  <app-icon
-                    name="trash"
-                    [size]="'20'"
-                    class="text-current mt-1"
-                  />
-                </button>
-              </div>
+              <!-- Badge de variantes (si tiene) -->
+              @if (producto.tieneVariantes) {
+              <span
+                class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
+                <app-icon name="layers" [size]="'12'" class="text-current pt-1" />
+                {{ producto.cantidadVariantes }} variantes
+              </span>
+              }
             </div>
           </div>
-        }
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <!-- Precio -->
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-lg bg-brand-primary/10 text-brand-primary text-[10px] font-bold uppercase tracking-wider">
+              {{ formatPrice(producto.precio) }}
+            </span>
+            <!-- Marca -->
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-lg bg-brand-cta/10 text-brand-secondary text-[10px] font-bold uppercase tracking-wider">
+              {{ getMarcaNombre(producto) }}
+            </span>
+            <!-- Variantes -->
+            @if (producto.tieneVariantes) {
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider">
+              <app-icon name="layers" [size]="'10'" class="mr-1" />
+              {{ producto.cantidadVariantes }} VAR
+            </span>
+            }
+          </div>
+        </div>
       </div>
-    }
+
+      <!-- Botones de acción -->
+      <div class="flex items-center gap-2 flex-shrink-0 sm:flex-col sm:gap-2 md:gap-4 md:flex-row">
+        <!-- Duplicar producto -->
+        <button (click)="duplicateProducto(producto)"
+          class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
+          title="Duplicar">
+          <app-icon name="copy" [size]="'20'" class="text-current mt-1" />
+        </button>
+
+        <!-- Gestionar variantes -->
+        <button (click)="gestionarVariantes(producto)" [class]="'flex-1 sm:flex-none p-2.5 sm:p-2 rounded-xl transition-all active:scale-90 ' +
+                    (producto.tieneVariantes
+                      ? 'text-brand-primary hover:bg-brand-primary/5'
+                      : 'text-gray-200 cursor-not-allowed')"
+          [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'">
+          <app-icon name="layers" [size]="'20'" />
+        </button>
+
+        <!-- Ver detalles -->
+        <button (click)="viewProducto(producto)"
+          class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
+          title="Ver detalles">
+          <app-icon name="eye" [size]="'20'" />
+        </button>
+
+        <!-- Editar -->
+        <button (click)="editProducto(producto)"
+          class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
+          title="Editar">
+          <app-icon name="edit-2" [size]="'20'" />
+        </button>
+
+        <!-- Eliminar -->
+        <button (click)="deleteProducto(producto)"
+          class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-error hover:bg-error/5 rounded-xl transition-all active:scale-90"
+          title="Eliminar">
+          <app-icon name="trash" [size]="'20'" />
+        </button>
+      </div>
+    </div>
   </div>
+  }
+</div>
+}
+</div>
 </div>

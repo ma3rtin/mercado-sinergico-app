@@ -14,11 +14,12 @@ import { ToastService } from '@app/services/toast/toast.service';
 // Shared Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-paquetes',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './administrar-paquetes.html',
 })
 export class AdministrarPaquetesComponent implements OnInit {
@@ -80,7 +81,7 @@ export class AdministrarPaquetesComponent implements OnInit {
       text: `Se eliminará "${paquete.nombre}" y sus asociaciones.`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#E53935',
+      confirmButtonColor: '#B92905',
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar'
     }).then(result => {

@@ -29,19 +29,20 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent],
+  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent, AdminBackButtonComponent],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
-    energetico: {
-      titulo: 'Energético',
+    energico: {
+      titulo: 'Enérgico',
       subtitulo: 'Con stock físico',
       descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
       items: [
@@ -166,7 +167,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   // 🔍 Buscar productos
   buscarProductos(reset = true): void {
     const query = this.busquedaProducto().trim();
-    if (this.cargando() || this.finResultados()) return;
+    if (this.cargando() || (!reset && this.finResultados())) return;
 
     if (reset) {
       this.page.set(0);
@@ -276,6 +277,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     formData.append('nombre', this.nombre());
     formData.append('descripcion', this.descripcion());
     formData.append('categoria_id', this.categoriaSeleccionada()!.toString());
+    formData.append('tipo', this.tipoPaquete());
     if (this.marcaSeleccionada()) {
       formData.append('marcaId', this.marcaSeleccionada()!.toString());
     }
@@ -287,7 +289,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.toast.success('Paquete base creado con éxito!', 'Éxito');
+          this.toast.success('¡Paquete creado con éxito!', 'Éxito');
           this.resetForm();
           this.router.navigate(['admin/perfil']);
         },

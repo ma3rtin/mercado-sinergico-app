@@ -1,65 +1,44 @@
-<header class="w-full font-body relative z-40">
+<header class="w-full font-body fixed top-0 left-0 z-50 bg-white shadow-sm">
   <!-- Top bar -->
   <div class="bg-primary">
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
-      <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- MOBILE -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="md:hidden grid grid-cols-[auto_1fr_auto] items-center gap-3">
+      <div class="md:hidden flex items-center justify-center relative h-10">
         <!-- Hamburguesa -->
-        <button
-          (click)="toggleDrawer()"
-          class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-          aria-label="Abrir menú"
-        >
-          <app-icon name="Menu" class="w-5 h-5"></app-icon>
+        <button (click)="toggleDrawer()"
+          class="absolute left-0 flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+          aria-label="Abrir menú">
+          <app-icon name="Menu" size="20"></app-icon>
         </button>
 
-        <!-- Logo + Texto -->
-        <div
-          class="min-w-0 flex items-center justify-center gap-2 cursor-pointer"
-          (click)="navigateToHome()"
-        >
-          <img
-            src="/assets/images/Logo2.png"
-            alt="Mercado Sinérgico"
-            class="h-10 w-auto"
-          />
+        <!-- Logo Centrado -->
+        <div class="cursor-pointer" (click)="navigateToHome()">
+          <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
           <span
-            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden"
-          >
+            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden">
             Mercado Sinérgico
           </span>
         </div>
 
         <!-- Usuario MÓVIL -->
         <div class="relative profile-menu-area">
-          <button
-            (click)="toggleProfileMenu()"
+          <button (click)="toggleProfileMenu()"
             class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-            aria-label="Mi perfil"
-          >
+            aria-label="Mi perfil">
             <app-icon name="User" class="w-8 h-8"></app-icon>
           </button>
 
           <!-- ✅ MENÚ MÓVIL -->
           @if (profileMenuOpen() && isLoggedIn()) {
-          <div
-            class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
-            style="z-index: 9999 !important"
-          >
-            <a
-              [routerLink]="profileLink"
-              (click)="profileMenuOpen.set(false)"
-              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
-            >
+          <div class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="z-index: 9999 !important">
+            <a [routerLink]="profileLink" (click)="profileMenuOpen.set(false)"
+              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
               <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
             </a>
-            <button
-              (click)="signOut()"
-              type="button"
-              class="w-full text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium"
-            >
+            <button (click)="signOut()" type="button"
+              class="w-full text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium">
               <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
             </button>
           </div>
@@ -67,62 +46,45 @@
         </div>
       </div>
 
+
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- DESKTOP -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div
-        class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6"
-      >
+      <div class="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6">
         <!-- Logo -->
         <a [routerLink]="'/home'" class="shrink-0 inline-flex items-center">
-          <img
-            src="/assets/images/Logo2.png"
-            alt="Mercado Sinérgico"
-            class="h-10 w-auto"
-          />
+          <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
         </a>
 
-        <!-- ✅ BUSCADOR DESKTOP (Componente) -->
-        <div
-          class="flex justify-center items-center min-w-0 flex-1 max-w-2xl mx-auto w-full"
-        >
+        <!-- ✅ BUSCADOR DESKTOP -->
+        <div class="flex justify-center items-center min-w-0 flex-1 max-w-2xl mx-auto w-full">
           <app-buscador-header variant="desktop" class="w-full" />
         </div>
 
         <!-- Perfil DESKTOP -->
         <div class="relative profile-menu-area">
-          <button
-            (click)="toggleProfileMenu()"
+          <button (click)="toggleProfileMenu()"
             class="inline-flex w-10 h-10 items-center justify-center cursor-pointer rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
-            aria-label="Mi perfil"
-          >
+            aria-label="Mi perfil">
             <app-icon name="User" class="w-7 h-7 translate-y-[1px]"></app-icon>
           </button>
 
-          <!-- ✅ MENÚ DESKTOP -->
           @if (profileMenuOpen() && isLoggedIn()) {
-          <div
-            class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
-            style="
-              z-index: 9999 !important;
-              position: absolute;
-              top: 100%;
-              right: 0;
-            "
-          >
-            <a
-              [routerLink]="profileLink"
-              (click)="profileMenuOpen.set(false)"
-              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200"
-            >
+          <div class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
+            style="z-index: 9999 !important; position: absolute; top: 100%; right: 0;">
+            @if (isAdmin) {
+            <a (click)="navigateAndClose('/admin/perfil')"
+              class="block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-secondary-dark border-b border-gray-200 flex items-center gap-2">
+              <app-icon name="Settings"></app-icon> Panel de Control
+            </a>
+            }
+            <a (click)="navigateAndClose('/perfil')"
+              [class]="'block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 font-medium text-gray-700 border-b border-gray-200 flex items-center gap-2 ' + (!isAdmin ? 'rounded-t-lg' : '')">
               <app-icon name="User"></app-icon> Mi perfil
             </a>
-            <button
-              (click)="signOut()"
-              type="button"
-              class="w-full cursor-pointer text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium"
-            >
-              <app-icon name="LogOut"></app-icon> Cerrar sesión
+            <button (click)="signOut()" type="button"
+              class="w-full cursor-pointer text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium flex items-center gap-2">
+              <app-icon name="LogOut" class="w-5 h-5"></app-icon> Cerrar sesión
             </button>
           </div>
           }
@@ -131,23 +93,22 @@
     </div>
   </div>
 
-  <!-- ✅ BUSCADOR MÓVIL (barra debajo del header) -->
-  <div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
-    <app-buscador-header variant="mobile" />
-  </div>
-
-  <!-- NAVBAR (desktop) -->
+  <!-- NAVBAR (desktop/mobile) -->
   <app-navbar></app-navbar>
 
   <!-- DRAWER (mobile) -->
   @if (drawerOpen()) {
-  <app-drawer
-    [isLoggedIn]="isLoggedIn()"
-    (closeDrawer)="toggleDrawer()"
-    (signOut)="signOut()"
-  ></app-drawer>
+  <app-drawer (closeDrawer)="toggleDrawer()"></app-drawer>
   }
 </header>
+
+<!-- Espaciador para el header fijo (solo la barra superior) -->
+<div class="h-[64px] md:h-[135px]"></div>
+
+<!-- ✅ BUSCADOR MÓVIL (No fijo, scrollea con el contenido) -->
+<div class="md:hidden bg-white border-b border-gray-200 px-4 py-2.5">
+  <app-buscador-header variant="mobile" />
+</div>
 
 <style>
   /* Asegurar que nada bloquee el menú */

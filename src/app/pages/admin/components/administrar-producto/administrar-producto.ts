@@ -13,11 +13,12 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {
@@ -143,7 +144,7 @@ filteredProductos = computed(() => {
     `,
     width: '600px',
     confirmButtonText: 'Cerrar',
-    confirmButtonColor: '#71A8D9'
+    confirmButtonColor: '#2E608C'
   });
 }
 
@@ -155,7 +156,8 @@ duplicateProducto(producto: Producto): void {
     showCancelButton: true,
     confirmButtonText: 'Duplicar',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#71A8D9'
+    confirmButtonColor: '#2E608C',
+    cancelButtonColor: '#9ca3af'
   }).then((result) => {
     if (result.isConfirmed) {
       this.productosService.duplicateProduct(producto.id_producto!).subscribe({
@@ -182,8 +184,9 @@ duplicateProducto(producto: Producto): void {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
-      confirmButtonColor: '#E53935',
+      confirmButtonColor: '#B92905',
       cancelButtonText: 'Cancelar',
+      cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (result.isConfirmed) {
         this.productosService.deleteProducto(producto.id_producto??0).subscribe({
@@ -251,5 +254,100 @@ private getCategoriaId(producto: Producto): number | undefined {
 
 public getImagenUrl(producto: Producto): string {
   return producto.imagen_url || producto.imagen || '/assets/placeholder.png';
+}
+
+mostrarGuiaSimbolos(): void {
+  console.log('💡 Abriendo guía de símbolos...');
+  Swal.fire({
+    title: 'Guía de Símbolos',
+    html: `
+      <div class="text-left py-2 space-y-5">
+        <!-- Sección: Acciones Rápidas -->
+        <div class="space-y-3">
+          <h4 class="text-[9px] font-black text-brand-primary uppercase tracking-[0.2em] px-1 opacity-70">Control de Producto</h4>
+          
+          <div class="space-y-2">
+            <!-- Item: Duplicar -->
+            <div class="flex items-center gap-4 p-4 bg-gray-50/80 rounded-[22px] border border-gray-100/50 shadow-sm active:scale-95 transition-all">
+              <div class="w-12 h-12 flex items-center justify-center bg-white text-gray-400 rounded-2xl shadow-sm shrink-0 border border-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-black text-gray-900 uppercase tracking-tight leading-none mb-1">Duplicar</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Clonar producto</p>
+              </div>
+            </div>
+
+            <!-- Item: Variantes -->
+            <div class="flex items-center gap-4 p-4 bg-brand-primary/5 rounded-[22px] border border-brand-primary/10 shadow-sm active:scale-95 transition-all">
+              <div class="w-12 h-12 flex items-center justify-center bg-brand-primary text-white rounded-2xl shadow-brand-primary/20 shadow-lg shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-black text-brand-primary uppercase tracking-tight leading-none mb-1">Variantes</p>
+                <p class="text-[10px] font-bold text-brand-primary/60 uppercase tracking-widest leading-tight">Stock y Atributos</p>
+              </div>
+            </div>
+
+            <!-- Item: Vista/Detalles -->
+            <div class="flex items-center gap-4 p-4 bg-gray-50/80 rounded-[22px] border border-gray-100/50 shadow-sm active:scale-95 transition-all">
+              <div class="w-12 h-12 flex items-center justify-center bg-white text-brand-secondary rounded-2xl shadow-sm shrink-0 border border-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-black text-gray-900 uppercase tracking-tight leading-none mb-1">Ver Ficha</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Detalle técnico</p>
+              </div>
+            </div>
+
+            <!-- Item: Editar -->
+            <div class="flex items-center gap-4 p-4 bg-gray-50/80 rounded-[22px] border border-gray-100/50 shadow-sm active:scale-95 transition-all">
+              <div class="w-12 h-12 flex items-center justify-center bg-white text-orange-500 rounded-2xl shadow-sm shrink-0 border border-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-black text-gray-900 uppercase tracking-tight leading-none mb-1">Editar</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Modificar datos</p>
+              </div>
+            </div>
+
+            <!-- Item: Eliminar -->
+            <div class="flex items-center gap-4 p-4 bg-red-50 rounded-[22px] border border-red-100 shadow-sm active:scale-95 transition-all">
+              <div class="w-12 h-12 flex items-center justify-center bg-white text-red-500 rounded-2xl shadow-sm shrink-0 border border-red-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-black text-red-700 uppercase tracking-tight leading-none mb-1">Eliminar</p>
+                <p class="text-[10px] font-bold text-red-400 uppercase tracking-widest leading-tight">Borrar definitivo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección: Estados -->
+        <div class="space-y-3 pt-2">
+          <h4 class="text-[9px] font-black text-brand-primary uppercase tracking-[0.2em] px-1 opacity-70">Leyenda de Estados</h4>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-4 py-2.5 rounded-2xl bg-blue-50 text-blue-600 text-[10px] font-black border border-blue-100 uppercase tracking-widest flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+              Variantes (VAR)
+            </span>
+            <span class="px-4 py-2.5 rounded-2xl bg-brand-primary/10 text-brand-primary text-[10px] font-black border border-brand-primary/10 uppercase tracking-widest flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
+              Precio Base
+            </span>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: true,
+    confirmButtonText: 'ENTENDIDO',
+    buttonsStyling: false,
+    customClass: {
+      popup: 'rounded-[32px] p-6 border-none shadow-2xl mx-4',
+      title: 'font-display font-black text-xl text-text-primary uppercase tracking-tight text-left mb-0',
+      confirmButton: 'w-full py-5 mt-6 bg-brand-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-[24px] hover:bg-brand-primary-dark transition-all active:scale-95 shadow-xl shadow-brand-primary/20'
+    }
+  });
 }
 }

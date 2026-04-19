@@ -2,14 +2,8 @@
 <app-admin-create-wrapper [titulo]="'Crear producto'">
   <div class="relative">
     <!-- Botón Volver -->
-    <div class="absolute -top-12 left-0">
-      <app-button 
-        variant="ghost" 
-        size="sm" 
-        (buttonClick)="router.navigate(['/admin/perfil'])"
-        [iconStart]="'arrowLeft'">
-        Volver al perfil
-      </app-button>
+    <div class="mb-4">
+      <app-admin-back-button label="Volver al perfil" />
     </div>
 
     <!-- 🎯 Tipo de Producto -->
@@ -220,7 +214,7 @@
               [placeholderValue]="'Cantidad disponible'"
               [suffixValue]="'unidades'"
               [minValue]="0"
-              [helperTextValue]="'Llená este campo si tu producto es un producto energético sin plantilla. Si agregás una plantilla, el stock se gestionará por cada variante después.'"
+              [helperTextValue]="'Llená este campo si tu producto es un producto enérgico sin plantilla. Si agregás una plantilla, el stock se gestionará por cada variante después.'"
             />
           } @else {
             <!-- Mensaje informativo cuando no se muestra stock -->

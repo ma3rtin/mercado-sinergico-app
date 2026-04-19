@@ -9,11 +9,12 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-publicaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent],
   templateUrl: './administrar-publicaciones.html',
 })
 export class AdministrarPublicacionesComponent implements OnInit {
@@ -29,13 +30,14 @@ export class AdministrarPublicacionesComponent implements OnInit {
   estadoFiltro = signal<string>('todos');
   highlightedId = signal<number | null>(null);
 
-  readonly estadosFiltro = ['todos', 'activo', 'pendiente', 'en preparación', 'finalizado', 'cancelado'];
+  readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
   filteredPaquetes = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const estado = this.estadoFiltro().toLowerCase();
     return this.paquetes().filter(p => {
       const matchTerm = !term ||
+        p.nombre?.toLowerCase().includes(term) ||
         p.paqueteBase?.nombre?.toLowerCase().includes(term) ||
         p.zona?.nombre?.toLowerCase().includes(term);
       const matchEstado = estado === 'todos' ||
@@ -44,14 +46,18 @@ export class AdministrarPublicacionesComponent implements OnInit {
     });
   });
 
+
   ngOnInit() {
-    // Leer el queryParam de highlight
+    // queryParamMap emite sincrónicamente al suscribirse (BehaviorSubject)
+    // → siempre se ejecuta en ngOnInit antes de la siguiente línea
     this.route.queryParamMap.subscribe(params => {
       const id = params.get('highlight');
       this.highlightedId.set(id ? Number(id) : null);
+      // Siempre recarga — tanto la carga inicial como al volver con reload=1
+      this.loadPaquetes();
     });
-    this.loadPaquetes();
   }
+
 
   loadPaquetes() {
     this.loading.set(true);
@@ -78,55 +84,25 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
-        title: '¿Cerrar pedido?',
-        html: `<p>Se cerrará <strong>${paquete.paqueteBase?.nombre}</strong> a nuevos compradores y pasará a <strong>En Preparación</strong>.</p>
-             ${avisoFaltantes}
-             <p class="text-sm text-gray-500 mt-2">Los compradores recibirán un mail de cierre anticipado.</p>`,
-        icon: 'warning',
+        title: '¿Confirmar compra con fabricante?',
+        html: `<p>Confirmás la compra de <strong>${paquete.paqueteBase?.nombre}</strong> con el proveedor.</p>
+               <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
+                 <p class="mt-1">Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong> y los compradores recibirán un email de confirmación.</p>
+               </div>`,
+        icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Sí, cerrar pedido',
-        confirmButtonColor: '#71A8D9',
+        confirmButtonText: 'Sí, confirmar compra',
+        confirmButtonColor: '#2E608C',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.cerrarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (res: any) => {
-            const updated: PaquetePublicado = res.result ?? res;
-            this.toast.success(`"${paquete.paqueteBase?.nombre}" está en preparación`, 'Pedido cerrado');
-            this._actualizarPaqueteEnLista(updated);
+        this.paqueteService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
+          next: () => {
+            this.toast.success(`"${paquete.paqueteBase?.nombre}" confirmado con el fabricante`, 'Compra confirmada');
+            this.loadPaquetes();
           },
           error: () => {
-            this.toast.error('Error al intentar cerrar el paquete.', 'Error');
-          }
-        });
-      });
-    });
-  }
-
-  /** En Preparación → Finalizado */
-  finalizarPaquete(paquete: PaquetePublicado) {
-    import('sweetalert2').then(({ default: Swal }) => {
-      Swal.fire({
-        title: '¿Completar pedido?',
-        html: `<p>Marcás <strong>${paquete.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
-               <div class="mt-4 p-3 bg-info-light border border-brand-primary-light rounded text-sm text-brand-secondary text-left">
-                 <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
-                 <p class="mt-1">Al completar este paquete podrás <strong>descargar los partes de logística y de proveedor</strong> desde la vista de detalles.</p>
-               </div>
-               <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó el paquete.</p>`,
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, completar pedido',
-        cancelButtonText: 'Cancelar'
-      }).then(result => {
-        if (!result.isConfirmed) return;
-        this.paqueteService.completarPaquete(paquete.id_paquete_publicado!).subscribe({
-          next: (updated: PaquetePublicado) => {
-            this.toast.success(`"${paquete.paqueteBase?.nombre}" finalizado`, 'Paquete completado'); // ← era "cancelado"
-            this._actualizarPaqueteEnLista(updated);
-          },
-          error: () => {
-            this.toast.error('Error al intentar completar el paquete.', 'Error');
+            this.toast.error('Error al confirmar la compra.', 'Error');
           }
         });
       });
@@ -176,8 +152,10 @@ export class AdministrarPublicacionesComponent implements OnInit {
       Swal.fire({
         title: '¿Enviar notificación a compradores?',
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
-        icon: 'info',
+        icon: 'question',
         showCancelButton: true,
+        confirmButtonColor: '#2E608C',
+        cancelButtonColor: '#9ca3af',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {

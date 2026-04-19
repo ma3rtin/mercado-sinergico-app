@@ -6,12 +6,13 @@ import Swal from 'sweetalert2';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
+import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
   styleUrls: ['./administrar-plantillas.component.css'],
-  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent],
+  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, AdminBackButtonComponent],
 })
 export class AdministrarPlantillasComponent implements OnInit {
   // ✅ signals
@@ -93,7 +94,7 @@ export class AdministrarPlantillasComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Duplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9'
+      confirmButtonColor: '#2E608C'
     }).then((result) => {
       if (result.isConfirmed) {
         const copia: Plantilla = {
@@ -122,8 +123,8 @@ export class AdministrarPlantillasComponent implements OnInit {
       text: `Se eliminará la plantilla "${plantilla.nombre}".`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
-      cancelButtonColor: 'rgba(170, 58, 58, 1)',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {

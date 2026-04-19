@@ -91,7 +91,7 @@ export class GestionarVariantesComponent implements OnInit {
   // ============================================
   // COMPUTED PROPERTIES
   // ============================================
-  esProductoEnergetico = computed(() => {
+  esProductoEnergico = computed(() => {
     return this.productoInfo()?.producto.tipo === TipoPaquete.ENERGICO;
   });
 
@@ -104,7 +104,7 @@ export class GestionarVariantesComponent implements OnInit {
   });
 
   stockTotal = computed(() => {
-    if (!this.esProductoEnergetico()) return null;
+    if (!this.esProductoEnergico()) return null;
     return this.variantes().reduce(
       (total, v) => total + (v.stockFisico || 0),
       0,
@@ -148,8 +148,8 @@ export class GestionarVariantesComponent implements OnInit {
       });
     }
 
-    // Filtro por stock (solo para energéticos)
-    if (filtroStk !== 'todas' && this.esProductoEnergetico()) {
+    // Filtro por stock (solo para enérgicos)
+    if (filtroStk !== 'todas' && this.esProductoEnergico()) {
       variantes = variantes.filter((v) => {
         const tieneStock = (v.stockFisico || 0) > 0;
         return filtroStk === 'con' ? tieneStock : !tieneStock;
@@ -514,7 +514,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseFloat(value) < 0) {
           return 'Ingresá un precio válido';
@@ -574,7 +574,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -668,10 +668,10 @@ export class GestionarVariantesComponent implements OnInit {
    * Verificar si una variante tiene cambios sin guardar
    */
   private hasVarianteChanges(variante: VarianteExtendida): boolean {
-    const esEnergetico = this.esProductoEnergetico();
+    const esEnergico = this.esProductoEnergico();
 
     return (
-      (esEnergetico && variante.stockFisico !== variante.stockOriginal) ||
+      (esEnergico && variante.stockFisico !== variante.stockOriginal) ||
       variante.precioExtra !== variante.precioExtraOriginal ||
       variante.activo !== variante.activoOriginal ||
       variante.imagenFile !== null
@@ -784,7 +784,7 @@ export class GestionarVariantesComponent implements OnInit {
       html: `Se actualizarán <strong>${variantesConCambios.length}</strong> variante(s)`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       cancelButtonColor: '#B92905',
       confirmButtonText: 'Sí, guardar',
       cancelButtonText: 'Cancelar',
@@ -811,7 +811,7 @@ export class GestionarVariantesComponent implements OnInit {
         activo: variante.activo,
       };
 
-      if (this.esProductoEnergetico()) {
+      if (this.esProductoEnergico()) {
         dto.stockFisico = variante.stockFisico;
       }
 
@@ -883,7 +883,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, descartar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -920,7 +920,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -966,7 +966,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#71A8D9',
+      confirmButtonColor: '#2E608C',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -1006,7 +1006,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#2D7A3E',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, activar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1033,7 +1033,7 @@ export class GestionarVariantesComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#D28509',
-      cancelButtonColor: '#6c757d',
+      cancelButtonColor: '#9ca3af',
       confirmButtonText: 'Sí, desactivar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1126,7 +1126,7 @@ export class GestionarVariantesComponent implements OnInit {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#B92905',
-        cancelButtonColor: '#6c757d',
+        cancelButtonColor: '#9ca3af',
         confirmButtonText: 'Sí, salir',
         cancelButtonText: 'Cancelar',
       }).then((result) => {

@@ -1,0 +1,44 @@
+{
+  "name": "Mercado Sinérgico",
+  "short_name": "MS",
+  "theme_color": "#2E608C",
+  "background_color": "#F9FAFB",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/images/pwa-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Panel de Mercado Sinérgico"
+    },
+    {
+      "src": "assets/images/pwa-mobile.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "label": "App Móvil de Compras Colectivas"
+    }
+  ]
+}

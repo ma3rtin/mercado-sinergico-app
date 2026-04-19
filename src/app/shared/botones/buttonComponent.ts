@@ -7,7 +7,7 @@ import { IconComponent } from '@app/shared/icono/icono';
  */
 export type ButtonVariant =
   | 'primary'      // Amarillo - acción principal
-  | 'secondary'    | 'tertiary'    | 'warning'      | 'danger'       | 'success'      | 'info'         | 'ghost';       // Otros
+  | 'secondary' | 'tertiary' | 'warning' | 'danger' | 'success' | 'info' | 'ghost' | 'success-outline';       // Otros
 
 /**
  * Tamaños del botón
@@ -29,6 +29,11 @@ export type ButtonWidth = 'auto' | 'full' | 'half';
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: './buttonComponent.html',
+  host: {
+    '[class.w-full]': 'fullWidth()',
+    '[class.h-full]': 'hFull()',
+    'class': 'block'
+  }
 })
 export class ButtonComponent {
 
@@ -38,6 +43,8 @@ export class ButtonComponent {
   size = input<ButtonSize>('md');
   shape = input<ButtonShape>('rounded');
   width = input<ButtonWidth>('auto');
+  direction = input<'row' | 'column'>('row');
+  hFull = input<boolean>(false);
 
   label = input<string | undefined>(undefined);
   disabled = input<boolean>(false);
@@ -93,16 +100,17 @@ export class ButtonComponent {
       'half': 'w-1/2',
     };
 
-    // Variantes (Adaptadas a tu paleta de colores)
+    // Variantes (Adaptadas usando variables CSS conectadas con styles.css)
     const variants: Record<ButtonVariant, string> = {
-      'primary': 'bg-[#FFD562] text-gray-900 hover:bg-[#FFB800] active:bg-[#FF9D00] focus:ring-2 focus:ring-[#FFE899] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
-      'secondary': 'bg-[#71A8D9] text-white hover:bg-[#4b87bd] active:bg-[#2E608C] focus:ring-2 focus:ring-[#A8C5E0] shadow-md hover:shadow-lg active:shadow-sm',
-      'tertiary': 'border-2 border-[#2E608C] text-[#2E608C] hover:bg-[#E6F0F8] active:bg-[#D9E9F6] focus:ring-2 focus:ring-[#71A8D9]',
-      'warning': 'border-2 border-[#D28509] text-[#D28509] hover:bg-[#FEF3E6] active:bg-[#FEE5C8] focus:ring-2 focus:ring-[#E6BE6B]',
-      'danger': 'bg-[#B92905] text-white hover:bg-[#8A1F03] active:bg-[#6B1702] focus:ring-2 focus:ring-[#D26B47] shadow-md hover:shadow-lg active:shadow-sm',
-      'success': 'bg-[#4CAF50] text-white hover:bg-[#2E7D32] active:bg-[#1B5E20] focus:ring-2 focus:ring-[#81C784] shadow-md hover:shadow-lg active:shadow-sm',
-      'info': 'bg-[#2E608C] text-white hover:bg-[#1B3A58] active:bg-[#0F2741] focus:ring-2 focus:ring-[#4E7FA8] shadow-md hover:shadow-lg active:shadow-sm',
-      'ghost': 'text-[#2E608C] hover:bg-[#D9E9F6] active:bg-[#D9E9F6] focus:ring-2 focus:ring-[#71A8D9]',
+      'primary': 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:bg-[var(--btn-primary-hover)] active:bg-[var(--btn-primary-active)] focus:ring-2 focus:ring-[var(--btn-primary-ring)] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
+      'secondary': 'bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-hover)] active:bg-[var(--btn-secondary-active)] focus:ring-2 focus:ring-[var(--btn-secondary-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'tertiary': 'bg-[var(--btn-tertiary-bg)] border-2 border-[var(--btn-tertiary-border)] text-[var(--btn-tertiary-text)] hover:bg-[var(--btn-tertiary-hover)] active:bg-[var(--btn-tertiary-active)] focus:ring-2 focus:ring-[var(--btn-tertiary-ring)]',
+      'warning': 'bg-[var(--btn-warning-bg)] border-2 border-[var(--btn-warning-border)] text-[var(--btn-warning-text)] hover:bg-[var(--btn-warning-hover)] active:bg-[var(--btn-warning-active)] focus:ring-2 focus:ring-[var(--btn-warning-ring)]',
+      'danger': 'bg-[var(--btn-danger-bg)] text-[var(--btn-danger-text)] hover:bg-[var(--btn-danger-hover)] active:bg-[var(--btn-danger-active)] focus:ring-2 focus:ring-[var(--btn-danger-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'success': 'bg-[var(--btn-success-bg)] text-[var(--btn-success-text)] hover:bg-[var(--btn-success-hover)] active:bg-[var(--btn-success-active)] focus:ring-2 focus:ring-[var(--btn-success-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'success-outline': 'bg-white border-2 border-[var(--btn-success-bg)] text-[var(--btn-success-bg)] hover:bg-green-50 active:bg-green-100 focus:ring-2 focus:ring-[var(--btn-success-ring)] shadow-sm font-semibold',
+      'info': 'bg-[var(--btn-info-bg)] text-[var(--btn-info-text)] hover:bg-[var(--btn-info-hover)] active:bg-[var(--btn-info-active)] focus:ring-2 focus:ring-[var(--btn-info-ring)] shadow-md hover:shadow-lg active:shadow-sm',
+      'ghost': 'bg-[var(--btn-ghost-bg)] text-[var(--btn-ghost-text)] hover:bg-[var(--btn-ghost-hover)] active:bg-[var(--btn-ghost-active)] focus:ring-2 focus:ring-[var(--btn-ghost-ring)]',
     };
 
     // Estado disabled
@@ -115,8 +123,9 @@ export class ButtonComponent {
       ? 'ring-2 ring-offset-2 ring-brand-secondary bg-info-light'
       : '';
 
-    // Full width
+    // Full width y height
     const fullWidthClass = this.fullWidth() ? 'w-full' : '';
+    const hFullClass = this.hFull() ? 'h-full' : '';
 
     // Uppercase
     const uppercaseClass = this.uppercase() ? 'uppercase tracking-wider' : '';
@@ -126,11 +135,29 @@ export class ButtonComponent {
     const widthClass = widths[this.width()];
     const variantClass = variants[this.variant()];
 
-    return `${base} ${sizeClass} ${shapeClass} ${widthClass} ${variantClass} ${disabledClasses} ${selectedClasses} ${fullWidthClass} ${uppercaseClass}`.trim();
+    return `${base} ${sizeClass} ${shapeClass} ${widthClass} ${variantClass} ${disabledClasses} ${selectedClasses} ${fullWidthClass} ${hFullClass} ${uppercaseClass}`.trim();
+  });
+
+  // 🎨 COMPUTED: Tamaño del icono en px
+  iconSize = computed(() => {
+    if (this.direction() === 'column') return '32';
+
+    const sizeMap: Record<ButtonSize, string> = {
+      'xs': '12',
+      'sm': '16',
+      'md': '20',
+      'lg': '24',
+      'xl': '28',
+      '2xl': '32',
+    };
+
+    return sizeMap[this.size()];
   });
 
   // 🎨 COMPUTED: Clases del icono
   iconClasses = computed(() => {
+    if (this.direction() === 'column') return 'w-8 h-8 flex-shrink-0';
+
     const sizeMap: Record<ButtonSize, string> = {
       'xs': 'w-3 h-3',
       'sm': 'w-4 h-4',
@@ -145,6 +172,8 @@ export class ButtonComponent {
 
   // 🎨 COMPUTED: Espaciador entre icono y texto
   spacerClasses = computed(() => {
+    if (this.direction() === 'column') return 'gap-2';
+
     const spacings: Record<ButtonSize, string> = {
       'xs': 'gap-1',
       'sm': 'gap-1.5',

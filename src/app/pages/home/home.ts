@@ -20,11 +20,12 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { FaqItemComponent } from '@app/components/faq-item/faq-item';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { WhatsAppButton } from '@app/shared/whatsapp-button/whatsapp-button';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterModule, CommonModule, Carrusel, FaqItemComponent, ButtonComponent],
+  imports: [RouterModule, CommonModule, Carrusel, FaqItemComponent, ButtonComponent, WhatsAppButton],
   templateUrl: './home.html',
   styleUrls: ['./home.css'],
 })
@@ -87,5 +88,13 @@ export class Home implements OnInit {
   // 🔄 Método público para recargar
   recargarPaquetes(): void {
     this.cargarPaquetesPorCerrarse();
+  }
+
+  // 🖱️ Scroll suave hacia la sección de información
+  scrollToInfo(): void {
+    const section = document.getElementById('info-section');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

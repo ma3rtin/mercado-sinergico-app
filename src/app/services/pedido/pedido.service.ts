@@ -55,4 +55,12 @@ export class PedidoService extends ApiService {
   iniciarCheckout(pedidoId: number): Observable<any> {
     return this.post(`${this.apiUrl}/${pedidoId}/checkout`, {});
   }
+
+  /** Solicita reembolso de un pedido Pagado (solo mientras el paquete está Activo) */
+  solicitarReembolso(pedidoId: number): Observable<{ message: string; pedidoId: number }> {
+    return this.post<{ message: string; pedidoId: number }>(
+      `${this.apiUrl}/${pedidoId}/solicitar-reembolso`,
+      {}
+    );
+  }
 }

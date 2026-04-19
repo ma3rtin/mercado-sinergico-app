@@ -35,10 +35,10 @@ export class PaqueteCard implements OnInit {
   });
 
   descuentoCalculado = computed(() => {
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) {
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) {
       return 8;
     }
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) {
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) {
       return 3;
     }
     return 0;
@@ -91,14 +91,14 @@ export class PaqueteCard implements OnInit {
   }
 
   obtenerIconoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return '⚡';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return '🔋';
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) return '⚡';
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) return '🔋';
     return '📦';
   }
 
   obtenerTextoTipo(): string {
-    if (this.paquete.tipoPaquete === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (this.paquete.tipoPaquete === TipoPaquete.ENERGICO) return 'Energético';
+    if (this.paquete.tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
+    if (this.paquete.tipo === TipoPaquete.ENERGICO) return 'Enérgico';
     return 'Por Definir';
   }
 
@@ -160,15 +160,11 @@ export class PaqueteCard implements OnInit {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-border-default';
 
     const e = String(estado).toLowerCase();
-    if (e.includes('activo') || e.includes('abierto')) {
-      return 'bg-status-active-bg text-status-active-text border-success';
-    }
-    if (e.includes('pend')) {
-      return 'bg-status-pending-bg text-status-pending-text border-warning';
-    }
-    if (e.includes('cerr')) {
-      return 'bg-status-closed-bg text-status-closed-text border-error';
-    }
+    if (e === 'activo') return 'bg-status-active-bg text-status-active-text border-success';
+    if (e === 'completo') return 'bg-status-info-bg text-status-info-text border-info';
+    if (e === 'confirmado') return 'bg-status-neutral-bg text-brand-secondary border-brand-secondary/30';
+    if (e === 'entregado') return 'bg-success-light text-success-dark border-success/30';
+    if (e === 'cancelado') return 'bg-error-light text-error border-error/30';
     return 'bg-status-neutral-bg text-status-neutral-text border-border-default';
   }
 }
