@@ -104,7 +104,7 @@ import {
   featherXCircle,
   featherHash,
 } from '@ng-icons/feather-icons';
-import { provideServiceWorker } from '@angular/service-worker';
+
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -205,9 +205,6 @@ export const appConfig: ApplicationConfig = {
         featherXCircle,
         featherHash,
       })
-    ), provideServiceWorker('ngsw-worker.js', {
-      enabled: true,
-      registrationStrategy: 'registerImmediately'
-    }),
+    ),
   ],
 };

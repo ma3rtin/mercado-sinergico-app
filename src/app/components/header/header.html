@@ -33,8 +33,8 @@
           @if (profileMenuOpen() && isLoggedIn()) {
           <div class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
             style="z-index: 9999 !important">
-            <a [routerLink]="profileLink" (click)="profileMenuOpen.set(false)"
-              class="block px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
+            <a (click)="navigateAndClose('/perfil')"
+              class="block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
               <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
             </a>
             <button (click)="signOut()" type="button"

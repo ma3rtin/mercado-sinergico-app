@@ -145,7 +145,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
     const faltan = (p.cant_productos || 0) - (p.cant_usuarios_registrados || 0);
-    const avisoFaltantes = faltan > 0
+    faltan > 0
       ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
       : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
 
@@ -172,11 +172,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     }).then(result => {
       if (result.isConfirmed) {
         this.enviandoMail.set(true);
-        this.paqueteService.confirmarCompra(id).subscribe({
+        this.paqueteService.confirmarCompra(p.id_paquete_publicado!).subscribe({
           next: (res) => {
             this.enviandoMail.set(false);
             this.toast.success(res.message ?? 'Compra confirmada correctamente');
-            this.loadPaquete(id);
+            this.loadPaquete(p.id_paquete_publicado!);
           },
           error: () => {
             this.enviandoMail.set(false);

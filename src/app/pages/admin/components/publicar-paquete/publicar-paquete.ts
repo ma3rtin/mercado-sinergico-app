@@ -30,6 +30,7 @@ interface ImageSlot {
   isExisting?: boolean;
 }
 
+
 @Component({
   selector: 'app-publicar-paquete',
   standalone: true,

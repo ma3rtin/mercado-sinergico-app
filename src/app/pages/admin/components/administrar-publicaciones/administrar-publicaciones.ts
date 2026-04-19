@@ -78,7 +78,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   cerrarPaquete(paquete: PaquetePublicado) {
     const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
-    const avisoFaltantes = faltan > 0
+    faltan > 0
       ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
       : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
 
