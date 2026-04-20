@@ -1,7 +1,21 @@
-img {
-    transition: transform 0.3s ease;
+/* paquete-card.css — Hover & transition styles */
+
+:host {
+  display: block;
 }
 
-img:hover {
-    transform: scale(1.05);
+article {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+article:hover {
+  transform: scale(1.02);
+}
+
+article img {
+  transition: transform 200ms ease-out !important;
+}
+
+article:hover img {
+  transform: scale(1.05) !important;
 }
