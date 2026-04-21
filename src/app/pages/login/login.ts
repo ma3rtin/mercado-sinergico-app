@@ -45,7 +45,6 @@ export class LoginComponent {
 
     this.usuarioService.login(credenciales).subscribe({
       next: (response) => {
-        console.log('✅ Token recibido:', response.token);
         this.authService.setJwtToken(response.token);
         this.loading.set(false);
         this.toast.success('Sesión iniciada correctamente', 'Éxito');
@@ -65,15 +64,13 @@ export class LoginComponent {
       this.loading.set(true);
       this.mensaje.set(undefined);
 
-      const user = await this.authService.signInWithGoogle();
-      console.log('✅ Usuario autenticado con Google:', user);
+      await this.authService.signInWithGoogle();
 
       const firebaseToken = this.authService.getFirebaseToken();
       if (!firebaseToken) throw new Error('No se pudo obtener el token de Firebase');
 
       this.usuarioService.loginWithFirebase(firebaseToken).subscribe({
-        next: (response) => {
-          console.log('✅ Usuario sincronizado con el backend:', response.usuario);
+        next: (_response) => {
           this.toast.success('Inicio de sesión con Google exitoso', 'Éxito');
           this.router.navigate(['/perfil']);
           this.loading.set(false);
