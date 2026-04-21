@@ -16,7 +16,7 @@
 
     <!-- Nombre -->
     <h3 class="font-display text-lg font-bold text-text-primary line-clamp-2 leading-snug
-               group-hover:text-brand-cta-hover transition-colors">
+               transition-colors" [ngClass]="getTitleHoverClass()">
       {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
     </h3>
 

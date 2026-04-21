@@ -68,6 +68,12 @@ export class PaqueteCard implements OnInit {
     return 'border-l-border-default';
   }
 
+  /** Title hover color by type */
+  getTitleHoverClass(): string {
+    if (this.isSinergico()) return 'group-hover:text-brand-primary';
+    return 'group-hover:text-brand-cta-hover';
+  }
+
   // ──── Footer ────
 
   /** Footer "Ver detalles" con color de acento */
