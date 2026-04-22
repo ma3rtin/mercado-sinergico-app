@@ -61,6 +61,7 @@ export class PaqueteCard implements OnInit {
     return this.paquete.tipo === TipoPaquete.SINERGICO;
   }
 
+
   /** Left border color by type */
   getBorderColorClass(): string {
     if (this.isEnergico()) return 'border-l-secondary-dark';
@@ -108,18 +109,22 @@ export class PaqueteCard implements OnInit {
   // ──── Timer (urgency-colored) ────
 
   /** Hours remaining (used for urgency thresholds) */
-  private getHoursRemaining(): number {
+  getHoursRemaining(): number {
     if (!this.paquete.fecha_fin) return Infinity;
-    const diff = new Date(this.paquete.fecha_fin).getTime() - Date.now();
+    const fechaStr = this.paquete.fecha_fin.toString();
+    const fecha = fechaStr.endsWith('Z') || fechaStr.includes('+')
+      ? new Date(fechaStr)
+      : new Date(fechaStr + 'Z');
+    const diff = fecha.getTime() - Date.now();
     return diff > 0 ? diff / (1000 * 60 * 60) : 0;
   }
 
   /** Timer text color based on urgency */
   getTimerTextClass(): string {
     const hours = this.getHoursRemaining();
-    if (hours <= 0) return 'text-red-500 font-medium';
-    if (hours < 24) return 'text-red-500 font-medium';
-    if (hours < 48) return 'text-amber-500';
+    if (hours <= 0) return 'text-red-800 font-medium';
+    if (hours < 24) return 'text-red-800 font-medium';
+    if (hours < 48) return 'text-amber-800';
     return 'text-text-muted';
   }
 
@@ -132,18 +137,20 @@ export class PaqueteCard implements OnInit {
   /** Tiempo restante formateado (ej: "2d 20h") */
   getTiempoRestante(fechaFin?: Date): string {
     if (!fechaFin) return 'N/A';
-    const ahora = new Date();
-    const fecha = new Date(fechaFin);
-    const diferencia = fecha.getTime() - ahora.getTime();
 
+    // Forzar interpretación UTC si el string no tiene timezone info
+    const fechaStr = fechaFin.toString();
+    const fecha = fechaStr.endsWith('Z') || fechaStr.includes('+')
+      ? new Date(fechaStr)
+      : new Date(fechaStr + 'Z'); // 👈 le agrega Z para que sea UTC
+
+    const diferencia = fecha.getTime() - Date.now();
     if (diferencia <= 0) return 'Finalizado';
 
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
     const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    if (dias > 0) {
-      return `${dias}d ${horas}h`;
-    }
+    if (dias > 0) return `${dias}d ${horas}h`;
     return `${horas}h`;
   }
 

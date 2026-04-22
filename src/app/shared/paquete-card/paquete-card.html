@@ -1,16 +1,25 @@
 <!-- paquete-card.html -->
 <!-- Card con distinción de color lateral según tipo -->
 
-<article (click)="onCardClick()" class="group bg-bg-surface rounded-2xl shadow-sm cursor-pointer
-         flex flex-col h-full w-full border-l-[3px]
+<article (click)="onCardClick()" class="group overflow-hidden bg-bg-surface rounded-2xl shadow-sm cursor-pointer
+         flex flex-col h-full w-full border-l-[5px]
          hover:shadow-lg hover:scale-[1.02]" [ngClass]="getBorderColorClass()">
 
-  <!-- IMAGEN -->
-  <div class="relative w-full rounded-t-2xl overflow-hidden bg-bg-app" style="aspect-ratio: 4/3; min-height: 0;">
-    <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
-      loading="lazy" />
-  </div>
+<!-- IMAGEN -->
+<div class="relative w-full bg-bg-app" style="aspect-ratio: 4/3; min-height: 0;">
+  <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
+    loading="lazy" />
 
+  <!-- Badge de urgencia -->
+  @if (getHoursRemaining() < 24) {
+    <div class="absolute top-2 right-2 flex items-center gap-1.5
+                bg-error text-white text-xs font-bold
+                px-2.5 py-1 rounded-full shadow-md">
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block"></span>
+      Cierra en {{ getTiempoRestante(paquete.fecha_fin) }}
+    </div>
+  }
+</div>
   <!-- CONTENIDO -->
   <div class="px-4 pt-4 pb-4 flex flex-col flex-grow gap-3">
 
@@ -72,7 +81,7 @@
 
   <!-- FOOTER: Ver detalles -->
   <div class="px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold
-              transition-all duration-300 border-t border-border-default" [ngClass]="getFooterClass()">
+            transition-all duration-300 border-t border-border-default rounded-b-2xl" [ngClass]="getFooterClass()">
     <span>Ver detalles</span>
     <app-icon name="ArrowRight" size="16"
       class="transition-transform duration-300 group-hover:translate-x-1"></app-icon>
