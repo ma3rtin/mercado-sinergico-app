@@ -106,6 +106,19 @@ import {
 } from '@ng-icons/feather-icons';
 import { provideServiceWorker } from '@angular/service-worker';
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyBtcTAMsMEd-X-E_63-ENUjVAf74yYei24',
+  authDomain: 'sinergia-comercial-341ec.firebaseapp.com',
+  projectId: 'sinergia-comercial-341ec',
+  storageBucket: 'sinergia-comercial-341ec.firebasestorage.app',
+  messagingSenderId: '738286713031',
+  appId: '1:738286713031:web:6c47163419c51912c226e2',
+  measurementId: 'G-8FZVYGMTJG'
+};
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
@@ -120,6 +133,10 @@ export const appConfig: ApplicationConfig = {
       const authService = inject(AuthService);
       return authService.restoreSession();
     }),
+
+    // 🔥 Firebase Providers
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideAuth(() => getAuth()),
 
     // ⭐️ NgIcons
     importProvidersFrom(
