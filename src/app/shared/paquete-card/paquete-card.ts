@@ -92,18 +92,20 @@ export class PaqueteCard implements OnInit {
 
   /** Texto del porcentaje de progreso */
   getPercentageTextClass(): string {
-    const porcentaje = this.porcentajeReservado();
-    if (porcentaje >= 80) return 'text-error';
-    if (porcentaje >= 50) return 'text-warning';
+    const p = this.porcentajeReservado();
+    if (p >= 86) return 'text-error';
+    if (p >= 61) return 'text-warning';
+    if (p >= 31) return 'text-attention-dark';
     return 'text-success';
   }
 
   /** Color de la barra de progreso */
   obtenerColorBarra(): string {
-    const porcentaje = this.porcentajeReservado();
-    if (porcentaje < 50) return 'bg-success';
-    if (porcentaje < 80) return 'bg-warning';
-    return 'bg-error';
+    const p = this.porcentajeReservado();
+    if (p >= 86) return 'bg-error';
+    if (p >= 61) return 'bg-warning';
+    if (p >= 31) return 'bg-attention';
+    return 'bg-success';
   }
 
   // ──── Timer (urgency-colored) ────
