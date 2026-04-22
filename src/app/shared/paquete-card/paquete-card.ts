@@ -134,15 +134,14 @@ export class PaqueteCard implements OnInit {
     return `Cierra en ${remaining}`;
   }
 
-  /** Tiempo restante formateado (ej: "2d 20h") */
+  /** Tiempo restante formateado */
   getTiempoRestante(fechaFin?: Date): string {
     if (!fechaFin) return 'N/A';
 
-    // Forzar interpretación UTC si el string no tiene timezone info
     const fechaStr = fechaFin.toString();
     const fecha = fechaStr.endsWith('Z') || fechaStr.includes('+')
       ? new Date(fechaStr)
-      : new Date(fechaStr + 'Z'); // 👈 le agrega Z para que sea UTC
+      : new Date(fechaStr + 'Z');
 
     const diferencia = fecha.getTime() - Date.now();
     if (diferencia <= 0) return 'Finalizado';

@@ -5,21 +5,21 @@
          flex flex-col h-full w-full border-l-[5px]
          hover:shadow-lg hover:scale-[1.02]" [ngClass]="getBorderColorClass()">
 
-<!-- IMAGEN -->
-<div class="relative w-full bg-bg-app" style="aspect-ratio: 4/3; min-height: 0;">
-  <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
-    loading="lazy" />
+  <!-- IMAGEN -->
+  <div class="relative w-full bg-bg-app" style="aspect-ratio: 4/3; min-height: 0;">
+    <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
+      loading="lazy" />
 
-  <!-- Badge de urgencia -->
-  @if (getHoursRemaining() < 24) {
+    <!-- Badge de urgencia -->
+    @if (getHoursRemaining() < 24) {
     <div class="absolute top-2 right-2 flex items-center gap-1.5
                 bg-error text-white text-xs font-bold
                 px-2.5 py-1 rounded-full shadow-md">
       <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block"></span>
-      Cierra en {{ getTiempoRestante(paquete.fecha_fin) }}
+      Finaliza pronto
     </div>
-  }
-</div>
+    }
+  </div>
   <!-- CONTENIDO -->
   <div class="px-4 pt-4 pb-4 flex flex-col flex-grow gap-3">
 
@@ -74,7 +74,7 @@
     <!-- Timer (fila propia) -->
     <div class="flex items-center gap-1.5 text-sm" [ngClass]="getTimerTextClass()" [title]="getTimerTooltip()">
       <app-icon name="Clock" size="14"></app-icon>
-      <span>{{ getTiempoRestante(paquete.fecha_fin) }}</span>
+      <span>Finaliza en {{ getTiempoRestante(paquete.fecha_fin) }}</span>
     </div>
 
   </div>
