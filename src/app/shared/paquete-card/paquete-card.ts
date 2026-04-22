@@ -57,7 +57,7 @@ export class PaqueteCard implements OnInit {
     return this.paquete.tipo === TipoPaquete.ENERGICO;
   }
 
-  private isSinergico(): boolean {
+  isSinergico(): boolean {
     return this.paquete.tipo === TipoPaquete.SINERGICO;
   }
 
@@ -73,6 +73,18 @@ export class PaqueteCard implements OnInit {
     if (this.isEnergico()) return 'text-secondary-dark border-secondary-dark';
     if (this.isSinergico()) return 'text-brand-primary border-brand-primary';
     return 'text-gray-500 border-gray-400';
+  }
+
+  /** Nombre formateado para el tooltip */
+  getPackageTypeName(): string {
+    return this.isSinergico() ? 'Paquete Sinérgico' : 'Paquete Enérgico';
+  }
+
+  /** Descripción para el tooltip */
+  getPackageTypeDescription(): string {
+    if (this.isSinergico()) return 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.';
+    if (this.isEnergico()) return 'Compra rápida individual con beneficios y envío prioritario.';
+    return 'Paquete estándar.';
   }
 
   /** Left border color by type */

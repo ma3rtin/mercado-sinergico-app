@@ -8,6 +8,20 @@ article {
   transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
 }
 
+/* Tooltip nativo a prueba de fallos */
+.tooltip-trigger .tooltip-content {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: all 200ms ease-out;
+}
+
+.tooltip-trigger:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
 article:hover {
   transform: scale(1.02);
 }
