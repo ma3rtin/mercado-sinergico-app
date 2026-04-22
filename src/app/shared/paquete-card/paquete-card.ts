@@ -61,6 +61,19 @@ export class PaqueteCard implements OnInit {
     return this.paquete.tipo === TipoPaquete.SINERGICO;
   }
 
+  /** Nombre del ícono según el tipo de paquete */
+  getTypeIconName(): string {
+    if (this.isEnergico()) return 'zap'; // Asumiendo 'zap' (rayo) para Enérgico
+    if (this.isSinergico()) return 'users'; // Asumiendo 'users' para Sinérgico
+    return 'package';
+  }
+
+  /** Colores del ícono circular superior derecho */
+  getTypeIconClass(): string {
+    if (this.isEnergico()) return 'text-secondary-dark border-secondary-dark';
+    if (this.isSinergico()) return 'text-brand-primary border-brand-primary';
+    return 'text-gray-500 border-gray-400';
+  }
 
   /** Left border color by type */
   getBorderColorClass(): string {

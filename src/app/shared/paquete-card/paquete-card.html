@@ -19,14 +19,22 @@
     </div>
     }
 
-    <!-- Badge de urgencia -->
-    @if (getHoursRemaining() < 24) { <div class="absolute top-2 right-2 flex items-center gap-1.5
-              bg-error text-white text-xs font-bold
-              px-2.5 py-1 rounded-full shadow-md">
+    <!-- Icono de Tipo de Paquete (Arriba Derecha) -->
+    <div class="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center 
+                border-2 shadow-sm bg-white/90 backdrop-blur-sm"
+         [ngClass]="getTypeIconClass()">
+      <app-icon [name]="getTypeIconName()" size="16"></app-icon>
+    </div>
+
+    <!-- Badge de urgencia (Abajo Derecha) -->
+    @if (getHoursRemaining() < 24) { 
+    <div class="absolute bottom-2 right-2 flex items-center gap-1.5
+                bg-error text-white text-xs font-bold
+                px-2.5 py-1 rounded-full shadow-md">
       <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block"></span>
       Finaliza pronto
-  </div>
-  }
+    </div>
+    }
   </div>
 
   <!-- CONTENIDO -->
