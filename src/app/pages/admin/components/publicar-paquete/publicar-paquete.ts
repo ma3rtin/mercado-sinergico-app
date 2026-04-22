@@ -167,11 +167,15 @@ export class PublicarPaqueteComponent implements OnInit {
 
         if (paquete.fecha_inicio) {
           const fi = new Date(paquete.fecha_inicio);
-          this.fechaInicio.set(this.isDuplicate() ? '' : fi.toISOString().split('T')[0]);
+          this.fechaInicio.set(
+            this.isDuplicate() ? '' : fi.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
+          );
         }
         if (paquete.fecha_fin) {
           const ff = new Date(paquete.fecha_fin);
-          this.fechaFin.set(this.isDuplicate() ? '' : ff.toISOString().split('T')[0]);
+          this.fechaFin.set(
+            this.isDuplicate() ? '' : ff.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
+          );
         }
 
         this.cantProductos.set(paquete.cant_productos ?? null);
@@ -375,8 +379,8 @@ export class PublicarPaqueteComponent implements OnInit {
       paqueteBaseId: Number(this.paqueteBaseSeleccionado()!),
       estadoId: Number(this.estadoSeleccionado()!),
       zonaId: Number(this.zonaSeleccionada()!),
-      fecha_inicio: new Date(this.fechaInicio()).toISOString(),
-      fecha_fin: new Date(this.fechaFin()).toISOString(),
+      fecha_inicio: this.argentinaDateToUTCIso(this.fechaInicio()),
+      fecha_fin: this.argentinaDateToUTCIso(this.fechaFin()),
     };
 
     if (this.cantProductos() !== null) {
@@ -436,6 +440,21 @@ export class PublicarPaqueteComponent implements OnInit {
       const parsed = Number(value);
       this.descuento.set(isNaN(parsed) ? null : parsed);
     }
+  }
+
+  // --- Convierte "YYYY-MM-DD" Argentina → UTC ISO string para medianoche ART ---
+  private argentinaDateToUTCIso(dateStr: string): string {
+    const tz = 'America/Argentina/Buenos_Aires';
+    // Referencia: mediodía UTC garantiza la misma fecha en Argentina (siempre UTC-3 o menos)
+    const refUTC = new Date(`${dateStr}T12:00:00.000Z`);
+    const partes = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(refUTC);
+    const hora = Number(partes.find(p => p.type === 'hour')?.value ?? 12);
+    const min  = Number(partes.find(p => p.type === 'minute')?.value ?? 0);
+    // offsetMs = diferencia UTC − ART en ms (ej: (12*60 − 9*60) * 60000 = 10800000)
+    const offsetMs = ((12 * 60) - (hora * 60 + min)) * 60_000;
+    return new Date(new Date(`${dateStr}T00:00:00.000Z`).getTime() + offsetMs).toISOString();
   }
 
   // --- Reset formulario ---

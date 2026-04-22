@@ -1,120 +1,121 @@
 <!-- paquete-card.html -->
-<!-- Card más cuadrada, imagen simple y datos principales -->
+<!-- Card con distinción de color lateral según tipo -->
 
-<article (click)="onCardClick()" class="group bg-bg-surface rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden
-         border border-border-default hover:border-brand-primary cursor-pointer
-         flex flex-col h-full hover:scale-105 active:scale-100 max-w-sm">
-
-  <!-- TAGS -->
-  <div class="px-3 pt-2 pb-2">
-    <div class="flex flex-wrap items-center gap-1.5">
-
-      <!-- Marca -->
-      @if (paquete.paqueteBase?.marca?.nombre) {
-      <span
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-primary text-text-on-dark rounded-full text-xs font-semibold">
-        {{ paquete.paqueteBase?.marca?.nombre }}
-      </span>
-      }
-
-      <!-- Categoría -->
-      @if (paquete.paqueteBase?.categoria?.nombre) {
-      <span
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-raised text-text-secondary rounded-full text-xs font-semibold">
-        {{ paquete.paqueteBase?.categoria?.nombre }}
-      </span>
-      }
-
-      <!-- Tipo -->
-      @if (obtenerIconoTipo()) {
-      <span
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-bg-surface border border-border-default text-text-secondary rounded-full text-xs font-semibold">
-        {{ obtenerIconoTipo() }} {{ obtenerTextoTipo() }}
-      </span>
-      }
-
-      <!-- Estado -->
-      @if (paquete.estado?.nombre) {
-      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
-        [class]="getEstadoClass(paquete.estado?.nombre)">
-        {{ paquete.estado?.nombre }}
-      </span>
-      }
-
-    </div>
-  </div>
+<article (click)="onCardClick()" class="group overflow-hidden bg-bg-surface rounded-2xl shadow-sm cursor-pointer
+         flex flex-col h-full w-full border-l-[5px]
+         hover:shadow-lg hover:scale-[1.02]" [ngClass]="getBorderColorClass()">
 
   <!-- IMAGEN -->
-  <div class="relative w-full bg-bg-app overflow-hidden" style="aspect-ratio: 1 / 1;">
-    <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre"
-      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+  <div class="relative w-full bg-bg-app overflow-hidden rounded-tl-[11px] rounded-tr-2xl" 
+       style="aspect-ratio: 4/3; min-height: 0; transform: translateZ(0);">
+    <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
+      loading="lazy" />
 
-    @if (esUrgente()) {
-    <div
-      class="absolute top-2 right-2 bg-error text-text-on-dark px-2 py-1 rounded-lg text-xs font-bold shadow-lg animate-pulse">
-      ⚠️ {{ getTiempoRestante(paquete.fecha_fin) }}
+    <!-- Badge de descuento -->
+    @if (paquete.descuento) {
+    <div class="absolute top-2 left-2 flex items-center gap-1
+            bg-white text-black text-xs font-bold
+            px-2.5 py-1 rounded-full shadow-md border-2 border-yellow-500">
+      {{ paquete.descuento }}% OFF
+    </div>
+    }
+
+    <!-- Icono de Tipo de Paquete con Tooltip -->
+    <div class="absolute top-2 right-2 tooltip-trigger z-20">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center cursor-default
+                  border-2 shadow-sm bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+           [ngClass]="getTypeIconClass()">
+        <app-icon [name]="getTypeIconName()" size="16"></app-icon>
+      </div>
+
+      <!-- Tooltip Content -->
+      <div class="tooltip-content absolute right-0 top-10 w-48 origin-top-right
+                  bg-gray-900/95 backdrop-blur-md text-white rounded-xl p-3 shadow-xl border border-gray-700 pointer-events-none">
+        <strong class="block text-xs font-bold mb-1 tracking-wide" [ngClass]="isSinergico() ? 'text-brand-primary-light' : 'text-amber-400'">
+          {{ getPackageTypeName() }}
+        </strong>
+        <p class="text-[11px] leading-relaxed text-gray-300">
+          {{ getPackageTypeDescription() }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Badge de urgencia (Abajo Derecha) -->
+    @if (getHoursRemaining() < 24) { 
+    <div class="absolute bottom-2 right-2 flex items-center gap-1.5
+                bg-error text-white text-xs font-bold
+                px-2.5 py-1 rounded-full shadow-md">
+      <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block"></span>
+      Finaliza pronto
     </div>
     }
   </div>
 
   <!-- CONTENIDO -->
-  <div class="px-4 py-3 space-y-2 flex flex-col flex-grow">
+  <div class="px-4 pt-4 pb-4 flex flex-col flex-grow gap-3">
 
     <!-- Nombre -->
-    <h3 class="font-display text-base font-bold text-text-primary line-clamp-2 group-hover:text-brand-cta-hover">
+    <h3 class="font-display text-lg font-bold text-text-primary line-clamp-2 leading-snug
+               transition-colors" [ngClass]="getTitleHoverClass()">
       {{ paquete.nombre || paquete.paqueteBase?.nombre || 'Paquete sin nombre' }}
     </h3>
 
-    <!-- STOCK -->
-    <div class="flex items-baseline gap-1 text-sm">
-      <span class="text-text-secondary">Quedan</span>
-      <span class="font-bold text-brand-cta-hover">{{ stockDisponible() }}</span>
-      <span class="text-text-secondary">de <strong>{{ paquete.cant_productos || 0 }}</strong></span>
+    <!-- Tags: Marca + Categoría (white pills) -->
+    <div class="flex flex-wrap items-center gap-1.5 mb-2">
+      @if (paquete.paqueteBase?.marca?.nombre) {
+      <span class="inline-flex items-center px-2.5 py-0.5 bg-white border border-border-default
+               text-text-secondary rounded-full text-xs font-semibold">
+        {{ paquete.paqueteBase?.marca?.nombre }}
+      </span>
+      }
+
+      @if (paquete.paqueteBase?.categoria?.nombre) {
+      <span class="inline-flex items-center px-2.5 py-0.5 bg-white border border-border-default
+               text-text-secondary rounded-full text-xs font-semibold">
+        {{ paquete.paqueteBase?.categoria?.nombre }}
+      </span>
+      }
     </div>
 
-    <!-- Barra -->
-    <div class="space-y-1">
+    <!-- Vendidos de Total + Barra de progreso -->
+    <div class="mt-auto space-y-1.5 mb-2">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-text-secondary">
+          <strong class="text-text-primary">{{ paquete.cant_productos_reservados || 0 }}</strong>
+          vendidos de
+          <strong class="text-text-primary">{{ paquete.cant_productos || 0 }}</strong>
+        </span>
+        <span class="font-semibold" [ngClass]="getPercentageTextClass()">
+          {{ porcentajeReservado().toFixed(0) }}%
+        </span>
+      </div>
+
       <div class="w-full bg-bg-raised rounded-full h-1.5 overflow-hidden">
-        <div class="h-full rounded-full transition-all duration-300" [style.width.%]="porcentajeReservado()"
+        <div class="h-full rounded-full transition-all duration-500" [style.width.%]="porcentajeReservado()"
           [ngClass]="obtenerColorBarra()"></div>
       </div>
-
-      <div class="text-xs text-text-muted text-right">
-        {{ porcentajeReservado().toFixed(0) }}% reservado
-      </div>
-
     </div>
 
-    <!-- Información inferior -->
-    <div class="grid grid-cols-2 gap-2 text-xs py-2 border-t border-border-default">
+    <!-- Compradores (solo número) -->
+    <div class="flex items-center gap-1.5 text-sm text-text-muted">
+      <app-icon name="users" size="14"></app-icon>
+      <span>{{ paquete.cant_usuarios_registrados || 0 }} {{ (paquete.cant_usuarios_registrados === 1) ? 'comprador' : 'compradores' }}</span>
+    </div>
 
-      <!-- Compradores -->
-      <div class="flex items-center gap-1">
-        <app-icon name="users" size="16"></app-icon>
-        <div>
-          <p class="text-text-muted">Compradores</p>
-          <p class="font-bold text-text-primary">{{ paquete.cant_usuarios_registrados || 0 }}</p>
-        </div>
-      </div>
-
-      <!-- Tiempo -->
-      <div class="flex items-center gap-1">
-        <app-icon name="Clock" size="16"></app-icon>
-        <div>
-          <p class="text-text-muted">Cierra</p>
-          <p class="font-bold text-text-primary">{{ getTiempoRestante(paquete.fecha_fin) }}</p>
-        </div>
-      </div>
-
+    <!-- Timer (fila propia) -->
+    <div class="flex items-center gap-1.5 text-sm" [ngClass]="getTimerTextClass()" [title]="getTimerTooltip()">
+      <app-icon name="Clock" size="14"></app-icon>
+      <span>Finaliza en {{ getTiempoRestante(paquete.fecha_fin) }}</span>
     </div>
 
   </div>
 
-  <!-- FOOTER -->
-  <div class="px-4 py-2 bg-bg-app flex items-center justify-center gap-2 text-brand-secondary font-semibold text-sm
-                group-hover:text-brand-primary transition-colors">
+  <!-- FOOTER: Ver detalles -->
+  <div class="px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold
+            transition-all duration-300 border-t border-border-default rounded-b-2xl" [ngClass]="getFooterClass()">
     <span>Ver detalles</span>
-    <app-icon name="ArrowRight" size="16" class="w-7 h-7 translate-y-[7px]"></app-icon>
+    <app-icon name="ArrowRight" size="16"
+      class="transition-transform duration-300 group-hover:translate-x-1"></app-icon>
   </div>
 
 </article>
