@@ -6,7 +6,8 @@
          hover:shadow-lg hover:scale-[1.02]" [ngClass]="getBorderColorClass()">
 
   <!-- IMAGEN -->
-  <div class="relative w-full bg-bg-app" style="aspect-ratio: 4/3; min-height: 0;">
+  <div class="relative w-full bg-bg-app overflow-hidden rounded-tl-[11px] rounded-tr-2xl" 
+       style="aspect-ratio: 4/3; min-height: 0; transform: translateZ(0);">
     <img [src]="obtenerImagenUrl()" [alt]="paquete.paqueteBase?.nombre" class="w-full h-full object-cover"
       loading="lazy" />
 
