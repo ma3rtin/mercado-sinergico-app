@@ -14,8 +14,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     if (!isPlatformBrowser(platformId)) return next(req);
 
     // 🚫 URLs públicas (sin autenticación de ningún tipo)
-    const publicEndpoints = ['/usuarios/login', '/usuarios/registrar', '/auth'];
-    if (publicEndpoints.some((url) => req.url.includes(url))) {
+    // Usamos regex para asegurar coincidencia exacta al final de la URL
+    const publicEndpoints = [/\/usuarios\/login$/, /\/usuarios\/registrar$/, /\/auth$/];
+    const isPublic = publicEndpoints.some((regex) => regex.test(req.url));
+
+    if (isPublic) {
         return next(req);
     }
 
