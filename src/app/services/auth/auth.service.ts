@@ -115,6 +115,7 @@ export class AuthService {
 
   // 🔐 Login con Google
   async signInWithGoogle(): Promise<User> {
+    this.clearJwtToken(); // Limpiar JWT previo para evitar conflictos en el interceptor
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
