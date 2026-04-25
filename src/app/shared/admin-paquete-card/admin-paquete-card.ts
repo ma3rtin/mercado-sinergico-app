@@ -9,17 +9,17 @@ import { ToastService } from '@app/services/toast/toast.service';
 @Component({
   selector: 'app-admin-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, ButtonComponent],
-  templateUrl:'./admin-paquete-card.html',
+  imports: [CommonModule, IconComponent],
+  templateUrl: './admin-paquete-card.html',
 })
 export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Input({ required: true }) paquete!: PaquetePublicado;
 
   // 📤 Outputs para acciones
-  @Output() confirm    = new EventEmitter<PaquetePublicado>(); // Completo → Confirmado
-  @Output() refund     = new EventEmitter<PaquetePublicado>(); // Activo/Completo → Cancelado
-  @Output() notify     = new EventEmitter<PaquetePublicado>(); // Notificar compradores
-  @Output() duplicate  = new EventEmitter<PaquetePublicado>(); // Duplicar
+  @Output() confirm = new EventEmitter<PaquetePublicado>(); // Completo → Confirmado
+  @Output() refund = new EventEmitter<PaquetePublicado>(); // Activo/Completo → Cancelado
+  @Output() notify = new EventEmitter<PaquetePublicado>(); // Notificar compradores
+  @Output() duplicate = new EventEmitter<PaquetePublicado>(); // Duplicar
   @Output() viewDetail = new EventEmitter<PaquetePublicado>(); // Ver detalle
 
   private toast = inject(ToastService);
@@ -89,15 +89,15 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   // ── Acciones válidas por estado ────────────────────────────────
   /** Notificar a compradores: solo cuando está activo */
-  get canNotify(): boolean    { return this.esActivo; }
+  get canNotify(): boolean { return this.esActivo; }
   /** Confirmar con fabricante: desde Completo */
-  get canConfirm(): boolean   { return this.esCompleto; }
+  get canConfirm(): boolean { return this.esCompleto; }
   /** Cancelar y reembolsar: desde Activo o Completo */
-  get canCancel(): boolean    { return this.esActivo || this.esCompleto; }
+  get canCancel(): boolean { return this.esActivo || this.esCompleto; }
   /** Duplicar: desde cualquier estado */
   get canDuplicate(): boolean { return true; }
   /** Si hay al menos una acción posible en el menú */
-  get hayAcciones(): boolean  { return this.canNotify || this.canConfirm || this.canCancel || this.canDuplicate; }
+  get hayAcciones(): boolean { return this.canNotify || this.canConfirm || this.canCancel || this.canDuplicate; }
 
   // ── Helpers de UI ──────────────────────────────────────────────
 
@@ -143,21 +143,21 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   getStatusColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')     return 'text-status-active-text';
-    if (e === 'completo')   return 'text-success';
-    if (e === 'confirmado') return 'text-brand-secondary';
-    if (e === 'entregado')  return 'text-success';
-    if (e === 'cancelado')  return 'text-error';
+    if (e === 'activo') return 'text-status-active-text';
+    if (e === 'completo') return 'bg-primary/30 text-brand-secondary';
+    if (e === 'confirmado') return ' bg-brand-cta/20 text-brand-secondary';
+    if (e === 'entregado') return 'text-success';
+    if (e === 'cancelado') return 'text-error';
     return 'text-text-secondary';
   }
 
   getStatusBgColor(): string {
     const e = this.estadoNombre.toLowerCase();
-    if (e === 'activo')     return 'bg-status-active-bg';
-    if (e === 'completo')   return 'bg-success-light';
-    if (e === 'confirmado') return 'bg-status-neutral-bg';
-    if (e === 'entregado')  return 'bg-success-light';
-    if (e === 'cancelado')  return 'bg-error-light';
+    if (e === 'activo') return 'bg-status-active-bg';
+    if (e === 'completo') return 'bg-cta/30';
+    if (e === 'confirmado') return 'bg-cta/20';
+    if (e === 'entregado') return 'bg-success-light';
+    if (e === 'cancelado') return 'bg-error-light';
     return 'bg-status-neutral-bg';
   }
 
