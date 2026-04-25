@@ -3,100 +3,90 @@
 
     <!-- 🔄 LOADING STATE -->
     @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center py-20">
-        <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-primary mb-4"></div>
-        <p class="text-gray-600 text-lg">Cargando información...</p>
-      </div>
+    <div class="flex flex-col items-center justify-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-primary mb-4"></div>
+      <p class="text-gray-600 text-lg">Cargando información...</p>
+    </div>
     }
 
     <!-- ❌ ERROR STATE -->
     @else if (errorMessage()) {
-      <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-        <svg class="w-20 h-20 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
-        <p class="text-gray-600 mb-6 text-center max-w-md">
-          No pudimos cargar la información. Por favor, intentá nuevamente.
-        </p>
-        <div class="flex gap-3">
-          <app-button
-            [variant]="'secondary'"
-            [iconStart]="'arrowLeft'"
-            (buttonClick)="volverAProductos()">
-            Volver a Productos
-          </app-button>
-          <app-button
-            [variant]="'primary'"
-            [iconStart]="'refreshCw'"
-            (buttonClick)="recargarDatos()">
-            Reintentar
-          </app-button>
-        </div>
+    <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
+      <svg class="w-20 h-20 text-error mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
+      <p class="text-gray-600 mb-6 text-center max-w-md">
+        No pudimos cargar la información. Por favor, intentá nuevamente.
+      </p>
+      <div class="flex gap-3">
+        <app-button [variant]="'secondary'" [iconStart]="'arrowLeft'" (buttonClick)="volverAProductos()">
+          Volver a Productos
+        </app-button>
+        <app-button [variant]="'primary'" [iconStart]="'refreshCw'" (buttonClick)="recargarDatos()">
+          Reintentar
+        </app-button>
       </div>
+    </div>
     }
 
     <!-- ✅ CONTENIDO PRINCIPAL -->
     @else if (productoSeleccionado()) {
 
-      <!-- Layout principal: Producto (izquierda) + Paquetes (derecha) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Layout principal: Producto (izquierda) + Paquetes (derecha) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-        <!-- 📦 PRODUCTO SELECCIONADO (Columna Izquierda - Sticky con scroll propio) -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl shadow-md lg:sticky lg:top-6 overflow-hidden">
+      <!-- 📦 PRODUCTO SELECCIONADO (Columna Izquierda - Sticky con scroll propio) -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-xl shadow-md lg:sticky lg:top-6 overflow-hidden">
 
-            <!-- Contenedor con altura máxima y scroll (SOLO EN DESKTOP) -->
-            <div class="lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto custom-scrollbar">
-              <div class="p-4 sm:p-6">
+          <!-- Contenedor con altura máxima y scroll (SOLO EN DESKTOP) -->
+          <div class="lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto custom-scrollbar">
+            <div class="p-4 sm:p-6">
 
-                <!-- Título de sección -->
-                <div class="mb-4 pb-4 border-b border-gray-200">
-                  <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
-                    Tu producto seleccionado
-                  </h2>
-                  <p class="text-sm text-gray-600">
-                    Elegí un paquete para obtener descuentos exclusivos
-                  </p>
+              <!-- Título de sección -->
+              <div class="mb-4 pb-4 border-b border-gray-200">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                  Tu producto seleccionado
+                </h2>
+                <p class="text-sm text-gray-600">
+                  Elegí un paquete para obtener descuentos exclusivos
+                </p>
+              </div>
+
+              <!-- Producto Card -->
+              <app-producto-card [producto]="productoSeleccionado()!" [contexto]="'seleccion'"
+                [mostrarDescripcion]="true" [longitudMaximaDescripcion]="150" />
+
+              <!-- Información adicional -->
+              <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
+
+                <!-- Características destacadas -->
+                @if (productoSeleccionado()!.descripcion) {
+                <div class="space-y-2">
+                  <div class="flex flex-col gap-2 text-sm text-gray-700">
+                    <span class="font-medium w-full">Descripción de tu producto:</span>
+                    <span class="flex items-center shadow-md rounded-lg p-4 bg-gray-50">{{
+                      productoSeleccionado()!.descripcion }}</span>
+                  </div>
                 </div>
-
-                <!-- Producto Card -->
-                <app-producto-card
-                  [producto]="productoSeleccionado()!"
-                  [contexto]="'seleccion'"
-                  [mostrarDescripcion]="true"
-                  [longitudMaximaDescripcion]="150"
-                />
-
-                <!-- Información adicional -->
-                <div class="mt-6 pt-6 border-t border-gray-200 space-y-3">
-
-                  <!-- Características destacadas -->
-                  @if (productoSeleccionado()!.descripcion) {
-                    <div class="space-y-2">
-                      <div class="flex flex-col gap-2 text-sm text-gray-700">
-                        <span class="font-medium w-full">Descripción de tu producto:</span>
-                        <span class="flex items-center shadow-md rounded-lg p-4 bg-gray-50">{{ productoSeleccionado()!.descripcion }}</span>
-                      </div>
-                    </div>
-                  }
-
-                  <!-- Precio base con tooltip -->
-                  <div class="bg-blue-50 rounded-lg p-4">
-                    <div class="flex items-start gap-3">
-                      <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                      </svg>
-                      <div class="flex-1">
-                        <p class="text-sm font-semibold text-blue-900 mb-1">
-                          💰 Ahorrá con paquetes grupales
-                        </p>
-                        <p class="text-xs text-blue-700">
-                          El precio final varía según el paquete que elijas. ¡Comprá en grupo y pagá menos!
-                        </p>
-                      </div>
+                }
+                <!-- Precio base con tooltip -->
+                <div class="bg-info-light rounded-lg p-4">
+                  <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-info mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                      <path
+                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                    </svg>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-brand-secondary mb-1">
+                        💰 Ahorrá con paquetes grupales
+                      </p>
+                      <p class="text-xs text-brand-secondary">
+                        El precio final varía según el paquete que elijas. ¡Comprá en grupo y pagá menos!
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -104,152 +94,141 @@
             </div>
           </div>
         </div>
-
-        <!-- 🎁 PAQUETES DISPONIBLES (Columna Derecha - 2 columnas) -->
-        <div class="lg:col-span-2">
-
-          <!-- Header de sección -->
-          <div class="mb-6">
-            <h2 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2 font-display">
-              Elegí a que paquete sumarte
-            </h2>
-            <p class="text-sm sm:text-base text-gray-600">
-              Estos son los paquetes disponibles para tu producto:
-            </p>
-            
-            <!-- Elegir entre paquete sinergico o energico -->
-            <div class="flex flex-col sm:flex-row justify-start items-center gap-2 mt-4">
-              <app-button class="w-full sm:w-auto"
-                [variant]="'tertiary'"
-                (buttonClick)="recargarDatos()">
-                <div class="flex items-center gap-2">
-                  <app-icon name="Users" size="18"></app-icon>
-                  <span>Sinérgico</span>
-                </div>
-              </app-button>
-              <app-button class="w-full sm:w-auto"
-                [variant]="'tertiary'"
-                (buttonClick)="recargarDatos()">
-                <div class="flex items-center gap-2">
-                  <app-icon name="Zap" size="18"></app-icon>
-                  <span>Enérgico</span>
-                </div>
-              </app-button>
-            </div>
-          </div>
-
-
-          <!-- Grid de Paquetes -->
-          @if (hayPaquetesDisponibles()) {
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-              @for (paquete of paquetesPaginados(); track paquete.id_paquete_publicado) {
-                <div class="transform transition-transform hover:scale-[1.02]">
-                  <app-paquete-card
-                    [paquete]="paquete"
-                    (cardClick)="navegarASumarse($event)"
-                  />
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Empty State: No hay paquetes disponibles -->
-          @else {
-            <div class="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center">
-              <div class="max-w-md mx-auto">
-                <!-- Icono -->
-                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                  </svg>
-                </div>
-
-                <!-- Mensaje -->
-                <h3 class="text-xl font-bold text-gray-900 mb-3">
-                  No hay paquetes disponibles
-                </h3>
-                <p class="text-gray-600 mb-6">
-                  Por el momento, este producto no está incluido en ningún paquete activo.
-                  Te invitamos a explorar otros productos o volver más tarde.
-                </p>
-
-                <!-- Acciones -->
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                  <app-button
-                    [variant]="'secondary'"
-                    [iconStart]="'arrowLeft'"
-                    (buttonClick)="volverAProductos()">
-                    Ver Otros Productos
-                  </app-button>
-                  <app-button
-                    [variant]="'primary'"
-                    [iconStart]="'refreshCw'"
-                    (buttonClick)="recargarDatos()">
-                    Actualizar
-                  </app-button>
-                </div>
-              </div>
-            </div>
-          }
-
-          <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
-          @if (paquetesPaginados().length > 0) {
-            <app-pagination
-              [totalItems]="totalItemsPaginacion()"
-              [itemsPerPage]="itemsPorPagina()"
-              [currentPage]="paginaActual()"
-              [showItemsPerPage]="true"
-              [itemsPerPageOptions]="[12, 24, 36, 48]"
-              (pageChange)="onPageChange($event)"
-              (itemsPerPageChange)="onItemsPerPageChange($event)"
-            />
-          }
-        </div>
       </div>
 
-      <!-- Footer informativo -->
-      <div class="mt-12 bg-gradient-to-r from-blue-50 to-yellow-50 rounded-xl p-6 sm:p-8">
-        <div class="max-w-4xl mx-auto">
-          <div class="flex items-start gap-4">
-            <div class="flex-shrink-0">
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <!-- 🎁 PAQUETES DISPONIBLES (Columna Derecha - 2 columnas) -->
+      <div class="lg:col-span-2">
+
+        <!-- Header de sección -->
+        <div class="mb-6">
+          <h2 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2 font-display">
+            Elegí a que paquete sumarte
+          </h2>
+          <p class="text-sm sm:text-base text-gray-600">
+            Estos son los paquetes disponibles para tu producto:
+          </p>
+
+          <!-- Elegir entre paquete sinergico o energico -->
+          <div class="flex flex-col sm:flex-row justify-start items-center gap-2 mt-4">
+            <app-button class="w-full sm:w-auto" [variant]="'tertiary'" (buttonClick)="recargarDatos()">
+              <div class="flex items-center gap-2">
+                <app-icon name="Users" size="18"></app-icon>
+                <span>Sinérgico</span>
+              </div>
+            </app-button>
+            <app-button class="w-full sm:w-auto" [variant]="'tertiary'" (buttonClick)="recargarDatos()">
+              <div class="flex items-center gap-2">
+                <app-icon name="Zap" size="18"></app-icon>
+                <span>Enérgico</span>
+              </div>
+            </app-button>
+          </div>
+        </div>
+
+
+        <!-- Grid de Paquetes -->
+        @if (hayPaquetesDisponibles()) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+          @for (paquete of paquetesPaginados(); track paquete.id_paquete_publicado) {
+          <div class="transform transition-transform hover:scale-[1.02]">
+            <app-paquete-card [paquete]="paquete" (cardClick)="navegarASumarse($event)" />
+          </div>
+          }
+        </div>
+        }
+
+        <!-- Empty State: No hay paquetes disponibles -->
+        @else {
+        <div class="bg-white rounded-xl shadow-md p-8 sm:p-12 text-center">
+          <div class="max-w-md mx-auto">
+            <!-- Icono -->
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
               </svg>
             </div>
-            <div class="flex-1">
-              <h4 class="text-lg font-bold text-gray-900 mb-2">
-                ¿Cómo funcionan los paquetes grupales?
-              </h4>
-              <p class="text-gray-700 text-sm leading-relaxed mb-3">
-                Los paquetes grupales te permiten comprar productos a precios más bajos al unirte con otros compradores de tu zona.
-                Cuantos más participantes, mayor es el descuento que obtenés.
-              </p>
-              <ul class="space-y-2 text-sm text-gray-700">
-                <li class="flex items-start gap-2">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Elegí el paquete que se adapte a tu zona y horario</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Unite al paquete y disfrutá de descuentos exclusivos</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                  </svg>
-                  <span>Recibí tu producto en la fecha acordada del paquete</span>
-                </li>
-              </ul>
+
+            <!-- Mensaje -->
+            <h3 class="text-xl font-bold text-gray-900 mb-3">
+              No hay paquetes disponibles
+            </h3>
+            <p class="text-gray-600 mb-6">
+              Por el momento, este producto no está incluido en ningún paquete activo.
+              Te invitamos a explorar otros productos o volver más tarde.
+            </p>
+
+            <!-- Acciones -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <app-button [variant]="'secondary'" [iconStart]="'arrowLeft'" (buttonClick)="volverAProductos()">
+                Ver Otros Productos
+              </app-button>
+              <app-button [variant]="'primary'" [iconStart]="'refreshCw'" (buttonClick)="recargarDatos()">
+                Actualizar
+              </app-button>
             </div>
           </div>
         </div>
+        }
+
+        <!-- 📄 PAGINACIÓN - Solo si hay paquetes -->
+        @if (paquetesPaginados().length > 0) {
+        <app-pagination [totalItems]="totalItemsPaginacion()" [itemsPerPage]="itemsPorPagina()"
+          [currentPage]="paginaActual()" [showItemsPerPage]="true" [itemsPerPageOptions]="[12, 24, 36, 48]"
+          (pageChange)="onPageChange($event)" (itemsPerPageChange)="onItemsPerPageChange($event)" />
+        }
       </div>
+    </div>
+
+    <!-- Footer informativo -->
+    <div class="mt-12 bg-gradient-to-r from-blue-50 to-yellow-50 rounded-xl p-6 sm:p-8">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0">
+            <svg class="w-8 h-8 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-lg font-bold text-gray-900 mb-2">
+              ¿Cómo funcionan los paquetes grupales?
+            </h4>
+            <p class="text-gray-700 text-sm leading-relaxed mb-3">
+              Los paquetes grupales te permiten comprar productos a precios más bajos al unirte con otros compradores de
+              tu zona.
+              Cuantos más participantes, mayor es el descuento que obtenés.
+            </p>
+            <ul class="space-y-2 text-sm text-gray-700">
+              <li class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+                </svg>
+                <span>Elegí el paquete que se adapte a tu zona y horario</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+                </svg>
+                <span>Unite al paquete y disfrutá de descuentos exclusivos</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd" />
+                </svg>
+                <span>Recibí tu producto en la fecha acordada del paquete</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
     }
   </div>
@@ -262,22 +241,22 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--bg-raised);
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #71A8D9;
+    background: var(--brand-primary);
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #2E608C;
+    background: var(--brand-secondary);
   }
 
   /* Firefox */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #71A8D9 #f1f1f1;
+    scrollbar-color: var(--brand-primary) var(--bg-raised);
   }
 </style>

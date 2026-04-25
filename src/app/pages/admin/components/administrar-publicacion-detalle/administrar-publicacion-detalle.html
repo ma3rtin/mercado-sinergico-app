@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto">
     <!-- 🔙 BOTÓN VOLVER -->
     <div class="mb-4">
-      <app-admin-back-button label="Volver al listado de publicaciones" />
+      <app-admin-back-button label="Volver al listado de publicaciones" route="/admin/administrar-publicaciones" />
     </div>
 
     <!-- Cargando -->
@@ -16,7 +16,7 @@
     <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
       <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4 mt-[2px]" />
       <p class="text-error font-semibold text-lg">{{ error() }}</p>
-      <app-admin-back-button label="Volver al listado" />
+      <app-admin-back-button label="Volver al listado" route="/admin/administrar-publicaciones" />
     </div>
 
     } @else if (paquete()) {

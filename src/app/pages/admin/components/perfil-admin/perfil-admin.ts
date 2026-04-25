@@ -229,7 +229,7 @@ export class PerfilAdmin implements OnInit {
         text: 'ESTO DEVOLVERÁ EL DINERO A TODOS LOS USUARIOS. Acción irreversible.',
         icon: 'error',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
+        confirmButtonColor: 'var(--error)',
         confirmButtonText: 'SÍ, REEMBOLSAR',
         cancelButtonText: 'No, volver',
       }).then((result) => {

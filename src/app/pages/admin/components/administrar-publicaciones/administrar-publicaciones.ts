@@ -76,8 +76,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   // ── Acciones de la card ────────────────────────────────────────
 
-  /** Completo → Confirmado: confirma la compra con el fabricante */
-  confirmarPaquete(paquete: PaquetePublicado) {
+  cerrarPaquete(paquete: PaquetePublicado) {
+    const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
+    faltan > 0
+      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
+
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Confirmar compra con fabricante?',
@@ -88,7 +92,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
-        confirmButtonColor: '#2E608C',
+        confirmButtonColor: 'var(--brand-secondary)',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
@@ -113,7 +117,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
         icon: 'error',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
+        confirmButtonColor: 'var(--error)',
         confirmButtonText: 'SÍ, CANCELAR',
         cancelButtonText: 'No, volver'
       }).then(result => {
@@ -150,8 +154,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#2E608C',
-        cancelButtonColor: '#9ca3af',
+        confirmButtonColor: 'var(--brand-secondary)',
+        cancelButtonColor: 'var(--text-muted)',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
@@ -178,10 +182,11 @@ export class AdministrarPublicacionesComponent implements OnInit {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     switch (estado.nombre?.toLowerCase().trim()) {
       case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'completo': return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
-      case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
-      case 'entregado': return 'bg-green-50 text-green-700 border-green-300';
-      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
+      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación': return 'bg-brand-primary-light text-brand-secondary border-focus';
+      case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado': return 'bg-error-light text-error border-error-light';
+      case 'eliminado': return 'bg-status-closed-bg text-status-closed-text border-transparent';
       default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }

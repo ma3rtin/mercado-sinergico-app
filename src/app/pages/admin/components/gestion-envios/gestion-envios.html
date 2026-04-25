@@ -3,7 +3,7 @@
 
     <!-- 🔙 BOTÓN VOLVER -->
     <div class="mb-4">
-      <app-admin-back-button [label]="'Volver al detalle del paquete'" (click)="volver()" />
+      <app-admin-back-button label="Volver al detalle del paquete" [route]="'/admin/administrar-publicacion/' + paqueteId()" />
     </div>
 
     <!-- ── LOADING ──────────────────────────────────────── -->

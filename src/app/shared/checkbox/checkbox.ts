@@ -119,7 +119,7 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
 
       const base = `inline-flex items-center gap-2 rounded-full cursor-pointer transition-all border-2 ${sizeClasses[size]}`;
       const state = checked
-        ? 'bg-yellow-100 text-secondary-dark border-secondary-dark font-medium'
+        ? 'bg-warning-light text-secondary-dark border-secondary-dark font-medium'
         : 'bg-gray-100 text-gray-700 border-transparent hover:bg-gray-200';
       const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
@@ -135,7 +135,7 @@ public ngControl: NgControl | null = null; // 👈 NUEVO
     if (variant === 'card') {
       const base = 'flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all';
       const state = checked
-        ? 'bg-yellow-50 border-secondary-dark'
+        ? 'bg-warning-light border-secondary-dark'
         : 'bg-white border-gray-200 hover:border-gray-300';
       const disabledClass = disabled ? 'opacity-50 cursor-not-allowed' : '';
 

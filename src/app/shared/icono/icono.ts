@@ -8,7 +8,7 @@ import { IconsService } from '@app/services/iconos/icons.service';
  *
  * Ejemplo de uso:
  * <app-icon name="search" [size]="'24'" [strokeWidth]="'2'" />
- * <app-icon name="chevronRight" class="text-blue-500" />
+ * <app-icon name="chevronRight" class="text-info" />
  * <app-icon name="user" [size]="'32'" />
  */
 @Component({

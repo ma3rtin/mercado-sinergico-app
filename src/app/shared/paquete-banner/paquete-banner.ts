@@ -81,13 +81,13 @@ export class PaqueteBannerComponent {
     const estado = this.estadoNombre().toLowerCase();
 
     if (estado.includes('activo') || estado.includes('abierto')) {
-      return 'bg-green-500/90 text-white';
+      return 'bg-primary text-white';
     }
     if (estado.includes('pend')) {
-      return 'bg-yellow-500/90 text-white';
+      return 'bg-warning text-white';
     }
     if (estado.includes('cerr')) {
-      return 'bg-red-500/90 text-white';
+      return 'bg-error text-white';
     }
     return 'bg-gray-500/90 text-white';
   });
@@ -132,9 +132,9 @@ export class PaqueteBannerComponent {
   // Clase de la barra de progreso
   progressBarClass = computed(() => {
     const porcentaje = this.porcentajeDisponible();
-    if (porcentaje > 50) return 'bg-green-500';
-    if (porcentaje > 20) return 'bg-yellow-500';
-    return 'bg-red-500';
+    if (porcentaje > 50) return 'bg-success';
+    if (porcentaje > 20) return 'bg-warning';
+    return 'bg-error';
   });
 
   // 🎯 MÉTODOS

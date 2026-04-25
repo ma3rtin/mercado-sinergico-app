@@ -241,14 +241,14 @@ imagenUrl = computed(() => {
     }
 
     if (stock === 0) {
-      return 'text-red-600';
+      return 'text-error';
     }
 
     if (stock < 10) {
-      return 'text-yellow-600';
+      return 'text-warning';
     }
 
-    return 'text-green-600';
+    return 'text-success';
   }
 
   // Obtener texto de stock

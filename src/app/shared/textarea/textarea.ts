@@ -176,9 +176,9 @@ ngOnInit(): void {
     };
 
     const state = this.currentError()
-      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+      ? 'border-error focus:border-error focus:ring-2 focus:ring-error-light'
       : this.successMessage()
-      ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+      ? 'border-success focus:border-success focus:ring-2 focus:ring-success-light'
       : this.isFocused()
       ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
       : 'border-gray-300 hover:border-gray-400';
@@ -197,8 +197,8 @@ ngOnInit(): void {
   }[this.size()]));
 
   counterClasses = computed(() => {
-    if (this.isOverLimit()) return 'text-red-600 font-semibold';
-    if (this.isNearLimit()) return 'text-yellow-600 font-medium';
+    if (this.isOverLimit()) return 'text-error font-semibold';
+    if (this.isNearLimit()) return 'text-warning font-medium';
     return 'text-gray-500';
   });
 

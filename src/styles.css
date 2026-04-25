@@ -170,6 +170,7 @@
     --color-brand-secondary-light: var(--brand-secondary-light);
     --color-brand-cta: var(--brand-cta);
     --color-brand-cta-hover: var(--brand-cta-hover);
+    --color-brand-accent: var(--brand-cta);
 
     --color-success: var(--success);
     --color-success-dark: var(--success-dark);
