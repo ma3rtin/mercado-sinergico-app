@@ -514,7 +514,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseFloat(value) < 0) {
           return 'Ingresá un precio válido';
@@ -574,7 +574,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -784,8 +784,8 @@ export class GestionarVariantesComponent implements OnInit {
       html: `Se actualizarán <strong>${variantesConCambios.length}</strong> variante(s)`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#B92905',
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--error)',
       confirmButtonText: 'Sí, guardar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -882,8 +882,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Se perderán todos los cambios no guardados',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, descartar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -919,8 +919,8 @@ export class GestionarVariantesComponent implements OnInit {
       html: `<p>Se eliminará la variante:</p><strong>${this.getVarianteDescripcion(variante)}</strong>`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -966,7 +966,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -1005,8 +1005,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Todas las variantes quedarán disponibles',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#2D7A3E',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--success)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, activar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1032,8 +1032,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Las variantes quedarán pausadas (no eliminadas)',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#D28509',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--warning)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, desactivar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1125,8 +1125,8 @@ export class GestionarVariantesComponent implements OnInit {
         text: 'Hay cambios sin guardar que se perderán',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
-        cancelButtonColor: '#9ca3af',
+        confirmButtonColor: 'var(--error)',
+        cancelButtonColor: 'var(--text-muted)',
         confirmButtonText: 'Sí, salir',
         cancelButtonText: 'Cancelar',
       }).then((result) => {

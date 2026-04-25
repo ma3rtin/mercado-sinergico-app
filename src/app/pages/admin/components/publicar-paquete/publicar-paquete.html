@@ -1,6 +1,6 @@
 <app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
     <div class="mb-3">
-        <app-admin-back-button label="Volver a gestionar publicaciones" />
+        <app-admin-back-button label="Volver a gestionar publicaciones" route="/admin/administrar-publicaciones" />
     </div>
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
 
@@ -46,7 +46,7 @@
                 <input #inputBusqueda type="text" [ngModel]="busqueda()"
                     (ngModelChange)="busqueda.set($event); buscarPaquetes()" (focus)="abrirLista()"
                     placeholder="Buscar paquete base..."
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300 text-gray-600 pr-10" />
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors text-gray-600 pr-10" />
                 @if (paqueteBaseSeleccionado()) {
                 <span class="absolute right-2 top-1/2 -translate-y-1/2">
                     <app-button variant="ghost" size="xs" [iconOnly]="true" iconEnd="x" title="Limpiar selección"
@@ -57,7 +57,7 @@
 
             <!-- Indicador de paquete seleccionado -->
             @if (paqueteBaseSeleccionado()) {
-            <p class="mt-1 text-xs text-green-600 flex items-center gap-1">
+            <p class="mt-1 text-xs text-success flex items-center gap-1">
                 <app-icon name="checkCircle" size="14" />
                 Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
             </p>
@@ -163,22 +163,21 @@
                     Fecha de inicio <span class="text-red-500">*</span>
                 </label>
                 <input title="Fecha de inicio" type="date" [ngModel]="fechaInicio()"
-                    (ngModelChange)="fechaInicio.set($event)"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                    (ngModelChange)="fechaInicio.set($event)" class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors" />
             </div>
             <div>
                 <label class="block text-gray-700 font-body font-medium mb-1">
                     Fecha de fin <span class="text-red-500">*</span>
                 </label>
                 <input title="Fecha de fin" type="date" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-300" />
+                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors" />
             </div>
         </div>
 
         <!-- ────────────────────────────────────── -->
         <!-- CANTIDAD DE PRODUCTOS + DESCUENTO      -->
         <!-- ────────────────────────────────────── -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+        <div class=" grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <app-input [ngModel]="cantProductos()" (ngModelChange)="cantProductos.set($event)" [typeValue]="'number'"
                 [labelValue]="'Cantidad total de productos'" [placeholderValue]="'Ej: 30'" [minValue]="1" />
             <app-input [ngModel]="descuento()" (ngModelChange)="setDescuento($event)" [typeValue]="'number'"

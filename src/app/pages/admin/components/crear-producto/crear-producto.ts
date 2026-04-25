@@ -524,8 +524,8 @@ if (tipoBackend) {
             `,
             icon: 'success',
             showCancelButton: true,
-            confirmButtonColor: '#2E608C',
-            cancelButtonColor: '#9ca3af',
+            confirmButtonColor: 'var(--brand-secondary)',
+            cancelButtonColor: 'var(--text-muted)',
             confirmButtonText: 'Sí, configurar',
             cancelButtonText: 'Más tarde'
           }).then((result) => {
@@ -559,7 +559,7 @@ if (tipoBackend) {
               </p>
             `,
             icon: 'warning',
-            confirmButtonColor: '#2E608C',
+            confirmButtonColor: 'var(--brand-secondary)',
             confirmButtonText: 'Entendido'
           }).then(() => {
             this.router.navigate(['/admin/administrar-productos']);
@@ -637,8 +637,8 @@ console.log('🎨 Plantilla:', plantilla);
       text: 'El producto quedará sin plantilla asociada',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#B92905',
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--error)',
       confirmButtonText: 'Sí, deseleccionar',
       cancelButtonText: 'Cancelar'
     }).then((result) => {

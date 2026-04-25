@@ -181,7 +181,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
       : this.successMessage()
         ? 'border-success focus:border-success focus:ring-2 focus:ring-success-light'
         : this.isFocused()
-          ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
+          ? 'border-brand-primary focus:ring-2 focus:ring-brand-primary/20'
           : 'border-gray-300 hover:border-gray-400';
 
     const disabledClass = this.isDisabled()

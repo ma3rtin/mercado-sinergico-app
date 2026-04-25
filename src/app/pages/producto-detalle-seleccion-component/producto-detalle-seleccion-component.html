@@ -241,22 +241,22 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--bg-raised);
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #71A8D9;
+    background: var(--brand-primary);
     border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #2E608C;
+    background: var(--brand-secondary);
   }
 
   /* Firefox */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #71A8D9 #f1f1f1;
+    scrollbar-color: var(--brand-primary) var(--bg-raised);
   }
 </style>

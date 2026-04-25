@@ -1,18 +1,14 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-body">
     <!-- Botón Volver -->
     <div class="mb-4">
-        <app-admin-back-button label="Volver al panel" />
+        <app-admin-back-button label="Volver al panel" route="/admin/perfil" />
     </div>
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <h1 class="text-3xl text-gray-900 font-display">Administrar plantillas</h1>
 
-        <app-button variant="primary" (click)="openCreateModal()">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                </path>
-            </svg>
+        <app-button variant="primary" (click)="openCreateModal()" iconStart="plus">
             Crear plantilla
         </app-button>
     </div>
@@ -59,7 +55,7 @@
                     <button (click)="duplicatePlantilla(plantilla)"
                         class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
                         title="Duplicar">
-                        <app-icon name="Layers" [size]="'20'" class="text-error" />
+                        <app-icon name="copy" [size]="'20'" class="text-primary" />
                     </button>
 
                     <!-- Editar -->

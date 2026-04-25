@@ -156,12 +156,13 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const e = estado.toLowerCase();
 
     const estilos: Record<string, string> = {
-      'pendiente':      'text-status-pending-text bg-status-pending-bg border-warning',
-      'pagado':         'text-status-active-text bg-status-active-bg border-success',
-      'reembolsado':    'text-text-secondary bg-status-neutral-bg border-border-default',
-      'en preparación': 'text-blue-700 bg-blue-50 border-blue-200',
-      'en camino':      'text-purple-700 bg-purple-50 border-purple-200',
-      'recibido':       'text-green-700 bg-green-50 border-green-200',
+      'pendiente': 'text-status-pending-text bg-status-pending-bg border-warning',
+      'pagado': 'text-status-active-text bg-status-active-bg border-success',
+      'reembolsado': 'text-text-secondary bg-status-neutral-bg border-border-default',
+      //un color distinto para cada estado dentro del styles.css:
+      'en preparación': 'text-secondary-text bg-secondary-bg border-secondary-bg',
+      'en camino': 'text-primary-bg bg-primary-bg border-primary-bg',
+      'recibido': 'text-success-text bg-success-bg border-success',
     };
 
     return Object.entries(estilos).find(([k]) => e === k)?.[1]
@@ -172,12 +173,12 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();
 
-    if (e === 'pagado')         return 'CheckCircle';
+    if (e === 'pagado') return 'CheckCircle';
     if (e === 'en preparación') return 'Package';
-    if (e === 'en camino')      return 'Truck';
-    if (e === 'recibido')       return 'CheckCircle';
-    if (e === 'reembolsado')    return 'RefreshCcw';
-    if (e === 'cancelado')      return 'XCircle';
+    if (e === 'en camino') return 'Truck';
+    if (e === 'recibido') return 'CheckCircle';
+    if (e === 'reembolsado') return 'RefreshCcw';
+    if (e === 'cancelado') return 'XCircle';
 
     return 'Clock'; // Pendiente u otros
   }
@@ -241,7 +242,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!this.puedeEditarCantidades) return;
     const input = event.target as HTMLInputElement;
     let valor = parseInt(input.value, 10);
-    
+
     if (isNaN(valor) || valor < 1) {
       input.value = '1';
       valor = 1;
@@ -253,7 +254,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       id_detalle: prod.id_detalle ?? prod.id,
       nuevaCantidad: valor
     };
-    
+
     this.setCantidadManual.emit(limpio);
   }
 

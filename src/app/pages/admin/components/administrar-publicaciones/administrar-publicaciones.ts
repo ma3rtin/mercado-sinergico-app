@@ -92,7 +92,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
-        confirmButtonColor: '#2E608C',
+        confirmButtonColor: 'var(--brand-secondary)',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
@@ -117,7 +117,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
         icon: 'error',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
+        confirmButtonColor: 'var(--error)',
         confirmButtonText: 'SÍ, CANCELAR',
         cancelButtonText: 'No, volver'
       }).then(result => {
@@ -154,8 +154,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#2E608C',
-        cancelButtonColor: '#9ca3af',
+        confirmButtonColor: 'var(--brand-secondary)',
+        cancelButtonColor: 'var(--text-muted)',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {

@@ -699,8 +699,8 @@ export class EditarProductoComponent implements OnInit {
               `,
             icon: 'success',
             showCancelButton: true,
-            confirmButtonColor: '#2E608C',
-            cancelButtonColor: '#9ca3af',
+            confirmButtonColor: 'var(--brand-secondary)',
+            cancelButtonColor: 'var(--text-muted)',
             confirmButtonText: 'Sí, configurar',
             cancelButtonText: 'Más tarde',
           }).then((result) => {
@@ -734,7 +734,7 @@ export class EditarProductoComponent implements OnInit {
                 </p>
               `,
             icon: 'warning',
-            confirmButtonColor: '#2E608C',
+            confirmButtonColor: 'var(--brand-secondary)',
             confirmButtonText: 'Entendido',
           }).then(() => {
             this.router.navigate(['/admin/administrar-productos']);
