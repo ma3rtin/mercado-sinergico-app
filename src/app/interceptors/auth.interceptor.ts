@@ -13,9 +13,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     // 🧩 Ignorar en entorno no browser (SSR)
     if (!isPlatformBrowser(platformId)) return next(req);
 
-    // 🚫 URLs públicas (sin autenticación)
-    const publicEndpoints = ['/login', '/registrarse', '/auth', '/firebase'];
-    if (publicEndpoints.some((url) => req.url.includes(url))) {
+    // 🚫 URLs públicas (sin autenticación de ningún tipo)
+    // Usamos regex para asegurar coincidencia exacta al final de la URL
+    const publicEndpoints = [/\/usuarios\/login$/, /\/usuarios\/registrar$/, /\/auth$/];
+    const isPublic = publicEndpoints.some((regex) => regex.test(req.url));
+
+    if (isPublic) {
         return next(req);
     }
 

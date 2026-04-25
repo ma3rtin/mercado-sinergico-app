@@ -98,7 +98,10 @@ export class PaqueteBannerComponent {
     if (!fechaFin) return null;
 
     const ahora = new Date();
-    const fecha = new Date(fechaFin);
+    const fechaStr = fechaFin.toString();
+    const fecha = (fechaStr.endsWith('Z') || fechaStr.includes('+'))
+      ? new Date(fechaStr)
+      : new Date(fechaStr + 'Z');
     const diferencia = fecha.getTime() - ahora.getTime();
 
     if (diferencia <= 0) return 'Finalizado';
@@ -149,7 +152,10 @@ export class PaqueteBannerComponent {
     if (!fechaFin) return false;
 
     const hoy = new Date();
-    const cierre = new Date(fechaFin);
+    const fechaStr = fechaFin.toString();
+    const cierre = (fechaStr.endsWith('Z') || fechaStr.includes('+'))
+      ? new Date(fechaStr)
+      : new Date(fechaStr + 'Z');
     const diasDiferencia = (cierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24);
 
     return diasDiferencia > 0 && diasDiferencia <= 2;
