@@ -111,6 +111,10 @@ export class PublicarPaqueteComponent implements OnInit {
   ngOnInit(): void {
     this.cargarZonas();
     this.cargarPaquetesIniciales();
+    
+    // Por defecto forzamos fecha de inicio a hoy y estado a Activo
+    this.fechaInicio.set(this.getHoyString());
+    this.estadoSeleccionado.set(2);
 
     // 🔍 Capturar baseId o duplicadoId de la URL para pre-selección
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -148,7 +152,10 @@ export class PublicarPaqueteComponent implements OnInit {
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
         this.busqueda.set(paquete.paqueteBase?.nombre ?? '');
         this.zonaSeleccionada.set(paquete.zonaId ?? null);
-        this.estadoSeleccionado.set(paquete.estado?.id_estado ?? null);
+        
+        // El estado siempre será Activo (2) salvo que no se pueda, pero forzamos 2 como default general o el que ya tenga.
+        // Como no se puede cambiar, mantenemos el que venga (si es edicion) o forzamos 2 si es duplicado.
+        this.estadoSeleccionado.set(this.isDuplicate() ? 2 : (paquete.estado?.id_estado ?? 2));
 
         // 🆕 Poblar nombre
         this.nombre.set(paquete.nombre ?? '');
@@ -169,7 +176,7 @@ export class PublicarPaqueteComponent implements OnInit {
         if (paquete.fecha_inicio) {
           const fi = new Date(paquete.fecha_inicio);
           this.fechaInicio.set(
-            this.isDuplicate() ? '' : fi.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
+            this.isDuplicate() ? this.getHoyString() : fi.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
           );
         }
         if (paquete.fecha_fin) {
@@ -458,13 +465,19 @@ export class PublicarPaqueteComponent implements OnInit {
     return new Date(new Date(`${dateStr}T00:00:00.000Z`).getTime() + offsetMs).toISOString();
   }
 
+  // --- Helper para obtener la fecha actual en formato YYYY-MM-DD para Argentina ---
+  private getHoyString(): string {
+    const today = new Date();
+    return today.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+  }
+
   // --- Reset formulario ---
   reiniciarFormulario(): void {
     this.busqueda.set('');
     this.paqueteBaseSeleccionado.set(null);
     this.zonaSeleccionada.set(null);
-    this.estadoSeleccionado.set(null);
-    this.fechaInicio.set('');
+    this.estadoSeleccionado.set(2);
+    this.fechaInicio.set(this.getHoyString());
     this.fechaFin.set('');
     this.cantProductos.set(null);
     this.nombre.set('');

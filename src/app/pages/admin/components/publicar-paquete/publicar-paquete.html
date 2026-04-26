@@ -3,6 +3,19 @@
         <app-admin-back-button label="Volver a gestionar publicaciones" route="/admin/administrar-publicaciones" />
     </div>
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
+        <!-- ────────────────────────────────────── -->
+        <!-- INFORMACIÓN FIJA                       -->
+        <!-- ────────────────────────────────────── -->
+        <div class="mb-6 p-4 bg-info-light border border-info text-info rounded-lg flex items-start gap-3">
+            <app-icon name="info" size="20" class="flex-shrink-0 mt-0.5" />
+            <div>
+                <p class="font-bold text-sm">Condiciones de publicación</p>
+                <p class="text-sm mt-1">
+                    El paquete se publicará en estado <strong>Activo</strong> y su <strong>fecha de inicio será
+                        hoy</strong> de manera automática. Estos valores no pueden ser modificados.
+                </p>
+            </div>
+        </div>
 
         <!-- Banner Edición / Duplicado -->
         @if (isEditMode()) {
@@ -17,8 +30,9 @@
                     publicación' }}
                 </p>
                 <p class="text-xs mt-1">
-                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes nuevas fechas de inicio y fin para que el paquete sea
-                    válido.' : 'Asegurate de establecer correctamente las fechas.' }}
+                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes una nueva fecha de fin para que el paquete sea
+                    válido. La fecha de inicio será hoy por defecto.' : 'Asegurate de establecer correctamente las
+                    fechas.' }}
                 </p>
             </div>
         </div>
@@ -136,14 +150,7 @@
             </div>
         </div>
 
-        <!-- ────────────────────────────────────── -->
-        <!-- ESTADO                                 -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6">
-            <app-select [labelValue]="'Estado'" [placeholderValue]="'Elegí un estado'" [optionsValue]="estadosOptions()"
-                [requiredValue]="true" [ngModel]="estadoSeleccionado()"
-                (valueChange)="estadoSeleccionado.set($event)" />
-        </div>
+
 
         <!-- ────────────────────────────────────── -->
         <!-- ZONA                                   -->
@@ -155,23 +162,11 @@
         </div>
 
         <!-- ────────────────────────────────────── -->
-        <!-- FECHAS                                 -->
+        <!-- FECHA DE FIN                           -->
         <!-- ────────────────────────────────────── -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label class="block text-gray-700 font-body font-medium mb-1">
-                    Fecha de inicio <span class="text-red-500">*</span>
-                </label>
-                <input title="Fecha de inicio" type="date" [ngModel]="fechaInicio()"
-                    (ngModelChange)="fechaInicio.set($event)" class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors" />
-            </div>
-            <div>
-                <label class="block text-gray-700 font-body font-medium mb-1">
-                    Fecha de fin <span class="text-red-500">*</span>
-                </label>
-                <input title="Fecha de fin" type="date" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)"
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors" />
-            </div>
+        <div class="mb-6 max-w-full">
+            <app-input [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" [typeValue]="'date'"
+                [labelValue]="'Fecha de cierre'" [requiredValue]="true" />
         </div>
 
         <!-- ────────────────────────────────────── -->
