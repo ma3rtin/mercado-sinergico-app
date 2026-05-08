@@ -4,14 +4,11 @@ import {
   OnInit,
   AfterViewChecked,
   ViewChild,
-  HostListener,
   DestroyRef,
-  effect,
   signal,
   inject,
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Router } from '@angular/router';
@@ -30,12 +27,14 @@ import {
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
+import { computed } from '@angular/core';
 
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, HttpClientModule, AdminCreateWrapperComponent, SelectorTipoCardComponent, AdminBackButtonComponent],
+  imports: [FormsModule, AdminCreateWrapperComponent, SelectorTipoCardComponent, AdminBackButtonComponent, SelectComponent],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
@@ -78,13 +77,18 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   busquedaProducto = signal<string>('');
   resultadosBusqueda = signal<Producto[]>([]);
   productosSeleccionados = signal<Producto[]>([]);
-
-  page = signal<number>(0);
-  limit = 10;
-  cargando = signal<boolean>(false);
-  finResultados = signal<boolean>(false);
-  sinResultados = signal<boolean>(false);
   creandoPaquete = signal<boolean>(false);
+
+  selectedProductoId = signal<number | null>(null);
+  productosOptions = computed<SelectOption[]>(() => {
+    const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id_producto));
+    return this.resultadosBusqueda()
+      .filter(p => !seleccionadosIds.has(p.id_producto))
+      .map(p => ({
+        value: p.id_producto,
+        label: `${p.nombre} - $${p.precio}`
+      }));
+  });
 
   // 🧩 ViewChilds
   @ViewChild('sentinel', { static: false }) sentinel?: ElementRef<HTMLDivElement>;
@@ -94,7 +98,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
   private observer?: IntersectionObserver;
   private lazyInitialized = false;
-   private toast = inject(ToastService);
+  private toast = inject(ToastService);
 
   constructor(
     private paqueteBaseService: PaqueteBaseService,
@@ -103,25 +107,15 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     private productoService: ProductosService,
     private destroyRef: DestroyRef,
     private router: Router
-  ) {
-    // 🔄 Efecto opcional: reacciona cuando cambia el texto de búsqueda
-    effect(() => {
-      const query = this.busquedaProducto().trim();
-      if (query.length > 2) this.buscarProductos(true);
-    });
-  }
+  ) { }
 
   ngOnInit(): void {
     this.cargarMarcas();
     this.cargarCategorias();
+    this.cargarTodosLosProductos();
   }
 
-  ngAfterViewChecked(): void {
-    if (!this.lazyInitialized && this.resultadosBusqueda().length > 0 && this.sentinel && this.scrollContainer) {
-      this.configurarLazyLoading();
-      this.lazyInitialized = true;
-    }
-  }
+  ngAfterViewChecked(): void { }
 
   // 🔄 Cargar datos base
   private cargarMarcas(): void {
@@ -164,89 +158,27 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     this.imagenSeleccionada.set(file);
   }
 
-  // 🔍 Buscar productos
-  buscarProductos(reset = true): void {
-    const query = this.busquedaProducto().trim();
-    if (this.cargando() || (!reset && this.finResultados())) return;
+  private cargarTodosLosProductos(): void {
+    this.productoService.getProductos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => this.resultadosBusqueda.set(data),
+      error: (err) => console.error('Error al obtener productos:', err),
+    });
+  }
 
-    if (reset) {
-      this.page.set(0);
-      this.resultadosBusqueda.set([]);
-      this.finResultados.set(false);
-      this.lazyInitialized = false;
-      this.observer?.disconnect();
+  onSelectProducto(id: number | null): void {
+    if (!id) return;
+    const prod = this.resultadosBusqueda().find(p => p.id_producto === id);
+    if (prod) {
+      this.productosSeleccionados.set([...this.productosSeleccionados(), prod]);
     }
-
-    this.cargando.set(true);
-
-    this.productoService
-      .getProductosFiltrados(query, this.page() * this.limit, this.limit)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          const idsSeleccionados = new Set(this.productosSeleccionados().map((p) => p.id_producto!));
-          const nuevos = data.filter((p) => !idsSeleccionados.has(p.id_producto!));
-          if (nuevos.length < this.limit) this.finResultados.set(true);
-
-          this.resultadosBusqueda.set([...this.resultadosBusqueda(), ...nuevos]);
-          this.page.update((p) => p + 1);
-          this.cargando.set(false);
-          this.sinResultados.set(this.resultadosBusqueda().length === 0 && !this.cargando());
-        },
-        error: (err) => {
-          console.error('Error al buscar productos:', err);
-          this.cargando.set(false);
-          this.toast.error('Error al buscar productos: ' + (err.error?.message || 'Error de red'));
-        },
-      });
-  }
-
-  reabrirBusqueda(): void {
-    if (this.resultadosBusqueda().length === 0 || this.busquedaProducto().trim().length > 0) {
-      this.buscarProductos(true);
-    }
-  }
-
-  // 🧠 Lazy loading
-  private configurarLazyLoading(): void {
-    const sentinelEl = this.sentinel?.nativeElement;
-    const scrollEl = this.scrollContainer?.nativeElement;
-    if (!sentinelEl || !scrollEl) return;
-
-    this.observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !this.finResultados() && !this.cargando()) {
-          this.buscarProductos(false);
-        }
-      },
-      { root: scrollEl, rootMargin: '0px 0px 100px 0px', threshold: 0.1 }
-    );
-
-    this.observer.observe(sentinelEl);
-  }
-
-  // 📦 Gestión de productos
-  agregarProducto(producto: Producto): void {
-    this.productosSeleccionados.set([...this.productosSeleccionados(), producto]);
-    this.resultadosBusqueda.set(this.resultadosBusqueda().filter((p) => p.id_producto !== producto.id_producto));
-
-    this.busquedaProducto.set('');
-    this.resultadosBusqueda.set([]);
-    this.sinResultados.set(false);
-    this.inputBusqueda?.nativeElement.blur();
+    // Limpiar selección para permitir agregar otro
+    setTimeout(() => this.selectedProductoId.set(null), 50);
   }
 
   eliminarProducto(index: number): void {
     const actual = [...this.productosSeleccionados()];
-    const eliminado = actual[index];
     actual.splice(index, 1);
     this.productosSeleccionados.set(actual);
-
-    const query = this.busquedaProducto().trim().toLowerCase();
-    if (query && eliminado.nombre.toLowerCase().includes(query)) {
-      this.resultadosBusqueda.set([eliminado, ...this.resultadosBusqueda()]);
-      this.sinResultados.set(false);
-    }
   }
 
   // 🧾 Crear paquete
@@ -313,22 +245,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
     this.productosSeleccionados.set([]);
     this.imagenSeleccionada.set(null);
-    this.imagenError.set(null);
-    this.resultadosBusqueda.set([]);
-    this.finResultados.set(false);
-    this.sinResultados.set(false);
-
     const inputElement = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputElement) inputElement.value = '';
-  }
-
-  // 📤 Click fuera
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (this.inputBusqueda?.nativeElement.contains(target) || this.scrollContainer?.nativeElement.contains(target))
-      return;
-    this.resultadosBusqueda.set([]);
-    this.sinResultados.set(false);
   }
 }

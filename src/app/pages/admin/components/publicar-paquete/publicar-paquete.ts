@@ -382,14 +382,19 @@ export class PublicarPaqueteComponent implements OnInit {
     }
 
     // Construir Payload JSON
+    // NOTA: estadoId NO se incluye en updates — el estado se gestiona con acciones específicas
     const payload: any = {
       nombre: this.nombre().trim(),
       paqueteBaseId: Number(this.paqueteBaseSeleccionado()!),
-      estadoId: Number(this.estadoSeleccionado()!),
       zonaId: Number(this.zonaSeleccionada()!),
       fecha_inicio: this.argentinaDateToUTCIso(this.fechaInicio()),
       fecha_fin: this.argentinaDateToUTCIso(this.fechaFin()),
     };
+
+    // En creación nueva, sí forzamos estado Activo por nombre
+    if (!this.isEditMode()) {
+      payload.estadoNombre = 'Activo';
+    }
 
     if (this.cantProductos() !== null) {
       payload.cant_productos = Number(this.cantProductos());
@@ -400,7 +405,7 @@ export class PublicarPaqueteComponent implements OnInit {
 
     const slot = this.imagenSlot();
     if (slot.preview && !slot.isExisting) {
-      payload.imagen_base64 = slot.preview; // Enviar como base64 si el backend lo soporta
+      payload.imagen_base64 = slot.preview;
     }
 
     const editId = this.editId();
@@ -448,6 +453,30 @@ export class PublicarPaqueteComponent implements OnInit {
       const parsed = Number(value);
       this.descuento.set(isNaN(parsed) ? null : parsed);
     }
+  }
+
+  // --- Descartar duplicacion: elimina la publicacion duplicada y vuelve al listado ---
+  descartarDuplicacion(): void {
+    const id = this.editId();
+    if (!id) {
+      this.router.navigate(['/admin/administrar-publicaciones']);
+      return;
+    }
+    this.cargando.set(true);
+    this.paquetePublicadoService.descartarDuplicado(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.cargando.set(false);
+          this.toast.info('Duplicación descartada.', 'Cancelado');
+          this.router.navigate(['/admin/administrar-publicaciones']);
+        },
+        error: () => {
+          this.cargando.set(false);
+          this.toast.error('No se pudo descartar la duplicación.');
+          this.router.navigate(['/admin/administrar-publicaciones']);
+        }
+      });
   }
 
   // --- Convierte "YYYY-MM-DD" Argentina → UTC ISO string para medianoche ART ---

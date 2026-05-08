@@ -5,9 +5,9 @@ import {
   AfterViewChecked,
   ViewChild,
   DestroyRef,
-  effect,
   signal,
   inject,
+  computed,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -26,11 +26,13 @@ import { SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/select
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { InputComponent } from '@app/shared/input/input-component';
+import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 
 @Component({
   selector: 'app-editar-paquete-base',
   standalone: true,
-  imports: [FormsModule, AdminCreateWrapperComponent, ButtonComponent, IconComponent, AdminBackButtonComponent],
+  imports: [FormsModule, AdminCreateWrapperComponent, ButtonComponent, IconComponent, AdminBackButtonComponent, InputComponent, SelectComponent],
   templateUrl: './editar-paquete-base.html',
 })
 export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
@@ -68,7 +70,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
   productosSeleccionados = signal<Producto[]>([]);
-  
+
   imagenUrl = signal<string | null>(null);
   imagenSeleccionada = signal<File | null>(null);
   imagenError = signal<string | null>(null);
@@ -78,14 +80,21 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   isLoading = signal(true);
   guardando = signal(false);
 
+  selectedProductoId = signal<number | null>(null);
+  productosOptions = computed<SelectOption[]>(() => {
+    const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id_producto));
+    return this.resultadosBusqueda()
+      .filter(p => !seleccionadosIds.has(p.id_producto))
+      .map(p => ({
+        value: p.id_producto,
+        label: p.nombre
+      }));
+  });
+
   @ViewChild('inputBusqueda') inputBusqueda?: ElementRef<HTMLInputElement>;
   @ViewChild('scrollContainer') scrollContainer?: ElementRef<HTMLElement>;
 
-  constructor() {
-    effect(() => {
-      if (this.busquedaProducto().trim().length > 2) this.buscarProductos();
-    });
-  }
+  constructor() { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.params['id'];
@@ -96,11 +105,12 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     this.cargarListas();
   }
 
-  ngAfterViewChecked(): void {}
+  ngAfterViewChecked(): void { }
 
   cargarListas(): void {
     this.marcaService.getMarcas().subscribe(data => this.marcas.set(data));
     this.categoriaService.getCategorias().subscribe(data => this.categorias.set(data));
+    this.productoService.getProductos().subscribe(data => this.resultadosBusqueda.set(data));
   }
 
   cargarDatos(): void {
@@ -115,7 +125,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         this.marcaSeleccionada.set(p.marcaId || null);
         this.imagenUrl.set(p.imagen_url);
         this.tipoPaquete.set(p.tipo || TipoPaquete.SINERGICO);
-        
+
         // Cargar productos del paquete
         this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe(prods => {
           this.productosSeleccionados.set(prods);
@@ -125,16 +135,18 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  buscarProductos(): void {
-    this.productoService.getProductosFiltrados(this.busquedaProducto(), 0, 10).subscribe(data => {
-      this.resultadosBusqueda.set(data.filter(p => !this.productosSeleccionados().some(s => s.id_producto === p.id_producto)));
-    });
-  }
-
   agregarProducto(p: Producto): void {
     this.productosSeleccionados.update(prods => [...prods, p]);
-    this.busquedaProducto.set('');
-    this.resultadosBusqueda.set([]);
+  }
+
+  onSelectProducto(id: number | null): void {
+    if (!id) return;
+    const prod = this.resultadosBusqueda().find(p => p.id_producto === id);
+    if (prod) {
+      this.agregarProducto(prod);
+    }
+    // Limpiar selección para permitir agregar otro
+    setTimeout(() => this.selectedProductoId.set(null), 50);
   }
 
   eliminarProducto(index: number): void {

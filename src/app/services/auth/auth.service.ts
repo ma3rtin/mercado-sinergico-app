@@ -11,7 +11,7 @@ import {
   User
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { tap, filter } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -26,7 +26,7 @@ export class AuthService {
 
   // Exponemos el usuario como signal
   userSignal = toSignal(this.user$, { initialValue: null });
-  
+
   private jwtSignal = signal<string | null>(null);
   private firebaseTokenSignal = signal<string | null>(null);
   private sessionReadySignal = signal(false);

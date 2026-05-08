@@ -1,42 +1,18 @@
-<app-admin-create-wrapper [titulo]="isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
+<app-admin-create-wrapper
+    [titulo]="isDuplicate() ? 'Editando duplicación' : isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
     <div class="mb-3">
+        @if (isDuplicate()) {
+        <button type="button" (click)="descartarDuplicacion()"
+            class="flex items-center gap-2 text-text-muted hover:text-error transition-colors text-sm font-medium">
+            <app-icon name="arrowLeft" size="20" />
+            Descartar duplicación y volver
+        </button>
+        } @else {
         <app-admin-back-button label="Volver a gestionar publicaciones" route="/admin/administrar-publicaciones" />
+        }
     </div>
     <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
-        <!-- ────────────────────────────────────── -->
-        <!-- INFORMACIÓN FIJA                       -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6 p-4 bg-info-light border border-info text-info rounded-lg flex items-start gap-3">
-            <app-icon name="info" size="20" class="flex-shrink-0 mt-0.5" />
-            <div>
-                <p class="font-bold text-sm">Condiciones de publicación</p>
-                <p class="text-sm mt-1">
-                    El paquete se publicará en estado <strong>Activo</strong> y su <strong>fecha de inicio será
-                        hoy</strong> de manera automática. Estos valores no pueden ser modificados.
-                </p>
-            </div>
-        </div>
-
-        <!-- Banner Edición / Duplicado -->
-        @if (isEditMode()) {
-        <div class="mb-6 p-4 rounded-lg border flex items-start gap-3" [class.bg-blue-50]="!isDuplicate()"
-            [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
-            [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()"
-            [class.text-amber-800]="isDuplicate()">
-            <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
-            <div>
-                <p class="font-bold text-sm">
-                    {{ isDuplicate() ? 'Estás creando desde una publicación duplicada' : 'Estás editando una
-                    publicación' }}
-                </p>
-                <p class="text-xs mt-1">
-                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes una nueva fecha de fin para que el paquete sea
-                    válido. La fecha de inicio será hoy por defecto.' : 'Asegurate de establecer correctamente las
-                    fechas.' }}
-                </p>
-            </div>
-        </div>
-        }
+        <!-- Banners removidos de aquí para ponerlos encima de la fecha -->
 
         <!-- ────────────────────────────────────── -->
         <!-- NOMBRE DE LA PUBLICACIÓN               -->
@@ -109,36 +85,36 @@
             </label>
             <div class="flex items-start gap-4">
                 <!-- Slot único de imagen -->
-                <div class="relative w-36 h-36 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all flex-shrink-0"
+                <div class="relative w-36 h-36 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all flex-shrink-0 group"
                     [class.border-solid]="!imagenSlot().preview" [class.border-3]="!imagenSlot().preview"
                     [class.border-accent]="!imagenSlot().preview" [class.bg-yellow-50]="!imagenSlot().preview"
-                    [class.border-2]="!!imagenSlot().preview" [class.border-blue-400]="!!imagenSlot().preview">
+                    [class.border-2]="!!imagenSlot().preview" [class.border-blue-400]="!!imagenSlot().preview"
+                    (click)="fileInput.click()">
                     @if (imagenSlot().preview) {
                     <img [src]="imagenSlot().preview" alt="Imagen de la publicación"
-                        class="w-full h-full object-cover rounded-xl" />
+                        class="w-full h-full object-cover rounded-xl group-hover:opacity-90 transition-opacity" />
                     <!-- Badge Principal -->
                     <span
-                        class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10">
+                        class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
                         Principal
                     </span>
                     <!-- Botón eliminar -->
                     <button type="button" (click)="removeImage($event)"
-                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-10 transition-colors pointer-events-auto">×</button>
+                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-20 transition-colors">×</button>
                     <!-- Icono editar -->
                     <div
-                        class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-50 text-white text-xs px-2 py-1 rounded z-10">
-                        <app-icon name="Pencil" size="16" />
+                        class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded z-10 pointer-events-none group-hover:bg-opacity-90 transition-all hover:scale-105">
+                        <app-icon name="edit" size="16" />
                     </div>
                     } @else {
-                    <div class="text-center pointer-events-none">
-                        <app-icon name="Upload" size="32" class="text-gray-500" />
+                    <div class="text-center pointer-events-none group-hover:scale-105 transition-transform">
+                        <app-icon name="upload" size="32" class="text-gray-500 mx-auto" />
                         <p class="text-xs text-gray-500 mt-1">Imagen principal</p>
                     </div>
                     }
                     <!-- Input file oculto -->
-                    <input type="file" accept="image/jpeg,image/png,image/gif,image/webp"
-                        (change)="onFileSelected($event)"
-                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
+                    <input #fileInput type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                        (change)="onFileSelected($event)" class="hidden" />
                 </div>
 
                 <!-- Instrucciones -->
@@ -164,6 +140,37 @@
         <!-- ────────────────────────────────────── -->
         <!-- FECHA DE FIN                           -->
         <!-- ────────────────────────────────────── -->
+
+        <!-- ────────────────────────────────────── -->
+        <!-- INFORMACIÓN FIJA                       -->
+        <!-- ────────────────────────────────────── -->
+        <div class="mb-6 p-4 bg-info-light border border-info text-info rounded-lg flex items-start gap-3">
+            <app-icon name="info" size="20" class="flex-shrink-0 mt-0.5" />
+            <div>
+                <p class="font-bold text-sm">Condiciones de publicación</p>
+                <p class="text-sm mt-1">
+                    El paquete se publicará automáticamente en estado <strong>Activo</strong>.
+                </p>
+            </div>
+        </div>
+
+        <!-- Banner Edición / Duplicado -->
+        @if (isEditMode()) {
+        <div class="mb-6 p-4 rounded-lg border flex items-start gap-3" [class.bg-blue-50]="!isDuplicate()"
+            [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
+            [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()"
+            [class.text-amber-800]="isDuplicate()">
+            <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
+            <div>
+                <p class="font-bold text-sm">
+                    {{ isDuplicate() ? 'Estás creando desde una publicación duplicada' : 'Estás editando una publicación' }}
+                </p>
+                <p class="text-xs mt-1">
+                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes una nueva fecha de cierre para que el paquete sea válido.' : 'Asegurate de establecer correctamente la fecha de cierre.' }}
+                </p>
+            </div>
+        </div>
+        }
         <div class="mb-6 max-w-full">
             <app-input [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" [typeValue]="'date'"
                 [labelValue]="'Fecha de cierre'" [requiredValue]="true" />
@@ -183,7 +190,11 @@
         <!-- ────────────────────────────────────── -->
         <!-- BOTÓN                                  -->
         <!-- ────────────────────────────────────── -->
-        <div class="flex justify-center">
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+            @if (isDuplicate()) {
+            <app-button variant="danger" label="Descartar duplicación"
+                [disabled]="cargando()" (buttonClick)="descartarDuplicacion()" />
+            }
             <app-button variant="primary" [label]="isEditMode() ? 'Guardar cambios' : 'Publicar paquete'"
                 [loading]="cargando()" [disabled]="cargando()" (buttonClick)="publicarPaquete()" />
         </div>
