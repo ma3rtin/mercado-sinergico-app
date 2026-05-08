@@ -104,7 +104,7 @@
                 }
             </div>
             } @empty {
-            <div class="px-4 py-3 text-sm text-gray-500 text-center">No se encontraron opciones</div>
+            <div class="px-4 py-3 text-sm text-gray-500 text-center">{{ emptyMessage() }}</div>
             }
             } @else {
             <!-- Grouped Options -->
@@ -133,7 +133,7 @@
                 }
             </div>
             } @empty {
-            <div class="px-4 py-3 text-sm text-gray-500 text-center">No se encontraron opciones</div>
+            <div class="px-4 py-3 text-sm text-gray-500 text-center">{{ emptyMessage() }}</div>
             }
             }
         </div>

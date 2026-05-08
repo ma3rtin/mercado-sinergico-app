@@ -61,6 +61,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   helperText = signal<string>('');
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
+  emptyMessage = signal<string>('No se encontraron opciones');
   size = signal<SelectSize>('md');
 
   // 🔧 Configuración funcional
@@ -246,6 +247,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   @Input() set helperTextValue(value: string) { this.helperText.set(value); }
   @Input() set errorMessageValue(value: string) { this.errorMessage.set(value); }
   @Input() set successMessageValue(value: string) { this.successMessage.set(value); }
+  @Input() set emptyMessageValue(value: string) { this.emptyMessage.set(value); }
   @Input() set sizeValue(value: SelectSize) { this.size.set(value); }
   @Input() set idValue(value: string) { this.selectId.set(value); }
   @Input() set requiredValue(value: boolean) { this.required.set(value); }

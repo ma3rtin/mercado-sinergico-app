@@ -139,7 +139,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   duplicarPaquete(paquete: PaquetePublicado) {
     this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
       next: (nuevoPaquete) => {
-        this.toast.success('Publicación duplicada con éxito');
+        this.toast.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
         this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toast.error('Error al duplicar la publicación')
