@@ -7,11 +7,12 @@ import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
 import { IconComponent } from '@app/shared/icono/icono';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, InfoTooltipComponent],
   templateUrl: './paquete-card.html',
   styleUrl: './paquete-card.css',
 })
