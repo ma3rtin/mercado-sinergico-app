@@ -18,6 +18,17 @@
     <div class="hidden sm:block absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent"></div>
   </div>
 
+  <!-- 📍 BADGE DE ZONA (Corner) -->
+  @if (zonaNombre()) {
+  <div class="absolute top-2 right-2 sm:top-3 sm:right-3 z-20">
+    <span
+      class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-brand-primary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-md shadow-lg border border-white/20">
+      <app-icon name="mapPin" [size]="'16'" />
+      {{ zonaNombre() }}
+    </span>
+  </div>
+  }
+
   <!-- 📝 CONTENIDO PRINCIPAL -->
   <div
     class="relative z-10 p-6 sm:p-8 lg:p-10 min-h-[320px] sm:min-h-[380px] lg:min-h-[420px] flex flex-col justify-end">
@@ -37,24 +48,15 @@
 
         <!-- Tipo de Paquete -->
         <span
-          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/90 text-gray-900 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+          [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + tipoBadgeClass()">
           <app-icon [name]="iconoTipo()" [size]="'16'" />
           {{ textoTipo() }}
         </span>
 
-        <!-- Zona -->
-        @if (zonaNombre()) {
-        <span
-          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-          <app-icon name="mapPin" [size]="'16'" />
-          {{ zonaNombre() }}
-        </span>
-        }
-
         <!-- Marca -->
         @if (marcaNombre()) {
         <span
-          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary-dark/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-brand-secondary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
           <app-icon name="Award" [size]="'16'" />
           {{ marcaNombre() }}
         </span>
@@ -68,6 +70,7 @@
           {{ categoriaNombre() }}
         </span>
         }
+
       </div>
     </div>
 

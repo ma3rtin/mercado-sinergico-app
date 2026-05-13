@@ -63,8 +63,8 @@ export class PaqueteBannerComponent {
   // Icono del tipo de paquete
   iconoTipo = computed(() => {
     const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'zap';
-    if (tipo === TipoPaquete.ENERGICO) return 'battery';
+    if (tipo === TipoPaquete.SINERGICO) return 'users';
+    if (tipo === TipoPaquete.ENERGICO) return 'zap';
     return 'package';
   });
 
@@ -76,17 +76,25 @@ export class PaqueteBannerComponent {
     return 'Por Definir';
   });
 
+  // Color del badge de tipo
+  tipoBadgeClass = computed(() => {
+    const tipo = this.tipoPaquete();
+    if (tipo === TipoPaquete.SINERGICO) return 'bg-brand-secondary text-white';
+    if (tipo === TipoPaquete.ENERGICO) return 'bg-brand-cta text-gray-900';
+    return 'bg-white/90 text-gray-900';
+  });
+
   // Color del badge de estado
   estadoBadgeClass = computed(() => {
     const estado = this.estadoNombre().toLowerCase();
 
-    if (estado.includes('activo') || estado.includes('abierto')) {
-      return 'bg-primary text-white';
+    if (estado.includes('activo') || estado.includes('abierto') || estado.includes('disponible')) {
+      return 'bg-success text-white';
     }
     if (estado.includes('pend')) {
       return 'bg-warning text-white';
     }
-    if (estado.includes('cerr')) {
+    if (estado.includes('cerr') || estado.includes('finalizado')) {
       return 'bg-error text-white';
     }
     return 'bg-gray-500/90 text-white';
