@@ -52,11 +52,19 @@ export class SelectorVariantesComponent {
   // 🧩 COMPUTED - Datos derivados
 
   /**
-   * Verifica si el producto tiene plantilla con variantes
+   * Verifica si el producto tiene plantilla con características
    */
   tieneVariantes = computed(() => {
     const prod = this.producto();
     return !!(prod.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+  });
+
+  /**
+   * Verifica si existen variantes activas armables
+   */
+  tieneVariantesFormables = computed(() => {
+    const variantes = this.producto().variantes || [];
+    return variantes.some(v => v.activo !== false);
   });
 
   /**
@@ -186,10 +194,29 @@ export class SelectorVariantesComponent {
       }
 
       // Si no, la selecciona
-      return {
+      const next = {
         ...current,
         [caracteristicaId]: opcionId
       };
+
+      // Validamos si la nueva combinación existe en alguna variante activa.
+      // Si no existe, limpiamos las otras selecciones para no bloquear al usuario.
+      const variantes = this.producto().variantes || [];
+      if (variantes.length > 0) {
+        const existeAlgunaVariante = variantes.some(variante => {
+          if (variante.activo === false) return false;
+          return Object.entries(next).every(([cId, oId]) =>
+            variante.opciones.some(op => op.caracteristicaId === Number(cId) && op.opcionId === oId)
+          );
+        });
+
+        if (!existeAlgunaVariante) {
+          // La combinación choca. Conservamos solo la nueva selección.
+          return { [caracteristicaId]: opcionId };
+        }
+      }
+
+      return next;
     });
   }
 
@@ -217,7 +244,7 @@ export class SelectorVariantesComponent {
   esOpcionCombinable(caracteristicaId: number, opcionId: number): boolean {
     const seleccionadas = this.seleccionadas();
     const variantes = this.producto().variantes || [];
-    if (variantes.length === 0) return true;
+    if (variantes.length === 0) return false;
 
     // Simular cómo quedaría la selección incluyendo la opción que estamos evaluando
     const seleccionSimulada = { ...seleccionadas, [caracteristicaId]: opcionId };

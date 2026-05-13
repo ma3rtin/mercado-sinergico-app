@@ -56,120 +56,131 @@
   </div>
   }
 
-  <!-- 🎨 CARACTERÍSTICAS -->
-  <div class="space-y-6">
-    @for (caracteristica of caracteristicas(); track caracteristica.id) {
-    <div [class]="getClasesContenedorCaracteristica(caracteristica)"
-      (mouseenter)="onMouseEnterCaracteristica(caracteristica.id!)" (mouseleave)="onMouseLeaveCaracteristica()">
+  <!-- ⚠️ SI NO HAY VARIANTES ACTIVAS -->
+  @if (!tieneVariantesFormables()) {
+    <div class="flex items-center gap-2 text-sm text-error bg-error-light p-4 rounded-lg border border-error-light">
+      <app-icon name="AlertTriangle" size="20" class="flex-shrink-0" />
+      <span>
+        Este producto no tiene opciones disponibles en este momento.
+      </span>
+    </div>
+  } @else {
 
-      <!-- Título de la característica -->
-      <div class="mb-3">
-        <div class="flex items-center justify-between">
-          <h4 class="text-base font-medium text-gray-900 capitalize">
-            {{ caracteristica.nombre }}
-          </h4>
+    <!-- 🎨 CARACTERÍSTICAS -->
+    <div class="space-y-6">
+      @for (caracteristica of caracteristicas(); track caracteristica.id) {
+      <div [class]="getClasesContenedorCaracteristica(caracteristica)"
+        (mouseenter)="onMouseEnterCaracteristica(caracteristica.id!)" (mouseleave)="onMouseLeaveCaracteristica()">
 
-          <!-- Opción seleccionada (si existe) -->
-          @if (getOpcionSeleccionada(caracteristica); as opcionSeleccionada) {
-          <span class="text-sm font-semibold text-brand-primary">
-            {{ opcionSeleccionada }}
-          </span>
-          }
-          @else {
-          <span class="text-sm text-gray-500 italic">
-            Sin seleccionar
-          </span>
-          }
-        </div>
-      </div>
+        <!-- Título de la característica -->
+        <div class="mb-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-base font-medium text-gray-900 capitalize">
+              {{ caracteristica.nombre }}
+            </h4>
 
-      <!-- Grid de opciones -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
-        @for (opcion of caracteristica.opciones; track opcion.id) {
-        <button type="button" [disabled]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
-          [class.opacity-40]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
-          [class.cursor-not-allowed]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
-          [class]="getClasesBotonOpcion(caracteristica.id!, opcion.id!)"
-          [title]="!esOpcionCombinable(caracteristica.id!, opcion.id!) ? 'Combinación agotada o inexistente' : ''"
-          (click)="seleccionarOpcion(caracteristica.id!, opcion.id!)">
-
-          <!-- Contenido del botón -->
-          <div class="flex items-center justify-center gap-2">
-            <!-- Texto de la opción -->
-            <span class="text-sm sm:text-base truncate"
-              [class.line-through]="!esOpcionCombinable(caracteristica.id!, opcion.id!)">
-              {{ opcion.nombre }}
+            <!-- Opción seleccionada (si existe) -->
+            @if (getOpcionSeleccionada(caracteristica); as opcionSeleccionada) {
+            <span class="text-sm font-semibold text-brand-primary">
+              {{ opcionSeleccionada }}
             </span>
-
-            <!-- Check icon (solo si está seleccionada) -->
-            @if (mostrarCheckIcon(caracteristica.id!, opcion.id!)) {
-            <app-icon name="CheckCircle" class="w-4 h-4 sm:w-5 sm:h-5 text-brand-primary flex-shrink-0" />
+            }
+            @else {
+            <span class="text-sm text-gray-500 italic">
+              Sin seleccionar
+            </span>
             }
           </div>
+        </div>
 
-          <!-- Indicador de selección (borde animado) -->
-          @if (estaSeleccionada(caracteristica.id!, opcion.id!)) {
-          <div class="absolute inset-0 rounded-lg border-2 border-brand-primary animate-pulse"></div>
+        <!-- Grid de opciones -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
+          @for (opcion of caracteristica.opciones; track opcion.id) {
+          <button type="button" [disabled]="!habilitado()"
+            [class.opacity-40]="!habilitado() || !esOpcionCombinable(caracteristica.id!, opcion.id!)"
+            [class.cursor-not-allowed]="!habilitado()"
+            [class]="getClasesBotonOpcion(caracteristica.id!, opcion.id!)"
+            [title]="!esOpcionCombinable(caracteristica.id!, opcion.id!) ? 'Combinación agotada (limpiará otras selecciones)' : ''"
+            (click)="seleccionarOpcion(caracteristica.id!, opcion.id!)">
+
+            <!-- Contenido del botón -->
+            <div class="flex items-center justify-center gap-2">
+              <!-- Texto de la opción -->
+              <span class="text-sm sm:text-base truncate"
+                [class.line-through]="!esOpcionCombinable(caracteristica.id!, opcion.id!)">
+                {{ opcion.nombre }}
+              </span>
+
+              <!-- Check icon (solo si está seleccionada) -->
+              @if (mostrarCheckIcon(caracteristica.id!, opcion.id!)) {
+              <app-icon name="CheckCircle" class="w-4 h-4 sm:w-5 sm:h-5 text-brand-primary flex-shrink-0" />
+              }
+            </div>
+
+            <!-- Indicador de selección (borde animado) -->
+            @if (estaSeleccionada(caracteristica.id!, opcion.id!)) {
+            <div class="absolute inset-0 rounded-lg border-2 border-brand-primary animate-pulse"></div>
+            }
+          </button>
           }
-        </button>
+        </div>
+
+        <!-- Ayuda contextual (solo mobile, si no tiene selección) -->
+        @if (!tieneSeleccion(caracteristica.id!)) {
+        <p class="mt-2 text-xs text-gray-500 sm:hidden flex items-center gap-1">
+          <app-icon name="Info" class="w-3.5 h-3.5" />
+          Tocá una opción para seleccionar
+        </p>
         }
       </div>
+      }
+    </div>
 
-      <!-- Ayuda contextual (solo mobile, si no tiene selección) -->
-      @if (!tieneSeleccion(caracteristica.id!)) {
-      <p class="mt-2 text-xs text-gray-500 sm:hidden flex items-center gap-1">
-        <app-icon name="Info" class="w-3.5 h-3.5" />
-        Tocá una opción para seleccionar
-      </p>
+    <!-- ⚠️ ADVERTENCIA SI FALTAN SELECCIONES -->
+    @if (habilitado() && !todasSeleccionadas()) {
+    <div class="flex items-start gap-3 p-3 bg-warning-light border border-warning-light rounded-lg">
+      <app-icon name="AlertTriangle" size="20" class="text-warning flex-shrink-0 mt-0.5" />
+      <div class="flex-1">
+        <p class="text-sm font-medium text-warning">
+          Seleccioná todas las opciones para continuar
+        </p>
+        <p class="mt-1 text-xs text-warning">
+          @if (caracteristicasFaltantes() === 1) {
+          Falta elegir {{ caracteristicasFaltantes() }} opción
+          }
+          @else {
+          Faltan elegir {{ caracteristicasFaltantes() }} opciones
+          }
+        </p>
+      </div>
+    </div>
+    }
+
+    <!-- ✅ CONFIRMACIÓN O ❌ ADVERTENCIA (Ambos requieren todas seleccionadas) -->
+    @if (todasSeleccionadas()) {
+    <div class="hidden sm:block">
+      <!-- Check de éxito solo si existe la variante -->
+      @if (varianteValida()) {
+      <div class="flex items-center gap-2 text-sm text-gray-600">
+        <app-icon name="Check" size="16" class="text-success" />
+        <span>
+          Todas las opciones seleccionadas. Podés continuar con tu compra.
+        </span>
+      </div>
+      }
+
+      <!-- Advertencia de Variante inexistente -->
+      @if (!varianteValida()) {
+      <div class="flex items-center gap-2 text-sm text-error bg-error-light p-3 rounded-lg border border-error-light mt-4">
+        <app-icon name="AlertTriangle" size="20" class="flex-shrink-0" />
+        <span>
+          Esta combinación de opciones se encuentra <b>agotada o no existe</b> para este producto. Por favor, selecciona
+          otra.
+        </span>
+      </div>
       }
     </div>
     }
-  </div>
-
-  <!-- ⚠️ ADVERTENCIA SI FALTAN SELECCIONES -->
-  @if (habilitado() && !todasSeleccionadas()) {
-  <div class="flex items-start gap-3 p-3 bg-warning-light border border-warning-light rounded-lg">
-    <app-icon name="AlertTriangle" size="20" class="text-warning flex-shrink-0 mt-0.5" />
-    <div class="flex-1">
-      <p class="text-sm font-medium text-warning">
-        Seleccioná todas las opciones para continuar
-      </p>
-      <p class="mt-1 text-xs text-warning">
-        @if (caracteristicasFaltantes() === 1) {
-        Falta elegir {{ caracteristicasFaltantes() }} opción
-        }
-        @else {
-        Faltan elegir {{ caracteristicasFaltantes() }} opciones
-        }
-      </p>
-    </div>
-  </div>
-  }
-
-  <!-- ✅ CONFIRMACIÓN O ❌ ADVERTENCIA (Ambos requieren todas seleccionadas) -->
-  @if (todasSeleccionadas()) {
-  <div class="hidden sm:block">
-    <!-- Check de éxito solo si existe la variante -->
-    @if (varianteValida()) {
-    <div class="flex items-center gap-2 text-sm text-gray-600">
-      <app-icon name="Check" size="16" class="text-success" />
-      <span>
-        Todas las opciones seleccionadas. Podés continuar con tu compra.
-      </span>
-    </div>
-    }
-
-    <!-- Advertencia de Variante inexistente -->
-    @if (!varianteValida()) {
-    <div class="flex items-center gap-2 text-sm text-error bg-error-light p-3 rounded-lg border border-error-light mt-4">
-      <app-icon name="AlertTriangle" size="20" class="flex-shrink-0" />
-      <span>
-        Esta combinación de opciones se encuentra <b>agotada o no existe</b> para este producto. Por favor, selecciona
-        otra.
-      </span>
-    </div>
-    }
-  </div>
   }
 </div>
 }
