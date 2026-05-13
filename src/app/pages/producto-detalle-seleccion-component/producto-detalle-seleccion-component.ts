@@ -75,11 +75,26 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   paginaActual = signal<number>(1);
   itemsPorPagina = signal<number>(12);
 
+  // 🎯 Filtro de Tipo de Paquete
+  filtroTipoPaquete = signal<'TODOS' | 'SINERGICO' | 'ENERGICO'>('TODOS');
+
+  // 📊 Computed Signals
+  paquetesDelProducto = computed(() => {
+    const todos = this.todosLosPaquetes();
+    const filtro = this.filtroTipoPaquete();
+
+    if (filtro === 'TODOS') {
+      return todos;
+    }
+
+    return todos.filter(p => p.tipo === filtro);
+  });
+
   // 📊 COMPUTED: Paquetes paginados
   paquetesPaginados = computed(() => {
     const page = this.paginaActual();
     const perPage = this.itemsPorPagina();
-    const filtrados = this.todosLosPaquetes();
+    const filtrados = this.paquetesDelProducto();
 
     const start = (page - 1) * perPage;
     const end = start + perPage;
@@ -89,19 +104,21 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
   // 📊 COMPUTED: Total de items para la paginación
   totalItemsPaginacion = computed(() => {
-    return this.todosLosPaquetes().length;
+    return this.paquetesDelProducto().length;
   });
-
-  // 📊 Computed Signals
-  paquetesDelProducto = computed(() => this.todosLosPaquetes());
 
   // Loading general
   isLoading = computed(
     () => this.isLoadingProducto() || this.isLoadingPaquetes()
   );
 
-  // Hay paquetes disponibles
+  // Hay paquetes disponibles en total (para la caja de info superior)
   hayPaquetesDisponibles = computed(
+    () => this.todosLosPaquetes().length > 0
+  );
+
+  // Hay paquetes disponibles con el filtro actual
+  hayPaquetesFiltrados = computed(
     () => this.paquetesDelProducto().length > 0
   );
 
@@ -220,6 +237,16 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     console.log('🔄 Recargando datos para producto ID:', productoId);
     this.errorMessage.set('');
     this.cargarDatos(productoId);
+  }
+
+  // 🎯 Cambiar Filtro
+  toggleFiltro(tipo: 'SINERGICO' | 'ENERGICO'): void {
+    if (this.filtroTipoPaquete() === tipo) {
+      this.filtroTipoPaquete.set('TODOS');
+    } else {
+      this.filtroTipoPaquete.set(tipo);
+    }
+    this.paginaActual.set(1); // Volver a la página 1 al filtrar
   }
 
   // 🧭 NAVEGACIÓN

@@ -114,7 +114,7 @@
                 </div>
                 <div>
                   <p class="text-base font-bold text-brand-secondary mb-1">
-                    Disponible en {{ totalItemsPaginacion() }} {{ totalItemsPaginacion() === 1 ? 'paquete' : 'paquetes'
+                    Disponible en {{ todosLosPaquetes().length }} {{ todosLosPaquetes().length === 1 ? 'paquete' : 'paquetes'
                     }}
                   </p>
                   <p class="text-sm text-brand-secondary/80 leading-snug">
@@ -150,13 +150,13 @@
 
         <!-- Toggle Sinérgico / Enérgico -->
         <div class="flex flex-wrap items-center gap-2 mt-4">
-          <app-button class="w-auto" [variant]="'tertiary'" (buttonClick)="recargarDatos()">
+          <app-button class="w-auto" [variant]="filtroTipoPaquete() === 'SINERGICO' ? 'primary' : 'tertiary'" (buttonClick)="toggleFiltro('SINERGICO')">
             <div class="flex items-center gap-2">
               <app-icon name="Users" size="18"></app-icon>
               <span>Sinérgico</span>
             </div>
           </app-button>
-          <app-button class="w-auto" [variant]="'tertiary'" (buttonClick)="recargarDatos()">
+          <app-button class="w-auto" [variant]="filtroTipoPaquete() === 'ENERGICO' ? 'primary' : 'tertiary'" (buttonClick)="toggleFiltro('ENERGICO')">
             <div class="flex items-center gap-2">
               <app-icon name="Zap" size="18"></app-icon>
               <span>Enérgico</span>
@@ -166,7 +166,7 @@
       </div>
 
       <!-- Grid de Paquetes -->
-      @if (hayPaquetesDisponibles()) {
+      @if (hayPaquetesFiltrados()) {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
         @for (paquete of paquetesPaginados(); track paquete.id_paquete_publicado) {
         <div class="transform transition-transform hover:scale-[1.02]">
@@ -199,11 +199,19 @@
 
           <!-- Mensaje -->
           <h3 class="text-xl font-bold text-gray-900 mb-3">
+            @if (filtroTipoPaquete() !== 'TODOS') {
+            No hay paquetes {{ filtroTipoPaquete() | lowercase }}s
+            } @else {
             No hay paquetes disponibles
+            }
           </h3>
           <p class="text-gray-600 mb-6">
+            @if (filtroTipoPaquete() !== 'TODOS') {
+            No encontramos paquetes de tipo {{ filtroTipoPaquete() | lowercase }} para este producto. Probá cambiando el filtro.
+            } @else {
             Por el momento, este producto no está incluido en ningún paquete activo.
             Te invitamos a explorar otros productos o volver más tarde.
+            }
           </p>
 
           <!-- Acciones -->
