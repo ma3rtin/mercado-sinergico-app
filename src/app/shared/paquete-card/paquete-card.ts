@@ -75,6 +75,13 @@ export class PaqueteCard implements OnInit {
     return 'text-gray-500 border-gray-400';
   }
 
+  /** Colores del badge de descuento (Sigue la misma lógica que el icono derecho) */
+  getDiscountBadgeClass(): string {
+    if (this.isEnergico()) return 'text-secondary-dark border-secondary-dark';
+    if (this.isSinergico()) return 'text-brand-primary border-brand-primary';
+    return 'text-gray-700 border-gray-400';
+  }
+
   /** Nombre formateado para el tooltip */
   getPackageTypeName(): string {
     return this.isSinergico() ? 'Paquete Sinérgico' : 'Paquete Enérgico';

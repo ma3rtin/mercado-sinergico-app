@@ -13,10 +13,14 @@
 
     <!-- Badge de descuento -->
     @if (paquete.descuento) {
-    <div class="absolute top-2 left-2 flex items-center gap-1
-            bg-white text-black text-xs font-bold
-            px-2.5 py-1 rounded-full shadow-md border-2 border-yellow-500">
-      {{ paquete.descuento }}% OFF
+    <div class="absolute top-3 left-3 z-10 transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3 origin-top-left">
+      <div class="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm 
+                  pl-2 pr-2.5 py-1 rounded-xl shadow-md border-2" [ngClass]="getDiscountBadgeClass()">
+        <app-icon name="Tag" size="14" [strokeWidth]="'3'"></app-icon>
+        <span class="font-black text-[13px] tracking-wider mt-px">
+          {{ paquete.descuento }}% <span class="font-bold text-[10px]">OFF</span>
+        </span>
+      </div>
     </div>
     }
 
