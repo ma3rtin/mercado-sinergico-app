@@ -31,14 +31,14 @@
     @if (caracteristicasFaltantes() > 0) {
     <span
       class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 bg-warning-light text-warning text-xs font-medium rounded-full">
-      <app-icon name="AlertTriangle" class="w-4 h-4" />
+      <app-icon name="AlertTriangle" size="16" />
       Faltan {{ caracteristicasFaltantes() }}
     </span>
     }
     @else {
     <span
       class="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 bg-success-light text-success text-xs font-medium rounded-full">
-      <app-icon name="CheckCircle" class="w-4 h-4" />
+      <app-icon name="CheckCircle" size="16" />
       Completo
     </span>
     }
@@ -48,7 +48,7 @@
   @if (habilitado() && todasSeleccionadas()) {
   <div class="hidden sm:flex items-center gap-2 p-3 rounded-lg border"
     [ngClass]="varianteValida() ? 'bg-success-light border-success-light' : 'bg-error-light border-error-light'">
-    <app-icon [name]="varianteValida() ? 'CheckCircle' : 'AlertTriangle'" class="w-5 h-5 flex-shrink-0"
+    <app-icon [name]="varianteValida() ? 'CheckCircle' : 'AlertTriangle'" size="20" class="flex-shrink-0"
       [ngClass]="varianteValida() ? 'text-success' : 'text-error'" />
     <span class="text-sm font-medium" [ngClass]="varianteValida() ? 'text-success' : 'text-error'">
       Seleccionaste: {{ textoVariantesSeleccionadas() }}
@@ -129,7 +129,7 @@
   <!-- ⚠️ ADVERTENCIA SI FALTAN SELECCIONES -->
   @if (habilitado() && !todasSeleccionadas()) {
   <div class="flex items-start gap-3 p-3 bg-warning-light border border-warning-light rounded-lg">
-    <app-icon name="AlertTriangle" class="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+    <app-icon name="AlertTriangle" size="20" class="text-warning flex-shrink-0 mt-0.5" />
     <div class="flex-1">
       <p class="text-sm font-medium text-warning">
         Seleccioná todas las opciones para continuar
@@ -152,7 +152,7 @@
     <!-- Check de éxito solo si existe la variante -->
     @if (varianteValida()) {
     <div class="flex items-center gap-2 text-sm text-gray-600">
-      <app-icon name="Check" class="w-4 h-4 text-success" />
+      <app-icon name="Check" size="16" class="text-success" />
       <span>
         Todas las opciones seleccionadas. Podés continuar con tu compra.
       </span>
@@ -162,7 +162,7 @@
     <!-- Advertencia de Variante inexistente -->
     @if (!varianteValida()) {
     <div class="flex items-center gap-2 text-sm text-error bg-error-light p-3 rounded-lg border border-error-light mt-4">
-      <app-icon name="AlertTriangle" class="w-5 h-5 flex-shrink-0" />
+      <app-icon name="AlertTriangle" size="20" class="flex-shrink-0" />
       <span>
         Esta combinación de opciones se encuentra <b>agotada o no existe</b> para este producto. Por favor, selecciona
         otra.
