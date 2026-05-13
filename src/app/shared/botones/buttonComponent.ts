@@ -102,7 +102,7 @@ export class ButtonComponent {
 
     // Variantes (Adaptadas usando variables CSS conectadas con styles.css)
     const variants: Record<ButtonVariant, string> = {
-      'primary': 'bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:bg-[var(--btn-primary-hover)] active:bg-[var(--btn-primary-active)] focus:ring-2 focus:ring-[var(--btn-primary-ring)] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
+      'primary': 'bg-[#FFD562] text-gray-900 hover:bg-[#FFB800] active:bg-[#FF9D00] focus:ring-2 focus:ring-[#FFE899] shadow-md hover:shadow-lg active:shadow-sm font-semibold',
       'secondary': 'bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-hover)] active:bg-[var(--btn-secondary-active)] focus:ring-2 focus:ring-[var(--btn-secondary-ring)] shadow-md hover:shadow-lg active:shadow-sm',
       'tertiary': 'bg-[var(--btn-tertiary-bg)] border-2 border-[var(--btn-tertiary-border)] text-[var(--btn-tertiary-text)] hover:bg-[var(--btn-tertiary-hover)] active:bg-[var(--btn-tertiary-active)] focus:ring-2 focus:ring-[var(--btn-tertiary-ring)]',
       'warning': 'bg-[var(--btn-warning-bg)] border-2 border-[var(--btn-warning-border)] text-[var(--btn-warning-text)] hover:bg-[var(--btn-warning-hover)] active:bg-[var(--btn-warning-active)] focus:ring-2 focus:ring-[var(--btn-warning-ring)]',
