@@ -51,6 +51,7 @@ export class Perfil implements OnInit {
       numero: [''],
       piso: [''],
       dpto: [''],
+      observaciones: [''],
     });
 
     this.form.valueChanges.subscribe(() => {
@@ -87,6 +88,7 @@ export class Perfil implements OnInit {
           numero: u.direccion?.numero || '',
           piso: u.direccion?.piso || '',
           dpto: u.direccion?.departamento || '',
+          observaciones: u.direccion?.observaciones || '',
         });
         this.inicializando = false;
         this.tieneCambios.set(false);
@@ -149,6 +151,7 @@ export class Perfil implements OnInit {
       if (v.numero) formData.append('numero', String(v.numero));
       if (v.piso) formData.append('piso', String(v.piso));
       if (v.dpto) formData.append('dpto', v.dpto);
+      formData.append('observaciones', v.observaciones ?? '');
       formData.append('imagen', this.selectedFile);
       this.enviarPerfil(formData);
     } else {
@@ -162,6 +165,7 @@ export class Perfil implements OnInit {
       if (v.numero) body['numero'] = Number(v.numero);
       if (v.piso) body['piso'] = Number(v.piso);
       if (v.dpto) body['dpto'] = v.dpto;
+      body['observaciones'] = v.observaciones;
       this.enviarPerfil(body);
     }
   }
