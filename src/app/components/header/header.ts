@@ -15,6 +15,7 @@ import { Drawer } from '../drawer/drawer';
 
 // Services
 import { AuthService } from '../../services/auth/auth.service';
+import { UsuarioService } from '../../services/usuario/usuario.service';
 import { BuscadorComponent } from '@app/shared/buscador/buscador';
 import { IconComponent } from '@app/shared/icono/icono';
 
@@ -33,8 +34,15 @@ import { IconComponent } from '@app/shared/icono/icono';
   styleUrl: './header.css',
 })
 export class Header {
+  constructor() {
+    // Intentar cargar el perfil si ya está logueado para activar la alerta si es necesario
+    if (this.authService.isAuthenticated()) {
+      this.usuarioService.getPerfil().subscribe();
+    }
+  }
   // 🔧 Servicios
   private authService = inject(AuthService);
+  private usuarioService = inject(UsuarioService);
   private router = inject(Router);
 
   // 🎯 Signals
@@ -43,6 +51,7 @@ export class Header {
 
   // 📊 Computed
   isLoggedIn = this.authService.isAuthenticated;
+  isProfileIncomplete = this.usuarioService.isProfileIncomplete;
 
   get isAdmin(): boolean {
     return this.authService.getUserRole()?.toLowerCase() === 'administrador';

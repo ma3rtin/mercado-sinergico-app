@@ -20,12 +20,16 @@
         <a [routerLink]="profileLink()" (click)="closeDrawer.emit()"
             class="flex items-center gap-3 active:scale-95 transition-transform cursor-pointer">
             <div
-                class="w-10 h-10 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white/50 shadow-sm overflow-hidden shrink-0">
+                [class.animate-pulse-red]="isProfileIncomplete()"
+                class="relative w-10 h-10 rounded-full bg-brand-cta flex items-center justify-center text-white border-2 border-white/50 shadow-sm shrink-0">
                 @if (userProfile()?.imagen_url || user()?.photoURL) {
                 <img [src]="userProfile()?.imagen_url || user()?.photoURL" alt="Profile"
-                    class="w-full h-full object-cover">
+                    class="w-full h-full object-cover rounded-full">
                 } @else {
                 <app-icon name="User" size="18"></app-icon>
+                }
+                @if (isProfileIncomplete()) {
+                  <span class="profile-alert-dot"></span>
                 }
             </div>
             <div class="min-w-0">

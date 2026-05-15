@@ -30,6 +30,7 @@ export class Drawer implements OnInit {
   user = this.authService.user;
   isLoggedIn = this.authService.isAuthenticated;
   userProfile = signal<Usuario | null>(null);
+  isProfileIncomplete = this.usuarioService.isProfileIncomplete;
 
   // 🔗 Links dinámicos
   profileLink = computed(() => {
