@@ -158,8 +158,8 @@ export class Perfil implements OnInit {
       if (v.localidad) body['localidad_id'] = Number(v.localidad);
       if (v.cp) body['cp'] = v.cp;
       if (v.calle) body['calle'] = v.calle;
-      if (v.numero) body['numero'] = v.numero;
-      if (v.piso) body['piso'] = v.piso;
+      if (v.numero) body['numero'] = Number(v.numero);
+      if (v.piso) body['piso'] = Number(v.piso);
       if (v.dpto) body['dpto'] = v.dpto;
       this.enviarPerfil(body);
     }
