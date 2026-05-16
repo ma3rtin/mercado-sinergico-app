@@ -37,7 +37,7 @@ export class UsuarioService extends ApiService {
   }
 
   loginWithFirebase(firebaseToken: string): Observable<FirebaseLoginResponse> {
-    return this.post<FirebaseLoginResponse>('login/firebase', { token: firebaseToken }).pipe(
+    return this.post<FirebaseLoginResponse>('usuarios/login-firebase', { token: firebaseToken }).pipe(
       tap(response => this.authService.setJwtToken(response.token)),
       timeout(30000),
       catchError(this.handleError('loginWithFirebase'))

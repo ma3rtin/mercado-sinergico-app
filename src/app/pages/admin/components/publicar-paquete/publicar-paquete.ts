@@ -30,6 +30,7 @@ interface ImageSlot {
   isExisting?: boolean;
 }
 
+
 @Component({
   selector: 'app-publicar-paquete',
   standalone: true,
@@ -110,6 +111,10 @@ export class PublicarPaqueteComponent implements OnInit {
   ngOnInit(): void {
     this.cargarZonas();
     this.cargarPaquetesIniciales();
+    
+    // Por defecto forzamos fecha de inicio a hoy y estado a Activo
+    this.fechaInicio.set(this.getHoyString());
+    this.estadoSeleccionado.set(2);
 
     // 🔍 Capturar baseId o duplicadoId de la URL para pre-selección
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -147,7 +152,10 @@ export class PublicarPaqueteComponent implements OnInit {
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
         this.busqueda.set(paquete.paqueteBase?.nombre ?? '');
         this.zonaSeleccionada.set(paquete.zonaId ?? null);
-        this.estadoSeleccionado.set(paquete.estado?.id_estado ?? null);
+        
+        // El estado siempre será Activo (2) salvo que no se pueda, pero forzamos 2 como default general o el que ya tenga.
+        // Como no se puede cambiar, mantenemos el que venga (si es edicion) o forzamos 2 si es duplicado.
+        this.estadoSeleccionado.set(this.isDuplicate() ? 2 : (paquete.estado?.id_estado ?? 2));
 
         // 🆕 Poblar nombre
         this.nombre.set(paquete.nombre ?? '');
@@ -167,11 +175,15 @@ export class PublicarPaqueteComponent implements OnInit {
 
         if (paquete.fecha_inicio) {
           const fi = new Date(paquete.fecha_inicio);
-          this.fechaInicio.set(this.isDuplicate() ? '' : fi.toISOString().split('T')[0]);
+          this.fechaInicio.set(
+            this.isDuplicate() ? this.getHoyString() : fi.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
+          );
         }
         if (paquete.fecha_fin) {
           const ff = new Date(paquete.fecha_fin);
-          this.fechaFin.set(this.isDuplicate() ? '' : ff.toISOString().split('T')[0]);
+          this.fechaFin.set(
+            this.isDuplicate() ? '' : ff.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })
+          );
         }
 
         this.cantProductos.set(paquete.cant_productos ?? null);
@@ -370,14 +382,19 @@ export class PublicarPaqueteComponent implements OnInit {
     }
 
     // Construir Payload JSON
+    // NOTA: estadoId NO se incluye en updates — el estado se gestiona con acciones específicas
     const payload: any = {
       nombre: this.nombre().trim(),
       paqueteBaseId: Number(this.paqueteBaseSeleccionado()!),
-      estadoId: Number(this.estadoSeleccionado()!),
       zonaId: Number(this.zonaSeleccionada()!),
-      fecha_inicio: new Date(this.fechaInicio()).toISOString(),
-      fecha_fin: new Date(this.fechaFin()).toISOString(),
+      fecha_inicio: this.argentinaDateToUTCIso(this.fechaInicio()),
+      fecha_fin: this.argentinaDateToUTCIso(this.fechaFin()),
     };
+
+    // En creación nueva, sí forzamos estado Activo por nombre
+    if (!this.isEditMode()) {
+      payload.estadoNombre = 'Activo';
+    }
 
     if (this.cantProductos() !== null) {
       payload.cant_productos = Number(this.cantProductos());
@@ -388,7 +405,7 @@ export class PublicarPaqueteComponent implements OnInit {
 
     const slot = this.imagenSlot();
     if (slot.preview && !slot.isExisting) {
-      payload.imagen_base64 = slot.preview; // Enviar como base64 si el backend lo soporta
+      payload.imagen_base64 = slot.preview;
     }
 
     const editId = this.editId();
@@ -438,13 +455,58 @@ export class PublicarPaqueteComponent implements OnInit {
     }
   }
 
+  // --- Descartar duplicacion: elimina la publicacion duplicada y vuelve al listado ---
+  descartarDuplicacion(): void {
+    const id = this.editId();
+    if (!id) {
+      this.router.navigate(['/admin/administrar-publicaciones']);
+      return;
+    }
+    this.cargando.set(true);
+    this.paquetePublicadoService.descartarDuplicado(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.cargando.set(false);
+          this.toast.info('Duplicación descartada.', 'Cancelado');
+          this.router.navigate(['/admin/administrar-publicaciones']);
+        },
+        error: () => {
+          this.cargando.set(false);
+          this.toast.error('No se pudo descartar la duplicación.');
+          this.router.navigate(['/admin/administrar-publicaciones']);
+        }
+      });
+  }
+
+  // --- Convierte "YYYY-MM-DD" Argentina → UTC ISO string para medianoche ART ---
+  private argentinaDateToUTCIso(dateStr: string): string {
+    const tz = 'America/Argentina/Buenos_Aires';
+    // Referencia: mediodía UTC garantiza la misma fecha en Argentina (siempre UTC-3 o menos)
+    const refUTC = new Date(`${dateStr}T12:00:00.000Z`);
+    const partes = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
+    }).formatToParts(refUTC);
+    const hora = Number(partes.find(p => p.type === 'hour')?.value ?? 12);
+    const min  = Number(partes.find(p => p.type === 'minute')?.value ?? 0);
+    // offsetMs = diferencia UTC − ART en ms (ej: (12*60 − 9*60) * 60000 = 10800000)
+    const offsetMs = ((12 * 60) - (hora * 60 + min)) * 60_000;
+    return new Date(new Date(`${dateStr}T00:00:00.000Z`).getTime() + offsetMs).toISOString();
+  }
+
+  // --- Helper para obtener la fecha actual en formato YYYY-MM-DD para Argentina ---
+  private getHoyString(): string {
+    const today = new Date();
+    return today.toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+  }
+
   // --- Reset formulario ---
   reiniciarFormulario(): void {
     this.busqueda.set('');
     this.paqueteBaseSeleccionado.set(null);
     this.zonaSeleccionada.set(null);
-    this.estadoSeleccionado.set(null);
-    this.fechaInicio.set('');
+    this.estadoSeleccionado.set(2);
+    this.fechaInicio.set(this.getHoyString());
     this.fechaFin.set('');
     this.cantProductos.set(null);
     this.nombre.set('');

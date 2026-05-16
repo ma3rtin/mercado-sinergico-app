@@ -62,7 +62,7 @@ export class ButtonComponent {
 
   // 🔔 Badges y notificaciones
   badge = input<number | undefined>(undefined);        // Número en badge
-  badgeColor = input<string>('bg-red-500');
+  badgeColor = input<string>('bg-error');
 
   // 🌐 Accesibilidad
   ariaLabel = input<string | undefined>(undefined);
@@ -120,7 +120,7 @@ export class ButtonComponent {
 
     // Estado selected
     const selectedClasses = this.selected()
-      ? 'ring-2 ring-offset-2 ring-blue-600 bg-blue-50'
+      ? 'ring-2 ring-offset-2 ring-brand-secondary bg-info-light'
       : '';
 
     // Full width y height

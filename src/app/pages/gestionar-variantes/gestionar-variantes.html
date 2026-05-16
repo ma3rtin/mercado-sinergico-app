@@ -22,7 +22,8 @@
           <div class="space-y-1">
             <div class="flex items-center gap-2">
               <span class="w-1.5 h-1.5 bg-brand-primary rounded-full"></span>
-              <p class="text-sm md:text-base text-text-muted font-medium italic">{{ productoInfo()!.producto.nombre }}</p>
+              <p class="text-sm md:text-base text-text-muted font-medium italic">{{ productoInfo()!.producto.nombre }}
+              </p>
             </div>
             <div class="flex flex-wrap items-center gap-3 text-xs text-text-muted font-medium">
               <span>
@@ -51,7 +52,7 @@
           }
           @if (esProductoSinergico()) {
           <div
-            class="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100 shadow-sm">
+            class="flex items-center gap-2 px-4 py-1.5 bg-primary text-white rounded-full border border-white shadow-sm">
             <app-icon name="users" size="14" />
             <span class="text-[10px] font-black uppercase tracking-widest">Sinérgico</span>
           </div>
@@ -172,7 +173,7 @@
             </div>
           </div>
           <button (click)="generarReporte()"
-            class="w-14 h-14 flex items-center justify-center bg-blue-50 text-blue-600 rounded-[22px] active:scale-90 hover:bg-blue-100 transition-all border border-blue-100 shadow-sm shadow-blue-500/10">
+            class="w-14 h-14 flex items-center justify-center bg-success text-white rounded-[22px] active:scale-90 hover:bg-green-100 transition-all border border-white shadow-sm shadow-green-500/10 hover:text-success">
             <app-icon name="download" size="24" />
           </button>
         </div>
@@ -265,18 +266,18 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-50">
-            @for (variante of variantesFiltradas(); track variante.id; let i = $index) {
+            @for (variante of paginatedVariantes(); track variante.id) {
             <tr
               [class]="'hover:bg-gray-50/50 transition-colors ' + (variante.seleccionada ? 'bg-brand-primary-light/30' : (variante.hasChanges ? 'bg-yellow-50/50' : ''))">
               <td class="px-8 py-6">
-                <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(i, $event)"
+                <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(variante.id!, $event)"
                   class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer" />
               </td>
               <td class="px-6 py-6">
                 <div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden relative group">
                   @if (tieneImagen(variante)) {
                   <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
-                  <button (click)="removeImagen(i)"
+                  <button (click)="removeImagen(variante.id!)"
                     class="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <app-icon name="trash2" size="18" />
                   </button>
@@ -284,7 +285,7 @@
                   <label
                     class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
                     <app-icon name="upload" size="20" class="text-gray-300" />
-                    <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden">
+                    <input type="file" accept="image/*" (change)="onImagenSelected($event, variante.id!)" class="hidden">
                   </label>
                   }
                 </div>
@@ -303,7 +304,7 @@
               @if (esProductoEnergico()) {
               <td class="px-6 py-6">
                 <input type="number" [value]="variante.stockFisico"
-                  (input)="onStockChange(i, +$any($event.target).value)"
+                  (input)="onStockChange(variante.id!, +$any($event.target).value)"
                   class="w-24 px-4 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary outline-none text-sm font-bold">
               </td>
               }
@@ -311,20 +312,20 @@
                 <div class="relative">
                   <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
                   <input type="number" [value]="variante.precioExtra"
-                    (input)="onPrecioExtraChange(i, +$any($event.target).value)"
+                    (input)="onPrecioExtraChange(variante.id!, +$any($event.target).value)"
                     class="w-24 pl-7 pr-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary outline-none text-sm font-bold">
                 </div>
               </td>
               <td class="px-6 py-6 font-black text-sm text-text-primary">${{ calcularPrecioFinal(variante).toFixed(2) }}
               </td>
               <td class="px-6 py-6">
-                <button (click)="toggleVarianteActiva(i)"
+                <button (click)="toggleVarianteActiva(variante.id!)"
                   [class]="'px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ' + (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
                   {{ variante.activo ? 'ACTIVA' : 'INACTIVA' }}
                 </button>
               </td>
               <td class="px-6 py-6 text-center">
-                <button (click)="eliminarVariante(i)"
+                <button (click)="eliminarVariante(variante.id!)"
                   class="text-gray-300 hover:text-red-500 active:scale-90 transition-all p-2 bg-gray-50 rounded-xl">
                   <app-icon name="trash2" size="20" />
                 </button>
@@ -350,26 +351,26 @@
           variantes</label>
       </div>
 
-      @for (variante of variantesFiltradas(); track variante.id; let i = $index) {
+      @for (variante of paginatedVariantes(); track variante.id) {
       <article
         [class]="'bg-white rounded-[32px] p-6 border shadow-xl transition-all duration-300 ' + (variante.seleccionada ? 'border-brand-primary ring-4 ring-brand-primary/5' : 'border-gray-100 text-gray-900')">
 
         <div class="flex items-start gap-4 mb-6">
-          <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(i, $event)"
+          <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(variante.id!, $event)"
             class="w-6 h-6 text-brand-primary border-gray-300 rounded-lg shrink-0 mt-1" />
 
           <div
             class="w-20 h-20 rounded-[22px] bg-gray-50 border border-gray-100 overflow-hidden relative shrink-0 shadow-inner">
             @if (tieneImagen(variante)) {
             <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
-            <button (click)="removeImagen(i)"
+            <button (click)="removeImagen(variante.id!)"
               class="absolute top-1 right-1 w-7 h-7 bg-red-600 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
               <app-icon name="x" size="14" />
             </button>
             } @else {
             <label class="w-full h-full flex items-center justify-center cursor-pointer active:bg-gray-100">
               <app-icon name="upload" size="24" class="text-gray-300" />
-              <input type="file" accept="image/*" (change)="onImagenSelected($event, i)" class="hidden">
+              <input type="file" accept="image/*" (change)="onImagenSelected($event, variante.id!)" class="hidden">
             </label>
             }
           </div>
@@ -378,7 +379,7 @@
             <div class="flex justify-between items-start">
               <p class="text-base font-black text-text-primary leading-snug truncate">{{
                 getVarianteDescripcion(variante) }}</p>
-              <button (click)="eliminarVariante(i)" class="text-gray-300 active:text-red-500 -mt-1 -mr-2 p-2">
+              <button (click)="eliminarVariante(variante.id!)" class="text-gray-300 active:text-red-500 -mt-1 -mr-2 p-2">
                 <app-icon name="trash2" size="20" />
               </button>
             </div>
@@ -402,7 +403,7 @@
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
               <input type="number" [value]="variante.precioExtra"
-                (input)="onPrecioExtraChange(i, +$any($event.target).value)"
+                (input)="onPrecioExtraChange(variante.id!, +$any($event.target).value)"
                 class="w-full pl-9 pr-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
             </div>
           </div>
@@ -410,7 +411,7 @@
           @if (esProductoEnergico()) {
           <div class="space-y-2">
             <label class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">Stock Actual</label>
-            <input type="number" [value]="variante.stockFisico" (input)="onStockChange(i, +$any($event.target).value)"
+            <input type="number" [value]="variante.stockFisico" (input)="onStockChange(variante.id!, +$any($event.target).value)"
               class="w-full px-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
           </div>
           }
@@ -424,7 +425,7 @@
               calcularPrecioFinal(variante).toFixed(2) }}</p>
           </div>
 
-          <button (click)="toggleVarianteActiva(i)"
+          <button (click)="toggleVarianteActiva(variante.id!)"
             [class]="'flex items-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.1em] transition-all active:scale-95 border-2 ' + 
                    (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
             <app-icon [name]="variante.activo ? 'checkCircle' : 'xCircle'" size="18" />
@@ -443,6 +444,19 @@
       </div>
       }
     </div>
+
+    <!-- Paginación Global -->
+    @if (variantesFiltradas().length > 0) {
+    <div class="mt-8 flex justify-center pb-4 mb-20">
+      <app-pagination 
+        [totalItems]="variantesFiltradas().length" 
+        [itemsPerPage]="itemsPerPage()"
+        [currentPage]="currentPage()" 
+        [autoHide]="false"
+        (pageChange)="onPageChange($event)" />
+    </div>
+    }
+
     }
 
     <!-- ⚠️ ESTADO VACÍO (Si no hay variantes iniciales) -->

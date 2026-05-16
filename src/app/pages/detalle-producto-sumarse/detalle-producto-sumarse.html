@@ -1,7 +1,7 @@
 <!-- Loading State -->
 @if (isLoading()) {
 <div class="flex flex-col items-center justify-center py-20">
-    <app-icon name="Loader" class="w-16 h-16 text-blue-500 mb-4 animate-spin" />
+    <app-icon name="Loader" class="w-16 h-16 text-info mb-4 animate-spin" />
     <p class="text-gray-600 text-lg">Cargando...</p>
 </div>
 }
@@ -10,7 +10,7 @@
 @else if (errorMessage()) {
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-        <app-icon name="AlertCircle" class="w-20 h-20 text-red-400 mb-4" />
+        <app-icon name="AlertCircle" class="w-20 h-20 text-error mb-4" />
         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
         <button (click)="goBack()"
             class="mt-4 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium transition-colors">
@@ -58,17 +58,14 @@
 
             <!-- 🆕 SELECTOR DE VARIANTES -->
             @if (productoTieneVariantes()) {
-            <app-selector-variantes
-                [producto]="producto()!"
-                [habilitado]="paqueteEstaActivo()"
-                (variantesChange)="onVariantesChange($event)"
-                (valido)="onVariantesValidoChange($event)"
+            <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
+                (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
                 (varianteSeleccionada)="onVarianteIdChange($event)">
             </app-selector-variantes>
             }
 
             <!-- Cantidad -->
-                <div class="flex items-center gap-4 mt-8">
+            <div class="flex items-center gap-4 mt-8">
                 <button (click)="changeQuantity(-1)"
                     class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold transition-colors"
                     [disabled]="quantity() <= minQuantity()">
@@ -76,7 +73,7 @@
                 </button>
                 <span class="text-xl font-semibold px-4">{{ quantity() }}</span>
                 <button (click)="changeQuantity(1)"
-                    class="w-10 h-10 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-xl font-bold transition-colors"
+                    class="w-10 h-10 rounded-full bg-accent hover:bg-accent flex items-center justify-center text-xl font-bold transition-colors"
                     [disabled]="quantity() >= maxQuantity()">
                     +
                 </button>
@@ -84,7 +81,7 @@
                 <!-- Botón Sumarse -->
                 <button (click)="addToCart()" [disabled]="!puedeAgregarAlCarrito()" [class]="'px-8 py-3 rounded-lg font-semibold transition-all ' +
                     (puedeAgregarAlCarrito()
-                        ? 'bg-yellow-400 shadow-md hover:bg-yellow-500 text-gray-800 cursor-pointer'
+                        ? 'bg-accent shadow-md hover:bg-accent text-gray-800 cursor-pointer'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60')">
 
                     @if (!paqueteEstaActivo()) {
@@ -99,9 +96,9 @@
 
             <!-- 🆕 AYUDA CONTEXTUAL (si tiene variantes y no están todas seleccionadas) -->
             @if (mostrarAyudaVariantes()) {
-            <div class="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <app-icon name="Info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p class="text-sm text-blue-800">
+            <div class="flex items-start gap-2 p-3 bg-info-light border border-brand-primary-light rounded-lg">
+                <app-icon name="Info" class="w-5 h-5 text-brand-secondary flex-shrink-0 mt-0.5" />
+                <p class="text-sm text-brand-secondary">
                     Seleccioná todas las opciones del producto (color, talle, etc.) para poder continuar
                 </p>
             </div>
@@ -109,7 +106,7 @@
 
             <!-- Volver al paquete -->
             <button (click)="goBack()"
-                class="shadow-md w-full border-2 border-secondary text-secondary py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                class="shadow-md w-full border-2 border-secondary text-secondary py-3 rounded-lg font-semibold hover:bg-info-light transition-colors flex items-center justify-center gap-2">
                 Volver al paquete
                 <app-icon name="ArrowRight" class="w-5 h-5" />
             </button>
@@ -167,7 +164,7 @@
     </div>
 
     @if (!hasPaqueteSeleccionado()) {
-    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+    <div class="mt-6 p-4 bg-warning-light border border-warning-light rounded-lg text-warning">
         No se pudo cargar la información del paquete.
         El producto se muestra de forma individual.
     </div>

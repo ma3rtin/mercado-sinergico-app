@@ -141,6 +141,11 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
+    /** Descarta una publicación duplicada sin pedidos (hard delete limpio) */
+    descartarDuplicado(id: number): Observable<{ message: string }> {
+        return this.post<{ message: string }>(`${this.apiUrl}/${id}/descartar`, {});
+    }
+
     /** Exportaciones */
     exportarFabrica(id: number): Observable<Blob> {
         return this.http.get(

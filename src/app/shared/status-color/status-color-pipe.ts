@@ -20,17 +20,19 @@ export class StatusColorPipe implements PipeTransform {
         return 'text-error';
       // Estados de pedido
       case 'Pendiente':
-        return 'text-status-pending-text';
-      case 'Pagado':
-        return 'text-status-active-text';
-      case 'Reembolsado':
-        return 'text-text-secondary';
-      case 'En preparación':
-        return 'text-blue-600';
-      case 'En camino':
+        return 'text-secondary-dark';
+      case 'En Preparación':
+        return 'text-brand-secondary';
+      case 'Enviado':
         return 'text-purple-600';
-      case 'Recibido':
-        return 'text-green-600';
+      case 'Entregado':
+        return 'text-success';
+      case 'Cancelado':
+        return 'text-error';
+      case 'Cerrado':
+        return 'text-error';
+      case 'Completo':
+        return 'text-success';
       default:
         return 'text-gray-600';
     }

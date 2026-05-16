@@ -215,9 +215,9 @@ export class PaquetesPublicosComponent implements OnInit {
         next: (paquetes) => {
           console.log('✅ Paquetes cargados:', paquetes);
 
-          // Filtrar paquetes eliminados por defecto
+          // Solo mostrar paquetes con estado Activo
           const paquetesActivos = paquetes.filter(
-            (p) => p.estado?.nombre !== 'Eliminado'
+            (p) => p.estado?.nombre === 'Activo'
           );
 
           const paquetesOrdenados = this.ordenarPaquetes(paquetesActivos, 'recientes');

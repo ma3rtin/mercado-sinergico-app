@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,11 +10,12 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-administrar-publicaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent, PaginationComponent],
   templateUrl: './administrar-publicaciones.html',
 })
 export class AdministrarPublicacionesComponent implements OnInit {
@@ -29,6 +30,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
   searchTerm = signal('');
   estadoFiltro = signal<string>('todos');
   highlightedId = signal<number | null>(null);
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
 
   readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
@@ -45,6 +48,26 @@ export class AdministrarPublicacionesComponent implements OnInit {
       return matchTerm && matchEstado;
     });
   });
+
+  paginatedPaquetes = computed(() => {
+    const all = this.filteredPaquetes();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
+
+  constructor() {
+    effect(() => {
+      this.searchTerm();
+      this.estadoFiltro();
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
 
 
   ngOnInit() {
@@ -76,8 +99,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   // ── Acciones de la card ────────────────────────────────────────
 
-  /** Completo → Confirmado: confirma la compra con el fabricante */
-  confirmarPaquete(paquete: PaquetePublicado) {
+  cerrarPaquete(paquete: PaquetePublicado) {
+    const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
+    faltan > 0
+      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
+
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
         title: '¿Confirmar compra con fabricante?',
@@ -88,7 +115,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
-        confirmButtonColor: '#2E608C',
+        confirmButtonColor: 'var(--brand-secondary)',
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
@@ -113,7 +140,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
         html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
         icon: 'error',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
+        confirmButtonColor: 'var(--error)',
         confirmButtonText: 'SÍ, CANCELAR',
         cancelButtonText: 'No, volver'
       }).then(result => {
@@ -135,7 +162,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   duplicarPaquete(paquete: PaquetePublicado) {
     this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
       next: (nuevoPaquete) => {
-        this.toast.success('Publicación duplicada con éxito');
+        this.toast.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
         this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toast.error('Error al duplicar la publicación')
@@ -150,8 +177,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
         text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${paquete.paqueteBase?.nombre}".`,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#2E608C',
-        cancelButtonColor: '#9ca3af',
+        confirmButtonColor: 'var(--brand-secondary)',
+        cancelButtonColor: 'var(--text-muted)',
         confirmButtonText: 'Sí, enviar',
         cancelButtonText: 'Cancelar'
       }).then(result => {
@@ -178,10 +205,11 @@ export class AdministrarPublicacionesComponent implements OnInit {
     if (!estado) return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     switch (estado.nombre?.toLowerCase().trim()) {
       case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'completo': return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
-      case 'confirmado': return 'bg-status-neutral-bg text-secondary border-secondary/20';
-      case 'entregado': return 'bg-green-50 text-green-700 border-green-300';
-      case 'cancelado': return 'bg-red-50 text-red-700 border-red-200';
+      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación': return 'bg-brand-primary-light text-brand-secondary border-focus';
+      case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado': return 'bg-error-light text-error border-error-light';
+      case 'eliminado': return 'bg-status-closed-bg text-status-closed-text border-transparent';
       default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }

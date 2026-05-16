@@ -143,8 +143,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   /** Completo (o Activo) → Confirmado */
   confirmarCompra() {
     const p = this.paquete();
-    if (!p?.id_paquete_publicado || this.enviandoMail()) return;
-    const id = p.id_paquete_publicado;
+    if (!p?.id_paquete_publicado) return;
+    const faltan = (p.cant_productos || 0) - (p.cant_usuarios_registrados || 0);
+    faltan > 0
+      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
 
     Swal.fire({
       title: '¿Confirmar compra con fabricante?',
@@ -169,11 +172,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     }).then(result => {
       if (result.isConfirmed) {
         this.enviandoMail.set(true);
-        this.paqueteService.confirmarCompra(id).subscribe({
+        this.paqueteService.confirmarCompra(p.id_paquete_publicado!).subscribe({
           next: (res) => {
             this.enviandoMail.set(false);
             this.toast.success(res.message ?? 'Compra confirmada correctamente');
-            this.loadPaquete(id);
+            this.loadPaquete(p.id_paquete_publicado!);
           },
           error: () => {
             this.enviandoMail.set(false);
@@ -190,10 +193,14 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p?.id_paquete_publicado) return;
 
     Swal.fire({
-      title: '¿Marcar como Entregado?',
-      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Entregado</strong>.</p>
-             <p class="text-sm text-gray-500 mt-2">Todos los pedidos pasarán a estado <strong>Recibido</strong>. Esta acción no se puede deshacer.</p>`,
-      icon: 'question',
+      title: '¿Completar pedido?',
+      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
+             <div class="mt-4 p-3 bg-info-light border border-brand-primary-light rounded text-sm text-brand-secondary text-left">
+               <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
+               <p class="mt-1">Al completar podrás <strong>descargar los partes de logística y de proveedor</strong>.</p>
+             </div>
+             <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó.</p>`,
+      icon: 'success',
       showCancelButton: true,
       confirmButtonColor: '#2E608C',
       cancelButtonColor: '#9ca3af',
@@ -246,7 +253,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p?.id_paquete_publicado) return;
     this.paqueteService.duplicarPaquete(p.id_paquete_publicado).subscribe({
       next: (nuevoPaquete) => {
-        this.toast.success('Publicación duplicada con éxito');
+        this.toast.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
         this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toast.error('Error al duplicar la publicación')
@@ -472,10 +479,10 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   getEstadoClasesStr(estadoNombre?: string): string {
     switch (estadoNombre?.toLowerCase().trim()) {
       case 'activo': return 'bg-status-active-bg text-status-active-text border-status-active-text/20';
-      case 'completo': return 'bg-status-info-bg text-status-info-text border-status-info-text/20';
-      case 'confirmado': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
-      case 'entregado': return 'bg-success-light text-success border-success/30';
-      case 'cancelado': return 'bg-error-light text-error border-error/30';
+      case 'pendiente': return 'bg-status-pending-bg text-status-pending-text border-status-pending-text/20';
+      case 'en preparación': return 'bg-brand-primary-light text-brand-secondary border-focus';
+      case 'finalizado': return 'bg-status-active-bg text-secondary border-secondary/20';
+      case 'cancelado': return 'bg-error-light text-error border-error-light';
       default: return 'bg-status-neutral-bg text-status-neutral-text border-transparent';
     }
   }

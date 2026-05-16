@@ -1,85 +1,76 @@
-     <div class="m-2">
-      <app-admin-back-button label="Volver a administrar paquetes" />
-</div> 
+<div class="m-2">
+  <app-admin-back-button label="Volver a administrar paquetes" route="/admin/administrar-paquetes" />
+</div>
 <app-admin-create-wrapper [titulo]="'Editar Paquete Base'">
-  
+
 
   <div class="max-w-4xl mx-auto relative">
-    
+
     <!-- Botón Volver -->
 
 
     @if (isLoading()) {
-      <div class="bg-white p-20 rounded-2xl shadow-sm text-center">
-        <app-icon name="loader" size="48" class="animate-spin text-primary mx-auto mb-4" />
-        <p class="text-gray-500">Cargando datos del paquete...</p>
-      </div>
+    <div class="bg-white p-20 rounded-2xl shadow-sm text-center">
+      <app-icon name="loader" size="48" class="animate-spin text-primary mx-auto mb-4" />
+      <p class="text-gray-500">Cargando datos del paquete...</p>
+    </div>
     } @else {
-      <div class="space-y-6">
-        <!-- Info Básica -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-              <input [(ngModel)]="nombre" type="text" class="w-full px-4 py-3 bg-white border-2 border-accent rounded-xl focus:ring-2 focus:ring-accent/20 focus:outline-none">
-            </div>
-            <div class="md:col-span-2">
-              <textarea [(ngModel)]="descripcion" rows="4" class="w-full px-4 py-3 bg-white border-2 border-accent rounded-xl focus:ring-2 focus:ring-accent/20 focus:outline-none"></textarea>
-            </div>
+    <div class="space-y-6">
+      <!-- Info Básica -->
+      <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <app-input [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" [typeValue]="'text'"
+              [labelValue]="'Nombre del paquete base'" [placeholderValue]="'Ej: Paquete Base Verano'" />
           </div>
-        </div>
-
-        <!-- Productos -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h3 class="text-lg font-display text-gray-900 mb-4">Productos en el Paquete</h3>
-          
-          <div class="relative mb-6">
-            <app-icon name="search" size="20" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input 
-              [(ngModel)]="busquedaProducto" 
-              placeholder="Agregar más productos..." 
-              class="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary/20 text-sm">
-            
-            @if (resultadosBusqueda().length > 0) {
-              <div class="absolute z-20 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-60 overflow-y-auto p-2">
-                @for (p of resultadosBusqueda(); track p.id_producto) {
-                  <button (click)="agregarProducto(p)" class="w-full text-left px-4 py-3 hover:bg-primary/5 rounded-lg transition-colors flex items-center justify-between group">
-                    <span class="text-gray-700 group-hover:text-primary transition-colors">{{ p.nombre }}</span>
-                    <app-icon name="plus" size="18" class="text-gray-300 group-hover:text-primary" />
-                  </button>
-                }
-              </div>
-            }
+          <div class="md:col-span-2">
+            <textarea [(ngModel)]="descripcion" rows="4"
+              class="w-full px-4 py-3 bg-white border-2 border-gray-300 focus:ring-2 focus:ring-brand-primary/20 rounded-2xl"></textarea>
           </div>
-
-          <div class="space-y-3">
-            @for (p of productosSeleccionados(); track p.id_producto; let i = $index) {
-              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
-                    <img [src]="p.imagen_url || '/assets/placeholder.png'" class="w-full h-full object-cover">
-                  </div>
-                  <span class="font-medium text-gray-800">{{ p.nombre }}</span>
-                </div>
-                <button (click)="eliminarProducto(i)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
-                  <app-icon name="trash" size="18" />
-                </button>
-              </div>
-            } @empty {
-              <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-2xl">
-                <p class="text-gray-400">No hay productos seleccionados</p>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Acciones -->
-        <div class="flex items-center justify-end gap-4 py-4">
-          <app-button variant="ghost" (buttonClick)="cancelar()">Cancelar</app-button>
-          <app-button variant="primary" (buttonClick)="guardar()" [disabled]="guardando()" [loading]="guardando()">
-            Guardar Cambios
-          </app-button>
         </div>
       </div>
+
+      <!-- Productos -->
+      <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-display text-gray-900 mb-4">Productos en el Paquete</h3>
+
+        <div class="mb-6 relative z-30">
+          <app-select [labelValue]="'Buscar y agregar productos'" [placeholderValue]="'Buscar...'"
+            [optionsValue]="productosOptions()" [searchableValue]="true" [clearableValue]="true"
+            [ngModel]="selectedProductoId()" (valueChange)="onSelectProducto($event)" />
+        </div>
+
+        <div class="space-y-3">
+          @for (p of productosSeleccionados(); track p.id_producto; let i = $index) {
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
+                <img [src]="p.imagen_url || '/assets/placeholder.png'" class="w-full h-full object-cover">
+              </div>
+              <span class="font-medium text-gray-800">{{ p.nombre }}</span>
+            </div>
+            <button (click)="eliminarProducto(i)"
+              class="p-2 text-gray-400 hover:text-error hover:bg-error-light rounded-lg transition-all">
+              <app-icon name="trash" size="18" />
+            </button>
+          </div>
+          } @empty {
+          <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-2xl">
+            <p class="text-gray-400">No hay productos seleccionados</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex items-center justify-end gap-4 py-4">
+        <app-button variant="ghost" (buttonClick)="cancelar()">Cancelar</app-button>
+        <app-button variant="primary" (buttonClick)="guardar()" [disabled]="guardando()" [loading]="guardando()">
+          Guardar Cambios
+        </app-button>
+      </div>
+    </div>
     }
   </div>
 </app-admin-create-wrapper>

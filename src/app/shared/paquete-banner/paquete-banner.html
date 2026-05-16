@@ -8,12 +8,8 @@
 
   <!-- 🖼️ IMAGEN DE FONDO -->
   <div class="absolute inset-0 z-0">
-    <img
-      [src]="imagenUrl()"
-      [alt]="nombrePaquete()"
-      (error)="onImageError($event)"
-      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-    />
+    <img [src]="imagenUrl()" [alt]="nombrePaquete()" (error)="onImageError($event)"
+      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
 
     <!-- Gradiente oscuro para legibilidad del texto -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30"></div>
@@ -23,7 +19,8 @@
   </div>
 
   <!-- 📝 CONTENIDO PRINCIPAL -->
-  <div class="relative z-10 p-6 sm:p-8 lg:p-10 min-h-[320px] sm:min-h-[380px] lg:min-h-[420px] flex flex-col justify-end">
+  <div
+    class="relative z-10 p-6 sm:p-8 lg:p-10 min-h-[320px] sm:min-h-[380px] lg:min-h-[420px] flex flex-col justify-end">
 
     <!-- 🏷️ BADGES SUPERIORES - Mobile Stack, Desktop Inline -->
     <div class="mb-4 sm:mb-6">
@@ -31,64 +28,72 @@
 
         <!-- Estado -->
         @if (estadoNombre()) {
-          <span [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + estadoBadgeClass()">
-            <app-icon name="checkCircle" [size]="'16'" class="hidden sm:block" />
-            {{ estadoNombre() }}
-          </span>
+        <span
+          [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + estadoBadgeClass()">
+          <app-icon name="checkCircle" [size]="'16'" class="hidden sm:block" />
+          {{ estadoNombre() }}
+        </span>
         }
 
         <!-- Tipo de Paquete -->
-        <span class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/90 text-gray-900 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+        <span
+          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/90 text-gray-900 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
           <app-icon [name]="iconoTipo()" [size]="'16'" />
           {{ textoTipo() }}
         </span>
 
         <!-- Zona -->
         @if (zonaNombre()) {
-          <span class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-            <app-icon name="mapPin" [size]="'16'" />
-            {{ zonaNombre() }}
-          </span>
+        <span
+          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+          <app-icon name="mapPin" [size]="'16'" />
+          {{ zonaNombre() }}
+        </span>
         }
 
         <!-- Marca -->
         @if (marcaNombre()) {
-          <span class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary-dark/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-            <app-icon name="Award" [size]="'16'" />
-            {{ marcaNombre() }}
-          </span>
+        <span
+          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-secondary-dark/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+          <app-icon name="Award" [size]="'16'" />
+          {{ marcaNombre() }}
+        </span>
         }
 
         <!-- Categoría -->
         @if (categoriaNombre()) {
-          <span class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-            <app-icon name="tag" [size]="'16'" />
-            {{ categoriaNombre() }}
-          </span>
+        <span
+          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
+          <app-icon name="tag" [size]="'16'" />
+          {{ categoriaNombre() }}
+        </span>
         }
       </div>
     </div>
 
     <!-- 📌 TÍTULO DEL PAQUETE -->
-    <h1 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 drop-shadow-2xl leading-tight">
+    <h1
+      class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 drop-shadow-2xl leading-tight">
       {{ nombrePaquete() }}
     </h1>
 
     <!-- 📄 DESCRIPCIÓN -->
     @if (descripcionPaquete()) {
-      <p class="text-white/95 text-sm sm:text-base lg:text-lg max-w-3xl mb-4 sm:mb-6 drop-shadow-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
-        {{ descripcionPaquete() }}
-      </p>
+    <p
+      class="text-white/95 text-sm sm:text-base lg:text-lg max-w-3xl mb-4 sm:mb-6 drop-shadow-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
+      {{ descripcionPaquete() }}
+    </p>
     }
 
     <!-- 📊 GRID DE INFORMACIÓN - Responsive -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
 
       <!-- Stock Disponible -->
-      <div class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
+      <div
+        class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
         <div class="flex items-center gap-2 mb-1.5">
           <app-icon name="Clipboard" [size]="'18'" class="text-accent" />
-          <p class="text-white/80 text-xs font-medium">Stock</p>
+          <p class="text-white/80 text-xs font-medium">Productos disponibles</p>
         </div>
         <p class="text-white text-xl sm:text-2xl font-bold">
           {{ stockDisponible() }}
@@ -99,15 +104,14 @@
 
         <!-- Barra de progreso -->
         <div class="mt-2 w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-          <div
-            [class]="'h-full transition-all duration-500 ' + progressBarClass()"
-            [style.width.%]="porcentajeDisponible()"
-          ></div>
+          <div [class]="'h-full transition-all duration-500 ' + progressBarClass()"
+            [style.width.%]="porcentajeDisponible()"></div>
         </div>
       </div>
 
       <!-- Compradores -->
-      <div class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
+      <div
+        class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
         <div class="flex items-center gap-2 mb-1.5">
           <app-icon name="users" [size]="'18'" class="text-accent" />
           <p class="text-white/80 text-xs font-medium">Compradores</p>
@@ -122,65 +126,69 @@
 
       <!-- Tiempo Restante -->
       @if (tiempoRestante()) {
-        <div class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all"
-             [ngClass]="{ 'ring-2 ring-red-500 animate-pulse': esUrgente() }">
-          <div class="flex items-center gap-2 mb-1.5">
-            <app-icon name="clock" [size]="'18'"
-                      [class]="esUrgente() ? 'text-red-400' : 'text-accent'" />
-            <p class="text-white/80 text-xs font-medium">Cierre</p>
-          </div>
-          <p [class]="'text-xl sm:text-2xl font-bold ' + (esUrgente() ? 'text-red-400' : 'text-white')">
-            {{ tiempoRestante() }}
-          </p>
-          @if (esUrgente()) {
-            <p class="text-red-400 text-xs mt-1 font-semibold">
-              ¡Apurate!
-            </p>
-          } @else {
-            <p class="text-white/70 text-xs mt-1">
-              restante
-            </p>
-          }
+      <div
+        class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all"
+        [ngClass]="{ 'ring-2 ring-error animate-pulse': esUrgente() }">
+        <div class="flex items-center gap-2 mb-1.5">
+          <app-icon name="clock" [size]="'18'" [class]="esUrgente() ? 'text-error' : 'text-accent'" />
+          <p class="text-white/80 text-xs font-medium">Cierre</p>
         </div>
+        <p [class]="'text-xl sm:text-2xl font-bold ' + (esUrgente() ? 'text-error' : 'text-white')">
+          {{ tiempoRestante() }}
+        </p>
+        @if (esUrgente()) {
+        <p class="text-error text-xs mt-1 font-semibold">
+          ¡Apurate!
+        </p>
+        } @else {
+        <p class="text-white/70 text-xs mt-1">
+          restante
+        </p>
+        }
+      </div>
       }
 
       <!-- Monto Total (si existe) -->
       @if (paquete().monto_total) {
-        <div class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
-          <div class="flex items-center gap-2 mb-1.5">
-            <app-icon name="dollarSign" [size]="'18'" class="text-accent" />
-            <p class="text-white/80 text-xs font-medium">Monto</p>
-          </div>
-          <p class="text-white text-xl sm:text-2xl font-bold">
-            ${{ paquete()!.monto_total!.toLocaleString('es-AR') }}
-          </p>
-          <p class="text-white/70 text-xs mt-1">
-            total
-          </p>
+      <div
+        class="bg-white/10 backdrop-blur-md rounded-lg p-3 sm:p-4 border border-white/20 hover:bg-white/15 transition-all">
+        <div class="flex items-center gap-2 mb-1.5">
+          <app-icon name="dollarSign" [size]="'18'" class="text-accent" />
+          <p class="text-white/80 text-xs font-medium">Monto</p>
         </div>
+        <p class="text-white text-xl sm:text-2xl font-bold">
+          ${{ paquete()!.monto_total!.toLocaleString('es-AR') }}
+        </p>
+        <p class="text-white/70 text-xs mt-1">
+          total
+        </p>
+      </div>
       }
     </div>
 
     <!-- 🚨 ALERTA DE URGENCIA (si aplica) -->
     @if (esUrgente()) {
-      <div class="mt-4 sm:mt-6 bg-red-500/20 backdrop-blur-md border-2 border-red-500 rounded-lg p-3 sm:p-4 flex items-center gap-3 animate-pulse">
-        <div class="flex-shrink-0">
-          <app-icon name="alertTriangle" [size]="'24'" class="text-red-400" />
-        </div>
-        <div class="flex-1">
-          <p class="text-white font-bold text-sm sm:text-base">
-            ⚡ ¡Última oportunidad!
-          </p>
-          <p class="text-white/90 text-xs sm:text-sm mt-1">
-            Este paquete cierra muy pronto. ¡No te lo pierdas!
-          </p>
-        </div>
+    <div
+      class="mt-4 sm:mt-6 bg-error backdrop-blur-md border-2 border-error rounded-lg p-3 sm:p-4 flex items-center gap-3 animate-pulse">
+      <div class="flex-shrink-0">
+        <app-icon name="alertTriangle" [size]="'24'" class="text-error" />
       </div>
+      <div class="flex-1">
+        <p class="text-white font-bold text-sm sm:text-base">
+          ⚡ ¡Última oportunidad!
+        </p>
+        <p class="text-white/90 text-xs sm:text-sm mt-1">
+          Este paquete cierra muy pronto. ¡No te lo pierdas!
+        </p>
+      </div>
+    </div>
     }
 
   </div>
 
   <!-- ✨ EFECTO DE BRILLO AL HOVER -->
-  <div class="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+  <div
+    class="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+  </div>
 
 </div>

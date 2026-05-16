@@ -370,7 +370,7 @@ export class MisPedidosComponent implements OnInit {
         showCancelButton: true,
         confirmButtonText: 'Sí, eliminar pedido',
         cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#B92905'
+        confirmButtonColor: 'var(--error)'
       }).then(result => {
         if (!result.isConfirmed) return;
 
@@ -409,8 +409,8 @@ export class MisPedidosComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af'
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -453,8 +453,8 @@ export class MisPedidosComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Sí, salir',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af'
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)'
     }).then(result => {
       if (!result.isConfirmed) return;
 
@@ -518,7 +518,7 @@ export class MisPedidosComponent implements OnInit {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, pedir reembolso',
-      confirmButtonColor: '#B92905',
+      confirmButtonColor: 'var(--error)',
       cancelButtonText: 'Cancelar'
     }).then(result => {
       if (!result.isConfirmed) return;
