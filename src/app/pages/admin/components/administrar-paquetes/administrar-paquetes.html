@@ -42,7 +42,7 @@
       </div>
     } @else {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (paquete of filteredBase(); track paquete.id_paquete_base) {
+        @for (paquete of paginatedBase(); track paquete.id_paquete_base) {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group">
             <div class="h-40 bg-gray-200 relative overflow-hidden">
               <img [src]="getImagenUrl(paquete)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -81,6 +81,18 @@
           </div>
         }
       </div>
+
+      <!-- Paginación -->
+      @if (filteredBase().length > 0) {
+      <div class="mt-8 flex justify-center pb-4">
+        <app-pagination 
+          [totalItems]="filteredBase().length" 
+          [itemsPerPage]="itemsPerPage()"
+          [currentPage]="currentPage()" 
+          [autoHide]="false"
+          (pageChange)="onPageChange($event)" />
+      </div>
+      }
     }
 
   </div>

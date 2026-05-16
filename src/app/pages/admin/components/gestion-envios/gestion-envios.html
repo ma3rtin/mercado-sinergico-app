@@ -154,7 +154,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-border-default">
-            @for (pedido of pedidosFiltrados(); track pedido.id_pedido) {
+            @for (pedido of paginatedPedidos(); track pedido.id_pedido) {
             <tr
               [class]="'transition-colors ' + (estaSeleccionado(pedido.id_pedido!) ? 'bg-brand-primary-light' : 'hover:bg-bg-app/60')"
               (click)="togglePedido(pedido.id_pedido!)"
@@ -179,6 +179,18 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Paginación -->
+      @if (pedidosFiltrados().length > 0) {
+      <div class="mt-6 flex justify-center pb-4">
+        <app-pagination 
+          [totalItems]="pedidosFiltrados().length" 
+          [itemsPerPage]="itemsPerPage()"
+          [currentPage]="currentPage()" 
+          [autoHide]="false"
+          (pageChange)="onPageChange($event)" />
+      </div>
+      }
 
       }
 
