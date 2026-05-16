@@ -95,7 +95,7 @@
     <!-- Lista de Productos -->
     @else {
     <div class="grid grid-cols-1 gap-4">
-      @for (producto of filteredProductos(); track producto.id_producto) {
+      @for (producto of paginatedProductos(); track producto.id_producto) {
       <div
         class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
         <!-- Mobile Layout (Vertical-ish) - Desktop Layout (Horizontal) -->
@@ -182,6 +182,19 @@
       </div>
       }
     </div>
+
+    <!-- Paginación -->
+    @if (filteredProductos().length > 0) {
+    <div class="mt-8 flex justify-center pb-4">
+      <app-pagination 
+        [totalItems]="filteredProductos().length" 
+        [itemsPerPage]="itemsPerPage()"
+        [currentPage]="currentPage()" 
+        [autoHide]="false"
+        (pageChange)="onPageChange($event)" />
+    </div>
+    }
+
     }
   </div>
 </div>

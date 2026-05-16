@@ -91,7 +91,7 @@
 
     } @else {
     <div class="flex flex-col gap-4">
-      @for (paquete of filteredPaquetes(); track paquete.id_paquete_publicado) {
+      @for (paquete of paginatedPaquetes(); track paquete.id_paquete_publicado) {
 
       <!-- Wrapper con animación de highlight -->
       <div [class]="isHighlighted(paquete)
@@ -99,15 +99,28 @@
             : ''">
 
         <app-admin-paquete-card [paquete]="paquete"
-          (confirm)="cerrarPaquete($event)"
-          (refund)="cancelarPaquete($event)"
-          (duplicate)="duplicarPaquete($event)"
-          (notify)="notificarCompradores($event)"
-          (viewDetail)="verDetalle($event)" />
+          (confirm)="cerrarPaquete(paquete)"
+          (refund)="cancelarPaquete(paquete)"
+          (duplicate)="duplicarPaquete(paquete)"
+          (notify)="notificarCompradores(paquete)"
+          (viewDetail)="verDetalle(paquete)" />
 
       </div>
       }
     </div>
+
+    <!-- Paginación -->
+    @if (filteredPaquetes().length > 0) {
+    <div class="mt-8 flex justify-center pb-4">
+      <app-pagination 
+        [totalItems]="filteredPaquetes().length" 
+        [itemsPerPage]="itemsPerPage()"
+        [currentPage]="currentPage()" 
+        [autoHide]="false"
+        (pageChange)="onPageChange($event)" />
+    </div>
+    }
+
     }
 
   </div>

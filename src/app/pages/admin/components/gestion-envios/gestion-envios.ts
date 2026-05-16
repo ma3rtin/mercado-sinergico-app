@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +8,12 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { ToastService } from '@app/services/toast/toast.service';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-gestion-envios',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
   templateUrl: './gestion-envios.html',
 })
 export class GestionEnviosComponent implements OnInit {
@@ -33,6 +34,10 @@ export class GestionEnviosComponent implements OnInit {
   // ── Selección ─────────────────────────────────────────────
   /** IDs de pedidos seleccionados para marcar en camino */
   seleccionados = signal<Set<number>>(new Set());
+
+  // ── Paginación ────────────────────────────────────────────
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
 
   // ── ID del paquete desde la ruta ──────────────────────────
   paqueteId = signal<number>(0);
@@ -57,21 +62,40 @@ export class GestionEnviosComponent implements OnInit {
     });
   });
 
+  paginatedPedidos = computed(() => {
+    const all = this.pedidosFiltrados();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
+
   cantidadSeleccionados = computed(() => this.seleccionados().size);
 
   /** True si todos los pedidos filtrados están seleccionados */
   todosSeleccionados = computed(() => {
-    const filtrados = this.pedidosFiltrados();
+    const filtrados = this.paginatedPedidos();
     if (filtrados.length === 0) return false;
     return filtrados.every(p => this.seleccionados().has(p.id_pedido!));
   });
 
   /** True si hay al menos uno pero no todos (para estado indeterminate) */
   algunoSeleccionado = computed(() => {
-    const filtrados = this.pedidosFiltrados();
+    const filtrados = this.paginatedPedidos();
     const sel = this.seleccionados();
     return filtrados.some(p => sel.has(p.id_pedido!)) && !this.todosSeleccionados();
   });
+
+  constructor() {
+    effect(() => {
+      this.busqueda();
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
 
   // ── Lifecycle ────────────────────────────────────────────
   ngOnInit() {
@@ -118,7 +142,7 @@ export class GestionEnviosComponent implements OnInit {
    * Si todos están seleccionados, los deselecciona. De lo contrario, selecciona todos.
    */
   toggleTodos() {
-    const filtrados = this.pedidosFiltrados();
+    const filtrados = this.paginatedPedidos();
     if (this.todosSeleccionados()) {
       // Deseleccionar solo los filtrados
       this.seleccionados.update(set => {

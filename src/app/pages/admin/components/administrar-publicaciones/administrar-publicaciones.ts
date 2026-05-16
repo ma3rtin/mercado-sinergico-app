@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,11 +10,12 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-administrar-publicaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent, PaginationComponent],
   templateUrl: './administrar-publicaciones.html',
 })
 export class AdministrarPublicacionesComponent implements OnInit {
@@ -29,6 +30,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
   searchTerm = signal('');
   estadoFiltro = signal<string>('todos');
   highlightedId = signal<number | null>(null);
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
 
   readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
@@ -45,6 +48,26 @@ export class AdministrarPublicacionesComponent implements OnInit {
       return matchTerm && matchEstado;
     });
   });
+
+  paginatedPaquetes = computed(() => {
+    const all = this.filteredPaquetes();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
+
+  constructor() {
+    effect(() => {
+      this.searchTerm();
+      this.estadoFiltro();
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
 
 
   ngOnInit() {
