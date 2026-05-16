@@ -115,7 +115,7 @@ export class PaginationComponent {
   });
 
   // 🎯 MÉTODOS
-  onPageChanged(page: number ): void {
+  onPageChanged(page: number): void {
     const total = this.totalPages();
 
     // Validar que la página esté en rango
@@ -172,6 +172,6 @@ export class PaginationComponent {
 
   // 🎨 Helper para botones Anterior/Siguiente
   getNavButtonClass(): string {
-    return 'flex items-center justify-center text-sm font-medium transition-colors focus:outline-none px-2 py-1 rounded-md text-gray-500 hover:text-blue-600 cursor-pointer bg-transparent border border-transparent';
+    return 'flex items-center justify-center text-sm font-medium transition-colors focus:outline-none px-2 py-1 rounded-md text-gray-500 hover:text-brand-primary cursor-pointer bg-transparent border border-transparent';
   }
 }

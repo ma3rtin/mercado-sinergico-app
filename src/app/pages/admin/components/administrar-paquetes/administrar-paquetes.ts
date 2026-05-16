@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -15,11 +15,12 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-administrar-paquetes',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
   templateUrl: './administrar-paquetes.html',
 })
 export class AdministrarPaquetesComponent implements OnInit {
@@ -31,6 +32,8 @@ export class AdministrarPaquetesComponent implements OnInit {
   paquetesBase = signal<PaqueteBase[]>([]);
   searchTerm = signal('');
   isLoading = signal(true);
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
 
   // Computed
   filteredBase = computed(() => {
@@ -40,6 +43,25 @@ export class AdministrarPaquetesComponent implements OnInit {
       (p.descripcion ?? '').toLowerCase().includes(term)
     );
   });
+
+  paginatedBase = computed(() => {
+    const all = this.filteredBase();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
+
+  constructor() {
+    effect(() => {
+      this.searchTerm();
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
 
   ngOnInit(): void {
     this.loadData();

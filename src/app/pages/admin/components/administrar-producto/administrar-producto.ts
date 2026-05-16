@@ -14,11 +14,12 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {
@@ -30,55 +31,69 @@ export class AdministrarProductosComponent {
   searchTerm = signal('');
   sortOrder = signal<'nombre-asc' | 'nombre-desc' | 'precio-asc' | 'precio-desc' | 'marca-asc' | 'marca-desc' | 'stock-asc' | 'stock-desc'>('nombre-asc');
   isLoading = signal(true);
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
 
 
-filteredProductos = computed(() => {
-  const term = this.searchTerm().toLowerCase().trim();
-  const sorted = [...this.productos()];
+  filteredProductos = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const sorted = [...this.productos()];
 
-  const getMarcaNombre = (p: Producto) =>
-    typeof p.marca === 'string'
-      ? p.marca
-      : p.marca?.nombre || '';
+    const getMarcaNombre = (p: Producto) =>
+      typeof p.marca === 'string'
+        ? p.marca
+        : p.marca?.nombre || '';
 
-  const getCategoriaNombre = (p: Producto) =>
-    typeof p.categoria === 'string'
-      ? p.categoria
-      : p.categoria?.nombre || '';
+    const getCategoriaNombre = (p: Producto) =>
+      typeof p.categoria === 'string'
+        ? p.categoria
+        : p.categoria?.nombre || '';
 
-  const filtered = term
-    ? sorted.filter(p =>
+    const filtered = term
+      ? sorted.filter(p =>
         p.nombre.toLowerCase().includes(term) ||
         getMarcaNombre(p).toLowerCase().includes(term) ||
         getCategoriaNombre(p).toLowerCase().includes(term)
       )
-    : sorted;
+      : sorted;
 
-  const order = this.sortOrder();
-  filtered.sort((a, b) => {
-    switch (order) {
-      case 'nombre-asc': return a.nombre.localeCompare(b.nombre);
-      case 'nombre-desc': return b.nombre.localeCompare(a.nombre);
-      case 'precio-asc': return a.precio - b.precio;
-      case 'precio-desc': return b.precio - a.precio;
-      case 'marca-asc': return getMarcaNombre(a).localeCompare(getMarcaNombre(b));
-      case 'marca-desc': return getMarcaNombre(b).localeCompare(getMarcaNombre(a));
-      case 'stock-asc': return (a.stock || 0) - (b.stock || 0);
-      case 'stock-desc': return (b.stock || 0) - (a.stock || 0);
-      default: return 0;
-    }
+    const order = this.sortOrder();
+    filtered.sort((a, b) => {
+      switch (order) {
+        case 'nombre-asc': return a.nombre.localeCompare(b.nombre);
+        case 'nombre-desc': return b.nombre.localeCompare(a.nombre);
+        case 'precio-asc': return a.precio - b.precio;
+        case 'precio-desc': return b.precio - a.precio;
+        case 'marca-asc': return getMarcaNombre(a).localeCompare(getMarcaNombre(b));
+        case 'marca-desc': return getMarcaNombre(b).localeCompare(getMarcaNombre(a));
+        case 'stock-asc': return (a.stock || 0) - (b.stock || 0);
+        case 'stock-desc': return (b.stock || 0) - (a.stock || 0);
+        default: return 0;
+      }
+    });
+
+    return filtered;
   });
 
-  return filtered;
-});
-
+  paginatedProductos = computed(() => {
+    const all = this.filteredProductos();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
 
   constructor() {
     this.loadProductos();
 
     effect(() => {
       console.log('🔍 Buscando:', this.searchTerm(), '| Orden:', this.sortOrder());
-    });
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   private loadProductos(): void {
@@ -111,21 +126,21 @@ filteredProductos = computed(() => {
   }
 
   gestionarVariantes(producto: Producto): void {
-  if (!producto.id_producto) {
-    this.toast.error('Producto inválido');
-    return;
+    if (!producto.id_producto) {
+      this.toast.error('Producto inválido');
+      return;
+    }
+
+    this.router.navigate([
+      '/admin/gestionar-variantes',
+      producto.id_producto
+    ]);
   }
 
-  this.router.navigate([
-    '/admin/gestionar-variantes',
-    producto.id_producto
-  ]);
-}
-
   viewProducto(producto: Producto): void {
-  Swal.fire({
-    title: producto.nombre,
-    html: `
+    Swal.fire({
+      title: producto.nombre,
+      html: `
       <div class="text-left space-y-2">
         <img src="${this.getImagenUrl(producto)}"
         alt="${producto.nombre}"
@@ -142,38 +157,38 @@ filteredProductos = computed(() => {
         ${producto.peso ? `<p><strong>Peso:</strong> ${producto.peso}kg</p>` : ''}
       </div>
     `,
-    width: '600px',
-    confirmButtonText: 'Cerrar',
-    confirmButtonColor: '#2E608C'
-  });
-}
+      width: '600px',
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#2E608C'
+    });
+  }
 
-duplicateProducto(producto: Producto): void {
-  Swal.fire({
-    title: '¿Duplicar producto?',
-    text: `Se creará una copia de "${producto.nombre}".`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Duplicar',
-    cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#2E608C',
-    cancelButtonColor: '#9ca3af'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.productosService.duplicateProduct(producto.id_producto!).subscribe({
-        next: (response) => {
-          this.productos.update((prev) => [...prev, response]);
-          this.toast.success('Producto duplicado correctamente');
-          this.loadProductos();
-        },
-        error: (error) => {
-          console.error('Error duplicando producto:', error);
-          this.toast.error('No se pudo duplicar el producto');
-        }
-      });
-    }
-  });
-}
+  duplicateProducto(producto: Producto): void {
+    Swal.fire({
+      title: '¿Duplicar producto?',
+      text: `Se creará una copia de "${producto.nombre}".`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Duplicar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.productosService.duplicateProduct(producto.id_producto!).subscribe({
+          next: (response) => {
+            this.productos.update((prev) => [...prev, response]);
+            this.toast.success('Producto duplicado correctamente');
+            this.loadProductos();
+          },
+          error: (error) => {
+            console.error('Error duplicando producto:', error);
+            this.toast.error('No se pudo duplicar el producto');
+          }
+        });
+      }
+    });
+  }
 
 
 
@@ -189,7 +204,7 @@ duplicateProducto(producto: Producto): void {
       cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (result.isConfirmed) {
-        this.productosService.deleteProducto(producto.id_producto??0).subscribe({
+        this.productosService.deleteProducto(producto.id_producto ?? 0).subscribe({
           next: () => {
             this.toast.success('Producto eliminado correctamente');
             this.loadProductos();
@@ -207,60 +222,60 @@ duplicateProducto(producto: Producto): void {
   }
 
   // ============================================
-// HELPERS PARA MANEJAR MARCA Y CATEGORÍA
-// ============================================
+  // HELPERS PARA MANEJAR MARCA Y CATEGORÍA
+  // ============================================
 
-public getMarcaNombre(producto: Producto): string {
-  if (!producto.marca) return 'N/A';
+  public getMarcaNombre(producto: Producto): string {
+    if (!producto.marca) return 'N/A';
 
-  if (typeof producto.marca === 'string') {
-    return producto.marca;
+    if (typeof producto.marca === 'string') {
+      return producto.marca;
+    }
+
+    if (typeof producto.marca === 'object' && producto.marca.nombre) {
+      return producto.marca.nombre;
+    }
+
+    return 'N/A';
   }
 
-  if (typeof producto.marca === 'object' && producto.marca.nombre) {
-    return producto.marca.nombre;
+  private getCategoriaNombre(producto: Producto): string {
+    if (!producto.categoria) return 'N/A';
+
+    if (typeof producto.categoria === 'string') {
+      return producto.categoria;
+    }
+
+    if (typeof producto.categoria === 'object' && producto.categoria.nombre) {
+      return producto.categoria.nombre;
+    }
+
+    return 'N/A';
   }
 
-  return 'N/A';
-}
-
-private getCategoriaNombre(producto: Producto): string {
-  if (!producto.categoria) return 'N/A';
-
-  if (typeof producto.categoria === 'string') {
-    return producto.categoria;
+  private getMarcaId(producto: Producto): number | undefined {
+    if (typeof producto.marca === 'object' && producto.marca.id_marca) {
+      return producto.marca.id_marca;
+    }
+    return producto.marca_id;
   }
 
-  if (typeof producto.categoria === 'object' && producto.categoria.nombre) {
-    return producto.categoria.nombre;
+  private getCategoriaId(producto: Producto): number | undefined {
+    if (typeof producto.categoria === 'object' && producto.categoria.id_categoria) {
+      return producto.categoria.id_categoria;
+    }
+    return producto.categoria_id;
   }
 
-  return 'N/A';
-}
-
-private getMarcaId(producto: Producto): number | undefined {
-  if (typeof producto.marca === 'object' && producto.marca.id_marca) {
-    return producto.marca.id_marca;
+  public getImagenUrl(producto: Producto): string {
+    return producto.imagen_url || producto.imagen || '/assets/placeholder.png';
   }
-  return producto.marca_id;
-}
 
-private getCategoriaId(producto: Producto): number | undefined {
-  if (typeof producto.categoria === 'object' && producto.categoria.id_categoria) {
-    return producto.categoria.id_categoria;
-  }
-  return producto.categoria_id;
-}
-
-public getImagenUrl(producto: Producto): string {
-  return producto.imagen_url || producto.imagen || '/assets/placeholder.png';
-}
-
-mostrarGuiaSimbolos(): void {
-  console.log('💡 Abriendo guía de símbolos...');
-  Swal.fire({
-    title: 'Guía de Símbolos',
-    html: `
+  mostrarGuiaSimbolos(): void {
+    console.log('💡 Abriendo guía de símbolos...');
+    Swal.fire({
+      title: 'Guía de Símbolos',
+      html: `
       <div class="text-left py-2 space-y-5">
         <!-- Sección: Acciones Rápidas -->
         <div class="space-y-3">
@@ -340,14 +355,14 @@ mostrarGuiaSimbolos(): void {
         </div>
       </div>
     `,
-    showConfirmButton: true,
-    confirmButtonText: 'ENTENDIDO',
-    buttonsStyling: false,
-    customClass: {
-      popup: 'rounded-[32px] p-6 border-none shadow-2xl mx-4',
-      title: 'font-display font-black text-xl text-text-primary uppercase tracking-tight text-left mb-0',
-      confirmButton: 'w-full py-5 mt-6 bg-brand-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-[24px] hover:bg-brand-primary-dark transition-all active:scale-95 shadow-xl shadow-brand-primary/20'
-    }
-  });
-}
+      showConfirmButton: true,
+      confirmButtonText: 'ENTENDIDO',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'rounded-[32px] p-6 border-none shadow-2xl mx-4',
+        title: 'font-display font-black text-xl text-text-primary uppercase tracking-tight text-left mb-0',
+        confirmButton: 'w-full py-5 mt-6 bg-brand-primary text-white font-black uppercase text-xs tracking-[0.2em] rounded-[24px] hover:bg-brand-primary-dark transition-all active:scale-95 shadow-xl shadow-brand-primary/20'
+      }
+    });
+  }
 }
