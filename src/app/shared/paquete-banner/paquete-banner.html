@@ -47,11 +47,21 @@
         }
 
         <!-- Tipo de Paquete -->
-        <span
-          [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + tipoBadgeClass()">
-          <app-icon [name]="iconoTipo()" [size]="'16'" />
-          {{ textoTipo() }}
-        </span>
+        <div class="flex items-center gap-2">
+          <span
+            [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + tipoBadgeClass()">
+            <app-icon [name]="iconoTipo()" [size]="'16'" />
+            {{ textoTipo() }}
+          </span>
+
+          <app-info-tooltip
+            iconName="help-circle"
+            [title]="'Paquete ' + textoTipo()"
+            [titleClass]="tipoPaquete() === TipoPaquete.SINERGICO ? 'text-brand-primary-light' : 'text-amber-400'"
+            [description]="descriptionTipo()"
+            position="bottom-center">
+          </app-info-tooltip>
+        </div>
 
         <!-- Marca -->
         @if (marcaNombre()) {

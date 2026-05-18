@@ -14,9 +14,18 @@
   <!-- 📌 HEADER -->
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
-      <h3 class="text-lg font-semibold text-gray-900 leading-none">
-        Elegí las opciones
-      </h3>
+      <div class="flex items-center gap-2">
+        <h3 class="text-lg font-semibold text-gray-900 leading-none">
+          Elegí las opciones
+        </h3>
+        <app-info-tooltip
+          iconName="help-circle"
+          [iconSize]="'14'"
+          title="Opciones del producto"
+          description="Las combinaciones dependen del stock disponible. Si una opción está tachada, es porque esa combinación específica no está disponible actualmente."
+          position="bottom-left">
+        </app-info-tooltip>
+      </div>
 
       <!-- Botón limpiar selección -->
       @if (hayAlgunaSeleccion()) {

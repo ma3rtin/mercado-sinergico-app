@@ -19,11 +19,20 @@
         {{ paquete.paqueteBase?.nombre }}
       </h3>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5">
         <!-- Estado Badge (Minimalista) -->
         <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ' + getEstadoClass(pedido.estado?.nombre)">
           {{ pedido.estado?.nombre }}
         </span>
+        
+        <app-info-tooltip
+          iconName="help-circle"
+          iconSize="12"
+          iconClass="text-text-muted border-border-default"
+          [description]="getDescripcionEstado(pedido.estado?.nombre)"
+          position="bottom-right">
+        </app-info-tooltip>
+
         <app-icon name="chevronRight" size="18" class="text-text-muted group-hover:translate-x-1 transition-transform" />
       </div>
     </div>
@@ -149,10 +158,16 @@
             <p class="text-[10px] text-text-muted font-bold uppercase">Gente</p>
             <p class="text-xs font-bold">{{ paquete.cant_usuarios_registrados || 0 }}</p>
           </div>
-          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
-            <app-icon name="info" size="18" class="text-brand-primary mx-auto mb-1.5" />
-            <p class="text-[10px] text-text-muted font-bold uppercase">Estado</p>
-            <p class="text-xs font-bold truncate leading-none mt-1">{{ pedido.estado?.nombre || 'OK' }}</p>
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm flex flex-col items-center justify-center">
+            <app-info-tooltip
+              iconName="info"
+              iconClass="text-brand-primary border-brand-primary"
+              [title]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+              [description]="getDescripcionEstado(pedido.estado?.nombre)"
+              position="top-center">
+            </app-info-tooltip>
+            <p class="text-[10px] text-text-muted font-bold uppercase mt-1">Estado</p>
+            <p class="text-xs font-bold truncate leading-none mt-1">{{ pedido.estado?.nombre || 'Pendiente' }}</p>
           </div>
         </div>
 

@@ -3,16 +3,20 @@ import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-banner',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, InfoTooltipComponent],
   templateUrl: './paquete-banner.html',
 })
 export class PaqueteBannerComponent {
   // 🎯 INPUT
   paquete = input.required<PaquetePublicado>();
+
+  // Exponer Enum para el template
+  public readonly TipoPaquete = TipoPaquete;
 
   // 📊 COMPUTED PROPERTIES
 
@@ -74,6 +78,14 @@ export class PaqueteBannerComponent {
     if (tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
     if (tipo === TipoPaquete.ENERGICO) return 'Enérgico';
     return 'Por Definir';
+  });
+
+  // Descripción del tipo de paquete
+  descriptionTipo = computed(() => {
+    const tipo = this.tipoPaquete();
+    if (tipo === TipoPaquete.SINERGICO) return 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.';
+    if (tipo === TipoPaquete.ENERGICO) return 'Compra rápida individual con beneficios y envío prioritario.';
+    return 'Paquete estándar.';
   });
 
   // Color del badge de tipo

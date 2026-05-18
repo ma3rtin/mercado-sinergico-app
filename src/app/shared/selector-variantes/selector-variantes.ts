@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 // Components
 import { IconComponent } from '@app/shared/icono/icono';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -31,7 +32,7 @@ export interface VariantesSeleccionadas {
 @Component({
   selector: 'app-selector-variantes',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, InfoTooltipComponent],
   templateUrl: './selector-variantes.html',
 })
 export class SelectorVariantesComponent {
