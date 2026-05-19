@@ -82,6 +82,7 @@ export class FiltrosComponent {
   // 🎯 SIGNAL INPUTS
   config = input.required<ConfigFiltros>();
   titulo = input<string>('Filtros');
+  valoresIniciales = input<Partial<FiltrosAplicados>>();
 
   // 📤 OUTPUTS
   filtrosAplicados = output<FiltrosAplicados>();
@@ -191,6 +192,22 @@ export class FiltrosComponent {
       const cfg = this.config();
       if (cfg && isPlatformBrowser(this.platformId)) {
         this.cargarDatosFiltros();
+      }
+    });
+
+    effect(() => {
+      const init = this.valoresIniciales();
+      if (init) {
+        if (init.categorias) this.categoriasSeleccionadas.set(init.categorias);
+        if (init.marcas) this.marcasSeleccionadas.set(init.marcas);
+        if (init.zonas) this.zonasSeleccionadas.set(init.zonas);
+        if (init.tiposPaquete) this.tiposPaqueteSeleccionados.set(init.tiposPaquete);
+        if (init.estados) this.estadosSeleccionados.set(init.estados);
+        if (init.ordenamiento) this.ordenSeleccionado.set(init.ordenamiento);
+        if (init.rangoPrecio) {
+          this.precioMin.set(init.rangoPrecio.min);
+          this.precioMax.set(init.rangoPrecio.max);
+        }
       }
     });
   }
