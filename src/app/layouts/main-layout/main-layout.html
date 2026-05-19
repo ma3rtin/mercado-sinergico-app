@@ -1,9 +1,33 @@
 <div class="min-h-screen flex flex-col bg-gray-50">
-    <app-header />
+  <app-header />
 
-    <main class="flex-1 pb-24 md:pb-0 mb-9">
-        <router-outlet />
-    </main>
+  <!-- ⚠️ Banner preventivo de perfil incompleto -->
+  @if (mostrarBannerPerfilIncompleto()) {
+  <div class="bg-amber-50 border-b border-amber-200/80 px-4 py-3 sm:px-6 transition-all duration-300 animate-fade-in">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="flex p-2 rounded-xl bg-amber-100/80 text-amber-800">
+          <app-icon name="alertTriangle" size="20"></app-icon>
+        </span>
+        <p class="text-sm font-medium text-amber-800 text-center sm:text-left">
+          <span class="font-bold">¡Atención!</span> Para poder sumarte a los paquetes y realizar pedidos, necesitás
+          completar todos los datos obligatorios de tu perfil.
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <a routerLink="/perfil"
+          class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-xl shadow-sm text-xs font-bold text-amber-900 bg-amber-200 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 cursor-pointer">
+          Completar perfil
+          <app-icon name="arrowRight" size="14" class="ml-1.5"></app-icon>
+        </a>
+      </div>
+    </div>
+  </div>
+  }
 
-    <app-footer />
+  <main class="flex-1 pb-24 md:pb-0 mb-9">
+    <router-outlet />
+  </main>
+
+  <app-footer />
 </div>
