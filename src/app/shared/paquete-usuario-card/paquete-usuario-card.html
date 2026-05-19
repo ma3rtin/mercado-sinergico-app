@@ -20,17 +20,16 @@
       </h3>
 
       <div class="flex items-center gap-1.5">
-        <!-- Estado Badge (Minimalista) -->
-        <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ' + getEstadoClass(pedido.estado?.nombre)">
-          {{ pedido.estado?.nombre }}
-        </span>
-        
+        <!-- Estado Badge como Tooltip -->
         <app-info-tooltip
-          iconName="help-circle"
-          iconSize="12"
-          iconClass="text-text-muted border-border-default"
+          [customTrigger]="true"
+          [tooltipTitle]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+          [titleClass]="getEstadoTitleClass(pedido.estado?.nombre)"
           [description]="getDescripcionEstado(pedido.estado?.nombre)"
           position="bottom-right">
+          <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border cursor-default ' + getEstadoClass(pedido.estado?.nombre)">
+            {{ pedido.estado?.nombre }}
+          </span>
         </app-info-tooltip>
 
         <app-icon name="chevronRight" size="18" class="text-text-muted group-hover:translate-x-1 transition-transform" />
