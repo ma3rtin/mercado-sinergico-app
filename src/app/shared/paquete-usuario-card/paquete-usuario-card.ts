@@ -170,6 +170,20 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
+  getEstadoTitleClass(estado?: string): string {
+    if (!estado) return 'text-white';
+    const e = estado.toLowerCase();
+
+    if (e === 'pendiente') return 'text-status-pending-bg';
+    if (e === 'pagado') return 'text-status-active-bg';
+    if (e === 'reembolsado') return 'text-status-neutral-bg';
+    if (e === 'en preparación') return 'text-secondary-bg';
+    if (e === 'en camino') return 'text-primary-bg';
+    if (e === 'recibido') return 'text-success-bg';
+
+    return 'text-white';
+  }
+
   getIconoEstado(estado?: string): string {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();

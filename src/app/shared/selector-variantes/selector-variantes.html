@@ -19,9 +19,10 @@
           Elegí las opciones
         </h3>
         <app-info-tooltip
-          iconName="help-circle"
-          [iconSize]="'14'"
-          title="Opciones del producto"
+          iconName="helpCircle"
+          [iconSize]="'18'"
+          [simple]="true"
+          [tooltipTitle]="'Opciones del producto'"
           description="Las combinaciones dependen del stock disponible. Si una opción está tachada, es porque esa combinación específica no está disponible actualmente."
           position="bottom-left">
         </app-info-tooltip>
@@ -193,46 +194,3 @@
   }
 </div>
 }
-
-<!-- ============================================ -->
-<!-- NOTAS DE DESARROLLO -->
-<!-- ============================================ -->
-<!--
-  🎨 CARACTERÍSTICAS DEL DISEÑO:
-
-  ✅ Responsive completo:
-     - Mobile: 2 columnas
-     - Tablet: 3 columnas
-     - Desktop: 4-5 columnas
-
-  ✅ Feedback visual:
-     - Borde y fondo amarillo en opción seleccionada
-     - Icono de check animado
-     - Borde pulsante en opción activa
-     - Hover suave en todas las opciones
-
-  ✅ Accesibilidad:
-     - aria-label descriptivo
-     - aria-pressed para estado
-     - Contraste adecuado
-     - Navegación por teclado
-
-  ✅ UX avanzada:
-     - Progress badge en mobile
-     - Resumen de selección en desktop
-     - Advertencia si faltan opciones
-     - Confirmación visual al completar
-     - Ayuda contextual en mobile
-
-  ✅ Paleta de colores:
-     - primary: #71A8D9 (azul claro)
-     - secondary: #2E608C (azul oscuro)
-     - secondary-dark: #D28509 (naranja/amarillo oscuro)
-     - accent: #FFD562 (amarillo)
-
-  🔗 INTEGRACIÓN:
-     - Se integra directamente en detalle-producto-sumarse.component.html
-     - Emite eventos: variantesChange y valido
-     - No requiere servicios externos
-     - Totalmente autocontenido
--->

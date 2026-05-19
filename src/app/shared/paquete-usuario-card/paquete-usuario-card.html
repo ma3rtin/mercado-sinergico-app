@@ -1,7 +1,7 @@
 <!-- CARD COLAPSADO: Mostrar PaqueteCard -->
 @if (!pedido.expandido || isMobile()) {
 <div
-  class="w-full bg-bg-surface rounded-2xl border border-border-default shadow-sm hover:shadow-md transition-all cursor-pointer p-3 sm:p-4 flex gap-3 sm:gap-4 items-center group"
+  class="w-full bg-bg-surface rounded-2xl border border-border-default shadow-sm hover:shadow-md transition-all cursor-pointer p-3 sm:p-4 flex gap-3 sm:gap-4 items-center group relative hover:z-30"
   (click)="onToggleExpansion()">
 
   <!-- Imagen -->
@@ -71,11 +71,11 @@
 <!-- CARD EXPANDIDO: Solo para Desktop -->
 @if (pedido.expandido && !isMobile()) {
 <article
-  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default animate-in fade-in zoom-in-95 duration-300 relative hover:z-30">
 
   <!-- HEADER (Desktop) -->
   <div (click)="onToggleExpansion()"
-    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default">
+    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default rounded-t-2xl">
 
     <!-- Imagen -->
     <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-bg-app overflow-hidden border border-border-default">
@@ -94,16 +94,23 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
-            {{ pedido.estado?.nombre }}
-          </span>
+          <app-info-tooltip
+            [customTrigger]="true"
+            [tooltipTitle]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+            [titleClass]="getEstadoTitleClass(pedido.estado?.nombre)"
+            [description]="getDescripcionEstado(pedido.estado?.nombre)"
+            position="bottom-right">
+            <span [class]="'px-3 py-1 rounded-full text-xs font-bold border cursor-default ' + getEstadoClass(pedido.estado?.nombre)">
+              {{ pedido.estado?.nombre }}
+            </span>
+          </app-info-tooltip>
           <app-icon name="chevronUp" size="24" class="text-text-muted" />
         </div>
       </div>
     </div>
   </div>
 
-  <div class="bg-bg-app">
+  <div class="bg-bg-app rounded-b-2xl">
     <ng-container *ngTemplateOutlet="expandedContent"></ng-container>
   </div>
 </article>
