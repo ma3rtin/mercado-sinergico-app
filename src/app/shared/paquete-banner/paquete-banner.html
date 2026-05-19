@@ -24,7 +24,7 @@
     <app-info-tooltip
       [customTrigger]="true"
       [tooltipTitle]="'Envío solo a ' + zonaNombre()"
-      titleClass="text-brand-cta font-bold"
+      titleClass="text-color-blanco font-bold"
       description="Los pedidos de este paquete se envían agrupados hacia esta zona. ¡Así logramos reducir al mínimo el costo de envío para todos!"
       position="bottom-left">
       <span
@@ -44,42 +44,6 @@
   <!-- 📝 CONTENIDO PRINCIPAL -->
   <div
     class="relative z-10 p-6 sm:p-8 lg:p-10 min-h-[320px] sm:min-h-[380px] lg:min-h-[420px] flex flex-col justify-end">
-
-    <!-- 🏷️ BADGES SUPERIORES - Mobile Stack, Desktop Inline -->
-    <div class="mb-4 sm:mb-6">
-      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-
-        <!-- Estado -->
-        @if (estadoNombre()) {
-        <span
-          [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + estadoBadgeClass()">
-          <app-icon name="checkCircle" [size]="'16'" class="hidden sm:block" />
-          {{ estadoNombre() }}
-        </span>
-        }
-
-
-
-        <!-- Marca -->
-        @if (marcaNombre()) {
-        <span
-          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-brand-secondary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-          <app-icon name="Award" [size]="'16'" />
-          {{ marcaNombre() }}
-        </span>
-        }
-
-        <!-- Categoría -->
-        @if (categoriaNombre()) {
-        <span
-          class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-800/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg">
-          <app-icon name="tag" [size]="'16'" />
-          {{ categoriaNombre() }}
-        </span>
-        }
-
-      </div>
-    </div>
 
     <!-- 📌 TÍTULO DEL PAQUETE -->
     <h1
