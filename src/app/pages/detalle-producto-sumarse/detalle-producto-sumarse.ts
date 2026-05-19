@@ -27,6 +27,8 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
+import { UsuarioService } from '@app/services/usuario/usuario.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
@@ -52,6 +54,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
+  private readonly usuarioService = inject(UsuarioService);
 
   // ✅ igual que productos-del-paquete
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -277,8 +280,44 @@ export class DetalleProductoSumarse implements OnInit {
 
     console.log('🧪 Body enviado:', body);
 
+    // 🌟 Verificar que el perfil esté completo antes de permitir sumarse a un paquete/pedido
+    this.usuarioService.getPerfil().subscribe({
+      next: () => {
+        if (!this.usuarioService.perfilCompleto()) {
+          Swal.fire({
+            title: '¡Faltan datos obligatorios!',
+            html: '<p class="text-gray-600 mb-4">Para poder sumarte a un paquete y realizar pedidos, primero debes completar los campos obligatorios en tu perfil (teléfono, fecha de nacimiento y dirección de entrega).</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Completar perfil',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: 'var(--brand-secondary)', // Azul
+            cancelButtonColor: 'var(--error)', // Rojo
+            customClass: {
+              confirmButton: 'px-5 py-2.5 rounded-xl text-white font-bold transition-all shadow-md',
+              cancelButton: 'px-5 py-2.5 rounded-xl text-white font-bold transition-all shadow-md'
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.router.navigate(['/perfil']);
+            }
+          });
+          return;
+        }
+
+        // Si el perfil está completo, procedemos a realizar la acción
+        this.procederSumarAlPaquete(paquete.id_paquete_publicado!, body);
+      },
+      error: (err) => {
+        console.error('❌ Error al validar perfil antes de comprar:', err);
+        this.toast.error('No se pudo verificar tu información de perfil. Intentá nuevamente.');
+      }
+    });
+  }
+
+  private procederSumarAlPaquete(paqueteId: number, body: any): void {
     this.pedidoService
-      .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
+      .sumarseAlPaquete(paqueteId, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

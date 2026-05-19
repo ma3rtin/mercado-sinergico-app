@@ -82,9 +82,9 @@
               <app-input formControlName="cp" labelValue="Código postal" [readonlyValue]="true"></app-input>
 
               <!-- Fila 2: Calle y Número -->
-              <app-input formControlName="calle" labelValue="Calle" placeholderValue="Ingresá tu calle"></app-input>
+              <app-input formControlName="calle" labelValue="Calle" placeholderValue="Ingresá tu calle" [requiredValue]="true"></app-input>
               <app-input formControlName="numero" labelValue="Número" typeValue="text"
-                placeholderValue="Ej: 123"></app-input>
+                placeholderValue="Ej: 123" [requiredValue]="true"></app-input>
 
               <!-- Fila 3: Dpto y Piso -->
               <app-input formControlName="dpto" labelValue="Dpto" placeholderValue="Ej: 2B"></app-input>

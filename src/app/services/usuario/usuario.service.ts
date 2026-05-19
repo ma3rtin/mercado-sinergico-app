@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { Observable, catchError, throwError, timeout, tap, shareReplay } from 'rxjs';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { Direccion } from '@app/models/ZonasInterfaces/Direccion';
@@ -9,9 +9,33 @@ import { FirebaseLoginResponse, LoginResponse } from './types';
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService extends ApiService {
+  // 🧠 Signals reactivos de perfil
+  perfilUsuario = signal<Usuario | null>(null);
+
+  perfilCompleto = computed(() => {
+    const usuario = this.perfilUsuario();
+    if (!usuario) return false;
+
+    const tieneTelefono = !!usuario.telefono && usuario.telefono.trim().length >= 8;
+    const tieneFechaNac = !!usuario.fecha_nac;
+    const tieneDireccion = !!usuario.direccion && 
+                           (!!usuario.direccion.localidadId || !!usuario.direccion.localidad?.id_localidad) &&
+                           !!usuario.direccion.calle && usuario.direccion.calle.trim().length > 0 &&
+                           !!usuario.direccion.numero;
+
+    return tieneTelefono && tieneFechaNac && tieneDireccion;
+  });
 
   constructor(private authService: AuthService) {
     super();
+
+    // 🔄 Limpiar perfil reactivamente cuando el usuario cierra sesión
+    effect(() => {
+      if (!this.authService.isAuthenticated()) {
+        this.perfilUsuario.set(null);
+        this.cachedPerfil$ = null;
+      }
+    });
   }
 
   getUsuarios(): Observable<Usuario[]> {
@@ -50,6 +74,7 @@ export class UsuarioService extends ApiService {
     if (!this.cachedPerfil$) {
       this.cachedPerfil$ = this.get<Usuario>('usuarios/me').pipe(
         timeout(60000),
+        tap(u => this.perfilUsuario.set(u)),
         shareReplay(1),
         catchError(err => {
           this.cachedPerfil$ = null;
@@ -62,7 +87,9 @@ export class UsuarioService extends ApiService {
 
   updatePerfil(data: any): Observable<Usuario> {
     return this.patch<Usuario>('usuarios/me', data).pipe(
-      tap(() => {
+      tap((res) => {
+        const u = (res as any).usuario ?? res;
+        this.perfilUsuario.set(u);
         // Limpiamos caché para forzar recarga la próxima vez
         this.cachedPerfil$ = null;
       }),
