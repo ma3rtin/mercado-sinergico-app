@@ -7,12 +7,12 @@ import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
 import { IconComponent } from '@app/shared/icono/icono';
-import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
+import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
 
 @Component({
   selector: 'app-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, InfoTooltipComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent],
   templateUrl: './paquete-card.html',
   styleUrl: './paquete-card.css',
 })
@@ -62,37 +62,11 @@ export class PaqueteCard implements OnInit {
     return this.paquete.tipo === TipoPaquete.SINERGICO;
   }
 
-  /** Nombre del ícono según el tipo de paquete */
-  getTypeIconName(): string {
-    if (this.isEnergico()) return 'zap'; // Asumiendo 'zap' (rayo) para Enérgico
-    if (this.isSinergico()) return 'users'; // Asumiendo 'users' para Sinérgico
-    return 'package';
-  }
-
-  /** Colores del ícono circular superior derecho */
-  getTypeIconClass(): string {
-    if (this.isEnergico()) return 'text-secondary-dark border-secondary-dark';
-    if (this.isSinergico()) return 'text-brand-primary border-brand-primary';
-    return 'text-gray-500 border-gray-400';
-  }
-
   /** Colores del badge de descuento (Sigue la misma lógica que el icono derecho) */
   getDiscountBadgeClass(): string {
     if (this.isEnergico()) return 'text-secondary-dark border-secondary-dark';
     if (this.isSinergico()) return 'text-brand-primary border-brand-primary';
     return 'text-gray-700 border-gray-400';
-  }
-
-  /** Nombre formateado para el tooltip */
-  getPackageTypeName(): string {
-    return this.isSinergico() ? 'Paquete Sinérgico' : 'Paquete Enérgico';
-  }
-
-  /** Descripción para el tooltip */
-  getPackageTypeDescription(): string {
-    if (this.isSinergico()) return 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.';
-    if (this.isEnergico()) return 'Compra rápida individual con beneficios y envío prioritario.';
-    return 'Paquete estándar.';
   }
 
   /** Left border color by type */

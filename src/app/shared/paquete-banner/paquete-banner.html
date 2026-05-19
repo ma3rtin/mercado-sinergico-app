@@ -18,16 +18,28 @@
     <div class="hidden sm:block absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent"></div>
   </div>
 
-  <!-- 📍 BADGE DE ZONA (Corner) -->
+  <!-- 📍 BADGE DE ZONA (Corner Left) -->
   @if (zonaNombre()) {
-  <div class="absolute top-2 right-2 sm:top-3 sm:right-3 z-20">
-    <span
-      class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-brand-primary/90 text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-md shadow-lg border border-white/20">
-      <app-icon name="mapPin" [size]="'16'" />
-      {{ zonaNombre() }}
-    </span>
+  <div class="absolute top-2 left-2 sm:top-3 sm:left-3 z-20">
+    <app-info-tooltip
+      [customTrigger]="true"
+      [tooltipTitle]="'Envío solo a ' + zonaNombre()"
+      titleClass="text-brand-cta font-bold"
+      description="Los pedidos de este paquete se envían agrupados hacia esta zona. ¡Así logramos reducir al mínimo el costo de envío para todos!"
+      position="bottom-left">
+      <span
+        class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-700 hover:bg-gray-600 transition-colors text-white rounded-full text-xs sm:text-sm font-bold backdrop-blur-md shadow-lg border border-white/20 cursor-default">
+        <app-icon name="mapPin" [size]="'16'" />
+        {{ zonaNombre() }}
+      </span>
+    </app-info-tooltip>
   </div>
   }
+
+  <!-- ⚡ TIPO DE PAQUETE ICON / TOOLTIP (Corner Right) -->
+  <div class="absolute top-2 right-2 sm:top-3 sm:right-3 z-20">
+    <app-tipo-paquete-badge [tipo]="tipoPaquete()" position="bottom-right"></app-tipo-paquete-badge>
+  </div>
 
   <!-- 📝 CONTENIDO PRINCIPAL -->
   <div
@@ -46,22 +58,7 @@
         </span>
         }
 
-        <!-- Tipo de Paquete -->
-        <div class="flex items-center gap-2">
-          <span
-            [class]="'inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-sm shadow-lg ' + tipoBadgeClass()">
-            <app-icon [name]="iconoTipo()" [size]="'16'" />
-            {{ textoTipo() }}
-          </span>
 
-          <app-info-tooltip
-            iconName="help-circle"
-            [title]="'Paquete ' + textoTipo()"
-            [titleClass]="tipoPaquete() === TipoPaquete.SINERGICO ? 'text-brand-primary-light' : 'text-amber-400'"
-            [description]="descriptionTipo()"
-            position="bottom-center">
-          </app-info-tooltip>
-        </div>
 
         <!-- Marca -->
         @if (marcaNombre()) {
@@ -93,9 +90,30 @@
     <!-- 📄 DESCRIPCIÓN -->
     @if (descripcionPaquete()) {
     <p
-      class="text-white/95 text-sm sm:text-base lg:text-lg max-w-3xl mb-4 sm:mb-6 drop-shadow-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
+      class="text-white/95 text-sm sm:text-base lg:text-lg max-w-3xl mb-3 drop-shadow-lg leading-relaxed line-clamp-2 sm:line-clamp-3">
       {{ descripcionPaquete() }}
     </p>
+    }
+
+    <!-- 🏷️ METADATOS (Marca y Tecnología) -->
+    @if (marcaNombre() || categoriaNombre()) {
+    <div class="flex flex-wrap gap-2 max-w-3xl mb-5 sm:mb-6">
+      @if (marcaNombre()) {
+      <span
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 text-white rounded-md text-[11px] sm:text-xs font-semibold backdrop-blur-md border border-white/15 shadow-sm">
+        <app-icon name="Award" [size]="'12'" />
+        {{ marcaNombre() }}
+      </span>
+      }
+
+      @if (categoriaNombre()) {
+      <span
+        class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 text-white rounded-md text-[11px] sm:text-xs font-semibold backdrop-blur-md border border-white/15 shadow-sm">
+        <app-icon name="tag" [size]="'12'" />
+        {{ categoriaNombre() }}
+      </span>
+      }
+    </div>
     }
 
     <!-- 📊 GRID DE INFORMACIÓN - Responsive -->

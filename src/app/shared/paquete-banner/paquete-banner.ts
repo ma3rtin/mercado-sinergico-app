@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
+import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
 import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-banner',
   standalone: true,
-  imports: [CommonModule, IconComponent, InfoTooltipComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent],
   templateUrl: './paquete-banner.html',
 })
 export class PaqueteBannerComponent {
@@ -64,37 +65,7 @@ export class PaqueteBannerComponent {
     return this.paquete()?.tipo || TipoPaquete.POR_DEFINIR;
   });
 
-  // Icono del tipo de paquete
-  iconoTipo = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'users';
-    if (tipo === TipoPaquete.ENERGICO) return 'zap';
-    return 'package';
-  });
 
-  // Texto del tipo de paquete
-  textoTipo = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (tipo === TipoPaquete.ENERGICO) return 'Enérgico';
-    return 'Por Definir';
-  });
-
-  // Descripción del tipo de paquete
-  descriptionTipo = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.';
-    if (tipo === TipoPaquete.ENERGICO) return 'Compra rápida individual con beneficios y envío prioritario.';
-    return 'Paquete estándar.';
-  });
-
-  // Color del badge de tipo
-  tipoBadgeClass = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'bg-brand-secondary text-white';
-    if (tipo === TipoPaquete.ENERGICO) return 'bg-brand-cta text-gray-900';
-    return 'bg-white/90 text-gray-900';
-  });
 
   // Color del badge de estado
   estadoBadgeClass = computed(() => {

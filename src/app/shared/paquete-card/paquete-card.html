@@ -26,14 +26,7 @@
 
     <!-- Icono de Tipo de Paquete con Tooltip -->
     <div class="absolute top-2 right-2 z-20">
-      <app-info-tooltip
-        [iconName]="getTypeIconName()"
-        [iconClass]="getTypeIconClass()"
-        [title]="getPackageTypeName()"
-        [titleClass]="isSinergico() ? 'text-brand-primary-light' : 'text-amber-400'"
-        [description]="getPackageTypeDescription()"
-        position="bottom-right"
-      ></app-info-tooltip>
+      <app-tipo-paquete-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-paquete-badge>
     </div>
 
     <!-- Badge de urgencia (Abajo Derecha) -->
