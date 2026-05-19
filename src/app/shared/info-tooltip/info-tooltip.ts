@@ -8,8 +8,8 @@ export type TooltipPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'to
   selector: 'app-info-tooltip',
   standalone: true,
   imports: [CommonModule, IconComponent],
-  templateUrl: './info-tooltip.component.html',
-  styleUrl: './info-tooltip.component.css'
+  templateUrl: './info-tooltip.html',
+  styleUrl: './info-tooltip.css'
 })
 export class InfoTooltipComponent {
   /** Nombre del icono (ej. 'info', 'help-circle', 'zap') */
@@ -24,6 +24,13 @@ export class InfoTooltipComponent {
   /** Título principal del tooltip (Opcional) */
   @Input() title?: string;
   
+  /** Título principal del tooltip de manera segura (evita mostrar el tooltip por defecto del navegador) */
+  @Input() tooltipTitle?: string;
+
+  get activeTitle(): string | undefined {
+    return this.tooltipTitle || this.title;
+  }
+  
   /** Color/Clase del título (ej. 'text-amber-400') */
   @Input() titleClass: string = 'text-white';
   
@@ -32,6 +39,12 @@ export class InfoTooltipComponent {
   
   /** Posición del tooltip con respecto al icono */
   @Input() position: TooltipPosition = 'bottom-right';
+
+  /** Si es true, renderiza el icono de forma simple, sin contenedor circular, fondo ni bordes */
+  @Input() simple: boolean = false;
+
+  /** Si es true, el componente no dibuja ningún ícono nativo y en su lugar usa el contenido proyectado como trigger */
+  @Input() customTrigger: boolean = false;
 
   getContentPositionClass(): string {
     switch (this.position) {
