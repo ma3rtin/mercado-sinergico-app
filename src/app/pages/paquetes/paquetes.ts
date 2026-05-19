@@ -17,12 +17,14 @@ import { map } from 'rxjs';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
 import { TipoPaquete } from '@app/models/Enums';
+import { Zona } from '@app/models/ZonasInterfaces/Zona';
 
 // Services
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { ZonaService } from '@app/services/zona/zona.service';
+import { UsuarioService } from '@app/services/usuario/usuario.service';
 
 // Components
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
@@ -57,6 +59,24 @@ export class PaquetesPublicosComponent implements OnInit {
   paquetesFiltrados = signal<PaquetePublicado[]>([]);
   isLoading = signal<boolean>(true);
   errorMessage = signal<string>('');
+  todasLasZonas = signal<Zona[]>([]);
+  zonasSeleccionadasActivas = signal<(string | number)[]>([]);
+
+  // 📊 Computed: Zonas seleccionadas formateadas
+  textoZonasFiltradas = computed(() => {
+    const activas = this.zonasSeleccionadasActivas();
+    if (activas.length === 0) return '';
+
+    const todas = this.todasLasZonas();
+    const nombres = activas
+      .map(id => todas.find(z => z.id_zona == id)?.nombre)
+      .filter(nombre => !!nombre);
+
+    if (nombres.length === 0) return '';
+    if (nombres.length === 1) return nombres[0];
+    if (nombres.length === 2) return `${nombres[0]} y ${nombres[1]}`;
+    return nombres.join(', ');
+  });
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
@@ -192,11 +212,23 @@ export class PaquetesPublicosComponent implements OnInit {
   totalPaquetes = computed(() => this.paquetesOriginales().length);
   paquetesMostrados = computed(() => this.paquetesFiltrados().length);
 
+  valoresFiltrosIniciales = computed<Partial<FiltrosAplicados>>(() => {
+    const perfil = this.usuarioService.perfilUsuario();
+    const zonas = perfil?.direccion?.localidad?.zonas || [];
+    if (zonas.length > 0 && zonas[0].id_zona) {
+      return {
+        zonas: [zonas[0].id_zona]
+      };
+    }
+    return {};
+  });
+
   constructor(
     private paquetePublicadoService: PaquetePublicadoService,
     private categoriaService: CategoriaService,
     private marcaService: MarcaService,
     private zonaService: ZonaService,
+    private usuarioService: UsuarioService,
     private router: Router,
     private destroyRef: DestroyRef,
     @Inject(PLATFORM_ID) platformId: Object
@@ -206,6 +238,7 @@ export class PaquetesPublicosComponent implements OnInit {
     // ✅ Solo ejecutar en el navegador, después del primer render
     afterNextRender(() => {
       this.cargarPaquetes();
+      this.cargarZonas();
     });
   }
 
@@ -235,7 +268,7 @@ export class PaquetesPublicosComponent implements OnInit {
           const paquetesOrdenados = this.ordenarPaquetes(paquetesActivos, 'recientes');
 
           this.paquetesOriginales.set(paquetesOrdenados);
-          this.paquetesFiltrados.set(paquetesOrdenados);
+          this.procesarFiltrosYOrden();
           this.paginaActual.set(1);
           this.isLoading.set(false);
         },
@@ -264,6 +297,19 @@ export class PaquetesPublicosComponent implements OnInit {
       });
   }
 
+  private cargarZonas(): void {
+    this.zonaService.getZonas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (zonas) => {
+          this.todasLasZonas.set(zonas);
+        },
+        error: (error) => {
+          console.error('❌ Error cargando zonas para etiqueta:', error);
+        }
+      });
+  }
+
   ordenSeleccionado = signal<string>('recientes');
 
   // 🎯 APLICAR FILTROS
@@ -278,7 +324,23 @@ export class PaquetesPublicosComponent implements OnInit {
 
   private procesarFiltrosYOrden(): void {
     let resultado = [...this.paquetesOriginales()];
-    const filtros = this.filtrosActuales;
+    let filtros = this.filtrosActuales;
+    this.zonasSeleccionadasActivas.set([]);
+
+    if (!filtros) {
+      const init = this.valoresFiltrosIniciales();
+      if (init && Object.keys(init).length > 0) {
+        filtros = {
+          categorias: init.categorias || [],
+          marcas: init.marcas || [],
+          tiposPaquete: init.tiposPaquete || [],
+          ordenamiento: init.ordenamiento || '',
+          rangoPrecio: init.rangoPrecio || { min: null, max: null },
+          estados: init.estados || [],
+          zonas: init.zonas || []
+        };
+      }
+    }
 
     if (filtros) {
         // Filtrar por categorías
@@ -300,6 +362,7 @@ export class PaquetesPublicosComponent implements OnInit {
           resultado = resultado.filter(p =>
             filtros.zonas.includes(p.zonaId || 0)
           );
+          this.zonasSeleccionadasActivas.set(filtros.zonas);
         }
 
         if (filtros.tiposPaquete.length > 0) {

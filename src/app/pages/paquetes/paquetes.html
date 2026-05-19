@@ -5,6 +5,7 @@
 
     <!-- 🎨 Filtros -->
     <app-filtros [config]="configFiltrosPaquetes()" [titulo]="'Filtrar Paquetes'"
+      [valoresIniciales]="valoresFiltrosIniciales()"
       (filtrosAplicados)="aplicarFiltros($event)" (filtrosLimpiados)="limpiarFiltros()" />
 
     <!-- 📦 Contenido -->
@@ -13,8 +14,11 @@
       <!-- 🛠️ CABECERA DEL CONTENIDO (Resultados y Ordenamiento) -->
       @if (!isLoading()) {
       <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
-        <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto">
+        <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto flex flex-wrap items-center gap-1">
           Mostrando {{ paquetesPaginados().length }} paquetes de {{ paquetesFiltrados().length }}
+          @if (textoZonasFiltradas()) {
+            en <span class="text-brand-primary font-semibold">{{ textoZonasFiltradas() }}</span>
+          }
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <label for="sort-paquetes" class="text-sm font-medium text-gray-600 whitespace-nowrap">Ordenar por:</label>
