@@ -22,6 +22,7 @@ import { TipoPaquete } from '@app/models/Enums';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { MarcaService } from '@app/services/producto/marca.service';
+import { ZonaService } from '@app/services/zona/zona.service';
 
 // Components
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
@@ -97,9 +98,18 @@ export class PaquetesPublicosComponent implements OnInit {
       } as OpcionFiltro)))
     ),
 
+    obtenerZonas: () => this.zonaService.getZonas().pipe(
+      map(zonas => zonas.map(zona => ({
+        id: zona.id_zona,
+        nombre: zona.nombre,
+        valor: zona.id_zona
+      } as OpcionFiltro)))
+    ),
+
     // 🎨 Filtros a mostrar (solo para paquetes)
     mostrarCategoria: true,
     mostrarMarca: true,
+    mostrarZona: true,
     mostrarTipoPaquete: true,
     mostrarRangoPrecio: false,
     mostrarOrdenamiento: false, // Ahora está arriba a la derecha
@@ -172,6 +182,7 @@ export class PaquetesPublicosComponent implements OnInit {
     // 🎯 Textos personalizados
     tituloCategoria: 'Categorías',
     tituloMarca: 'Marcas',
+    tituloZona: 'Zonas',
     tituloTipoPaquete: 'Tipo de Paquete',
     tituloOrdenamiento: 'Ordenar por',
     tituloEstados: 'Estado del paquete',
@@ -185,6 +196,7 @@ export class PaquetesPublicosComponent implements OnInit {
     private paquetePublicadoService: PaquetePublicadoService,
     private categoriaService: CategoriaService,
     private marcaService: MarcaService,
+    private zonaService: ZonaService,
     private router: Router,
     private destroyRef: DestroyRef,
     @Inject(PLATFORM_ID) platformId: Object
@@ -280,6 +292,13 @@ export class PaquetesPublicosComponent implements OnInit {
         if (filtros.marcas.length > 0) {
           resultado = resultado.filter(p =>
             filtros.marcas.includes(p.paqueteBase?.marcaId || 0)
+          );
+        }
+
+        // Filtrar por zonas
+        if (filtros.zonas && filtros.zonas.length > 0) {
+          resultado = resultado.filter(p =>
+            filtros.zonas.includes(p.zonaId || 0)
           );
         }
 
