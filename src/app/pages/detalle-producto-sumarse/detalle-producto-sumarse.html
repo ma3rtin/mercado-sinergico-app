@@ -1,7 +1,7 @@
 <!-- Loading State -->
 @if (isLoading()) {
 <div class="flex flex-col items-center justify-center py-20">
-    <app-icon name="Loader" class="w-16 h-16 text-blue-500 mb-4 animate-spin" />
+    <app-icon name="Loader" class="w-16 h-16 text-info mb-4 animate-spin" />
     <p class="text-gray-600 text-lg">Cargando...</p>
 </div>
 }
@@ -10,7 +10,7 @@
 @else if (errorMessage()) {
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
-        <app-icon name="AlertCircle" class="w-20 h-20 text-red-400 mb-4" />
+        <app-icon name="AlertCircle" class="w-20 h-20 text-error mb-4" />
         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
         <button (click)="goBack()"
             class="mt-4 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium transition-colors">
@@ -23,151 +23,154 @@
 <!-- Contenido principal -->
 @else if (hasProducto()) {
 
-<!-- Zona Badge -->
-<div class="bg-gray-50 text-white py-2 px-4">
-    <div class="container mx-auto flex justify-end align-middle">
-        <span style="background-image: var(--color-tag)" class="mr-3 px-3 py-1 rounded-lg text-sm">
-            <app-icon name="MapPin" size="16" class="color-secondary"></app-icon>
-            {{ zonaDelPaquete() }}
-        </span>
-    </div>
-</div>
-
 <!-- Main Content -->
-<div class="container mx-auto px-4 py-8 bg-gray-50 min-h-screen font-body">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        <!-- Visor de imágenes -->
-        <div class="bg-white rounded-lg shadow-md p-4">
-            <app-visor-imagenes [producto]="producto()!" [altText]="producto()!.nombre">
-            </app-visor-imagenes>
+<div class="container mx-auto px-4 py-8 lg:py-12 bg-gray-50 min-h-screen font-body max-w-7xl">
+    
+    <!-- 🌟 GRAN CARD PRINCIPAL 🌟 -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col lg:flex-row">
+        
+        <!-- COLUMNA IZQUIERDA: Imágenes y Especificaciones (Se estira hasta el final) -->
+        <div class="w-full lg:w-[55%] lg:border-r border-gray-100 relative rounded-tl-xl rounded-bl-xl">
+            
+            <!-- CONTENIDO STICKY -->
+            <div class="sticky top-24 pt-16 p-4 sm:p-6 lg:p-8 lg:pt-16">
+                <app-visor-imagenes [producto]="producto()!" [altText]="producto()!.nombre">
+                </app-visor-imagenes>
+            </div>
         </div>
 
-        <!-- Información del producto -->
-        <div class="space-y-6">
-            <h1 class="text-2xl lg:text-3xl text-gray-800 font-display">
+        <!-- COLUMNA DERECHA: Información, Variantes y Compra -->
+        <div class="w-full lg:w-[45%] p-6 lg:p-8 flex flex-col">
+            
+            <!-- Badges: Marca y Categoría -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                @if (marcaNombre()) {
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-secondary text-white shadow-sm">
+                    <app-icon name="Tag" size="14"></app-icon>
+                    {{ marcaNombre() }}
+                </span>
+                }
+                @if (categoriaNombre()) {
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary/20 text-brand-secondary border border-brand-primary/30">
+                    <app-icon name="Layers" size="14"></app-icon>
+                    {{ categoriaNombre() }}
+                </span>
+                }
+            </div>
+
+            <!-- Título -->
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-4">
                 {{ producto()!.nombre }}
             </h1>
 
-            <!-- Descripción corta -->
-            @if (producto()!.descripcion) {
-            <div class="text-gray-600">
-                <p>{{ producto()!.descripcion }}</p>
+            <!-- Precios -->
+            <div class="flex flex-col gap-1 mb-8">
+                @if (porcentajeAhorro() > 0) {
+                <div class="flex items-center gap-2">
+                    <span class="text-lg text-gray-400 line-through font-medium">
+                        {{ formatPrice(precioBase()) }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-4xl font-black text-gray-900">
+                        {{ formatPrice(precioFinal()) }}
+                    </span>
+                    <span class="text-success text-lg font-bold">
+                        {{ porcentajeAhorro() }}% OFF
+                    </span>
+                </div>
+                } @else {
+                <span class="text-4xl font-black text-gray-900">
+                    {{ formatPrice(precioBase()) }}
+                </span>
+                }
+            </div>
+
+            <!-- Selector de Variantes -->
+            @if (productoTieneVariantes()) {
+            <div class="mb-8">
+                <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
+                    (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
+                    (varianteSeleccionada)="onVarianteIdChange($event)">
+                </app-selector-variantes>
             </div>
             }
 
-            <!-- 🆕 SELECTOR DE VARIANTES -->
-            @if (productoTieneVariantes()) {
-            <app-selector-variantes
-                [producto]="producto()!"
-                [habilitado]="paqueteEstaActivo()"
-                (variantesChange)="onVariantesChange($event)"
-                (valido)="onVariantesValidoChange($event)"
-                (varianteSeleccionada)="onVarianteIdChange($event)">
-            </app-selector-variantes>
-            }
+            <!-- Mini Card: Información del Paquete -->
+            <div class="bg-white rounded-xl border border-gray-200 p-5 mb-8 flex flex-col gap-4">
+                <!-- Estado y Cierre -->
+                <div class="flex items-start gap-4">
+                    <app-icon name="Package" size="24" class="text-success shrink-0 mt-0.5" />
+                    <div>
+                        <p class="text-success font-semibold flex items-center gap-2">
+                            Sumándote a este paquete
+                        </p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Comprando dentro de este grupo accedés al descuento.
+                            El paquete cierra el <b>{{ fechaCierre() }}</b>.
+                        </p>
+                    </div>
+                </div>
 
-            <!-- Cantidad -->
-                <div class="flex items-center gap-4 mt-8">
-                <button (click)="changeQuantity(-1)"
-                    class="w-10 h-10 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xl font-bold transition-colors"
-                    [disabled]="quantity() <= minQuantity()">
-                    -
+                <!-- Progreso de participantes -->
+                <div class="flex items-start gap-4 mt-2">
+                    <app-icon name="Users" size="24" class="text-gray-400 shrink-0 mt-0.5" />
+                    <div class="w-full">
+                        <p class="text-gray-800 font-semibold text-sm mb-1">
+                            Participantes: {{ participantesActuales() }}
+                        </p>
+                        <!-- Barra de progreso simple -->
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1 overflow-hidden">
+                            <div class="bg-success h-1.5 rounded-full" [style.width.%]="(participantesActuales() / maxParticipantes()) * 100"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            Faltan {{ faltanParaCerrar() }} para llegar al objetivo.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Enlace volver -->
+                <button (click)="goBack()" class="cursor-pointer text-brand-primary text-sm font-semibold hover:text-brand-secondary text-left mt-2 transition-colors">
+                    Ver detalle del paquete
                 </button>
-                <span class="text-xl font-semibold px-4">{{ quantity() }}</span>
-                <button (click)="changeQuantity(1)"
-                    class="w-10 h-10 rounded-full bg-yellow-400 hover:bg-yellow-500 flex items-center justify-center text-xl font-bold transition-colors"
-                    [disabled]="quantity() >= maxQuantity()">
-                    +
-                </button>
+            </div>
 
-                <!-- Botón Sumarse -->
-                <button (click)="addToCart()" [disabled]="!puedeAgregarAlCarrito()" [class]="'px-8 py-3 rounded-lg font-semibold transition-all ' +
-                    (puedeAgregarAlCarrito()
-                        ? 'bg-yellow-400 shadow-md hover:bg-yellow-500 text-gray-800 cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60')">
+            <!-- Botón de Compra -->
+            <div class="mt-auto flex flex-col gap-4">
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-800 font-medium">Cantidad:</span>
+                    <div class="flex items-center justify-between bg-gray-100 rounded-lg p-1 h-12 w-32">
+                        <button (click)="changeQuantity(-1)" class="w-10 h-10 rounded shadow-sm bg-white text-xl font-bold flex items-center justify-center hover:bg-gray-50 disabled:opacity-50" [disabled]="quantity() <= minQuantity()">-</button>
+                        <span class="font-bold px-2 text-gray-800">{{ quantity() }}</span>
+                        <button (click)="changeQuantity(1)" class="w-10 h-10 rounded shadow-sm bg-white text-xl font-bold flex items-center justify-center hover:bg-gray-50 disabled:opacity-50" [disabled]="quantity() >= maxQuantity()">+</button>
+                    </div>
+                    <span class="text-sm text-gray-400">({{ maxQuantity() }} disponibles)</span>
+                </div>
 
+                <app-button 
+                    [variant]="'primary'" 
+                    [size]="'lg'" 
+                    [fullWidth]="true" 
+                    [disabled]="!puedeAgregarAlCarrito()" 
+                    (buttonClick)="addToCart()">
+                    
                     @if (!paqueteEstaActivo()) {
                     Paquete no disponible
                     } @else if (productoTieneVariantes() && !variantesValidas()) {
-                    Elegí todas las opciones
+                    Elegí las opciones
                     } @else {
-                    Sumarse
+                    Agregar al pedido
                     }
-                </button>
+                </app-button>
             </div>
 
-            <!-- 🆕 AYUDA CONTEXTUAL (si tiene variantes y no están todas seleccionadas) -->
-            @if (mostrarAyudaVariantes()) {
-            <div class="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <app-icon name="Info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p class="text-sm text-blue-800">
-                    Seleccioná todas las opciones del producto (color, talle, etc.) para poder continuar
-                </p>
-            </div>
-            }
-
-            <!-- Volver al paquete -->
-            <button (click)="goBack()"
-                class="shadow-md w-full border-2 border-secondary text-secondary py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
-                Volver al paquete
-                <app-icon name="ArrowRight" class="w-5 h-5" />
-            </button>
-
-            <!-- Información del paquete -->
-            <div class="bg-white rounded-lg shadow-md p-6 border">
-                <h3 class="font-semibold text-gray-800 mb-4">Información del paquete</h3>
-
-                <div class="space-y-3">
-                    <div>
-                        <div class="text-sm text-gray-600">Productos ya comprados</div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg font-semibold flex items-center gap-1">
-                                <app-icon name="Package" class="w-5 h-5 text-gray-600" />
-                                {{ participantesActuales() }}/{{ maxParticipantes() }}
-                            </span>
-                            <span class="text-sm text-gray-500">
-                                (Faltan {{ faltanParaCerrar() }} para cerrar)
-                            </span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="text-sm text-gray-600">Estado del paquete</div>
-                        <div class="flex items-center gap-2">
-                            <app-icon name="check" class="w-5 h-5 text-gray-600" />
-                            <span [class]="'font-semibold ' + getEstadoClass(estadoDelPaquete())">
-                                {{ estadoDelPaquete() }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="text-sm text-gray-600">El paquete cierra el</div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-semibold flex items-center gap-1">
-                                <app-icon name="Calendar" class="w-5 h-5 text-gray-600" />
-                                {{ fechaCierre() }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="text-sm text-gray-600">Compradores involucrados</div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg flex items-center gap-1">
-                                <app-icon name="Users" class="w-5 h-5 text-gray-600" />
-                            </span>
-                            <span class="font-semibold">{{ participantesActuales() }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     @if (!hasPaqueteSeleccionado()) {
-    <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+    <div class="mt-6 p-4 bg-warning-light border border-warning-light rounded-lg text-warning">
         No se pudo cargar la información del paquete.
         El producto se muestra de forma individual.
     </div>

@@ -14,7 +14,7 @@
                 <!-- Email -->
                 <div>
                     <label class="block text-base font-medium text-gray-700 mb-2 font-body">
-                        Ingresá tu mail <span class="text-red-500">*</span>
+                        Ingresá tu mail <span class="text-error">*</span>
                     </label>
                     <input 
                         type="email" 
@@ -29,7 +29,7 @@
 
                     <!-- Mensaje de error dinámico -->
                     @if (emailCtrl.invalid && emailCtrl.touched) {
-                        <p class="text-sm text-red-600 font-body mt-2">
+                        <p class="text-sm text-error font-body mt-2">
                             Ingresá un mail válido
                         </p>
                     }
@@ -38,7 +38,7 @@
                 <!-- Password -->
                 <div>
                     <label class="block text-base font-medium text-gray-700 mb-2 font-body">
-                        Ingresá tu contraseña <span class="text-red-500">*</span>
+                        Ingresá tu contraseña <span class="text-error">*</span>
                     </label>
                     <div class="relative">
                         <input 
@@ -56,15 +56,15 @@
                         <button 
                             type="button" 
                             (click)="togglePassword()" 
-                            class="absolute right-4 top-1/2 -translate-y-1/2  hover:text-gray-700 transition-colors text-xl"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            {{ showPassword() ? '🙈' : '' }}
+                            <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" size="20"></app-icon>
                         </button>
                     </div>
 
                     <!-- Mensajes de error dinámicos -->
                     @if (passCtrl.invalid && passCtrl.touched) {
-                        <div class="text-red-600 text-sm space-y-1 font-body mt-2">
+                        <div class="text-error text-sm space-y-1 font-body mt-2">
                             @if (passCtrl.errors?.['required']) {
                                 <p>La contraseña es obligatoria</p>
                             }
@@ -87,8 +87,8 @@
 
                 <!-- Mensaje de error general -->
                 @if (mensaje()) {
-                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-center font-body text-red-600 text-sm">
+                    <div class="p-3 bg-error-light border border-error-light rounded-lg">
+                        <p class="text-center font-body text-error text-sm">
                             {{ mensaje() }}
                         </p>
                     </div>

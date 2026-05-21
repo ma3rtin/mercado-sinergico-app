@@ -61,6 +61,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   helperText = signal<string>('');
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
+  emptyMessage = signal<string>('No se encontraron opciones');
   size = signal<SelectSize>('md');
 
   // 🔧 Configuración funcional
@@ -146,6 +147,9 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   });
 
   currentError = computed(() => {
+    // Forzar re-evaluación cuando cambia el estado del control
+    this.controlStateTracker();
+
     if (!this.isTouched() || !this.ngControl?.control) return '';
 
     const control = this.ngControl.control;
@@ -177,11 +181,11 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
 
     // ✅ FIX: usar secondary (azul) en lugar de warning (naranja)
     const state = this.currentError()
-      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+      ? 'border-error focus:border-error focus:ring-2 focus:ring-error-light'
       : this.successMessage()
-        ? 'border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+        ? 'border-success focus:border-success focus:ring-2 focus:ring-success-light'
         : this.isFocused()
-          ? 'border-secondary focus:ring-2 focus:ring-secondary/20'
+          ? 'border-brand-primary focus:ring-2 focus:ring-brand-primary/20'
           : 'border-gray-300 hover:border-gray-400';
 
     const disabledClass = this.isDisabled()
@@ -222,6 +226,9 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
     }
   }
 
+  // 🎯 Signal para forzar re-evaluación de computed properties
+  private controlStateTracker = signal<number>(0);
+
   ngOnInit(): void {
     try {
       this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
@@ -233,6 +240,12 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
           .subscribe(value => {
             // ✅ FIX: usar .set() para que los computed se recalculen
             this.internalValue.set(value !== null && value !== undefined ? value : null);
+          });
+
+        this.ngControl.control?.statusChanges
+          ?.pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => {
+            this.controlStateTracker.update(v => v + 1);
           });
       }
     } catch (e) {
@@ -246,6 +259,7 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   @Input() set helperTextValue(value: string) { this.helperText.set(value); }
   @Input() set errorMessageValue(value: string) { this.errorMessage.set(value); }
   @Input() set successMessageValue(value: string) { this.successMessage.set(value); }
+  @Input() set emptyMessageValue(value: string) { this.emptyMessage.set(value); }
   @Input() set sizeValue(value: SelectSize) { this.size.set(value); }
   @Input() set idValue(value: string) { this.selectId.set(value); }
   @Input() set requiredValue(value: boolean) { this.required.set(value); }

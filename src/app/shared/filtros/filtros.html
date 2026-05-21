@@ -1,24 +1,24 @@
 <!-- 📱 TRIGGER PARA MÓVIL (Visible solo en pantallas pequeñas) -->
 <div class="lg:hidden w-full mb-6">
-  <button 
+  <button
     (click)="toggleDrawer()"
     class="w-full flex items-center justify-between px-5 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
     <div class="flex items-center gap-3">
-        <div class="p-2 bg-brand-primary/10 rounded-xl text-brand-primary">
-            <app-icon name="Filter" size="20"></app-icon>
-        </div>
-        <div class="text-left">
-            <span class="block text-sm font-bold text-gray-900 leading-none mb-1">{{ titulo() }}</span>
-            <span class="block text-xs text-gray-500 font-medium">Categorías, marcas y más</span>
-        </div>
+      <div class="p-2 bg-brand-primary/10 rounded-xl text-brand-primary">
+        <app-icon name="Filter" size="20"></app-icon>
+      </div>
+      <div class="text-left">
+        <span class="block text-sm font-bold text-gray-900 leading-none mb-1">{{ titulo() }}</span>
+        <span class="block text-xs text-gray-500 font-medium">Categorías, marcas y más</span>
+      </div>
     </div>
     <div class="flex items-center gap-2">
-        @if (tieneFiltrosActivos()) {
-          <span class="flex items-center justify-center bg-brand-primary text-white text-[10px] font-bold w-5 h-5 rounded-full">
-            {{ contadorFiltrosActivos() }}
-          </span>
-        }
-        <app-icon name="ChevronRight" size="18" class="text-gray-300"></app-icon>
+      @if (tieneFiltrosActivos()) {
+        <span class="flex items-center justify-center bg-brand-primary text-white text-[10px] font-bold w-5 h-5 rounded-full">
+          {{ contadorFiltrosActivos() }}
+        </span>
+      }
+      <app-icon name="ChevronRight" size="18" class="text-gray-300"></app-icon>
     </div>
   </button>
 </div>
@@ -28,19 +28,19 @@
   <div class="fixed inset-0 z-[100] lg:hidden flex flex-col">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeDrawer()"></div>
-    
+
     <!-- Contenido del Drawer -->
     <div class="relative mt-auto h-[85vh] bg-white rounded-t-[2.5rem] shadow-2xl flex flex-col animate-slide-up overflow-hidden">
       <!-- Handle visual -->
       <div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 rounded-full z-10"></div>
-      
+
       <!-- Header Fixed -->
       <div class="flex items-center justify-between px-8 pt-8 pb-5 bg-white rounded-t-[2.5rem] border-b border-gray-100/50 shadow-sm z-20">
         <div>
-            <h2 class="font-display text-2xl font-bold text-gray-900">{{ titulo() }}</h2>
-            <p class="text-xs text-gray-500 font-medium mt-0.5">Personalizá tu búsqueda</p>
+          <h2 class="font-display text-2xl font-bold text-gray-900">{{ titulo() }}</h2>
+          <p class="text-xs text-gray-500 font-medium mt-0.5">Personalizá tu búsqueda</p>
         </div>
-        <button (click)="closeDrawer()" 
+        <button (click)="closeDrawer()"
           class="w-10 h-10 flex items-center justify-center bg-gray-100/80 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-full transition-all active:scale-95 shadow-sm">
           <app-icon name="X" size="24"></app-icon>
         </button>
@@ -53,17 +53,17 @@
 
       <!-- Footer Fixed -->
       <div class="p-6 bg-white border-t border-gray-100 flex gap-4 shadow-[0_-10px_40px_rgba(0,0,0,0.04)] z-20">
-        <app-button 
-            variant="tertiary" 
-            class="flex-1"
-            (buttonClick)="limpiarFiltros()"
-            label="Limpiar">
+        <app-button
+          variant="tertiary"
+          class="flex-1"
+          (buttonClick)="limpiarFiltros()"
+          label="Limpiar">
         </app-button>
-        <app-button 
-            variant="primary" 
-            class="flex-[2]"
-            (buttonClick)="aplicarFiltros()"
-            label="Aplicar Filtros">
+        <app-button
+          variant="primary"
+          class="flex-[2]"
+          (buttonClick)="aplicarFiltros()"
+          label="Aplicar Filtros">
         </app-button>
       </div>
     </div>
@@ -73,38 +73,38 @@
 <!-- 🖥️ SIDEBAR DESKTOP -->
 <aside class="hidden lg:block w-72 xl:w-80 flex-shrink-0 sticky top-24 self-start">
   <div class="bg-white rounded-[2rem] shadow-sm border border-gray-50/50 overflow-hidden">
-     <div class="p-8">
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="font-display text-xl font-bold text-gray-900">{{ titulo() }}</h2>
-            @if (tieneFiltrosActivos()) {
-                <button (click)="limpiarFiltros()" class="text-xs text-brand-primary hover:underline font-bold tracking-tight uppercase">Reiniciar</button>
-            }
+    <div class="p-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="font-display text-xl font-bold text-gray-900">{{ titulo() }}</h2>
+        @if (tieneFiltrosActivos()) {
+          <button (click)="limpiarFiltros()" class="text-xs text-brand-primary hover:underline font-bold tracking-tight uppercase">Reiniciar</button>
+        }
+      </div>
+
+      <!-- ⏳ Loading State Desktop -->
+      @if (cargando()) {
+        <div class="flex flex-col items-center justify-center py-12 gap-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-100 border-t-brand-primary"></div>
+          <span class="text-xs text-brand-primary font-bold animate-pulse">Cargando...</span>
         </div>
-        
-        <!-- ⏳ Loading State Desktop -->
-        @if (cargando()) {
-          <div class="flex flex-col items-center justify-center py-12 gap-3">
-            <div class="animate-spin rounded-full h-8 w-8 border-4 border-gray-100 border-t-brand-primary"></div>
-            <span class="text-xs text-brand-primary font-bold animate-pulse">Cargando...</span>
-          </div>
-        }
-        @else {
-          <ng-container *ngTemplateOutlet="filterContentTemplate"></ng-container>
-          
-          <!-- Botón Aplicar Desktop -->
-          <div class="mt-10 pt-8 border-t border-gray-100">
-             <app-button 
-                variant="primary" 
-                class="w-full"
-                (buttonClick)="aplicarFiltros()">
-                <div class="flex items-center justify-center gap-2">
-                    <app-icon name="Filter" size="18"></app-icon>
-                    <span>Aplicar</span>
-                </div>
-             </app-button>
-          </div>
-        }
-     </div>
+      }
+      @else {
+        <ng-container *ngTemplateOutlet="filterContentTemplate"></ng-container>
+
+        <!-- Botón Aplicar Desktop -->
+        <div class="mt-10 pt-8 border-t border-gray-100">
+          <app-button
+            variant="primary"
+            class="w-full"
+            (buttonClick)="aplicarFiltros()">
+            <div class="flex items-center justify-center gap-2">
+              <app-icon name="Filter" size="18"></app-icon>
+              <span>Aplicar</span>
+            </div>
+          </app-button>
+        </div>
+      }
+    </div>
   </div>
 </aside>
 
@@ -134,7 +134,7 @@
             <!-- Buscador interno -->
             <div class="relative mb-4">
               <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
-              <input type="text" 
+              <input type="text"
                      [value]="searchCategoria()"
                      (input)="searchCategoria.set($any($event.target).value)"
                      placeholder="Buscar categoría..."
@@ -190,7 +190,7 @@
             <!-- Buscador interno -->
             <div class="relative mb-4">
               <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
-              <input type="text" 
+              <input type="text"
                      [value]="searchMarca()"
                      (input)="searchMarca.set($any($event.target).value)"
                      placeholder="Buscar marca..."
@@ -277,7 +277,7 @@
           <div class="pt-4 flex flex-col gap-3 animate-fade-in">
             <div class="relative group">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
-                  <app-icon name="DollarSign" size="16"></app-icon>
+                <app-icon name="DollarSign" size="16"></app-icon>
               </span>
               <input
                 type="number"
@@ -288,7 +288,7 @@
             </div>
             <div class="relative group">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-primary transition-colors">
-                  <app-icon name="DollarSign" size="16"></app-icon>
+                <app-icon name="DollarSign" size="16"></app-icon>
               </span>
               <input
                 type="number"

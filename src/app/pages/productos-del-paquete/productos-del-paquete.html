@@ -3,29 +3,9 @@
 
     <!-- 🎯 Header Section -->
     <div class="mb-6 sm:mb-8 lg:mb-12">
-      <!-- Título y Buscador -->
-      <div class="text-center mb-6 sm:mb-8">
-        <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-          Productos del Paquete
-        </h2>
-        <p class="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-          Elegí los productos que querés incluir en <strong class="text-primary">tu paquete</strong>
-        </p>
-      </div>
-
       <!-- Información del Paquete -->
       @if (paquete()) {
         <app-paquete-banner [paquete]="paquete()!" />
-      }
-
-      <!-- 📊 Estadísticas -->
-      @if (!isLoading() && !errorMessage()) {
-        <div class="flex items-center justify-center max-w-3xl mx-auto px-4 text-sm text-gray-600">
-          <span>
-            Mostrando <strong class="text-gray-900">{{ productosFiltrados().length }}</strong>
-            de <strong class="text-gray-900">{{ totalProductos() }}</strong> productos
-          </span>
-        </div>
       }
     </div>
 
@@ -72,7 +52,7 @@
             <div class="relative">
               <div class="animate-spin rounded-full h-16 w-16 sm:h-20 sm:w-20 border-4 border-gray-200 border-t-blue-500"></div>
               <div class="absolute inset-0 flex items-center justify-center">
-                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-8 h-8 sm:w-10 sm:h-10 text-info" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
                 </svg>
               </div>
@@ -84,8 +64,8 @@
         <!-- ❌ Estado de Error -->
         @else if (errorMessage()) {
           <div class="flex flex-col items-center justify-center py-16 sm:py-24 bg-white rounded-xl shadow-md max-w-2xl mx-auto">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
-              <svg class="w-10 h-10 sm:w-12 sm:h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-error-light rounded-full flex items-center justify-center mb-6">
+              <svg class="w-10 h-10 sm:w-12 sm:h-12 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
               </svg>
@@ -98,7 +78,7 @@
             </p>
             <button
               (click)="recargarProductos()"
-              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
+              class="inline-flex items-center gap-2 bg-brand-secondary hover:bg-secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -166,7 +146,7 @@
                     </p>
                     <button
                       (click)="limpiarFiltros()"
-                      class="text-blue-600 hover:text-secondary-dark font-medium transition-colors">
+                      class="text-brand-secondary hover:text-secondary-dark font-medium transition-colors">
                       Limpiar filtros
                     </button>
                   </div>

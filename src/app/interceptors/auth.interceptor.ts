@@ -38,13 +38,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(authReq).pipe(
         catchError((error) => {
             if (error.status === 401) {
-                const hasAnyToken =
-                    !!authService.getJwtToken() || !!authService.getFirebaseToken();
-
-                if (!hasAnyToken) {
-                    authService.clearTokens();
-                    router.navigate(['/login']);
-                }
+                // Token inválido o expirado: limpiar sesión y redirigir a login
+                authService.clearTokens();
+                router.navigate(['/login']);
             }
 
             return throwError(() => error);

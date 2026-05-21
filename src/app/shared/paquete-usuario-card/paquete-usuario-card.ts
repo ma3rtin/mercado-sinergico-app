@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inj
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,7 +12,7 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -156,30 +157,59 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const e = estado.toLowerCase();
 
     const estilos: Record<string, string> = {
-      'pendiente':      'text-status-pending-text bg-status-pending-bg border-warning',
-      'pagado':         'text-status-active-text bg-status-active-bg border-success',
-      'reembolsado':    'text-text-secondary bg-status-neutral-bg border-border-default',
-      'en preparación': 'text-blue-700 bg-blue-50 border-blue-200',
-      'en camino':      'text-purple-700 bg-purple-50 border-purple-200',
-      'recibido':       'text-green-700 bg-green-50 border-green-200',
+      'pendiente': 'text-status-pending-text bg-status-pending-bg border-warning',
+      'pagado': 'text-status-active-text bg-status-active-bg border-success',
+      'reembolsado': 'text-text-secondary bg-status-neutral-bg border-border-default',
+      //un color distinto para cada estado dentro del styles.css:
+      'en preparación': 'text-secondary-text bg-secondary-bg border-secondary-bg',
+      'en camino': 'text-primary-bg bg-primary-bg border-primary-bg',
+      'recibido': 'text-success-text bg-success-bg border-success',
     };
 
     return Object.entries(estilos).find(([k]) => e === k)?.[1]
       ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
+  getEstadoTitleClass(estado?: string): string {
+    if (!estado) return 'text-white';
+    const e = estado.toLowerCase();
+
+    if (e === 'pendiente') return 'text-status-pending-bg';
+    if (e === 'pagado') return 'text-status-active-bg';
+    if (e === 'reembolsado') return 'text-status-neutral-bg';
+    if (e === 'en preparación') return 'text-secondary-bg';
+    if (e === 'en camino') return 'text-primary-bg';
+    if (e === 'recibido') return 'text-success-bg';
+
+    return 'text-white';
+  }
+
   getIconoEstado(estado?: string): string {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();
 
-    if (e === 'pagado')         return 'CheckCircle';
+    if (e === 'pagado') return 'CheckCircle';
     if (e === 'en preparación') return 'Package';
-    if (e === 'en camino')      return 'Truck';
-    if (e === 'recibido')       return 'CheckCircle';
-    if (e === 'reembolsado')    return 'RefreshCcw';
-    if (e === 'cancelado')      return 'XCircle';
+    if (e === 'en camino') return 'Truck';
+    if (e === 'recibido') return 'CheckCircle';
+    if (e === 'reembolsado') return 'RefreshCcw';
+    if (e === 'cancelado') return 'XCircle';
 
     return 'Clock'; // Pendiente u otros
+  }
+
+  getDescripcionEstado(estado?: string): string {
+    if (!estado) return 'Estado desconocido.';
+    const e = estado.toLowerCase();
+    
+    if (e === 'pendiente') return 'Tu pedido está reservado. El paquete se procesará cuando se complete el cupo o finalice el tiempo.';
+    if (e === 'pagado') return '¡Pago confirmado! Estamos esperando que el paquete cierre para procesar el envío.';
+    if (e === 'en preparación') return 'El paquete ha cerrado y estamos preparando los productos para el envío.';
+    if (e === 'en camino') return 'Tu pedido está viajando hacia el punto de entrega.';
+    if (e === 'recibido') return '¡El pedido ha sido entregado exitosamente!';
+    if (e === 'reembolsado') return 'El dinero ha sido devuelto a tu cuenta.';
+    
+    return 'Estado actual de tu pedido.';
   }
 
   obtenerImagenUrl(): string {
@@ -241,7 +271,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!this.puedeEditarCantidades) return;
     const input = event.target as HTMLInputElement;
     let valor = parseInt(input.value, 10);
-    
+
     if (isNaN(valor) || valor < 1) {
       input.value = '1';
       valor = 1;
@@ -253,7 +283,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       id_detalle: prod.id_detalle ?? prod.id,
       nuevaCantidad: valor
     };
-    
+
     this.setCantidadManual.emit(limpio);
   }
 

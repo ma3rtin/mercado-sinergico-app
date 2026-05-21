@@ -13,31 +13,20 @@
 
     <!-- Badge de descuento -->
     @if (paquete.descuento) {
-    <div class="absolute top-2 left-2 flex items-center gap-1
-            bg-white text-black text-xs font-bold
-            px-2.5 py-1 rounded-full shadow-md border-2 border-yellow-500">
-      {{ paquete.descuento }}% OFF
+    <div class="absolute top-3 left-3 z-10">
+      <div class="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm 
+                  pl-2 pr-2.5 py-1 rounded-xl shadow-md border-2" [ngClass]="getDiscountBadgeClass()">
+        <app-icon name="Tag" size="14" [strokeWidth]="'3'"></app-icon>
+        <span class="font-black text-[13px] tracking-wider mt-px">
+          {{ paquete.descuento }}% <span class="font-bold text-[10px]">OFF</span>
+        </span>
+      </div>
     </div>
     }
 
     <!-- Icono de Tipo de Paquete con Tooltip -->
-    <div class="absolute top-2 right-2 tooltip-trigger z-20">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center cursor-default
-                  border-2 shadow-sm bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
-           [ngClass]="getTypeIconClass()">
-        <app-icon [name]="getTypeIconName()" size="16"></app-icon>
-      </div>
-
-      <!-- Tooltip Content -->
-      <div class="tooltip-content absolute right-0 top-10 w-48 origin-top-right
-                  bg-gray-900/95 backdrop-blur-md text-white rounded-xl p-3 shadow-xl border border-gray-700 pointer-events-none">
-        <strong class="block text-xs font-bold mb-1 tracking-wide" [ngClass]="isSinergico() ? 'text-brand-primary-light' : 'text-amber-400'">
-          {{ getPackageTypeName() }}
-        </strong>
-        <p class="text-[11px] leading-relaxed text-gray-300">
-          {{ getPackageTypeDescription() }}
-        </p>
-      </div>
+    <div class="absolute top-2 right-2 z-20">
+      <app-tipo-paquete-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-paquete-badge>
     </div>
 
     <!-- Badge de urgencia (Abajo Derecha) -->

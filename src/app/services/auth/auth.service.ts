@@ -11,7 +11,7 @@ import {
   User
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { tap, filter } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -26,7 +26,7 @@ export class AuthService {
 
   // Exponemos el usuario como signal
   userSignal = toSignal(this.user$, { initialValue: null });
-  
+
   private jwtSignal = signal<string | null>(null);
   private firebaseTokenSignal = signal<string | null>(null);
   private sessionReadySignal = signal(false);
@@ -120,6 +120,9 @@ export class AuthService {
     provider.addScope('email');
     provider.addScope('profile');
 
+    // Limpiar tokens de sesión anterior antes de iniciar nueva sesión
+    this.clearTokens();
+
     try {
       const result = await signInWithPopup(this.auth, provider);
       const user = result.user;
@@ -154,14 +157,17 @@ export class AuthService {
     const token = this.getJwtToken();
     if (!token) return null;
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.rol || null;
-    } catch (error) {
-      console.error('❌ Error al decodificar el token JWT:', error);
-      return null;
+        try {
+            const partes = token.split('.');
+            if (partes.length !== 3) return null;
+            const payload = JSON.parse(atob(partes[1]));
+            if (typeof payload?.rol !== 'string') return null;
+            return payload.rol;
+        } catch {
+            return null;
+        }
     }
-  }
+
 
   // ♻️ Restaurar sesión al iniciar la app
   async restoreSession(): Promise<void> {

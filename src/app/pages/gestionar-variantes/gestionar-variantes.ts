@@ -9,6 +9,7 @@ import {
   signal,
   computed,
   DestroyRef,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,9 +27,9 @@ import {
 import { ProductosService } from '@app/services/producto/producto.service';
 import { TipoPaquete } from '@app/models/Enums';
 
-// Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 import Swal from 'sweetalert2';
 
@@ -55,6 +56,7 @@ interface VarianteExtendida extends ProductoVariante {
     ReactiveFormsModule,
     ButtonComponent,
     IconComponent,
+    PaginationComponent,
   ],
   templateUrl: './gestionar-variantes.html',
 })
@@ -85,8 +87,12 @@ export class GestionarVariantesComponent implements OnInit {
   filtroStock = signal<'todas' | 'con' | 'sin'>('todas');
   filtroEstado = signal<'todas' | 'activas' | 'inactivas'>('todas');
 
+  // 📄 PAGINACIÓN
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(10);
+
   // ✅ SELECCIÓN MÚLTIPLE
-  lastSelectedIndex = signal<number | null>(null);
+  lastSelectedId = signal<number | null>(null);
 
   // ============================================
   // COMPUTED PROPERTIES
@@ -166,6 +172,14 @@ export class GestionarVariantesComponent implements OnInit {
     return variantes;
   });
 
+  paginatedVariantes = computed(() => {
+    const all = this.variantesFiltradas();
+    const page = this.currentPage();
+    const limit = this.itemsPerPage();
+    const start = (page - 1) * limit;
+    return all.slice(start, start + limit);
+  });
+
   // 🆕 SELECCIÓN MÚLTIPLE
   variantesSeleccionadas = computed(() => {
     return this.variantes().filter((v) => v.seleccionada);
@@ -193,6 +207,17 @@ export class GestionarVariantesComponent implements OnInit {
   // ============================================
   // LIFECYCLE
   // ============================================
+  
+  constructor() {
+    effect(() => {
+      this.searchTerm();
+      this.filtroEstado();
+      this.filtroImagen();
+      this.filtroStock();
+      this.currentPage.set(1);
+    }, { allowSignalWrites: true });
+  }
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -205,6 +230,10 @@ export class GestionarVariantesComponent implements OnInit {
     this.productoId.set(parseInt(id, 10));
     this.cargarDatosProducto();
     this.cargarVariantes();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   // ============================================
@@ -346,35 +375,38 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Toggle selección de una variante con soporte para Shift
    */
-  toggleSeleccion(index: number, event: MouseEvent): void {
-    const variantesFiltradas = this.variantesFiltradas();
-    const variante = variantesFiltradas[index];
-    if (!variante) return;
+  toggleSeleccion(varianteId: number, event: MouseEvent): void {
+    const variantesPaginadas = this.paginatedVariantes();
+    const indiceActual = variantesPaginadas.findIndex(v => v.id === varianteId);
+    if (indiceActual === -1) return;
 
     // Si se presiona Shift y hay una última selección
-    if (event.shiftKey && this.lastSelectedIndex() !== null) {
-      const inicio = Math.min(this.lastSelectedIndex()!, index);
-      const fin = Math.max(this.lastSelectedIndex()!, index);
+    if (event.shiftKey && this.lastSelectedId() !== null) {
+      const indiceAnterior = variantesPaginadas.findIndex(v => v.id === this.lastSelectedId());
+      if (indiceAnterior !== -1) {
+        const inicio = Math.min(indiceAnterior, indiceActual);
+        const fin = Math.max(indiceAnterior, indiceActual);
 
-      this.variantes.update((current) => {
-        const updated = [...current];
-        const idsEnRango = variantesFiltradas
-          .slice(inicio, fin + 1)
-          .map((v) => v.id);
+        this.variantes.update((current) => {
+          const updated = [...current];
+          const idsEnRango = variantesPaginadas
+            .slice(inicio, fin + 1)
+            .map((v) => v.id);
 
-        updated.forEach((v) => {
-          if (idsEnRango.includes(v.id)) {
-            v.seleccionada = true;
-          }
+          updated.forEach((v) => {
+            if (idsEnRango.includes(v.id)) {
+              v.seleccionada = true;
+            }
+          });
+
+          return updated;
         });
-
-        return updated;
-      });
+      }
     } else {
       // Toggle simple
       this.variantes.update((current) => {
         const updated = [...current];
-        const varianteEncontrada = updated.find((v) => v.id === variante.id);
+        const varianteEncontrada = updated.find((v) => v.id === varianteId);
         if (varianteEncontrada) {
           varianteEncontrada.seleccionada = !varianteEncontrada.seleccionada;
         }
@@ -382,7 +414,7 @@ export class GestionarVariantesComponent implements OnInit {
       });
     }
 
-    this.lastSelectedIndex.set(index);
+    this.lastSelectedId.set(varianteId);
   }
 
   /**
@@ -390,14 +422,14 @@ export class GestionarVariantesComponent implements OnInit {
    */
   toggleTodasLasSelecciones(): void {
     const todasSeleccionadas = this.todasSeleccionadas();
-    const variantesFiltradas = this.variantesFiltradas();
+    const variantesPaginadas = this.paginatedVariantes();
 
     this.variantes.update((current) => {
       const updated = [...current];
-      const idsFiltradas = variantesFiltradas.map((v) => v.id);
+      const idsPaginadas = variantesPaginadas.map((v) => v.id);
 
       updated.forEach((v) => {
-        if (idsFiltradas.includes(v.id)) {
+        if (idsPaginadas.includes(v.id)) {
           v.seleccionada = !todasSeleccionadas;
         }
       });
@@ -413,7 +445,7 @@ export class GestionarVariantesComponent implements OnInit {
     this.variantes.update((current) =>
       current.map((v) => ({ ...v, seleccionada: false })),
     );
-    this.lastSelectedIndex.set(null);
+    this.lastSelectedId.set(null);
   }
 
   // ============================================
@@ -514,7 +546,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseFloat(value) < 0) {
           return 'Ingresá un precio válido';
@@ -574,7 +606,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -614,17 +646,18 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Actualizar stock de una variante
    */
-  onStockChange(index: number, nuevoStock: number): void {
+  onStockChange(varianteId: number, nuevoStock: number): void {
     if (nuevoStock < 0) {
       nuevoStock = 0;
     }
 
     this.variantes.update((current) => {
       const updated = [...current];
-      const variante = updated[index];
-
-      variante.stockFisico = nuevoStock;
-      variante.hasChanges = this.hasVarianteChanges(variante);
+      const variante = updated.find(v => v.id === varianteId);
+      if (variante) {
+        variante.stockFisico = nuevoStock;
+        variante.hasChanges = this.hasVarianteChanges(variante);
+      }
 
       return updated;
     });
@@ -633,17 +666,19 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Actualizar precio extra de una variante
    */
-  onPrecioExtraChange(index: number, nuevoPrecio: number): void {
+  onPrecioExtraChange(varianteId: number, nuevoPrecio: number): void {
     if (nuevoPrecio < 0) {
       nuevoPrecio = 0;
     }
 
     this.variantes.update((current) => {
       const updated = [...current];
-      const variante = updated[index];
-
-      variante.precioExtra = nuevoPrecio;
-      variante.hasChanges = this.hasVarianteChanges(variante);
+      const variante = updated.find(v => v.id === varianteId);
+      
+      if (variante) {
+        variante.precioExtra = nuevoPrecio;
+        variante.hasChanges = this.hasVarianteChanges(variante);
+      }
 
       return updated;
     });
@@ -652,13 +687,15 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Toggle activo/inactivo de una variante
    */
-  toggleVarianteActiva(index: number): void {
+  toggleVarianteActiva(varianteId: number): void {
     this.variantes.update((current) => {
       const updated = [...current];
-      const variante = updated[index];
+      const variante = updated.find(v => v.id === varianteId);
 
-      variante.activo = !variante.activo;
-      variante.hasChanges = this.hasVarianteChanges(variante);
+      if (variante) {
+        variante.activo = !variante.activo;
+        variante.hasChanges = this.hasVarianteChanges(variante);
+      }
 
       return updated;
     });
@@ -685,7 +722,7 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Manejar selección de imagen
    */
-  onImagenSelected(event: Event, index: number): void {
+  onImagenSelected(event: Event, varianteId: number): void {
     const input = event.target as HTMLInputElement;
 
     if (!input.files || input.files.length === 0) {
@@ -712,11 +749,13 @@ export class GestionarVariantesComponent implements OnInit {
     reader.onload = (e: ProgressEvent<FileReader>) => {
       this.variantes.update((current) => {
         const updated = [...current];
-        const variante = updated[index];
+        const variante = updated.find(v => v.id === varianteId);
 
-        variante.imagenFile = file;
-        variante.imagenPreview = e.target?.result as string;
-        variante.hasChanges = true;
+        if (variante) {
+          variante.imagenFile = file;
+          variante.imagenPreview = e.target?.result as string;
+          variante.hasChanges = true;
+        }
 
         return updated;
       });
@@ -731,14 +770,16 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Eliminar imagen seleccionada
    */
-  removeImagen(index: number): void {
+  removeImagen(varianteId: number): void {
     this.variantes.update((current) => {
       const updated = [...current];
-      const variante = updated[index];
+      const variante = updated.find(v => v.id === varianteId);
 
-      variante.imagenFile = null;
-      variante.imagenPreview = null;
-      variante.hasChanges = this.hasVarianteChanges(variante);
+      if (variante) {
+        variante.imagenFile = null;
+        variante.imagenPreview = null;
+        variante.hasChanges = this.hasVarianteChanges(variante);
+      }
 
       return updated;
     });
@@ -784,8 +825,8 @@ export class GestionarVariantesComponent implements OnInit {
       html: `Se actualizarán <strong>${variantesConCambios.length}</strong> variante(s)`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#B92905',
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--error)',
       confirmButtonText: 'Sí, guardar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -882,8 +923,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Se perderán todos los cambios no guardados',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, descartar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -911,35 +952,34 @@ export class GestionarVariantesComponent implements OnInit {
   /**
    * Eliminar una variante
    */
-  eliminarVariante(index: number): void {
-    const variante = this.variantes()[index];
+  eliminarVariante(varianteId: number): void {
+    const variante = this.variantes().find(v => v.id === varianteId);
+    if (!variante) return;
 
     Swal.fire({
       title: '¿Eliminar variante?',
-      html: `<p>Se eliminará la variante:</p><strong>${this.getVarianteDescripcion(variante)}</strong>`,
+      text: `Se eliminará permanentemente la variante: ${this.getVarianteDescripcion(variante)}`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#B92905',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
         this.varianteService
-          .eliminarVariante(variante.id)
+          .eliminarVariante(variante.id!)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: () => {
               this.variantes.update((current) =>
-                current.filter((_, i) => i !== index),
+                current.filter((v) => v.id !== variante.id),
               );
               this.toastr.success('Variante eliminada correctamente');
             },
-            error: (err) => {
+            error: (err: any) => {
               console.error('❌ Error eliminando variante:', err);
-              this.toastr.error(
-                err.error?.message || 'Error al eliminar la variante',
-              );
+              this.toastr.error('Error al intentar eliminar la variante');
             },
           });
       }
@@ -966,7 +1006,7 @@ export class GestionarVariantesComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Aplicar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#2E608C',
+      confirmButtonColor: 'var(--brand-secondary)',
       inputValidator: (value) => {
         if (!value || parseInt(value) < 0) {
           return 'Ingresá una cantidad válida';
@@ -1005,8 +1045,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Todas las variantes quedarán disponibles',
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#2D7A3E',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--success)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, activar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1032,8 +1072,8 @@ export class GestionarVariantesComponent implements OnInit {
       text: 'Las variantes quedarán pausadas (no eliminadas)',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#D28509',
-      cancelButtonColor: '#9ca3af',
+      confirmButtonColor: 'var(--warning)',
+      cancelButtonColor: 'var(--text-muted)',
       confirmButtonText: 'Sí, desactivar todas',
       cancelButtonText: 'Cancelar',
     }).then((result) => {
@@ -1125,8 +1165,8 @@ export class GestionarVariantesComponent implements OnInit {
         text: 'Hay cambios sin guardar que se perderán',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#B92905',
-        cancelButtonColor: '#9ca3af',
+        confirmButtonColor: 'var(--error)',
+        cancelButtonColor: 'var(--text-muted)',
         confirmButtonText: 'Sí, salir',
         cancelButtonText: 'Cancelar',
       }).then((result) => {

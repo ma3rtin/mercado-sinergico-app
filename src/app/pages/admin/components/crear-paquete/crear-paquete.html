@@ -3,7 +3,7 @@
 >
   <!-- Botón Volver -->
   <div class="mb-2">
-    <app-admin-back-button label="Volver a administrar paquetes" />
+    <app-admin-back-button label="Volver a administrar paquetes" route="/admin/administrar-paquetes" />
   </div>
 
   <div class="space-y-6">
@@ -26,25 +26,25 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="lg:col-span-2">
           <label class="block text-lg font-medium text-black mb-2">
-            Nombre <span class="text-red-500">*</span>
+            Nombre <span class="text-error">*</span>
           </label>
           <input
             [(ngModel)]="nombre"
             type="text"
             placeholder="Ingresá el nombre del paquete"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus placeholder-gray-500"
           />
         </div>
 
         <div class="lg:col-span-2">
           <label class="block text-lg font-medium text-black mb-2">
-            Descripción <span class="text-red-500">*</span>
+            Descripción <span class="text-error">*</span>
           </label>
           <textarea
             [(ngModel)]="descripcion"
             rows="4"
             placeholder="Ingresá una breve descripción"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical placeholder-gray-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus resize-vertical placeholder-gray-500"
           ></textarea>
         </div>
 
@@ -52,7 +52,7 @@
           <label class="block text-lg font-medium text-black mb-2">Marca</label>
           <select
             [(ngModel)]="marcaSeleccionada"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white placeholder-gray-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus bg-white placeholder-gray-500"
           >
             <option value="">Elegí una marca</option>
             @for (marca of marcas(); track marca.id_marca) {
@@ -63,11 +63,11 @@
 
         <div>
           <label class="block text-lg font-medium text-black mb-2">
-            Categoría <span class="text-red-500">*</span>
+            Categoría <span class="text-error">*</span>
           </label>
           <select
             [(ngModel)]="categoriaSeleccionada"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white placeholder-gray-500"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus bg-white placeholder-gray-500"
           >
             <option value="">Elegí una categoría</option>
             @for (categoria of categorias(); track categoria.id_categoria) {
@@ -81,7 +81,7 @@
     <div class="bg-white rounded-lg shadow-sm p-6">
       <div class="mb-4">
         <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Imagen de portada <span class="text-red-500">*</span>
+          Imagen de portada <span class="text-error">*</span>
         </h3>
         <p class="text-sm text-gray-600">Subí una imagen (máx. 200 KB).</p>
       </div>
@@ -90,11 +90,11 @@
         type="file"
         accept="image/*"
         (change)="onFileSelected($event)"
-        class="w-full px-4 py-3 border border-dashed border-gray-400 rounded-lg hover:border-blue-400 cursor-pointer"
+        class="w-full px-4 py-3 border border-dashed border-gray-400 rounded-lg hover:border-focus cursor-pointer"
       />
 
       @if (imagenError()) {
-        <p class="mt-2 text-sm text-red-600">{{ imagenError() }}</p>
+        <p class="mt-2 text-sm text-error">{{ imagenError() }}</p>
       }
     </div>
 
@@ -104,43 +104,16 @@
         <p class="text-sm text-gray-600">Buscá y seleccioná los productos que van a formar parte del paquete.</p>
       </div>
 
-      <div class="relative mb-4">
-        <input
-          #inputBusqueda
-          [(ngModel)]="busquedaProducto"
-          (input)="buscarProductos()"
-          (focus)="reabrirBusqueda()"
-          type="text"
-          placeholder="Buscar productos..."
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
-        />
-        <i class="fa-solid fa-magnifying-glass absolute right-4 top-4 text-gray-400"></i>
-
-        @if (resultadosBusqueda().length > 0) {
-          <ul
-            #scrollContainer
-            class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 w-full max-h-60 overflow-y-auto shadow-md"
-          >
-            @for (producto of resultadosBusqueda(); track producto.id_producto) {
-              <li
-                (click)="agregarProducto(producto)"
-                class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 hover:opacity-80"
-              >
-                {{ producto.nombre }} - ${{ producto.precio }}
-              </li>
-            }
-            <div #sentinel id="sentinel" class="h-6 bg-transparent"></div>
-            @if (cargando() && resultadosBusqueda().length === 0) {
-              <p class="p-3 text-center text-gray-500">Cargando productos...</p>
-            }
-          </ul>
-        }
-
-        @if (sinResultados() && !cargando()) {
-          <p class="absolute z-10 bg-white border border-gray-200 rounded-lg mt-1 w-full p-3 text-center text-gray-500">
-            No se encontraron resultados.
-          </p>
-        }
+      <div class="mb-4 relative z-30">
+        <app-select 
+          [labelValue]="'Buscar y agregar productos'" 
+          [placeholderValue]="'Buscar...'" 
+          [optionsValue]="productosOptions()"
+          [searchableValue]="true"
+          [clearableValue]="true"
+          [ngModel]="selectedProductoId()"
+          [emptyMessageValue]="'No hay mas productos aqui'"
+          (valueChange)="onSelectProducto($event)" />
       </div>
 
       <div class="border border-gray-200 rounded-lg p-4">
@@ -159,7 +132,7 @@
                 <span class="font-semibold text-gray-800">${{ p.precio }}</span>
                 <button
                   (click)="eliminarProducto(i)"
-                  class="text-red-500 hover:text-red-700 transition"
+                  class="text-error hover:text-error transition"
                   title="Eliminar producto"
                 >
                   <i class="fa-solid fa-xmark text-lg"></i>

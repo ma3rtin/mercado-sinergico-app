@@ -699,8 +699,8 @@ export class EditarProductoComponent implements OnInit {
               `,
             icon: 'success',
             showCancelButton: true,
-            confirmButtonColor: '#2E608C',
-            cancelButtonColor: '#9ca3af',
+            confirmButtonColor: 'var(--brand-secondary)',
+            cancelButtonColor: 'var(--text-muted)',
             confirmButtonText: 'Sí, configurar',
             cancelButtonText: 'Más tarde',
           }).then((result) => {
@@ -725,7 +725,7 @@ export class EditarProductoComponent implements OnInit {
             title: 'Producto creado',
             html: `
                 <p class="mb-2">El producto se creó correctamente.</p>
-                <p class="text-sm text-red-600">
+                <p class="text-sm text-error">
                   ⚠️ Pero hubo un error al generar las variantes:
                   <br><strong>${err.error?.message || 'Error desconocido'}</strong>
                 </p>
@@ -734,7 +734,7 @@ export class EditarProductoComponent implements OnInit {
                 </p>
               `,
             icon: 'warning',
-            confirmButtonColor: '#2E608C',
+            confirmButtonColor: 'var(--brand-secondary)',
             confirmButtonText: 'Entendido',
           }).then(() => {
             this.router.navigate(['/admin/administrar-productos']);
@@ -801,7 +801,7 @@ export class EditarProductoComponent implements OnInit {
   private scrollToFirstError(): void {
     setTimeout(() => {
       const firstError = document.querySelector(
-        '.border-red-500, .text-red-600',
+        '.border-error, .text-error',
       );
       if (firstError) {
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });

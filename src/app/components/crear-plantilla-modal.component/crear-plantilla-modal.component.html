@@ -30,7 +30,7 @@
                     Nombre de la plantilla
                 </label>
                 <input type="text" [(ngModel)]="plantilla.nombre" placeholder="Ingresá el nombre de tu plantilla..."
-                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus placeholder-gray-400">
             </div>
 
             <!-- Características -->
@@ -42,9 +42,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <input type="text" [(ngModel)]="plantilla.caracteristicas[caracIndex].nombre"
                             placeholder="Ingresá el nombre de la característica..."
-                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus placeholder-gray-400">
                         <button (click)="removeCaracteristica(caracIndex)"
-                            class="ml-3 text-gray-400 hover:text-red-500 transition-colors">
+                            class="ml-3 text-gray-400 hover:text-error transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12"></path>
@@ -59,9 +59,9 @@
                             <input type="text"
                                 [(ngModel)]="plantilla.caracteristicas[caracIndex].opciones[opcionIndex].nombre"
                                 placeholder="Opción {{ opcionIndex + 1 }}"
-                                class="block w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400">
+                                class="block w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus placeholder-gray-400">
                             <button (click)="removeOption(caracIndex, opcionIndex)"
-                                class="absolute right-2 top-2 text-gray-400 hover:text-red-500 transition-colors">
+                                class="absolute right-2 top-2 text-gray-400 hover:text-error transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>

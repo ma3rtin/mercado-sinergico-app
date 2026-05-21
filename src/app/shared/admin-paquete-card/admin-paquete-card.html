@@ -2,23 +2,16 @@
     class="group bg-bg-surface rounded-xl shadow-sm border transition-all duration-300 cursor-pointer hover:ring-2 hover:ring-brand-primary/40"
     [class]="esCompleto ? 'border-success/50 shadow-success-light' : esConfirmado ? 'border-brand-secondary/40' : esCancelado ? 'border-error/30' : esEntregado ? 'border-success/30' : 'border-border-default hover:shadow-md'">
 
-    <!-- Banner: Completo — esperando confirmación del admin -->
+
     @if (esCompleto) {
-    <div class="flex items-center justify-between gap-3 bg-success-light border-b border-success/30 px-4 py-2.5">
-        <div class="flex items-center gap-2 text-success">
-            <app-icon name="checkCircle" size="16" />
-            <span class="text-xs font-bold uppercase tracking-widest">Completo — Confirmar con fabricante</span>
-        </div>
-        <app-button variant="primary" size="sm" (buttonClick)="onConfirm()">
-            <app-icon name="checkCircle" size="14" class="mr-1" />
-            Confirmar compra
-        </app-button>
+    <div class="flex items-center gap-2 bg-primary/30 border-b border-primary/20 px-4 py-2 text-secondary">
+        <app-icon name="package" size="16" />
+        <span class="text-xs font-bold uppercase tracking-widest">Completo — Esperando confirmación de fabricante</span>
     </div>
     }
-
     <!-- Banner: Confirmado — en preparación -->
     @if (esConfirmado) {
-    <div class="flex items-center gap-2 bg-brand-secondary/10 border-b border-brand-secondary/20 px-4 py-2 text-brand-secondary">
+    <div class="flex items-center gap-2 bg-brand-cta/20 border-b border-brand-cta/20 px-4 py-2 text-secondary">
         <app-icon name="package" size="16" />
         <span class="text-xs font-bold uppercase tracking-widest">Confirmado — Pedidos en preparación</span>
     </div>
@@ -26,7 +19,7 @@
 
     <!-- Banner: Entregado -->
     @if (esEntregado) {
-    <div class="flex items-center gap-2 bg-success-light border-b border-success/20 px-4 py-2 text-success-dark">
+    <div class="flex items-center gap-2 bg-success-light border-b border-success/20 px-4 py-2 text-success">
         <app-icon name="checkCircle" size="16" />
         <span class="text-xs font-bold uppercase tracking-widest">Entregado — Pedidos recibidos</span>
     </div>
@@ -129,19 +122,6 @@
             @if (!esEntregado && !esCancelado) {
             <div class="flex items-center justify-end gap-2">
 
-                <!-- Trigger del dropdown -->
-                <button (click)="toggleMenu($event)"
-                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all"
-                    [class]="menuAbierto
-                                ? 'bg-bg-raised text-text-primary border-border-default'
-                                : 'bg-bg-surface text-text-secondary border-border-default hover:border-brand-primary/50 hover:bg-brand-primary-light'"
-                    title="Acciones">
-                    <app-icon name="sliders" size="14" />
-                    <span class="text-xs">Acciones</span>
-                    <app-icon name="chevronDown" size="14" class="transition-transform duration-200"
-                        [class]="menuAbierto ? 'rotate-180' : ''" />
-                </button>
-
                 <!-- Panel desplegable -->
                 @if (menuAbierto) {
                 <div
@@ -174,7 +154,8 @@
                             <app-icon name="copy" size="16" class="text-success flex-shrink-0" />
                             <div class="text-left">
                                 <p class="font-medium text-xs leading-tight">Duplicar publicación</p>
-                                <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este paquete</p>
+                                <p class="text-[10px] text-text-muted leading-tight">Crea una nueva copia de este
+                                    paquete</p>
                             </div>
                         </button>
 
@@ -195,13 +176,15 @@
                     @if (canCancel) {
                     <div class="my-1 mx-2 border-t border-error/20"></div>
                     <div class="px-2 pb-2">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de riesgo</p>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de
+                            riesgo</p>
                         <button (click)="onRefund($event)"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
                             <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
                             <div class="text-left">
                                 <p class="font-medium text-xs leading-tight">Cancelar y reembolsar</p>
-                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los compradores</p>
+                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los
+                                    compradores</p>
                             </div>
                         </button>
                     </div>

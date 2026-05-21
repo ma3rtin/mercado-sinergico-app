@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 // Components
 import { IconComponent } from '@app/shared/icono/icono';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -31,7 +32,7 @@ export interface VariantesSeleccionadas {
 @Component({
   selector: 'app-selector-variantes',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, InfoTooltipComponent],
   templateUrl: './selector-variantes.html',
 })
 export class SelectorVariantesComponent {
@@ -52,11 +53,19 @@ export class SelectorVariantesComponent {
   // 🧩 COMPUTED - Datos derivados
 
   /**
-   * Verifica si el producto tiene plantilla con variantes
+   * Verifica si el producto tiene plantilla con características
    */
   tieneVariantes = computed(() => {
     const prod = this.producto();
     return !!(prod.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+  });
+
+  /**
+   * Verifica si existen variantes activas armables
+   */
+  tieneVariantesFormables = computed(() => {
+    const variantes = this.producto().variantes || [];
+    return variantes.some(v => v.activo !== false);
   });
 
   /**
@@ -186,10 +195,29 @@ export class SelectorVariantesComponent {
       }
 
       // Si no, la selecciona
-      return {
+      const next = {
         ...current,
         [caracteristicaId]: opcionId
       };
+
+      // Validamos si la nueva combinación existe en alguna variante activa.
+      // Si no existe, limpiamos las otras selecciones para no bloquear al usuario.
+      const variantes = this.producto().variantes || [];
+      if (variantes.length > 0) {
+        const existeAlgunaVariante = variantes.some(variante => {
+          if (variante.activo === false) return false;
+          return Object.entries(next).every(([cId, oId]) =>
+            variante.opciones.some(op => op.caracteristicaId === Number(cId) && op.opcionId === oId)
+          );
+        });
+
+        if (!existeAlgunaVariante) {
+          // La combinación choca. Conservamos solo la nueva selección.
+          return { [caracteristicaId]: opcionId };
+        }
+      }
+
+      return next;
     });
   }
 
@@ -217,7 +245,7 @@ export class SelectorVariantesComponent {
   esOpcionCombinable(caracteristicaId: number, opcionId: number): boolean {
     const seleccionadas = this.seleccionadas();
     const variantes = this.producto().variantes || [];
-    if (variantes.length === 0) return true;
+    if (variantes.length === 0) return false;
 
     // Simular cómo quedaría la selección incluyendo la opción que estamos evaluando
     const seleccionSimulada = { ...seleccionadas, [caracteristicaId]: opcionId };
@@ -266,7 +294,7 @@ export class SelectorVariantesComponent {
     const seleccionada = this.estaSeleccionada(caracteristicaId, opcionId);
 
     if (seleccionada) {
-      return `${base} border-secondary-dark bg-yellow-50 text-secondary-dark shadow-md`;
+      return `${base} border-brand-primary bg-brand-primary-light text-brand-secondary shadow-md`;
     }
 
     return `${base} ${hover} border-gray-300 text-gray-700 bg-white`;
