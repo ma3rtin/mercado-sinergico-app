@@ -47,8 +47,8 @@ export class Perfil implements OnInit {
       imagen_url: [''],
       localidad: ['', Validators.required],
       cp: [''],
-      calle: [''],
-      numero: [''],
+      calle: ['', Validators.required],
+      numero: ['', Validators.required],
       piso: [''],
       dpto: [''],
     });
@@ -130,6 +130,7 @@ export class Perfil implements OnInit {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.form.updateValueAndValidity({ emitEvent: true });
       this.toast.warning('Completá los campos obligatorios antes de guardar.');
       return;
     }
@@ -172,6 +173,8 @@ export class Perfil implements OnInit {
         this.usuario.set(u);
         this.toast.success('Perfil actualizado correctamente.');
         this.form.markAsPristine();
+        this.form.markAsUntouched();
+        this.form.updateValueAndValidity({ emitEvent: true });
         this.tieneCambios.set(false);
         this.loadingImagen.set(false);
         this.selectedFile = null;

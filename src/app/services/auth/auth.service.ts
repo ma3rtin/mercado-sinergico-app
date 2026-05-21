@@ -119,6 +119,9 @@ export class AuthService {
     provider.addScope('email');
     provider.addScope('profile');
 
+    // Limpiar tokens de sesión anterior antes de iniciar nueva sesión
+    this.clearTokens();
+
     try {
       const result = await signInWithPopup(this.auth, provider);
       const user = result.user;
