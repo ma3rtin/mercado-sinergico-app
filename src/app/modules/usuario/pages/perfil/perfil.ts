@@ -47,8 +47,8 @@ export class Perfil implements OnInit {
       imagen_url: [''],
       localidad: ['', Validators.required],
       cp: [''],
-      calle: [''],
-      numero: [''],
+      calle: ['', Validators.required],
+      numero: ['', Validators.required],
       piso: [''],
       dpto: [''],
     });
