@@ -70,7 +70,8 @@ export class LoginComponent {
       if (!firebaseToken) throw new Error('No se pudo obtener el token de Firebase');
 
       this.usuarioService.loginWithFirebase(firebaseToken).subscribe({
-        next: (_response) => {
+        next: (response) => {
+          this.authService.setJwtToken(response.token);
           this.toast.success('Inicio de sesión con Google exitoso', 'Éxito');
           this.router.navigate(['/perfil']);
           this.loading.set(false);
