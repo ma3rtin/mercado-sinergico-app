@@ -5,12 +5,13 @@ import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterModule, ButtonComponent],
+  imports: [FormsModule, RouterModule, ButtonComponent, IconComponent],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })

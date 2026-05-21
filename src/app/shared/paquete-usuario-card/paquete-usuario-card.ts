@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inj
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,7 +12,7 @@ import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -169,6 +170,20 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       ?? 'text-status-neutral-text bg-status-neutral-bg border-border-default';
   }
 
+  getEstadoTitleClass(estado?: string): string {
+    if (!estado) return 'text-white';
+    const e = estado.toLowerCase();
+
+    if (e === 'pendiente') return 'text-status-pending-bg';
+    if (e === 'pagado') return 'text-status-active-bg';
+    if (e === 'reembolsado') return 'text-status-neutral-bg';
+    if (e === 'en preparación') return 'text-secondary-bg';
+    if (e === 'en camino') return 'text-primary-bg';
+    if (e === 'recibido') return 'text-success-bg';
+
+    return 'text-white';
+  }
+
   getIconoEstado(estado?: string): string {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();
@@ -181,6 +196,20 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (e === 'cancelado') return 'XCircle';
 
     return 'Clock'; // Pendiente u otros
+  }
+
+  getDescripcionEstado(estado?: string): string {
+    if (!estado) return 'Estado desconocido.';
+    const e = estado.toLowerCase();
+    
+    if (e === 'pendiente') return 'Tu pedido está reservado. El paquete se procesará cuando se complete el cupo o finalice el tiempo.';
+    if (e === 'pagado') return '¡Pago confirmado! Estamos esperando que el paquete cierre para procesar el envío.';
+    if (e === 'en preparación') return 'El paquete ha cerrado y estamos preparando los productos para el envío.';
+    if (e === 'en camino') return 'Tu pedido está viajando hacia el punto de entrega.';
+    if (e === 'recibido') return '¡El pedido ha sido entregado exitosamente!';
+    if (e === 'reembolsado') return 'El dinero ha sido devuelto a tu cuenta.';
+    
+    return 'Estado actual de tu pedido.';
   }
 
   obtenerImagenUrl(): string {

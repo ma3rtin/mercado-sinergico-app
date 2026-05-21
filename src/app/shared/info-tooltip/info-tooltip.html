@@ -1,0 +1,28 @@
+<div class="tooltip-trigger relative inline-block z-20">
+  @if (customTrigger) {
+    <ng-content></ng-content>
+  } @else if (simple) {
+    <div class="text-text-muted hover:text-text-primary transition-colors flex items-center justify-center p-0.5 translate-y-[2px]">
+      <app-icon [name]="iconName" [size]="iconSize"></app-icon>
+    </div>
+  } @else {
+    <div class="w-8 h-8 rounded-full flex items-center justify-center cursor-default
+                border-2 shadow-sm backdrop-blur-sm transition-transform hover:scale-110"
+         [ngClass]="iconClass.includes('bg-') ? iconClass : 'bg-white/90 ' + iconClass">
+      <app-icon [name]="iconName" [size]="iconSize"></app-icon>
+    </div>
+  }
+
+  <!-- Tooltip Content -->
+  <div class="tooltip-content absolute w-48 sm:w-56 bg-gray-900/95 backdrop-blur-md text-white rounded-xl p-3 shadow-xl border border-gray-700 pointer-events-none z-50"
+       [ngClass]="getContentPositionClass()">
+    @if (activeTitle) {
+      <strong class="block text-xs sm:text-sm font-bold mb-1 tracking-wide" [ngClass]="titleClass">
+        {{ activeTitle }}
+      </strong>
+    }
+    <p class="text-[11px] sm:text-xs leading-relaxed text-gray-300">
+      {{ description }}
+    </p>
+  </div>
+</div>

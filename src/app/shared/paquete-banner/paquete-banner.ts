@@ -3,16 +3,21 @@ import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
+import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-banner',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent],
   templateUrl: './paquete-banner.html',
 })
 export class PaqueteBannerComponent {
   // 🎯 INPUT
   paquete = input.required<PaquetePublicado>();
+
+  // Exponer Enum para el template
+  public readonly TipoPaquete = TipoPaquete;
 
   // 📊 COMPUTED PROPERTIES
 
@@ -60,33 +65,19 @@ export class PaqueteBannerComponent {
     return this.paquete()?.tipo || TipoPaquete.POR_DEFINIR;
   });
 
-  // Icono del tipo de paquete
-  iconoTipo = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'zap';
-    if (tipo === TipoPaquete.ENERGICO) return 'battery';
-    return 'package';
-  });
 
-  // Texto del tipo de paquete
-  textoTipo = computed(() => {
-    const tipo = this.tipoPaquete();
-    if (tipo === TipoPaquete.SINERGICO) return 'Sinérgico';
-    if (tipo === TipoPaquete.ENERGICO) return 'Enérgico';
-    return 'Por Definir';
-  });
 
   // Color del badge de estado
   estadoBadgeClass = computed(() => {
     const estado = this.estadoNombre().toLowerCase();
 
-    if (estado.includes('activo') || estado.includes('abierto')) {
-      return 'bg-primary text-white';
+    if (estado.includes('activo') || estado.includes('abierto') || estado.includes('disponible')) {
+      return 'bg-success text-white';
     }
     if (estado.includes('pend')) {
       return 'bg-warning text-white';
     }
-    if (estado.includes('cerr')) {
+    if (estado.includes('cerr') || estado.includes('finalizado')) {
       return 'bg-error text-white';
     }
     return 'bg-gray-500/90 text-white';

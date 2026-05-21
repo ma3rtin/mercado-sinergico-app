@@ -17,6 +17,7 @@ import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagene
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -37,6 +38,7 @@ import { ToastService } from '@app/services/toast/toast.service';
     IconComponent,
     PaqueteCard,
     SelectorVariantesComponent,
+    ButtonComponent,
   ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
@@ -117,6 +119,35 @@ export class DetalleProductoSumarse implements OnInit {
     return new Date(paquete.fecha_fin).toLocaleDateString('es-AR', {
       day: '2-digit', month: '2-digit', year: '2-digit'
     });
+  });
+
+  // 🏷️ Marca y Categoría
+  categoriaNombre = computed(() => {
+    const producto = this.producto();
+    if (!producto?.categoria) return '';
+    return typeof producto.categoria === 'string'
+      ? producto.categoria
+      : producto.categoria?.nombre ?? '';
+  });
+
+  marcaNombre = computed(() => {
+    const producto = this.producto();
+    if (!producto?.marca) return '';
+    return typeof producto.marca === 'string'
+      ? producto.marca
+      : producto.marca?.nombre ?? '';
+  });
+
+  // 💰 Precios y Ahorro
+  precioBase = computed(() => this.producto()?.precio || 0);
+
+  porcentajeAhorro = computed(() => this.paqueteSeleccionado()?.descuento || 0);
+
+  precioFinal = computed(() => {
+    const base = this.precioBase();
+    const descuento = this.porcentajeAhorro();
+    if (descuento <= 0) return base;
+    return base * (1 - descuento / 100);
   });
 
   ngOnInit(): void {

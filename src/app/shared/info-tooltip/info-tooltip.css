@@ -1,0 +1,12 @@
+.tooltip-trigger .tooltip-content {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: all 200ms ease-out;
+}
+
+.tooltip-trigger:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}

@@ -94,8 +94,13 @@
                             Contraseña <span class="text-error">*</span>
                         </label>
 
-                        <input id="contrasena" type="password" formControlName="password" placeholder="**********"
-                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400" />
+                        <div class="relative">
+                            <input id="contrasena" [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="**********"
+                                class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all pr-12 placeholder:text-gray-400" />
+                            <button type="button" (click)="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <app-icon [name]="showPassword() ? 'eyeOff' : 'eye'" size="20"></app-icon>
+                            </button>
+                        </div>
 
                         <!-- Reglas informativas -->
                         <ul class="text-sm text-gray-600 font-body mt-2 space-y-1">
@@ -124,9 +129,14 @@
                         <label for="c_contrasena" class="block text-base font-medium text-gray-700 mb-2 font-body">
                             Confirmar contraseña <span class="text-error">*</span>
                         </label>
-                        <input id="c_contrasena" type="password" formControlName="confirmPassword"
-                            placeholder="**********"
-                            class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all placeholder:text-gray-400" />
+                        <div class="relative">
+                            <input id="c_contrasena" [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirmPassword"
+                                placeholder="**********"
+                                class="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base font-body focus:outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all pr-12 placeholder:text-gray-400" />
+                            <button type="button" (click)="toggleConfirmPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <app-icon [name]="showConfirmPassword() ? 'eyeOff' : 'eye'" size="20"></app-icon>
+                            </button>
+                        </div>
                         @if (submitted() && f['confirmPassword'].errors?.['required']) {
                         <p class="text-error text-sm mt-1 font-body">Debes confirmar la contraseña</p>
                         }
