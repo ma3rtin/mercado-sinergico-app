@@ -153,14 +153,17 @@ export class AuthService {
     const token = this.getJwtToken();
     if (!token) return null;
 
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.rol || null;
-    } catch (error) {
-      console.error('❌ Error al decodificar el token JWT:', error);
-      return null;
+        try {
+            const partes = token.split('.');
+            if (partes.length !== 3) return null;
+            const payload = JSON.parse(atob(partes[1]));
+            if (typeof payload?.rol !== 'string') return null;
+            return payload.rol;
+        } catch {
+            return null;
+        }
     }
-  }
+
 
   // ♻️ Restaurar sesión al iniciar la app
   async restoreSession(): Promise<void> {

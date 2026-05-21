@@ -483,16 +483,22 @@ export class MisPedidosComponent implements OnInit {
       return;
     }
 
-    // Opcional: Guardar en localStorage para verificar después
-    localStorage.setItem('pedido_en_pago', pedidoId.toString());
+    sessionStorage.setItem('pedido_en_pago', pedidoId.toString());
 
-    // Llamar al servicio para obtener la preferencia
     this.pedidoService.iniciarCheckout(pedidoId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          // Redirigir a MercadoPago
-          window.location.href = response.checkoutUrl.checkoutUrl;
+          const url: string = response.checkoutUrl.checkoutUrl;
+          const dominiosPermitidos = ['mercadopago.com', 'mercadopago.com.ar', 'mercadolibre.com'];
+          const esSeguро = dominiosPermitidos.some(d => {
+            try { return new URL(url).hostname.endsWith(d); } catch { return false; }
+          });
+          if (!esSeguро) {
+            this.toast.error('URL de pago inválida. Contactá soporte.');
+            return;
+          }
+          window.location.href = url;
         },
         error: (err) => {
           this.toast.error('No se pudo iniciar el pago');
