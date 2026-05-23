@@ -4,6 +4,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
+import { TipoPaquete } from '@app/models/Enums';
 
 @Component({
   selector: 'app-admin-paquete-card',
@@ -84,6 +85,14 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   get esCancelado(): boolean {
     return this.estadoNombre.toLowerCase() === EstadoPaqueteNombre.Cancelado.toLowerCase();
+  }
+
+  get isEnergico(): boolean {
+    return this.paquete.tipo === TipoPaquete.ENERGICO || this.paquete.paqueteBase?.tipo === TipoPaquete.ENERGICO;
+  }
+
+  get isSinergico(): boolean {
+    return this.paquete.tipo === TipoPaquete.SINERGICO || this.paquete.paqueteBase?.tipo === TipoPaquete.SINERGICO;
   }
 
   // ── Acciones válidas por estado ────────────────────────────────

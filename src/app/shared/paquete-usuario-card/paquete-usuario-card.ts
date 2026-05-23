@@ -132,7 +132,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (t.includes('sin')) return TipoPaquete.SINERGICO;
     if (t.includes('ener')) return TipoPaquete.ENERGICO;
 
-    return TipoPaquete.POR_DEFINIR;
+    return TipoPaquete.SINERGICO;
   }
 
   obtenerTextoTipo(tipo?: string | TipoPaquete): string {

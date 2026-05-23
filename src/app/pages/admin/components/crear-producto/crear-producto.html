@@ -15,7 +15,7 @@
         <p class="text-sm text-gray-600">
           Seleccioná si este producto tendrá control de stock físico o se gestionará bajo pedido.
         </p>
-        @if (mostrarSeleccionTipo() && tipoProducto() === 'POR_DEFINIR') {
+        @if (mostrarSeleccionTipo()) {
           <p class="mt-2 text-sm text-error font-medium">
             ⚠️ Debés seleccionar un tipo de producto
           </p>
@@ -45,9 +45,6 @@
               }
               @if (tipoProducto() === 'SINERGICO') {
                 Los productos sinérgicos no requieren configuración de stock.
-              }
-              @if (tipoProducto() === 'POR_DEFINIR') {
-                Elegí el tipo que mejor se adapte a tu modelo de negocio.
               }
             </p>
           </div>

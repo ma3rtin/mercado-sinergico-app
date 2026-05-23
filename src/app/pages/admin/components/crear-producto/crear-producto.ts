@@ -92,7 +92,6 @@ export class CrearProductoComponent implements OnInit {
 readonly tipoMap: Record<TipoPaquete, string> = {
   [TipoPaquete.SINERGICO]: 'SINERGICO',
   [TipoPaquete.ENERGICO]: 'Enérgico',
-  [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
 };
 
 
@@ -114,7 +113,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
-  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
   mostrarSeleccionTipo = signal<boolean>(false);
 
   // 🎭 Estados
@@ -124,7 +123,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
   // 📊 Computed
   puedeGenerarVariantes = computed(() => {
     return this.selectedTemplate() !== null &&
-           this.tipoProducto() !== TipoPaquete.POR_DEFINIR;
+           this.tipoProducto() !== TipoPaquete.SINERGICO;
   });
 
   mostrarStock = computed(() => {
@@ -160,7 +159,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
       profundidad: [null, [Validators.min(0)]],
       peso: [null, [Validators.min(0)]],
       plantillaId: [null],
-      tipo: [TipoPaquete.POR_DEFINIR]
+      tipo: [TipoPaquete.SINERGICO]
     });
   }
 
@@ -406,7 +405,7 @@ isAttributeSelected(attributeName: string, value: string): boolean {
     }
 
     // ✅ Validar tipo de producto si tiene plantilla
-    if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
+    if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.SINERGICO) {
       this.toast.error('Debés seleccionar el tipo de producto (Enérgico o Sinérgico)');
       this.mostrarSeleccionTipo.set(true);
       return;

@@ -80,7 +80,6 @@ export class EditarProductoComponent implements OnInit {
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
     [TipoPaquete.ENERGICO]: 'Enérgico',
-    [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
   };
 
   // Form
@@ -94,7 +93,7 @@ export class EditarProductoComponent implements OnInit {
   // Signals - Estado del producto
   productoId = signal<number | null>(null);
   productoOriginal = signal<Producto | null>(null);
-  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
 
   // Signals - Plantilla y atributos
   selectedTemplate = signal<Plantilla | null>(null);

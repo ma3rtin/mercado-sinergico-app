@@ -82,7 +82,11 @@
       <div class="flex items-center justify-between text-sm">
         <span class="text-text-secondary">
           <strong class="text-text-primary">{{ paquete.cant_productos_reservados || 0 }}</strong>
-          vendidos de
+          @if (isEnergico()) {
+            consumidos de
+          } @else {
+            vendidos de
+          }
           <strong class="text-text-primary">{{ paquete.cant_productos || 0 }}</strong>
         </span>
         <span class="font-semibold" [ngClass]="getPercentageTextClass()">

@@ -106,7 +106,7 @@ export interface StockGlobalResponse {
   precio: number;
   marca_id: number;
   categoria_id: number;
-  stockTotal: number | null; // null si es producto POR_DEFINIR
+  stockTotal: number | null;
   distribucion: DistribucionStockVariante[];
 }
 
