@@ -104,6 +104,9 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   });
 
   currentError = computed(() => {
+    // Forzar re-evaluación cuando cambia el estado del control
+    this.controlStateTracker();
+
     if (!this.isTouched() || !this.ngControl?.control) {
       return '';
     }
@@ -180,6 +183,9 @@ export class InputComponent implements ControlValueAccessor, OnInit {
   });
 
   suffixClass = computed(() => 'text-gray-500 text-sm');
+  // 🎯 Signal para forzar re-evaluación de computed properties
+  private controlStateTracker = signal<number>(0);
+
   // 🎯 Effect para sincronizar con el FormControl
   statusEffect = effect(() => {
     const control = this.ngControl?.control;
@@ -188,7 +194,8 @@ export class InputComponent implements ControlValueAccessor, OnInit {
     control.statusChanges
       ?.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        // Trigger change detection cuando cambia el estado del control
+        this.controlStateTracker.update(v => v + 1);
+        this.cdr.markForCheck();
       });
   });
 

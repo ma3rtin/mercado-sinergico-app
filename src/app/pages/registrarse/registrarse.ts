@@ -16,6 +16,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-registrarse',
@@ -26,6 +27,7 @@ import { ToastService } from '@app/services/toast/toast.service';
     ReactiveFormsModule,
     RouterModule,
     ButtonComponent,
+    IconComponent,
   ],
   templateUrl: './registrarse.html',
   styleUrls: ['./registrarse.css'],
@@ -34,6 +36,17 @@ export class RegistrarseComponent implements OnInit {
   // 🧠 Signals
   loading = signal(false);
   submitted = signal(false);
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
+
+  // 👁️ Cambiar visibilidad de las contraseñas
+  togglePassword() {
+    this.showPassword.update((v) => !v);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update((v) => !v);
+  }
 
   // 🧱 Formulario
   form!: FormGroup;

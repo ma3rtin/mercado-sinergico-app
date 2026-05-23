@@ -1,7 +1,7 @@
 <!-- CARD COLAPSADO: Mostrar PaqueteCard -->
 @if (!pedido.expandido || isMobile()) {
 <div
-  class="w-full bg-bg-surface rounded-2xl border border-border-default shadow-sm hover:shadow-md transition-all cursor-pointer p-3 sm:p-4 flex gap-3 sm:gap-4 items-center group"
+  class="w-full bg-bg-surface rounded-2xl border border-border-default shadow-sm hover:shadow-md transition-all cursor-pointer p-3 sm:p-4 flex gap-3 sm:gap-4 items-center group relative hover:z-30"
   (click)="onToggleExpansion()">
 
   <!-- Imagen -->
@@ -19,11 +19,19 @@
         {{ paquete.paqueteBase?.nombre }}
       </h3>
 
-      <div class="flex items-center gap-2">
-        <!-- Estado Badge (Minimalista) -->
-        <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ' + getEstadoClass(pedido.estado?.nombre)">
-          {{ pedido.estado?.nombre }}
-        </span>
+      <div class="flex items-center gap-1.5">
+        <!-- Estado Badge como Tooltip -->
+        <app-info-tooltip
+          [customTrigger]="true"
+          [tooltipTitle]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+          [titleClass]="getEstadoTitleClass(pedido.estado?.nombre)"
+          [description]="getDescripcionEstado(pedido.estado?.nombre)"
+          position="bottom-right">
+          <span [class]="'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border cursor-default ' + getEstadoClass(pedido.estado?.nombre)">
+            {{ pedido.estado?.nombre }}
+          </span>
+        </app-info-tooltip>
+
         <app-icon name="chevronRight" size="18" class="text-text-muted group-hover:translate-x-1 transition-transform" />
       </div>
     </div>
@@ -62,11 +70,11 @@
 <!-- CARD EXPANDIDO: Solo para Desktop -->
 @if (pedido.expandido && !isMobile()) {
 <article
-  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+  class="bg-bg-surface rounded-2xl shadow-lg border border-border-default animate-in fade-in zoom-in-95 duration-300 relative hover:z-30">
 
   <!-- HEADER (Desktop) -->
   <div (click)="onToggleExpansion()"
-    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default">
+    class="cursor-pointer px-6 py-5 flex items-center gap-5 hover:bg-bg-app transition border-b border-border-default rounded-t-2xl">
 
     <!-- Imagen -->
     <div class="w-16 h-16 flex-shrink-0 rounded-xl bg-bg-app overflow-hidden border border-border-default">
@@ -85,16 +93,23 @@
         </div>
 
         <div class="flex items-center gap-4">
-          <span [class]="'px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoClass(pedido.estado?.nombre)">
-            {{ pedido.estado?.nombre }}
-          </span>
+          <app-info-tooltip
+            [customTrigger]="true"
+            [tooltipTitle]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+            [titleClass]="getEstadoTitleClass(pedido.estado?.nombre)"
+            [description]="getDescripcionEstado(pedido.estado?.nombre)"
+            position="bottom-right">
+            <span [class]="'px-3 py-1 rounded-full text-xs font-bold border cursor-default ' + getEstadoClass(pedido.estado?.nombre)">
+              {{ pedido.estado?.nombre }}
+            </span>
+          </app-info-tooltip>
           <app-icon name="chevronUp" size="24" class="text-text-muted" />
         </div>
       </div>
     </div>
   </div>
 
-  <div class="bg-bg-app">
+  <div class="bg-bg-app rounded-b-2xl">
     <ng-container *ngTemplateOutlet="expandedContent"></ng-container>
   </div>
 </article>
@@ -149,10 +164,16 @@
             <p class="text-[10px] text-text-muted font-bold uppercase">Gente</p>
             <p class="text-xs font-bold">{{ paquete.cant_usuarios_registrados || 0 }}</p>
           </div>
-          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
-            <app-icon name="info" size="18" class="text-brand-primary mx-auto mb-1.5" />
-            <p class="text-[10px] text-text-muted font-bold uppercase">Estado</p>
-            <p class="text-xs font-bold truncate leading-none mt-1">{{ pedido.estado?.nombre || 'OK' }}</p>
+          <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm flex flex-col items-center justify-center">
+            <app-info-tooltip
+              iconName="info"
+              iconClass="text-brand-primary border-brand-primary"
+              [title]="'Estado: ' + (pedido.estado?.nombre || 'Pendiente')"
+              [description]="getDescripcionEstado(pedido.estado?.nombre)"
+              position="top-center">
+            </app-info-tooltip>
+            <p class="text-[10px] text-text-muted font-bold uppercase mt-1">Estado</p>
+            <p class="text-xs font-bold truncate leading-none mt-1">{{ pedido.estado?.nombre || 'Pendiente' }}</p>
           </div>
         </div>
 

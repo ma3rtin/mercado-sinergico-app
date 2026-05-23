@@ -147,6 +147,9 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
   });
 
   currentError = computed(() => {
+    // Forzar re-evaluación cuando cambia el estado del control
+    this.controlStateTracker();
+
     if (!this.isTouched() || !this.ngControl?.control) return '';
 
     const control = this.ngControl.control;
@@ -223,6 +226,9 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
     }
   }
 
+  // 🎯 Signal para forzar re-evaluación de computed properties
+  private controlStateTracker = signal<number>(0);
+
   ngOnInit(): void {
     try {
       this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
@@ -234,6 +240,12 @@ export class SelectComponent implements ControlValueAccessor, OnInit {
           .subscribe(value => {
             // ✅ FIX: usar .set() para que los computed se recalculen
             this.internalValue.set(value !== null && value !== undefined ? value : null);
+          });
+
+        this.ngControl.control?.statusChanges
+          ?.pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => {
+            this.controlStateTracker.update(v => v + 1);
           });
       }
     } catch (e) {

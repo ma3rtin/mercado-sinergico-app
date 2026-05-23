@@ -5,12 +5,13 @@ import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
+import { IconComponent } from '@app/shared/icono/icono';
 
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterModule, ButtonComponent],
+  imports: [FormsModule, RouterModule, ButtonComponent, IconComponent],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })
@@ -44,9 +45,7 @@ export class LoginComponent {
     };
 
     this.usuarioService.login(credenciales).subscribe({
-      next: (response) => {
-        console.log('✅ Token recibido:', response.token);
-        this.authService.setJwtToken(response.token);
+      next: () => {
         this.loading.set(false);
         this.toast.success('Sesión iniciada correctamente', 'Éxito');
         this.router.navigate(['/perfil']);
@@ -65,15 +64,13 @@ export class LoginComponent {
       this.loading.set(true);
       this.mensaje.set(undefined);
 
-      const user = await this.authService.signInWithGoogle();
-      console.log('✅ Usuario autenticado con Google:', user);
+      await this.authService.signInWithGoogle();
 
       const firebaseToken = this.authService.getFirebaseToken();
       if (!firebaseToken) throw new Error('No se pudo obtener el token de Firebase');
 
       this.usuarioService.loginWithFirebase(firebaseToken).subscribe({
-        next: (response) => {
-          console.log('✅ Usuario sincronizado con el backend:', response.usuario);
+        next: () => {
           this.toast.success('Inicio de sesión con Google exitoso', 'Éxito');
           this.router.navigate(['/perfil']);
           this.loading.set(false);
