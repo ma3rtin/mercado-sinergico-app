@@ -98,8 +98,8 @@
       @for (producto of paginatedProductos(); track producto.id_producto) {
       <div
         class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
-        <!-- Mobile Layout (Vertical-ish) - Desktop Layout (Horizontal) -->
-        <div class="flex flex-row sm:flex-row sm:items-center p-5 gap-5">
+        <!-- Mobile Layout (Column) - Desktop Layout (Row) -->
+        <div class="flex flex-col sm:flex-row sm:items-center p-5 gap-5">
 
           <!-- Left Section: Image and Basic Info -->
           <div class="flex items-center sm:items-start gap-4 flex-1 min-w-0">
@@ -128,6 +128,16 @@
                 {{ getMarcaNombre(producto) }}
               </span>
 
+              <!-- Tipo de Producto Badge -->
+              @if (producto.tipo) {
+                <span
+                  [class]="'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ' + 
+                  (producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'bg-secondary-dark text-white' : 'bg-info-light text-primary')">
+                  <app-icon [name]="producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'zap' : 'users'" [size]="'12'" class="pt-0.5" />
+                  {{ producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'Enérgico' : 'Sinérgico' }}
+                </span>
+              }
+
               <!-- Badge de variantes (si tiene) -->
               @if (producto.tieneVariantes) {
               <span
@@ -138,46 +148,46 @@
               }
             </div>
           </div>
-        </div>
 
-        <!-- Botones de acción -->
-        <div class="flex items-center gap-2 flex-shrink-0 p-5 pt-0 sm:pt-5 sm:flex-col sm:gap-2 md:gap-4 md:flex-row">
-          <!-- Duplicar producto -->
-          <button (click)="duplicateProducto(producto)"
-            class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
-            title="Duplicar">
-            <app-icon name="copy" [size]="'20'" class="text-current mt-1" />
-          </button>
+          <!-- Botones de acción -->
+          <div class="flex flex-row items-center gap-2 flex-shrink-0 pt-4 border-t sm:pt-0 sm:border-t-0 sm:border-l border-gray-200 sm:pl-5">
+            <!-- Duplicar producto -->
+            <button (click)="duplicateProducto(producto)"
+              class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
+              title="Duplicar">
+              <app-icon name="copy" [size]="'20'" class="text-current mt-1" />
+            </button>
 
-          <!-- Gestionar variantes -->
-          <button (click)="gestionarVariantes(producto)" [class]="'flex-1 sm:flex-none p-2.5 sm:p-2 rounded-xl transition-all active:scale-90 ' +
-                      (producto.tieneVariantes
-                        ? 'text-brand-primary hover:bg-brand-primary/5'
-                        : 'text-gray-200 cursor-not-allowed')"
-            [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'">
-            <app-icon name="layers" [size]="'20'" />
-          </button>
+            <!-- Gestionar variantes -->
+            <button (click)="gestionarVariantes(producto)" [class]="'flex-1 sm:flex-none p-2.5 sm:p-2 rounded-xl transition-all active:scale-90 ' +
+                        (producto.tieneVariantes
+                          ? 'text-brand-primary hover:bg-brand-primary/5'
+                          : 'text-gray-200 cursor-not-allowed')"
+              [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'">
+              <app-icon name="layers" [size]="'20'" />
+            </button>
 
-          <!-- Ver detalles -->
-          <button (click)="viewProducto(producto)"
-            class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
-            title="Ver detalles">
-            <app-icon name="eye" [size]="'20'" />
-          </button>
+            <!-- Ver detalles -->
+            <button (click)="viewProducto(producto)"
+              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
+              title="Ver detalles">
+              <app-icon name="eye" [size]="'20'" />
+            </button>
 
-          <!-- Editar -->
-          <button (click)="editProducto(producto)"
-            class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
-            title="Editar">
-            <app-icon name="edit-2" [size]="'20'" />
-          </button>
+            <!-- Editar -->
+            <button (click)="editProducto(producto)"
+              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
+              title="Editar">
+              <app-icon name="edit-2" [size]="'20'" />
+            </button>
 
-          <!-- Eliminar -->
-          <button (click)="deleteProducto(producto)"
-            class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-error hover:bg-error/5 rounded-xl transition-all active:scale-90"
-            title="Eliminar">
-            <app-icon name="trash" [size]="'20'" />
-          </button>
+            <!-- Eliminar -->
+            <button (click)="deleteProducto(producto)"
+              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-error hover:bg-error/5 rounded-xl transition-all active:scale-90"
+              title="Eliminar">
+              <app-icon name="trash" [size]="'20'" />
+            </button>
+          </div>
         </div>
       </div>
       }

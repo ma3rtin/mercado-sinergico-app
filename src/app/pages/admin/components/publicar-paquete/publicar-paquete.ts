@@ -9,6 +9,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
+import { TipoPaquete } from '@app/models/Enums';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -91,6 +92,24 @@ export class PublicarPaqueteComponent implements OnInit {
   // 🔄 Computed: opciones para app-select de estado
   estadosOptions = computed<SelectOption[]>(() =>
     this.estados.map(e => ({ value: e.id_estado, label: e.nombre }))
+  );
+
+  // 🔄 Computed: tipo del paquete base actualmente seleccionado
+  tipoPaqueteSeleccionado = computed<TipoPaquete | null>(() => {
+    const id = this.paqueteBaseSeleccionado();
+    if (!id) return null;
+    const paquete = this.paquetesBase().find(p => p.id_paquete_base === id);
+    return paquete?.tipo ?? null;
+  });
+
+  // 🔄 Computed: ¿el paquete base seleccionado es Enérgico?
+  isEnergico = computed<boolean>(() =>
+    this.tipoPaqueteSeleccionado() === TipoPaquete.ENERGICO
+  );
+
+  // 🔄 Computed: ¿el paquete base seleccionado es Sinérgico?
+  isSinergico = computed<boolean>(() =>
+    this.tipoPaqueteSeleccionado() === TipoPaquete.SINERGICO
   );
 
   // 🧩 ViewChilds

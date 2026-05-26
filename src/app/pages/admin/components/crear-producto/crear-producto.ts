@@ -91,8 +91,7 @@ export class CrearProductoComponent implements OnInit {
   };
 readonly tipoMap: Record<TipoPaquete, string> = {
   [TipoPaquete.SINERGICO]: 'SINERGICO',
-  [TipoPaquete.ENERGICO]: 'Enérgico',
-  [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
+  [TipoPaquete.ENERGICO]: 'ENERGICO',
 };
 
 
@@ -114,8 +113,9 @@ readonly tipoMap: Record<TipoPaquete, string> = {
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
-  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
   mostrarSeleccionTipo = signal<boolean>(false);
+  tipoSeleccionadoManual = signal<boolean>(false);
 
   // 🎭 Estados
   draggedIndex: number | null = null;
@@ -123,8 +123,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
 
   // 📊 Computed
   puedeGenerarVariantes = computed(() => {
-    return this.selectedTemplate() !== null &&
-           this.tipoProducto() !== TipoPaquete.POR_DEFINIR;
+    return this.selectedTemplate() !== null;
   });
 
   mostrarStock = computed(() => {
@@ -160,13 +159,14 @@ readonly tipoMap: Record<TipoPaquete, string> = {
       profundidad: [null, [Validators.min(0)]],
       peso: [null, [Validators.min(0)]],
       plantillaId: [null],
-      tipo: [TipoPaquete.POR_DEFINIR]
+      tipo: [TipoPaquete.SINERGICO]
     });
   }
 
   // 🎯 Cambiar tipo de producto
   cambiarTipoProducto(tipo: TipoPaquete): void {
     this.tipoProducto.set(tipo);
+    this.tipoSeleccionadoManual.set(true);
     this.productForm.patchValue({ tipo });
 
     // Si es sinérgico, el stock siempre es null
@@ -238,6 +238,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
 selectTemplate(template: Plantilla): void {
   if (this.selectedTemplate()?.id !== template.id) {
     this.selectedTemplate.set(template);
+    this.mostrarSeleccionTipo.set(true);
 
     // 🔥 Inicializar TODOS los atributos seleccionados
     const atributosIniciales: { [key: string]: string[] } = {};
@@ -406,7 +407,7 @@ isAttributeSelected(attributeName: string, value: string): boolean {
     }
 
     // ✅ Validar tipo de producto si tiene plantilla
-    if (this.selectedTemplate() && this.tipoProducto() === TipoPaquete.POR_DEFINIR) {
+    if (this.selectedTemplate() && !this.tipoSeleccionadoManual()) {
       this.toast.error('Debés seleccionar el tipo de producto (Enérgico o Sinérgico)');
       this.mostrarSeleccionTipo.set(true);
       return;
@@ -610,6 +611,7 @@ console.log('🎨 Plantilla:', plantilla);
     this.selectedAttributes.set({});
     this.selectedAttributesTouched.set({});
     this.imageSlots.set(Array(8).fill(null).map(() => ({ file: null, preview: null })));
+    this.tipoSeleccionadoManual.set(false);
     this.formSubmitted.set(false);
     this.router.navigate(['/admin/administrar-productos']);
   }
@@ -646,6 +648,7 @@ console.log('🎨 Plantilla:', plantilla);
         this.selectedTemplate.set(null);
         this.selectedAttributes.set({});
         this.selectedAttributesTouched.set({});
+        this.tipoSeleccionadoManual.set(false);
         this.productForm.patchValue({ plantillaId: null });
         this.toast.info('Plantilla deseleccionada');
       }

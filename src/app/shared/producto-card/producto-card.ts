@@ -256,17 +256,17 @@ imagenUrl = computed(() => {
     const stock = this.producto().stock;
 
     if (stock === null || stock === undefined) {
-      return 'Stock ilimitado';
+      return 'Disponibilidad flexible';
     }
 
     if (stock === 0) {
-      return 'Sin stock';
+      return 'Agotado';
     }
 
     if (stock < 10) {
-      return `¡Últimas ${stock} unidades!`;
+      return `Pocas unidades (${stock})`;
     }
 
-    return `${stock} disponibles`;
+    return `Disponible`;
   }
 }

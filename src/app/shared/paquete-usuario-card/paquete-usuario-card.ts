@@ -8,11 +8,12 @@ import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
+import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
 
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent, TipoPaqueteBadgeComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -133,7 +134,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (t.includes('sin')) return TipoPaquete.SINERGICO;
     if (t.includes('ener')) return TipoPaquete.ENERGICO;
 
-    return TipoPaquete.POR_DEFINIR;
+    return TipoPaquete.SINERGICO;
   }
 
   obtenerTextoTipo(tipo?: string | TipoPaquete): string {

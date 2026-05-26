@@ -79,8 +79,7 @@ export class EditarProductoComponent implements OnInit {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
-    [TipoPaquete.ENERGICO]: 'Enérgico',
-    [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
+    [TipoPaquete.ENERGICO]: 'ENERGICO',
   };
 
   // Form
@@ -94,7 +93,7 @@ export class EditarProductoComponent implements OnInit {
   // Signals - Estado del producto
   productoId = signal<number | null>(null);
   productoOriginal = signal<Producto | null>(null);
-  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
 
   // Signals - Plantilla y atributos
   selectedTemplate = signal<Plantilla | null>(null);
@@ -118,6 +117,7 @@ export class EditarProductoComponent implements OnInit {
   draggedIndex = signal<number | null>(null);
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
+  tipoSeleccionadoManual = signal<boolean>(false);
 
   // Computed signals
   hasImages = computed(() =>
@@ -219,6 +219,7 @@ export class EditarProductoComponent implements OnInit {
 
   cambiarTipoProducto(tipo: TipoPaquete): void {
     this.tipoProducto.set(tipo);
+    this.tipoSeleccionadoManual.set(true);
 
     if (tipo === TipoPaquete.SINERGICO) {
       this.productForm.patchValue({ stock: null });
@@ -272,9 +273,11 @@ export class EditarProductoComponent implements OnInit {
 
     // ✅ 1. Cargar tipo de producto
     if (producto.tipo) {
-      const tipoEnum = producto.tipo as TipoPaquete;
+      // Normalizar: el backend envía 'ENERGICO' o 'SINERGICO', mapeamos al enum local
+      const tipoStr = String(producto.tipo).toUpperCase();
+      const tipoEnum = tipoStr === 'ENERGICO' ? TipoPaquete.ENERGICO : TipoPaquete.SINERGICO;
       this.tipoProducto.set(tipoEnum);
-      console.log('✅ Tipo cargado:', tipoEnum);
+      this.tipoSeleccionadoManual.set(true);
     }
 
     // ✅ 2. Cargar datos básicos del formulario
@@ -534,6 +537,12 @@ export class EditarProductoComponent implements OnInit {
 
     if (!this.hasMainImage()) {
       this.toast.error('Debés tener al menos la imagen principal del producto');
+      return;
+    }
+
+    // ✅ Validar tipo de producto (asegurar que esté confirmado)
+    if (!this.tipoSeleccionadoManual()) {
+      this.toast.error('Debés confirmar el tipo de producto');
       return;
     }
 

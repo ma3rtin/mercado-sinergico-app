@@ -50,7 +50,7 @@
 
         <!-- Info Principal -->
         <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
                 <span
                     [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
                     {{ paquete.estado?.nombre || 'Sin estado' }}
@@ -60,6 +60,18 @@
                     <app-icon name="mapPin" size="12" />
                     {{ paquete.zona?.nombre || 'Sin zona' }}
                 </span>
+                <span class="w-1 h-1 rounded-full bg-border-default hidden sm:block"></span>
+                @if (isEnergico) {
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-dark/10 text-secondary-dark border border-secondary-dark/30 uppercase tracking-wider">
+                    <app-icon name="zap" size="10" />
+                    Enérgico
+                  </span>
+                } @else if (isSinergico) {
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/30 uppercase tracking-wider">
+                    <app-icon name="users" size="10" />
+                    Sinérgico
+                  </span>
+                }
             </div>
             <h3
                 class="text-lg font-display text-text-primary truncate mb-2 group-hover:text-brand-primary transition-colors">
