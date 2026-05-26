@@ -14,10 +14,13 @@
   <div class="flex-1 min-w-0 flex flex-col">
 
     <!-- Título + flecha -->
-    <div class="flex justify-between items-center mb-1">
-      <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
-        {{ paquete.paqueteBase?.nombre }}
-      </h3>
+    <div class="flex justify-between items-center mb-1 gap-2">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
+          {{ paquete.paqueteBase?.nombre }}
+        </h3>
+        <app-tipo-paquete-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-paquete-badge>
+      </div>
 
       <div class="flex items-center gap-1.5">
         <!-- Estado Badge como Tooltip -->
@@ -86,9 +89,12 @@
     <div class="flex-1 min-w-0">
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="font-display text-xl text-text-primary font-bold">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
+          <div class="flex items-center gap-2.5">
+            <h3 class="font-display text-xl text-text-primary font-bold">
+              {{ paquete.paqueteBase?.nombre }}
+            </h3>
+            <app-tipo-paquete-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-paquete-badge>
+          </div>
           <p class="text-xs text-text-secondary mt-1">Detalles de tu participación en este paquete</p>
         </div>
 
@@ -130,9 +136,12 @@
           <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain" (error)="onImageError($event)">
         </div>
         <div class="min-w-0 font-body">
-          <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
+              {{ paquete.paqueteBase?.nombre }}
+            </h3>
+            <app-tipo-paquete-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-paquete-badge>
+          </div>
           <p class="text-xs text-text-muted font-bold uppercase tracking-wider">Detalle del Pedido</p>
         </div>
       </div>

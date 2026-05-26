@@ -14,12 +14,29 @@
 
     <!-- 🏷️ BADGES (top) -->
     <div class="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-      <!-- Categoría -->
-      <span
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-brand-secondary border border-brand-primary/30 shadow-sm backdrop-blur-sm">
-        <app-icon name="Layers" size="14"></app-icon>
-        {{ categoriaNombre() }}
-      </span>
+      <div class="flex flex-col gap-2">
+        <!-- Categoría -->
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-brand-secondary border border-brand-primary/30 shadow-sm backdrop-blur-sm">
+          <app-icon name="Layers" size="14"></app-icon>
+          {{ categoriaNombre() }}
+        </span>
+
+        <!-- Badge Tipo Paquete -->
+        @if (tipoPaquete() === 'ENERGICO') {
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-secondary-dark/30 text-secondary-dark bg-secondary-dark/10 shadow-sm backdrop-blur-sm w-fit">
+          <app-icon name="Zap" size="14"></app-icon>
+          Enérgico
+        </span>
+        } @else if (tipoPaquete() === 'SINERGICO') {
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-info/90 text-text-on-dark shadow-sm backdrop-blur-sm w-fit">
+          <app-icon name="Users" size="14"></app-icon>
+          Sinérgico
+        </span>
+        }
+      </div>
 
       <!-- Descuento badge (si aplica) -->
       @if (tieneDescuento() && !descuento()?.aplicado) {

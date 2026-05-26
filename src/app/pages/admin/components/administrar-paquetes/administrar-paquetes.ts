@@ -16,11 +16,19 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-administrar-paquetes',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    IconComponent,
+    AdminBackButtonComponent,
+    PaginationComponent,
+    TipoBadgeComponent
+  ],
   templateUrl: './administrar-paquetes.html',
 })
 export class AdministrarPaquetesComponent implements OnInit {

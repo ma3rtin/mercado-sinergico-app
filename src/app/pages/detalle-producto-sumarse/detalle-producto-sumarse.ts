@@ -80,8 +80,43 @@ export class DetalleProductoSumarse implements OnInit {
   // 🧩 Computed
   hasProducto = computed(() => !!this.producto());
   hasPaqueteSeleccionado = computed(() => !!this.paqueteSeleccionado());
-  maxQuantity = computed(() => 25);
+
+  // --- LÓGICA DE STOCK Y DISPONIBILIDAD REFACTORIZADA ---
+
+  // 1. Cupos del Paquete (Capacidad de la campaña)
+  cuposTotalesPaquete = computed(() => this.paqueteSeleccionado()?.cant_productos || 0);
+  cuposReservadosPaquete = computed(() => this.paqueteSeleccionado()?.cant_productos_reservados || 0);
+  cuposRestantesPaquete = computed(() => Math.max(0, this.cuposTotalesPaquete() - this.cuposReservadosPaquete()));
+
+  // 2. Información de la Variante Seleccionada
+  varianteSeleccionada = computed(() => {
+    const id = this.varianteIdSeleccionada();
+    if (!id) return null;
+    return this.producto()?.variantes?.find(v => v.id === id) || null;
+  });
+
+  // 3. Stock Físico (null significa SINÉRGICO/Ilimitado)
+  stockFisicoVariante = computed(() => this.varianteSeleccionada()?.stockFisico ?? null);
+
+  // 4. Disponibilidad Real (El "Cuello de Botella")
+  disponibilidadRealParaUsuario = computed(() => {
+    const cupos = this.cuposRestantesPaquete();
+    const stock = this.stockFisicoVariante();
+
+    // Si el paquete está lleno, disponibilidad es 0
+    if (cupos <= 0) return 0;
+
+    // Si no hay variante seleccionada o es SINÉRGICO (null), el límite es el cupo del paquete
+    if (stock === null) return cupos;
+
+    // Si es ENÉRGICO, el límite es el menor entre cupo y stock físico
+    return Math.min(cupos, stock);
+  });
+
+  maxQuantity = computed(() => this.disponibilidadRealParaUsuario());
   minQuantity = computed(() => 1);
+
+  // --- ESTADOS DE UI ---
 
   productoTieneVariantes = computed(() => {
     const prod = this.producto();
@@ -89,16 +124,27 @@ export class DetalleProductoSumarse implements OnInit {
   });
 
   puedeAgregarAlCarrito = computed(() => {
-    if (!this.paqueteEstaActivo()) return false;
-
-    if (!this.productoTieneVariantes()) return true;
-
-    return this.variantesValidas();
+    return this.paqueteEstaActivo() && 
+           this.disponibilidadRealParaUsuario() > 0 && 
+           (!this.productoTieneVariantes() || this.variantesValidas());
   });
 
+  tipoPaquete = computed(() => this.paqueteSeleccionado()?.tipo || null);
+
+  // Progreso de Campaña (Sinergico)
   participantesActuales = computed(() => this.paqueteSeleccionado()?.cant_usuarios_registrados || 0);
-  maxParticipantes = computed(() => this.paqueteSeleccionado()?.cant_productos || 0);
-  faltanParaCerrar = computed(() => this.maxParticipantes() - this.participantesActuales());
+  faltanParaCerrar = computed(() => Math.max(0, this.cuposTotalesPaquete() - this.participantesActuales()));
+
+  // Motivo del límite (para feedback al usuario)
+  motivoLimite = computed(() => {
+    const cupos = this.cuposRestantesPaquete();
+    const stock = this.stockFisicoVariante();
+    
+    if (cupos <= 0) return 'PAQUETE_LLENO';
+    if (stock !== null && stock < cupos) return 'STOCK_FISICO_LIMITADO';
+    return 'CUPO_PAQUETE_LIMITADO';
+  });
+
   zonaDelPaquete = computed(() => this.paqueteSeleccionado()?.zona?.nombre || 'Sin zona');
   estadoDelPaquete = computed(() => this.paqueteSeleccionado()?.estado?.nombre || 'Sin estado');
 
@@ -276,9 +322,17 @@ export class DetalleProductoSumarse implements OnInit {
 
   changeQuantity(delta: number): void {
     const newQuantity = this.quantity() + delta;
-    if (newQuantity >= this.minQuantity() && newQuantity <= this.maxQuantity()) {
-      this.quantity.set(newQuantity);
+    const max = this.maxQuantity();
+    
+    if (newQuantity < this.minQuantity()) return;
+    
+    if (newQuantity > max) {
+      this.toast.warning(`Solo hay ${max} unidades disponibles por el momento`);
+      this.quantity.set(max);
+      return;
     }
+    
+    this.quantity.set(newQuantity);
   }
 
   addToCart(): void {

@@ -8,11 +8,12 @@ import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
+import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
 
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent, TipoPaqueteBadgeComponent],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {

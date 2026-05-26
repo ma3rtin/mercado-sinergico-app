@@ -19,7 +19,7 @@ export class TipoPaqueteBadgeComponent {
 
   // Safe fallback to POR_DEFINIR
   tipoSafe = computed(() => {
-    return this.tipo() || TipoPaquete.POR_DEFINIR;
+    return this.tipo();
   });
 
   // Icon name by package type
