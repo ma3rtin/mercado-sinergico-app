@@ -267,6 +267,6 @@ imagenUrl = computed(() => {
       return `Pocas unidades (${stock})`;
     }
 
-    return `Disponible`;
+    return 'Disponible';
   }
 }
