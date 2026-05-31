@@ -16,6 +16,16 @@
     </div>
     } @else {
     <div class="space-y-6">
+      <!-- Selector de Tipo -->
+      <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <h3 class="text-lg font-display text-gray-900 mb-4">Tipo de paquete</h3>
+        <app-selector-tipo-card
+          [selectedType]="tipoPaquete()"
+          [contenido]="tipoCardContenido"
+          (typeChange)="onTipoPaqueteChange($event)"
+        />
+      </div>
+
       <!-- Info Básica -->
       <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -38,6 +48,10 @@
           <app-select [labelValue]="'Buscar y agregar productos'" [placeholderValue]="'Buscar...'"
             [optionsValue]="productosOptions()" [searchableValue]="true" [clearableValue]="true"
             [ngModel]="selectedProductoId()" (valueChange)="onSelectProducto($event)" />
+          <p class="text-[11px] text-gray-500 mt-1.5 italic flex items-center gap-1">
+            <app-icon name="info" size="14" class="text-info" />
+            Solo se muestran productos compatibles con el tipo <b>{{ tipoPaquete()  }}</b>.
+          </p>
         </div>
 
         <div class="space-y-3">

@@ -5,11 +5,12 @@ import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquet
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { TipoPaquete } from '@app/models/Enums';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-admin-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, TipoBadgeComponent],
   templateUrl: './admin-paquete-card.html',
 })
 export class AdminPaqueteCard implements OnInit, OnDestroy {

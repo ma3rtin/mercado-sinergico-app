@@ -76,6 +76,9 @@
               {{ categoriaNombre() }}
             </span>
             }
+            @if (productoSeleccionado()?.tipo) {
+            <app-tipo-badge [tipo]="productoSeleccionado()!.tipo" mode="icon" />
+            }
           </div>
 
           <!-- Nombre del producto -->

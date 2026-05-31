@@ -61,16 +61,8 @@
                     {{ paquete.zona?.nombre || 'Sin zona' }}
                 </span>
                 <span class="w-1 h-1 rounded-full bg-border-default hidden sm:block"></span>
-                @if (isEnergico) {
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-dark/10 text-secondary-dark border border-secondary-dark/30 uppercase tracking-wider">
-                    <app-icon name="zap" size="10" />
-                    Enérgico
-                  </span>
-                } @else if (isSinergico) {
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/30 uppercase tracking-wider">
-                    <app-icon name="users" size="10" />
-                    Sinérgico
-                  </span>
+                @if (isEnergico || isSinergico) {
+                <app-tipo-badge [tipo]="paquete.tipo" mode="icon" />
                 }
             </div>
             <h3
