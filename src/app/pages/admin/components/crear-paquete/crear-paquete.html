@@ -114,6 +114,10 @@
           [ngModel]="selectedProductoId()"
           [emptyMessageValue]="'No hay mas productos aqui'"
           (valueChange)="onSelectProducto($event)" />
+        <p class="text-[11px] text-gray-500 mt-1 italic flex items-center gap-1">
+          <app-icon name="info" size="14" class="text-info" />
+          Solo se muestran productos de tipo <b>{{ tipoPaquete() }}</b>.
+        </p>
       </div>
 
       <div class="border border-gray-200 rounded-lg p-4">
@@ -135,7 +139,7 @@
                   class="text-error hover:text-error transition"
                   title="Eliminar producto"
                 >
-                  <i class="fa-solid fa-xmark text-lg"></i>
+                  <app-icon name="x" size="20" />
                 </button>
               </div>
             </div>

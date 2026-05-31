@@ -25,6 +25,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-producto-detalle-seleccion',
@@ -36,7 +37,8 @@ import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagene
     IconComponent,
     PaginationComponent,
     VisorImagenesComponent,
-  ],
+    TipoBadgeComponent
+],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
@@ -60,6 +62,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   productoIdActual = signal<number | null>(null);
+
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);

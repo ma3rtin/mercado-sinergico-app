@@ -13,6 +13,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '../icono/icono';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 /**
  * Contexto de uso del ProductoCard
@@ -42,7 +43,7 @@ export interface DescuentoProducto {
 @Component({
   selector: 'app-producto-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, TipoBadgeComponent],
   templateUrl: './producto-card.html',
 })
 export class ProductoCard {
@@ -56,6 +57,7 @@ export class ProductoCard {
   tipoPaquete = input<string | null>(null);
   paqueteId = input<number | null>(null);
   navegacion = input<ProductoCardNavegacion>('detalle-seleccion');
+  tipoProducto = input<string | null>(null);
 
   // 📤 OUTPUTS
   cardClick = output<number>();
@@ -176,6 +178,7 @@ imagenUrl = computed(() => {
 
     return stock !== null && stock !== undefined;
   });
+
 
   constructor(private router: Router) {}
 

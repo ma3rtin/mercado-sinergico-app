@@ -28,6 +28,7 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
@@ -39,7 +40,8 @@ import { ToastService } from '@app/services/toast/toast.service';
     PaqueteCard,
     SelectorVariantesComponent,
     ButtonComponent,
-  ],
+    TipoBadgeComponent
+],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
