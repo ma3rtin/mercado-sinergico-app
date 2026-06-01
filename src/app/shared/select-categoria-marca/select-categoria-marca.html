@@ -1,0 +1,63 @@
+<div class="flex flex-col gap-3">
+  @if (label()) {
+    <label class="text-lg font-medium text-black">
+      {{ label() }} <span class="text-error">*</span>
+    </label>
+  }
+
+  <!-- Buscador Inline -->
+  <div class="relative">
+    <app-icon name="search" size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+    <input
+      type="text"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+      placeholder="Buscar marca o categoría..."
+      class="w-full pl-10 pr-4 py-2.5 bg-bg-app border border-border-default rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all text-sm placeholder:text-text-muted"
+    />
+  </div>
+
+  <!-- Grid de Chips/Opciones -->
+  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+    @for (option of filteredOptions(); track option.id) {
+      <button
+        type="button"
+        (click)="select(option.id)"
+        [disabled]="isDisabled()"
+        [class]="'flex items-center justify-center px-3 py-2.5 rounded-xl border text-xs font-bold transition-all active:scale-95 ' +
+          (selectedValue() === option.id
+            ? 'bg-brand-cta text-gray-900 border-brand-cta shadow-sm'
+            : 'bg-white text-text-secondary border-border-default hover:border-brand-primary/50 shadow-sm')"
+      >
+        {{ option.nombre }}
+      </button>
+    } @empty {
+      <div class="col-span-full py-6 text-center bg-bg-app rounded-xl border border-dashed border-border-default">
+        <p class="text-xs text-text-muted italic">No se encontraron resultados</p>
+      </div>
+    }
+  </div>
+
+  <!-- Campo de creación rápida -->
+  <div class="flex gap-2 pt-2 border-t border-border-default/50">
+    <input
+      type="text"
+      [ngModel]="newName()"
+      (ngModelChange)="newName.set($event)"
+      (keyup.enter)="handleCreate()"
+      [placeholder]="placeholderCreate()"
+      class="flex-1 px-4 py-2 bg-bg-raised border border-border-default rounded-xl focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all text-sm"
+    />
+    <app-button
+      variant="primary"
+      shape="circle"
+      size="sm"
+      [iconOnly]="true"
+      iconStart="plus"
+      class="[&_app-icon]:-translate-y-[2px]"
+      [loading]="loading()"
+      [disabled]="isDisabled() || !newName().trim()"
+      (buttonClick)="handleCreate()"
+    />
+  </div>
+</div>
