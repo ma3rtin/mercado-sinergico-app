@@ -77,7 +77,9 @@
               [label]="'Marca'"
               [placeholderCreate]="'Nueva marca...'"
               [loading]="creandoMarca()"
+              [loadingEdit]="editandoMarca()"
               (createRequest)="crearMarca($event)"
+              (editRequest)="editarMarca($event)"
             />
             @if (isFieldInvalid('marca_id')) {
               <p class="mt-1 text-sm text-error">{{ getErrorMessage("marca_id") }}</p>
@@ -92,7 +94,9 @@
               [label]="'Categoría'"
               [placeholderCreate]="'Nueva categoría...'"
               [loading]="creandoCategoria()"
+              [loadingEdit]="editandoCategoria()"
               (createRequest)="crearCategoria($event)"
+              (editRequest)="editarCategoria($event)"
             />
             @if (isFieldInvalid('categoria_id')) {
               <p class="mt-1 text-sm text-error">{{ getErrorMessage("categoria_id") }}</p>

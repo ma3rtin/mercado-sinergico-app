@@ -37,6 +37,8 @@ import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { SelectCategoriaMarca } from '../../../../shared/select-categoria-marca/select-categoria-marca';
+import { MapOptionsPipe } from '../../../../shared/pipes/map-options.pipe';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
@@ -60,6 +62,8 @@ interface ImageSlot {
     IconComponent,
     CrearPlantillaModalComponent,
     AdminBackButtonComponent,
+    SelectCategoriaMarca,
+    MapOptionsPipe,
   ],
   standalone: true,
 })
@@ -89,6 +93,11 @@ export class EditarProductoComponent implements OnInit {
   plantillas = signal<Plantilla[]>([]);
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
+
+  creandoMarca = signal(false);
+  creandoCategoria = signal(false);
+  editandoMarca = signal(false);
+  editandoCategoria = signal(false);
 
   // Signals - Estado del producto
   productoId = signal<number | null>(null);
@@ -160,6 +169,76 @@ export class EditarProductoComponent implements OnInit {
       peso: [null, [Validators.min(0)]],
       plantillaId: [null],
     });
+  }
+
+  crearMarca(nombre: string): void {
+    this.creandoMarca.set(true);
+    this.marcaService.createMarca(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: any) => {
+          this.marcas.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ marca_id: nueva.id_marca });
+          this.toast.success(`Marca "${nombre}" creada exitosamente`);
+          this.creandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la marca');
+          this.creandoMarca.set(false);
+        }
+      });
+  }
+
+  crearCategoria(nombre: string): void {
+    this.creandoCategoria.set(true);
+    this.categoriaService.createCategoria(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: any) => {
+          this.categorias.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ categoria_id: nueva.id_categoria });
+          this.toast.success(`Categoría "${nombre}" creada exitosamente`);
+          this.creandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la categoría');
+          this.creandoCategoria.set(false);
+        }
+      });
+  }
+
+  editarMarca(event: { id: number; nombre: string }): void {
+    this.editandoMarca.set(true);
+    this.marcaService.updateMarca(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: any) => {
+          this.marcas.update(prev => prev.map(m => m.id_marca === event.id ? actualizada : m));
+          this.toast.success(`Marca actualizada a "${event.nombre}"`);
+          this.editandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la marca');
+          this.editandoMarca.set(false);
+        }
+      });
+  }
+
+  editarCategoria(event: { id: number; nombre: string }): void {
+    this.editandoCategoria.set(true);
+    this.categoriaService.updateCategoria(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: any) => {
+          this.categorias.update(prev => prev.map(c => c.id_categoria === event.id ? actualizada : c));
+          this.toast.success(`Categoría actualizada a "${event.nombre}"`);
+          this.editandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la categoría');
+          this.editandoCategoria.set(false);
+        }
+      });
   }
 
   loadInitialData(): void {

@@ -18,4 +18,7 @@ export class MarcaService extends ApiService {
     getMarcaById(id: number): Observable<Marca> {
         return this.get<Marca>(`${this.apiUrl}/${id}`);
     }
+    updateMarca(id: number, nombre: string): Observable<Marca> {
+    return this.put<Marca>(`${this.apiUrl}/${id}`, { nombre });
+  }
 }

@@ -26,10 +26,10 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
-import Swal from 'sweetalert2';
-
 import { SelectCategoriaMarca } from '../../../../shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '../../../../shared/pipes/map-options.pipe';
+
+import Swal from 'sweetalert2';
 
 interface ImageSlot {
   file: File | null;
@@ -66,8 +66,11 @@ export class CrearProductoComponent implements OnInit {
   private varianteService = inject(VarianteService);
   private toast = inject(ToastService);
 
+  // 🔧 Estados de loading
   creandoMarca = signal(false);
   creandoCategoria = signal(false);
+  editandoMarca = signal(false);
+  editandoCategoria = signal(false);
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
@@ -207,6 +210,24 @@ export class CrearProductoComponent implements OnInit {
       });
   }
 
+  // ✅ Editar marca inline
+  editarMarca(event: { id: number; nombre: string }): void {
+    this.editandoMarca.set(true);
+    this.marcaService.updateMarca(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: any) => {
+          this.marcas.update(prev => prev.map(m => m.id_marca === event.id ? actualizada : m));
+          this.toast.success(`Marca actualizada a "${event.nombre}"`);
+          this.editandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la marca');
+          this.editandoMarca.set(false);
+        }
+      });
+  }
+
   // ✅ Crear categoría inline
   crearCategoria(nombre: string): void {
     this.creandoCategoria.set(true);
@@ -226,6 +247,28 @@ export class CrearProductoComponent implements OnInit {
       });
   }
 
+  // ✅ Editar categoría inline
+  editarCategoria(event: { id: number; nombre: string }): void {
+    this.editandoCategoria.set(true);
+    this.categoriaService.updateCategoria(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: any) => {
+          const id = actualizada.id_categoria || event.id;
+          this.categorias.update(prev => prev.map(c => c.id_categoria === id ? actualizada : c));
+          // Si la categoría que editamos era la seleccionada, actualizamos el texto visual
+          if (this.productForm.get('categoria_id')?.value === id) { this.productForm.patchValue({ categoria_id: id }); }
+          this.toast.success(`Categoría actualizada a "${actualizada.nombre}"`);
+          this.editandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al editar la categoría');
+          this.editandoCategoria.set(false);
+        }
+      });
+  }
+
+  // 🎨 Selección de plantilla
   selectTemplate(template: Plantilla): void {
     if (this.selectedTemplate()?.id !== template.id) {
       this.selectedTemplate.set(template);
@@ -268,6 +311,7 @@ export class CrearProductoComponent implements OnInit {
     return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
+  // 📸 Manejo de imágenes
   onFileSelected(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -292,6 +336,7 @@ export class CrearProductoComponent implements OnInit {
   hasImages(): boolean { return this.imageSlots().some(slot => slot.file !== null); }
   hasMainImage(): boolean { return this.imageSlots()[0].file !== null; }
 
+  // 🎯 Drag & Drop
   onDragStart(index: number, event: DragEvent) {
     this.draggedIndex = index;
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
@@ -314,6 +359,7 @@ export class CrearProductoComponent implements OnInit {
   }
   onDragEnd() { this.draggedIndex = null; }
 
+  // 🚀 Submit
   onSubmit() {
     this.formSubmitted.set(true);
     if (this.productForm.invalid) { this.toast.error('Por favor completá todos los campos requeridos'); this.scrollToFirstError(); return; }
@@ -423,7 +469,11 @@ export class CrearProductoComponent implements OnInit {
 
   openCreateModal(): void { this.isCreateModalOpen.set(true); this.plantillaToEdit = undefined; }
   closeCreateModal(): void { this.isCreateModalOpen.set(false); this.plantillaToEdit = undefined; }
-  onPlantillaCreated(plantilla: Plantilla): void { this.plantillas.update(current => [...current, plantilla]); this.selectTemplate(plantilla); this.closeCreateModal(); }
+  onPlantillaCreated(plantilla: Plantilla): void {
+    this.plantillas.update(current => [...current, plantilla]);
+    this.selectTemplate(plantilla);
+    this.closeCreateModal();
+  }
 
   deseleccionarPlantilla(): void {
     Swal.fire({

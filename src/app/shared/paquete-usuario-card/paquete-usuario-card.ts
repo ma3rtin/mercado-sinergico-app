@@ -8,7 +8,7 @@ import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
-import {TipoBadgeComponent } from "@app/tipo-badge/tipo-badge";
+import {TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-paquete-usuario-card',

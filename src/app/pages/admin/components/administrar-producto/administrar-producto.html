@@ -118,30 +118,23 @@
 
               <!-- Precio -->
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-primary rounded-full text-sm font-medium">
+                class="inline-flex items-center gap-1 px-2 py-1 mr-1 bg-brand-primary-light text-primary rounded-full text-sm font-medium">
                 {{ formatPrice(producto.precio) }}
               </span>
 
               <!-- Marca -->
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 bg-warning-light text-black rounded-full text-sm font-medium">
+                class="inline-flex items-center gap-1 px-2 py-1 mr-1 bg-warning-light text-black rounded-full text-sm font-medium">
                 {{ getMarcaNombre(producto) }}
               </span>
 
               <!-- Tipo de Producto Badge -->
-              @if (producto.tipo) {
-                <span
-                  [class]="'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ' + 
-                  (producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'bg-secondary-dark text-white' : 'bg-info-light text-primary')">
-                  <app-icon [name]="producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'zap' : 'users'" [size]="'12'" class="pt-0.5" />
-                  {{ producto.tipo.toString().toUpperCase() === 'ENERGICO' ? 'Enérgico' : 'Sinérgico' }}
-                </span>
-              }
+              <app-tipo-badge [tipo]="producto.tipo" class="mr-1" />
 
               <!-- Badge de variantes (si tiene) -->
               @if (producto.tieneVariantes) {
               <span
-                class="inline-flex items-center gap-1 px-2 py-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
+                class="inline-flex items-center gap-1 px-2 py-1 mr-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
                 <app-icon name="layers" [size]="'12'" class="text-current pt-1" />
                 {{ producto.cantidadVariantes }} variantes
               </span>
@@ -150,7 +143,7 @@
           </div>
 
           <!-- Botones de acción -->
-          <div class="flex flex-row items-center gap-2 flex-shrink-0 pt-4 border-t sm:pt-0 sm:border-t-0 sm:border-l border-gray-200 sm:pl-5">
+          <div class="flex flex-row items-center gap-2  flex-shrink-0 pt-4 border-t sm:pt-0 sm:border-t-0 sm:border-l border-gray-200 sm:pl-5">
             <!-- Duplicar producto -->
             <button (click)="duplicateProducto(producto)"
               class="p-2 text-gray-500 hover:text-primary hover:bg-info-light rounded-lg transition-colors"
