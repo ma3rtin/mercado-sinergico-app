@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, effect } from '@angular/core';
-import { Observable, catchError, throwError, timeout, tap, shareReplay } from 'rxjs';
+import { Observable, catchError, throwError, timeout, tap } from 'rxjs';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { Direccion } from '@app/models/ZonasInterfaces/Direccion';
 import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
@@ -26,8 +26,6 @@ export class UsuarioService extends ApiService {
     return tieneTelefono && tieneFechaNac && tieneDireccion;
   });
 
-  private cachedPerfil$: Observable<Usuario> | null = null;
-
   constructor(private authService: AuthService) {
     super();
 
@@ -35,7 +33,6 @@ export class UsuarioService extends ApiService {
     effect(() => {
       if (!this.authService.isAuthenticated()) {
         this.perfilUsuario.set(null);
-        this.cachedPerfil$ = null;
       }
     });
   }
@@ -71,18 +68,11 @@ export class UsuarioService extends ApiService {
   }
 
   getPerfil(): Observable<Usuario> {
-    if (!this.cachedPerfil$) {
-      this.cachedPerfil$ = this.get<Usuario>('usuarios/me').pipe(
-        timeout(60000),
-        tap(u => this.perfilUsuario.set(u)),
-        shareReplay(1),
-        catchError(err => {
-          this.cachedPerfil$ = null;
-          return this.handleError('getPerfil')(err);
-        })
-      );
-    }
-    return this.cachedPerfil$;
+    return this.get<Usuario>('usuarios/me').pipe(
+      timeout(60000),
+      tap(u => this.perfilUsuario.set(u)),
+      catchError(this.handleError('getPerfil'))
+    );
   }
 
   updatePerfil(data: any): Observable<Usuario> {
@@ -90,8 +80,6 @@ export class UsuarioService extends ApiService {
       tap((res) => {
         const u = (res as any).usuario ?? res;
         this.perfilUsuario.set(u);
-        // Limpiamos caché para forzar recarga la próxima vez
-        this.cachedPerfil$ = null;
       }),
       timeout(60000),
       catchError(this.handleError('updatePerfil'))
