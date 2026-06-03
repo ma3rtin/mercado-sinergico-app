@@ -1,8 +1,8 @@
-import { Component, input, Output, EventEmitter, computed, signal, inject, forwardRef } from '@angular/core';
+import { Component, input, output, computed, signal, inject, forwardRef, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-import { IconComponent } from '../icono/icono';
-import { ButtonComponent } from '../botones/buttonComponent';
+import { IconComponent } from '@app/shared/icono/icono';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import Swal from 'sweetalert2';
 
@@ -31,10 +31,11 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
   label = input<string>('');
   placeholderCreate = input<string>('Nuevo...');
   loading = input<boolean>(false);
-  loadingEdit = input<boolean>(false);
+  hasError = input<boolean>(false);
+  allowDeselect = input<boolean>(true);
 
-  @Output() createRequest = new EventEmitter<string>();
-  @Output() editRequest = new EventEmitter<{ id: number; nombre: string }>();
+  createRequest = output<string>();
+  editRequest = output<{ id: number; nombre: string }>();
 
   searchTerm = signal('');
   newName = signal('');
@@ -42,6 +43,12 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
   editingName = signal('');
   selectedValue = signal<number | null>(null);
   isDisabled = signal(false);
+  isEditLoading = signal(false);
+
+  // Nombre normalizado enviado al backend. Permite verificar que el close
+  // corresponde a la edición que está en vuelo, no a una ajena.
+  private pendingEditName = signal<string | null>(null);
+  private pendingCreateName = signal('');
 
   filteredOptions = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
@@ -50,18 +57,44 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
     return all.filter(opt => opt.nombre.toLowerCase().includes(term));
   });
 
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  searchPlaceholder = computed(() => {
+    const lbl = this.label().toLowerCase().trim();
+    return lbl ? `Buscar ${lbl}...` : 'Buscar...';
+  });
+
+  onChange: (value: number | null) => void = () => {};
+  onTouched: () => void = () => {};
+
+  constructor() {
+    // Detecta creación exitosa cuando la opción pendiente aparece en la lista.
+    // Solo limpia newName si todavía contiene el nombre pendiente; si el usuario
+    // ya escribió algo nuevo, lo preserva.
+    effect(() => {
+      const opts = this.options();
+      const pending = this.pendingCreateName();
+      if (pending && opts.some(o => o.nombre.toLowerCase() === pending.toLowerCase())) {
+        untracked(() => {
+          this.pendingCreateName.set('');
+          if (this.newName().trim().toLowerCase() === pending.toLowerCase()) {
+            this.newName.set('');
+            this.searchTerm.set('');
+          }
+        });
+      }
+    });
+  }
+
+  // ─── ControlValueAccessor ──────────────────────────────────────────────────
 
   writeValue(value: number | null): void {
     this.selectedValue.set(value);
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: number | null) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
@@ -69,13 +102,18 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
     this.isDisabled.set(isDisabled);
   }
 
+  // ─── Selección ─────────────────────────────────────────────────────────────
+
   select(id: number): void {
     if (this.isDisabled()) return;
+    if (!this.allowDeselect() && this.selectedValue() === id) return;
     const newVal = this.selectedValue() === id ? null : id;
     this.selectedValue.set(newVal);
     this.onChange(newVal);
     this.onTouched();
   }
+
+  // ─── Creación inline ───────────────────────────────────────────────────────
 
   handleCreate(): void {
     const name = this.newName().trim();
@@ -90,10 +128,12 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
       return;
     }
 
+    this.pendingCreateName.set(name);
     this.createRequest.emit(name);
-    this.newName.set('');
-    this.searchTerm.set('');
+    // newName se limpia por el effect solo si el backend confirma el alta
   }
+
+  // ─── Edición inline ────────────────────────────────────────────────────────
 
   startEdit(option: SelectOption, event: Event): void {
     event.stopPropagation();
@@ -103,6 +143,8 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
 
   cancelEdit(event?: Event): void {
     event?.stopPropagation();
+    this.isEditLoading.set(false);
+    this.pendingEditName.set(null);
     this.editingId.set(null);
     this.editingName.set('');
   }
@@ -143,11 +185,41 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
+        // Guarda el nombre enviado (normalizado) para que el padre pueda
+        // verificar el resultado antes de llamar a finishEditSuccess/Error.
+        this.pendingEditName.set(newName.trim().toLowerCase());
+        this.isEditLoading.set(true);
         this.editRequest.emit({ id, nombre: newName });
-        this.editingId.set(null);
-        this.editingName.set('');
       }
     });
+  }
+
+  /**
+   * El padre lo llama desde `next()` pasando el nombre devuelto por el backend.
+   * Solo cierra edición si ese nombre coincide con el que fue enviado (pendingEditName).
+   * Si no coincide, apaga el spinner pero deja el modo edición abierto para reintentar.
+   */
+  finishEditSuccess(updatedName: string): void {
+    const normalized = updatedName.trim().toLowerCase();
+    if (normalized === this.pendingEditName()) {
+      this.isEditLoading.set(false);
+      this.pendingEditName.set(null);
+      this.editingId.set(null);
+      this.editingName.set('');
+    } else {
+      this.isEditLoading.set(false);
+      // nombre inesperado: spinner apagado, edición permanece abierta
+    }
+  }
+
+  /**
+   * El padre lo llama desde `error()` cuando el PUT falla.
+   * Apaga el spinner pero preserva el modo edición y el texto para reintentar.
+   */
+  finishEditError(): void {
+    this.isEditLoading.set(false);
+    this.pendingEditName.set(null);
+    // editingId y editingName se mantienen para que el usuario pueda reintentar
   }
 
   onEditKeydown(event: KeyboardEvent): void {
