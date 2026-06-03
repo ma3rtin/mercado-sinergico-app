@@ -139,21 +139,18 @@
 
             <!-- Marca -->
             <div>
-              <label class="block text-lg font-medium text-black mb-2">
-                Marca <span class="text-error">*</span>
-              </label>
-              <select
+              <app-select-categoria-marca
+                #marcaSelector
                 formControlName="marca_id"
-                [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
-                  (isFieldInvalid('marca_id')
-                    ? 'border-error focus:ring-error focus:border-error'
-                    : 'border-gray-300 focus:ring-brand-primary-hover focus:border-focus')"
-              >
-                <option value="">Elegí una marca</option>
-                @for (marca of marcas(); track marca.id_marca) {
-                  <option [value]="marca.id_marca">{{ marca.nombre }}</option>
-                }
-              </select>
+                [options]="marcas() | mapOptions:'id_marca'"
+                [label]="'Marca'"
+                [placeholderCreate]="'Nueva marca...'"
+                [loading]="creandoMarca()"
+                [hasError]="isFieldInvalid('marca_id')"
+                [allowDeselect]="false"
+                (createRequest)="crearMarca($event)"
+                (editRequest)="editarMarca($event)"
+              />
               @if (isFieldInvalid('marca_id')) {
                 <p class="mt-1 text-sm text-error">{{ getErrorMessage("marca_id") }}</p>
               }
@@ -161,21 +158,18 @@
 
             <!-- Categoría -->
             <div>
-              <label class="block text-lg font-medium text-black mb-2">
-                Categoría <span class="text-error">*</span>
-              </label>
-              <select
+              <app-select-categoria-marca
+                #categoriaSelector
                 formControlName="categoria_id"
-                [class]="'w-full px-4 py-3 border rounded-lg focus:ring-2 appearance-none bg-white placeholder-gray-500 ' +
-                  (isFieldInvalid('categoria_id')
-                    ? 'border-error focus:ring-error focus:border-error'
-                    : 'border-gray-300 focus:ring-brand-primary-hover focus:border-focus')"
-              >
-                <option value="">Elegí una categoría</option>
-                @for (categoria of categorias(); track categoria.id_categoria) {
-                  <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option>
-                }
-              </select>
+                [options]="categorias() | mapOptions:'id_categoria'"
+                [label]="'Categoría'"
+                [placeholderCreate]="'Nueva categoría...'"
+                [loading]="creandoCategoria()"
+                [hasError]="isFieldInvalid('categoria_id')"
+                [allowDeselect]="false"
+                (createRequest)="crearCategoria($event)"
+                (editRequest)="editarCategoria($event)"
+              />
               @if (isFieldInvalid('categoria_id')) {
                 <p class="mt-1 text-sm text-error">{{ getErrorMessage("categoria_id") }}</p>
               }

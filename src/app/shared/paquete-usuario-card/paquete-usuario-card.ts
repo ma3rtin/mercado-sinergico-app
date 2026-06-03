@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnInit, DestroyRef, inject, HostListener, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -8,7 +8,7 @@ import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
-import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import {TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-paquete-usuario-card',
@@ -46,6 +46,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly router = inject(Router);
+  private readonly tick = signal(Date.now());
 
   get paquete() {
     return this.pedido.paquetePublicado;
@@ -62,6 +63,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         // forzamos reevaluación del getter
+        this.tick.set(Date.now());
       });
   }
 
@@ -97,10 +99,11 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     );
   }
 
-  get tiempoRestante(): string {
+  tiempoRestante = computed(() => {
+    this.tick(); // Leemos el tick para re-evaluar
     if (!this.paquete?.fecha_fin) return '—';
 
-    const ahora = new Date().getTime();
+    const ahora = this.tick();
     const fin = new Date(this.paquete.fecha_fin).getTime();
 
     const diffMs = fin - ahora;
@@ -114,7 +117,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (dias > 0) return `${dias} día${dias > 1 ? 's' : ''}`;
     if (horas > 0) return `${horas} h`;
     return `${minutos} min`;
-  }
+  });
 
   verProductosDisponibles(): void {
     const idPaquete = this.paquete?.id_paquete_publicado;
@@ -221,16 +224,16 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     );
   }
 
-  get esUrgente(): boolean {
+  esUrgente = computed(() => {
+    this.tick();
     if (!this.paquete?.fecha_fin) return false;
 
-    const ahora = Date.now();
+    const ahora = this.tick();
     const fin = new Date(this.paquete.fecha_fin).getTime();
 
     const horasRestantes = (fin - ahora) / (1000 * 60 * 60);
     return horasRestantes <= 24;
-  }
-
+  });
 
   onToggleExpansion(): void {
     if (this.isMobile()) {

@@ -5,6 +5,7 @@ import {
   signal,
   DestroyRef,
   computed,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -37,6 +38,8 @@ import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
+import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
@@ -60,10 +63,15 @@ interface ImageSlot {
     IconComponent,
     CrearPlantillaModalComponent,
     AdminBackButtonComponent,
+    SelectCategoriaMarca,
+    MapOptionsPipe,
   ],
   standalone: true,
 })
 export class EditarProductoComponent implements OnInit {
+  @ViewChild('marcaSelector') private marcaSelector!: SelectCategoriaMarca;
+  @ViewChild('categoriaSelector') private categoriaSelector!: SelectCategoriaMarca;
+
   // Injections
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
@@ -89,6 +97,9 @@ export class EditarProductoComponent implements OnInit {
   plantillas = signal<Plantilla[]>([]);
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
+
+  creandoMarca = signal(false);
+  creandoCategoria = signal(false);
 
   // Signals - Estado del producto
   productoId = signal<number | null>(null);
@@ -162,6 +173,74 @@ export class EditarProductoComponent implements OnInit {
     });
   }
 
+  crearMarca(nombre: string): void {
+    this.creandoMarca.set(true);
+    this.marcaService.createMarca(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Marca) => {
+          this.marcas.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ marca_id: nueva.id_marca });
+          this.toast.success(`Marca "${nombre}" creada exitosamente`);
+          this.creandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la marca');
+          this.creandoMarca.set(false);
+        }
+      });
+  }
+
+  crearCategoria(nombre: string): void {
+    this.creandoCategoria.set(true);
+    this.categoriaService.createCategoria(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Categoria) => {
+          this.categorias.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ categoria_id: nueva.id_categoria });
+          this.toast.success(`Categoría "${nombre}" creada exitosamente`);
+          this.creandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la categoría');
+          this.creandoCategoria.set(false);
+        }
+      });
+  }
+
+  editarMarca(event: { id: number; nombre: string }): void {
+    this.marcaService.updateMarca(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Marca) => {
+          this.marcas.update(prev => prev.map(m => m.id_marca === event.id ? actualizada : m));
+          this.toast.success(`Marca actualizada a "${event.nombre}"`);
+          this.marcaSelector?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la marca');
+          this.marcaSelector?.finishEditError();
+        }
+      });
+  }
+
+  editarCategoria(event: { id: number; nombre: string }): void {
+    this.categoriaService.updateCategoria(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Categoria) => {
+          this.categorias.update(prev => prev.map(c => c.id_categoria === event.id ? actualizada : c));
+          this.toast.success(`Categoría actualizada a "${event.nombre}"`);
+          this.categoriaSelector?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la categoría');
+          this.categoriaSelector?.finishEditError();
+        }
+      });
+  }
+
   loadInitialData(): void {
     this.plantillaService.getPlantillas().subscribe({
       next: (plantillas) => this.plantillas.set(plantillas),
@@ -193,18 +272,19 @@ export class EditarProductoComponent implements OnInit {
   // ============================================
 
   private getMarcaId(producto: Producto): number | undefined {
-    if (typeof producto.marca === 'object' && producto.marca?.id_marca) {
-      return producto.marca.id_marca;
+    if (typeof producto.marca === 'object' && producto.marca !== null) {
+      // El backend puede devolver { id_marca } o { id } según el endpoint usado
+      const m = producto.marca as { id_marca?: number; id?: number };
+      return m.id_marca ?? m.id;
     }
     return producto.marca_id;
   }
 
   private getCategoriaId(producto: Producto): number | undefined {
-    if (
-      typeof producto.categoria === 'object' &&
-      producto.categoria?.id_categoria
-    ) {
-      return producto.categoria.id_categoria;
+    if (typeof producto.categoria === 'object' && producto.categoria !== null) {
+      // El backend puede devolver { id_categoria } o { id } según el endpoint usado
+      const c = producto.categoria as { id_categoria?: number; id?: number };
+      return c.id_categoria ?? c.id;
     }
     return producto.categoria_id;
   }

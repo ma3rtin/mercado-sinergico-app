@@ -15,11 +15,12 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent, TipoBadgeComponent],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {

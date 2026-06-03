@@ -159,9 +159,9 @@
         <!-- RESUMEN RÁPIDO (Celdas más grandes y legibles) -->
         <div class="grid grid-cols-4 gap-2.5">
           <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
-            <app-icon name="clock" size="18" [class]="esUrgente ? 'text-error mx-auto mb-1.5' : 'text-brand-primary mx-auto mb-1.5'" />
+            <app-icon name="clock" size="18" [class]="esUrgente() ? 'text-error mx-auto mb-1.5' : 'text-brand-primary mx-auto mb-1.5'" />
             <p class="text-[10px] text-text-muted font-bold uppercase">Cierre</p>
-            <p class="text-xs font-bold truncate" [ngClass]="{'text-error': esUrgente}">{{ tiempoRestante }}</p>
+            <p class="text-xs font-bold truncate" [ngClass]="{'text-error': esUrgente()}">{{ tiempoRestante() }}</p>
           </div>
           <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
             <app-icon name="package" size="18" class="text-brand-primary mx-auto mb-1.5" />
@@ -393,9 +393,9 @@
             <div class="p-3 rounded-xl bg-bg-app border border-border-default">
               <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mb-1">Cierra en</p>
               <div class="flex items-center gap-2">
-                <app-icon name="clock" size="16" [class]="esUrgente ? 'text-error' : 'text-brand-primary'" />
-                <p class="text-base font-bold" [ngClass]="{'text-error': esUrgente, 'text-text-primary': !esUrgente}">
-                  {{ tiempoRestante }}
+                <app-icon name="clock" size="16" [class]="esUrgente() ? 'text-error' : 'text-brand-primary'" />
+                <p class="text-base font-bold" [ngClass]="{'text-error': esUrgente(), 'text-text-primary': !esUrgente()}">
+                  {{ tiempoRestante() }}
                 </p>
               </div>
             </div>

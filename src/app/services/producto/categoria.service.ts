@@ -11,11 +11,18 @@ export class CategoriaService extends ApiService {
     super();
     }
 
+    createCategoria(nombre: string): Observable<Categoria> {
+        return this.post<Categoria>(this.endpoint, { nombre });
+    }
+
     getCategorias(): Observable<Categoria[]> {
         return this.get<Categoria[]>(this.endpoint);
     }
 
     getCategoriaById(id: number): Observable<Categoria> {
         return this.get<Categoria>(`${this.endpoint}/${id}`);
+    }
+    updateCategoria(id: number, nombre: string): Observable<Categoria> {
+        return this.put<Categoria>(`${this.endpoint}/${id}`, { nombre });
     }
 }
