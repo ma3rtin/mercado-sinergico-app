@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, inject, OnInit, signal, DestroyRef, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef, computed, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TipoPaquete } from '@app/models/Enums';
@@ -26,8 +26,8 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
-import { SelectCategoriaMarca } from '../../../../shared/select-categoria-marca/select-categoria-marca';
-import { MapOptionsPipe } from '../../../../shared/pipes/map-options.pipe';
+import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
+import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 
 import Swal from 'sweetalert2';
 
@@ -56,6 +56,9 @@ interface ImageSlot {
   templateUrl: './crear-producto.html',
 })
 export class CrearProductoComponent implements OnInit {
+  @ViewChild('marcaSelector') private marcaSelector!: SelectCategoriaMarca;
+  @ViewChild('categoriaSelector') private categoriaSelector!: SelectCategoriaMarca;
+
   private fb = inject(FormBuilder);
   public router = inject(Router);
   private destroyRef = inject(DestroyRef);
@@ -66,11 +69,8 @@ export class CrearProductoComponent implements OnInit {
   private varianteService = inject(VarianteService);
   private toast = inject(ToastService);
 
-  // 🔧 Estados de loading
   creandoMarca = signal(false);
   creandoCategoria = signal(false);
-  editandoMarca = signal(false);
-  editandoCategoria = signal(false);
 
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
@@ -191,13 +191,12 @@ export class CrearProductoComponent implements OnInit {
       });
   }
 
-  // ✅ Crear marca inline
   crearMarca(nombre: string): void {
     this.creandoMarca.set(true);
     this.marcaService.createMarca(nombre)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (nueva: any) => {
+        next: (nueva: Marca) => {
           this.marcas.update(prev => [...prev, nueva]);
           this.productForm.patchValue({ marca_id: nueva.id_marca });
           this.toast.success(`Marca "${nombre}" creada exitosamente`);
@@ -210,31 +209,28 @@ export class CrearProductoComponent implements OnInit {
       });
   }
 
-  // ✅ Editar marca inline
   editarMarca(event: { id: number; nombre: string }): void {
-    this.editandoMarca.set(true);
     this.marcaService.updateMarca(event.id, event.nombre)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (actualizada: any) => {
+        next: (actualizada: Marca) => {
           this.marcas.update(prev => prev.map(m => m.id_marca === event.id ? actualizada : m));
           this.toast.success(`Marca actualizada a "${event.nombre}"`);
-          this.editandoMarca.set(false);
+          this.marcaSelector?.finishEditSuccess(actualizada.nombre);
         },
         error: (err) => {
           this.toast.error(err.error?.message || 'Error al actualizar la marca');
-          this.editandoMarca.set(false);
+          this.marcaSelector?.finishEditError();
         }
       });
   }
 
-  // ✅ Crear categoría inline
   crearCategoria(nombre: string): void {
     this.creandoCategoria.set(true);
     this.categoriaService.createCategoria(nombre)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (nueva: any) => {
+        next: (nueva: Categoria) => {
           this.categorias.update(prev => [...prev, nueva]);
           this.productForm.patchValue({ categoria_id: nueva.id_categoria });
           this.toast.success(`Categoría "${nombre}" creada exitosamente`);
@@ -247,23 +243,22 @@ export class CrearProductoComponent implements OnInit {
       });
   }
 
-  // ✅ Editar categoría inline
   editarCategoria(event: { id: number; nombre: string }): void {
-    this.editandoCategoria.set(true);
     this.categoriaService.updateCategoria(event.id, event.nombre)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (actualizada: any) => {
+        next: (actualizada: Categoria) => {
           const id = actualizada.id_categoria || event.id;
           this.categorias.update(prev => prev.map(c => c.id_categoria === id ? actualizada : c));
-          // Si la categoría que editamos era la seleccionada, actualizamos el texto visual
-          if (this.productForm.get('categoria_id')?.value === id) { this.productForm.patchValue({ categoria_id: id }); }
+          if (this.productForm.get('categoria_id')?.value === id) {
+            this.productForm.patchValue({ categoria_id: id });
+          }
           this.toast.success(`Categoría actualizada a "${actualizada.nombre}"`);
-          this.editandoCategoria.set(false);
+          this.categoriaSelector?.finishEditSuccess(actualizada.nombre);
         },
         error: (err) => {
           this.toast.error(err.error?.message || 'Error al editar la categoría');
-          this.editandoCategoria.set(false);
+          this.categoriaSelector?.finishEditError();
         }
       });
   }

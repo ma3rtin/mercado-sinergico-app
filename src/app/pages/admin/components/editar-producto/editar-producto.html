@@ -140,12 +140,14 @@
             <!-- Marca -->
             <div>
               <app-select-categoria-marca
+                #marcaSelector
                 formControlName="marca_id"
                 [options]="marcas() | mapOptions:'id_marca'"
                 [label]="'Marca'"
                 [placeholderCreate]="'Nueva marca...'"
                 [loading]="creandoMarca()"
-                [loadingEdit]="editandoMarca()"
+                [hasError]="isFieldInvalid('marca_id')"
+                [allowDeselect]="false"
                 (createRequest)="crearMarca($event)"
                 (editRequest)="editarMarca($event)"
               />
@@ -157,12 +159,14 @@
             <!-- Categoría -->
             <div>
               <app-select-categoria-marca
+                #categoriaSelector
                 formControlName="categoria_id"
                 [options]="categorias() | mapOptions:'id_categoria'"
                 [label]="'Categoría'"
                 [placeholderCreate]="'Nueva categoría...'"
                 [loading]="creandoCategoria()"
-                [loadingEdit]="editandoCategoria()"
+                [hasError]="isFieldInvalid('categoria_id')"
+                [allowDeselect]="false"
                 (createRequest)="crearCategoria($event)"
                 (editRequest)="editarCategoria($event)"
               />
