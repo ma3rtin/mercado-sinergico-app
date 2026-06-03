@@ -10,7 +10,6 @@ export class CategoriaService extends ApiService {
     constructor() {
     super();
     }
-    //crearcategoria por nombre     this.marcaService.crearcategoria({ nombre }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
 
     createCategoria(nombre: string): Observable<Categoria> {
         return this.post<Categoria>(this.endpoint, { nombre });
