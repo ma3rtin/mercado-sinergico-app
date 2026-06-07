@@ -1,7 +1,6 @@
 <!-- editar-producto.html -->
-<div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 font-body">
-  <div class="max-w-6xl mx-auto">
-
+<app-admin-create-wrapper [titulo]="'Editar producto'">
+  <div class="relative">
     <!-- ⏳ Loading State -->
     @if (isLoading() && !productoOriginal()) {
       <div class="flex flex-col items-center justify-center py-16">
@@ -16,8 +15,6 @@
       <div class="mb-4">
         <app-admin-back-button label="Volver" route="/admin/administrar-productos" />
       </div>
-
-      <h1 class="text-2xl text-gray-900 mb-2 font-display">Editar producto</h1>
 
       <!-- 🎯 Tipo de Producto -->
       <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -35,88 +32,19 @@
           }
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Opción Enérgico -->
-          <button
-            type="button"
-            (click)="cambiarTipoProducto(TipoPaquete.ENERGICO)"
-            [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-              (tipoProducto() === TipoPaquete.ENERGICO
-                ? 'border-secondary-dark bg-warning-light ring-2 ring-secondary-dark ring-offset-2'
-                : 'border-gray-300 hover:border-secondary-dark hover:bg-warning-light')"
-          >
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                  (tipoProducto() === TipoPaquete.ENERGICO ? 'bg-secondary-dark text-white' : 'bg-gray-200 text-gray-600')">
-                  <app-icon name="Zap" size="24"></app-icon>
-                </div>
-                <div class="text-left">
-                  <h4 class="text-lg font-semibold text-gray-900">Enérgico</h4>
-                  <p class="text-xs text-gray-500">Con stock físico</p>
-                </div>
-              </div>
-              @if (tipoProducto() === TipoPaquete.ENERGICO) {
-                <app-icon name="Check" size="24" class="text-secondary-dark"></app-icon>
-              }
-            </div>
-            <p class="text-sm text-gray-600 text-left">
-              El stock se controla físicamente. Ideal para productos con inventario real.
-            </p>
-          </button>
-
-          <!-- Opción Sinérgico -->
-          <button
-            type="button"
-            (click)="cambiarTipoProducto(TipoPaquete.SINERGICO)"
-            [class]="'relative flex flex-col p-6 border-2 rounded-lg transition-all cursor-pointer ' +
-              (tipoProducto() === TipoPaquete.SINERGICO
-                ? 'border-primary bg-info-light ring-2 ring-offset-2'
-                : 'border-gray-300 hover:border-primary hover:bg-info-light')"
-          >
-            <div class="flex items-start justify-between mb-3">
-              <div class="flex items-center gap-3">
-                <div [class]="'w-12 h-12 rounded-full flex items-center justify-center ' +
-                  (tipoProducto() === TipoPaquete.SINERGICO ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600')">
-                  <app-icon name="users" size="24"></app-icon>
-                </div>
-                <div class="text-left">
-                  <h4 class="text-lg font-semibold text-gray-900">Sinérgico</h4>
-                  <p class="text-xs text-gray-500">Bajo pedido</p>
-                </div>
-              </div>
-              @if (tipoProducto() === TipoPaquete.SINERGICO) {
-                <app-icon name="Check" size="24" class="text-primary"></app-icon>
-              }
-            </div>
-            <p class="text-sm text-gray-600 text-left">
-              Sin control de stock físico. Se produce o gestiona bajo pedido.
-            </p>
-          </button>
+        <div [class.pointer-events-none]="esTipoBloqueado()" [class.opacity-60]="esTipoBloqueado()">
+          <app-selector-tipo-card
+            [selectedType]="tipoProducto()"
+            [contenido]="tipoCardContenido"
+            (typeChange)="cambiarTipoProducto($event)"
+          />
         </div>
-
-        <!-- Info adicional -->
-        <div class="mt-4 p-4 bg-info-light border-l-4 border-primary rounded-r-lg">
-          <div class="flex items-start gap-3">
-            <app-icon name="info" size="16" class="text-primary flex-shrink-0"></app-icon>
-            <div class="flex-1">
-              <p class="text-sm text-black font-medium mb-1">
-                ℹ️ Información importante
-              </p>
-              <p class="text-xs text-black">
-                @if (tipoProducto() === TipoPaquete.ENERGICO && !selectedTemplate()) {
-                  Este producto tiene control de stock general. Si tiene plantilla, el stock se maneja por variantes.
-                }
-                @if (tipoProducto() === TipoPaquete.ENERGICO && selectedTemplate()) {
-                  El stock se gestiona por cada variante individualmente.
-                }
-                @if (tipoProducto() === TipoPaquete.SINERGICO) {
-                  Los productos sinérgicos no requieren configuración de stock.
-                }
-              </p>
-            </div>
-          </div>
-        </div>
+        @if (esTipoBloqueado()) {
+          <p class="mt-3 text-sm text-amber-600 font-medium flex items-center gap-2">
+            <app-icon name="alertTriangle" size="16"></app-icon>
+            El tipo de este producto no puede modificarse porque está asociado a un paquete activo.
+          </p>
+        }
       </div>
 
       <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -146,8 +74,6 @@
                 [label]="'Marca'"
                 [placeholderCreate]="'Nueva marca...'"
                 [loading]="creandoMarca()"
-                [hasError]="isFieldInvalid('marca_id')"
-                [allowDeselect]="false"
                 (createRequest)="crearMarca($event)"
                 (editRequest)="editarMarca($event)"
               />
@@ -165,8 +91,6 @@
                 [label]="'Categoría'"
                 [placeholderCreate]="'Nueva categoría...'"
                 [loading]="creandoCategoria()"
-                [hasError]="isFieldInvalid('categoria_id')"
-                [allowDeselect]="false"
                 (createRequest)="crearCategoria($event)"
                 (editRequest)="editarCategoria($event)"
               />
@@ -188,76 +112,21 @@
           </div>
         </div>
 
-        <!-- Imágenes con Drag & Drop -->
+        <!-- 📸 Sección de Imágenes -->
         <div class="bg-white rounded-lg shadow-sm p-6">
           <div class="mb-4">
             <h3 class="text-lg font-medium text-gray-900 mb-2">
-              Imágenes <span class="text-error">*</span>
+              Imágenes del Producto <span class="text-error">*</span>
             </h3>
             <p class="text-sm text-gray-600">
-              Insertá las imágenes de tu producto. Podés arrastrarlas para reordenarlas.
+              Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">16</strong> fotos en total). Límite de tamaño: 20MB por archivo.
             </p>
-            @if (formSubmitted() && !hasMainImage()) {
-              <p class="mt-2 text-sm text-error font-medium">⚠️ La imagen principal es obligatoria</p>
-            }
           </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-            @for (slot of imageSlots(); track $index) {
-              <div
-                draggable="true"
-                (dragstart)="onDragStart($index, $event)"
-                (dragover)="onDragOver($event)"
-                (drop)="onDrop($index, $event)"
-                (dragend)="onDragEnd()"
-                class="aspect-square rounded-lg flex items-center justify-center cursor-pointer relative overflow-hidden transition-all"
-                [ngClass]="{
-                  'border-solid border-3 border-secondary-dark hover:shadow-md hover:shadow-secondary-dark hover:bg-warning-light bg-warning-light': $index === 0 && !slot.preview,
-                  'bg-gray-100 border-2 border-dashed border-gray-300 hover:bg-gray-50': !slot.preview && $index !== 0,
-                  'border-2 border-focus shadow-lg scale-105': draggedIndex() === $index,
-                  'ring-2 ring-error': formSubmitted() && $index === 0 && !slot.preview
-                }"
-              >
-                @if (slot.preview) {
-                  <img [src]="slot.preview" alt="Imagen {{ $index + 1 }}" class="w-full h-full object-cover rounded-lg" />
-
-                  <!-- Botón eliminar -->
-                  <button
-                    type="button"
-                    (click)="removeImage($index, $event)"
-                    class="absolute top-2 right-2 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-error z-10 transition-colors pointer-events-auto"
-                  >×</button>
-
-                  <!-- Badge imagen principal -->
-                  @if ($index === 0) {
-                    <span class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10">Principal</span>
-                  }
-
-                  <!-- Badge imagen existente -->
-                  @if (slot.isExisting && !slot.file) {
-                    <span class="absolute bottom-2 left-2 bg-brand-secondary text-white text-xs font-semibold px-2 py-0.5 rounded z-10">Guardada</span>
-                  }
-
-                  <!-- Indicador drag -->
-                  <div class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-50 text-white text-xs px-2 py-1 rounded z-10">
-                    <app-icon name="move" size="16"></app-icon>
-                  </div>
-                } @else {
-                  <div class="text-center pointer-events-none">
-                    <app-icon name="Upload" size="32" class="text-gray-500"></app-icon>
-                    <p class="text-xs text-gray-500 mt-1">{{ $index === 0 ? "Imagen principal" : "Imagen adicional" }}</p>
-                  </div>
-                }
-
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  (change)="onFileSelected($event, $index)"
-                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0"
-                />
-              </div>
-            }
-          </div>
+          <app-subidor-imagenes
+            [formSubmitted]="formSubmitted()"
+            [allowMultiple]="true"
+            [maxSlots]="16"
+          />
         </div>
 
         <!-- Precio y Stock -->
@@ -385,6 +254,18 @@
 
           <!-- Atributos de la plantilla seleccionada -->
           @if (selectedTemplate()) {
+            <div class="my-4">
+              <app-button
+                [type]="'button'"
+                [variant]="'warning'"
+                [size]="'sm'"
+                (buttonClick)="deseleccionarPlantilla()"
+                class="inline-flex items-center gap-1.5"
+              >
+                <app-icon name="x" [size]="'16'" class="text-current pt-1" />
+                Deseleccionar plantilla
+              </app-button>
+            </div>
             <div class="space-y-6">
               <p class="text-sm text-gray-600 mb-4">Esta plantilla contiene los siguientes atributos:</p>
 
@@ -455,4 +336,4 @@
       />
     }
   </div>
-</div>
+</app-admin-create-wrapper>

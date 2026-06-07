@@ -132,6 +132,11 @@ export class AdministrarProductosComponent {
       return;
     }
 
+    if (!producto.plantillaId && !producto.plantilla) {
+      this.toast.warning('Este producto no tiene una plantilla de variantes asignada');
+      return;
+    }
+
     this.router.navigate([
       '/admin/gestionar-variantes',
       producto.id_producto
@@ -153,7 +158,7 @@ export class AdministrarProductosComponent {
         <p><strong>Categoría:</strong> ${this.getCategoriaNombre(producto)}</p>
         <p><strong>Stock:</strong> ${producto.stock !== null && producto.stock !== undefined ? producto.stock + ' unidades' : 'Sin stock definido'}</p>
         <p><strong>Tipo:</strong> ${producto.tipo || 'Por definir'}</p>
-        ${producto.tieneVariantes ? '<p><strong>Tiene variantes:</strong> Sí (' + (producto.cantidadVariantes || 0) + ')</p>' : ''}
+        ${(producto.plantillaId || producto.plantilla) ? '<p><strong>Tiene variantes:</strong> Sí (' + (producto.cantidadVariantes || 0) + ')</p>' : ''}
         ${producto.altura ? `<p><strong>Dimensiones:</strong> ${producto.altura}cm x ${producto.ancho}cm x ${producto.profundidad}cm</p>` : ''}
         ${producto.peso ? `<p><strong>Peso:</strong> ${producto.peso}kg</p>` : ''}
       </div>
