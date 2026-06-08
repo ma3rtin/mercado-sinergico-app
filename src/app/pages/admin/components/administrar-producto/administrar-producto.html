@@ -132,7 +132,7 @@
               <app-tipo-badge [tipo]="producto.tipo" class="mr-1" />
 
               <!-- Badge de variantes (si tiene) -->
-              @if (producto.tieneVariantes) {
+              @if (producto.plantillaId || producto.plantilla) {
               <span
                 class="inline-flex items-center gap-1 px-2 py-1 mr-1 bg-brand-primary-light text-brand-secondary rounded-full text-xs font-medium">
                 <app-icon name="layers" [size]="'12'" class="text-current pt-1" />
@@ -153,11 +153,13 @@
             </button>
 
             <!-- Gestionar variantes -->
-            <button (click)="gestionarVariantes(producto)" [class]="'flex-1 sm:flex-none p-2.5 sm:p-2 rounded-xl transition-all active:scale-90 ' +
-                        (producto.tieneVariantes
+            <button (click)="gestionarVariantes(producto)" 
+              [disabled]="!producto.plantillaId && !producto.plantilla"
+              [class]="'flex-1 sm:flex-none p-2.5 sm:p-2 rounded-xl transition-all active:scale-90 ' +
+                        (producto.plantillaId || producto.plantilla
                           ? 'text-brand-primary hover:bg-brand-primary/5'
                           : 'text-gray-200 cursor-not-allowed')"
-              [title]="producto.tieneVariantes ? 'Gestionar variantes' : 'Sin variantes'">
+              [title]="(producto.plantillaId || producto.plantilla) ? 'Gestionar variantes' : 'Sin variantes'">
               <app-icon name="layers" [size]="'20'" />
             </button>
 

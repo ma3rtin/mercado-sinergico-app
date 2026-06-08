@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, inject, OnInit, signal, DestroyRef, computed, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, DestroyRef, computed, ViewChild, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TipoPaquete } from '@app/models/Enums';
@@ -28,13 +28,9 @@ import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/share
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
+import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
 
 import Swal from 'sweetalert2';
-
-interface ImageSlot {
-  file: File | null;
-  preview: string | null;
-}
 
 @Component({
   selector: 'app-crear-producto',
@@ -52,12 +48,15 @@ interface ImageSlot {
     AdminBackButtonComponent,
     SelectCategoriaMarca,
     MapOptionsPipe,
+    SubidorImagenes,
   ],
   templateUrl: './crear-producto.html',
 })
 export class CrearProductoComponent implements OnInit {
   @ViewChild('marcaSelector') private marcaSelector!: SelectCategoriaMarca;
   @ViewChild('categoriaSelector') private categoriaSelector!: SelectCategoriaMarca;
+
+  private subidorImagenes = viewChild(SubidorImagenes);
 
   private fb = inject(FormBuilder);
   public router = inject(Router);
@@ -101,18 +100,17 @@ export class CrearProductoComponent implements OnInit {
   selectedTemplate = signal<Plantilla | null>(null);
   selectedAttributes = signal<{ [key: string]: string[] }>({});
   selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
-  imageSlots = signal<ImageSlot[]>(Array(8).fill(null).map(() => ({ file: null, preview: null })));
   isLoading = signal<boolean>(false);
   formSubmitted = signal<boolean>(false);
   isCreateModalOpen = signal<boolean>(false);
   tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
   mostrarSeleccionTipo = signal<boolean>(false);
-  tipoSeleccionadoManual = signal<boolean>(false);
+  tipoSeleccionadoManual = signal<boolean>(true);
 
-  draggedIndex: number | null = null;
   plantillaToEdit?: Plantilla;
 
   puedeGenerarVariantes = computed(() => this.selectedTemplate() !== null);
+  hasMainImage = computed(() => this.subidorImagenes()?.hasMainImage() ?? false);
 
   mostrarStock = computed(() => {
     const tipo = this.tipoProducto();
@@ -267,7 +265,6 @@ export class CrearProductoComponent implements OnInit {
   selectTemplate(template: Plantilla): void {
     if (this.selectedTemplate()?.id !== template.id) {
       this.selectedTemplate.set(template);
-      this.mostrarSeleccionTipo.set(true);
 
       const atributosIniciales: { [key: string]: string[] } = {};
       template.caracteristicas.forEach(car => {
@@ -306,54 +303,6 @@ export class CrearProductoComponent implements OnInit {
     return this.selectedAttributes()[attributeName]?.includes(value) ?? false;
   }
 
-  // 📸 Manejo de imágenes
-  onFileSelected(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      if (!file.type.startsWith('image/')) { this.toast.error('Solo se permiten archivos de imagen'); return; }
-      if (file.size > 5 * 1024 * 1024) { this.toast.error('La imagen no puede superar los 5MB'); return; }
-      this.imageSlots.update(slots => { const s = [...slots]; s[index] = { ...s[index], file }; return s; });
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imageSlots.update(slots => { const s = [...slots]; s[index] = { ...s[index], preview: e.target.result }; return s; });
-      };
-      reader.readAsDataURL(file);
-    }
-    input.value = '';
-  }
-
-  removeImage(index: number, event?: Event) {
-    if (event) event.stopPropagation();
-    this.imageSlots.update(slots => { const s = [...slots]; s[index] = { file: null, preview: null }; return s; });
-  }
-
-  hasImages(): boolean { return this.imageSlots().some(slot => slot.file !== null); }
-  hasMainImage(): boolean { return this.imageSlots()[0].file !== null; }
-
-  // 🎯 Drag & Drop
-  onDragStart(index: number, event: DragEvent) {
-    this.draggedIndex = index;
-    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
-  }
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
-  }
-  onDrop(targetIndex: number, event: DragEvent) {
-    event.preventDefault();
-    if (this.draggedIndex === null || this.draggedIndex === targetIndex) { this.draggedIndex = null; return; }
-    this.imageSlots.update(slots => {
-      const s = [...slots];
-      const temp = s[this.draggedIndex!];
-      s[this.draggedIndex!] = s[targetIndex];
-      s[targetIndex] = temp;
-      return s;
-    });
-    this.draggedIndex = null;
-  }
-  onDragEnd() { this.draggedIndex = null; }
-
   // 🚀 Submit
   onSubmit() {
     this.formSubmitted.set(true);
@@ -374,7 +323,7 @@ export class CrearProductoComponent implements OnInit {
     const tipoBackend = this.tipoMap[this.tipoProducto()];
     if (tipoBackend) formData.append('tipo', tipoBackend);
 
-    const slots = this.imageSlots();
+    const slots = this.subidorImagenes()?.getSlots() || [];
     if (slots[0].file) formData.append('icono', slots[0].file);
     for (let i = 1; i < slots.length; i++) {
       if (slots[i].file) formData.append('imagenes', slots[i].file as Blob);
@@ -456,8 +405,8 @@ export class CrearProductoComponent implements OnInit {
     this.selectedTemplate.set(null);
     this.selectedAttributes.set({});
     this.selectedAttributesTouched.set({});
-    this.imageSlots.set(Array(8).fill(null).map(() => ({ file: null, preview: null })));
-    this.tipoSeleccionadoManual.set(false);
+    this.subidorImagenes()?.reset();
+    this.tipoSeleccionadoManual.set(true);
     this.formSubmitted.set(false);
     this.router.navigate(['/admin/administrar-productos']);
   }
@@ -481,7 +430,7 @@ export class CrearProductoComponent implements OnInit {
         this.selectedTemplate.set(null);
         this.selectedAttributes.set({});
         this.selectedAttributesTouched.set({});
-        this.tipoSeleccionadoManual.set(false);
+        this.tipoSeleccionadoManual.set(true);
         this.productForm.patchValue({ plantillaId: null });
         this.toast.info('Plantilla deseleccionada');
       }

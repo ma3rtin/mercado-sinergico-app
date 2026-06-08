@@ -6,6 +6,7 @@ import {
   DestroyRef,
   computed,
   ViewChild,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -38,18 +39,14 @@ import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
+import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
+import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
-
-interface ImageSlot {
-  file: File | null;
-  preview: string | null;
-  existingUrl?: string;
-  isExisting?: boolean;
-}
 
 @Component({
   selector: 'app-editar-producto',
@@ -63,14 +60,19 @@ interface ImageSlot {
     IconComponent,
     CrearPlantillaModalComponent,
     AdminBackButtonComponent,
+    AdminCreateWrapperComponent,
+    SelectorTipoCardComponent,
     SelectCategoriaMarca,
     MapOptionsPipe,
+    SubidorImagenes,
   ],
   standalone: true,
 })
 export class EditarProductoComponent implements OnInit {
   @ViewChild('marcaSelector') private marcaSelector!: SelectCategoriaMarca;
   @ViewChild('categoriaSelector') private categoriaSelector!: SelectCategoriaMarca;
+
+  private subidorImagenes = viewChild(SubidorImagenes);
 
   // Injections
   private fb = inject(FormBuilder);
@@ -88,6 +90,21 @@ export class EditarProductoComponent implements OnInit {
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
     [TipoPaquete.ENERGICO]: 'ENERGICO',
+  };
+
+  readonly tipoCardContenido: SelectorTipoCardContenido = {
+    energico: {
+      titulo: 'Enérgico',
+      subtitulo: 'Con stock físico',
+      descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
+      items: ['Control de inventario preciso', 'Evita sobreventa', 'Stock compartido entre paquetes']
+    },
+    sinergico: {
+      titulo: 'Sinérgico',
+      subtitulo: 'Bajo pedido',
+      descripcion: 'Sin control de stock físico. Se produce o gestiona bajo pedido.',
+      items: ['Sin límites de inventario', 'Ideal para productos custom', 'Pedidos bajo demanda']
+    }
   };
 
   // Form
@@ -111,36 +128,32 @@ export class EditarProductoComponent implements OnInit {
   selectedAttributes = signal<{ [key: string]: string[] }>({});
   selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
 
-  // Signals - Imágenes
-  imageSlots = signal<ImageSlot[]>(
-    Array(8)
-      .fill(null)
-      .map(() => ({
-        file: null,
-        preview: null,
-        isExisting: false,
-      })),
-  );
-
   // Signals - Estado UI
   isLoading = signal(false);
   formSubmitted = signal(false);
-  draggedIndex = signal<number | null>(null);
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
   tipoSeleccionadoManual = signal<boolean>(false);
+  imagenPrincipalCargada = signal<boolean>(false);
 
   // Computed signals
-  hasImages = computed(() =>
-    this.imageSlots().some((slot) => slot.file !== null || slot.isExisting),
-  );
+  hasImages = computed(() => (this.subidorImagenes()?.getCantidadImagenesCargadas() ?? 0) > 0);
 
-  hasMainImage = computed(() => {
-    const mainSlot = this.imageSlots()[0];
-    return mainSlot.file !== null || mainSlot.isExisting === true;
+  isFormValid = computed(() => this.productForm?.valid && (this.imagenPrincipalCargada() || (this.subidorImagenes()?.hasMainImage() ?? false)));
+
+esTipoBloqueado = computed(() => {
+  const p = this.productoOriginal();
+  if (!p) return false;
+  const cantPaquetes = (p as any).cantPaquetes ?? 0;
+  if (cantPaquetes === 0) return false;
+  // Solo bloquear si hay paquetes activos con estado conocido
+  const paquetes = p.paquetes || [];
+  if (paquetes.length === 0) return false; // Sin info de estado, no bloquear
+  return paquetes.some(pkg => {
+    const estado = (pkg as any).paquetePublicado?.estado?.nombre?.toLowerCase() || '';
+    return !['finalizado', 'cancelado'].includes(estado);
   });
-
-  isFormValid = computed(() => this.productForm?.valid && this.hasMainImage());
+});
 
   mostrarStock = computed(() => {
     const tipo = this.tipoProducto();
@@ -345,7 +358,8 @@ export class EditarProductoComponent implements OnInit {
   }
 
   populateForm(producto: Producto): void {
-    console.log('🔄 Poblando formulario con:', producto);
+    console.log('📦 estructura producto completa:', JSON.stringify(producto));
+    console.log(' Poblando formulario con:', producto);
     console.log('  ↳ Tipo:', producto.tipo);
     console.log('  ↳ Marca:', producto.marca);
     console.log('  ↳ Categoría:', producto.categoria);
@@ -360,6 +374,8 @@ export class EditarProductoComponent implements OnInit {
       this.tipoSeleccionadoManual.set(true);
     }
 
+    const dim = (producto as any).dimensiones ?? producto;
+
     // ✅ 2. Cargar datos básicos del formulario
     this.productForm.patchValue({
       nombre: producto.nombre,
@@ -372,13 +388,18 @@ export class EditarProductoComponent implements OnInit {
 
       // ✅ Manejar categoría (string u objeto)
       categoria_id: this.getCategoriaId(producto),
-
-      altura: producto.altura,
-      ancho: producto.ancho,
-      profundidad: producto.profundidad,
-      peso: producto.peso,
       plantillaId: producto.plantilla?.id,
     });
+
+    // Bug 2 fix: move dimensions to a setTimeout to ensure app-input is ready
+    setTimeout(() => {
+      this.productForm.patchValue({
+        altura: dim.altura != null ? Number(dim.altura) : null,
+        ancho: dim.ancho != null ? Number(dim.ancho) : null,
+        profundidad: dim.profundidad != null ? Number(dim.profundidad) : null,
+        peso: dim.peso != null ? Number(dim.peso) : null,
+      });
+    }, 0);
 
     // ✅ 3. Cargar plantilla si existe
     if (producto.plantilla) {
@@ -402,7 +423,7 @@ export class EditarProductoComponent implements OnInit {
   }
 
   loadProductImages(producto: Producto): void {
-    const newSlots: ImageSlot[] = Array(8)
+    const newSlots: ImageSlot[] = Array(16)
       .fill(null)
       .map(() => ({
         file: null,
@@ -424,7 +445,7 @@ export class EditarProductoComponent implements OnInit {
     // Imágenes adicionales
     if (producto.imagenes && Array.isArray(producto.imagenes)) {
       producto.imagenes.forEach((imagen, index) => {
-        if (index < 7) {
+        if (index < 15) {
           const imageUrl = (imagen as any).url || (imagen as any).imagen_url;
           if (imageUrl) {
             newSlots[index + 1] = {
@@ -438,11 +459,15 @@ export class EditarProductoComponent implements OnInit {
       });
     }
 
-    this.imageSlots.set(newSlots);
-    console.log(
-      '✅ Imágenes cargadas:',
-      newSlots.filter((s) => s.preview),
-    );
+    // ⏳ Deferimos la carga al siguiente tick para asegurar que el viewChild ya esté instanciado
+    setTimeout(() => {
+      this.subidorImagenes()?.loadSlots(newSlots);
+      this.imagenPrincipalCargada.set(newSlots[0]?.preview !== null);
+      console.log(
+        '✅ Imágenes enviadas al subidor:',
+        newSlots.filter((s) => s.preview).length
+      );
+    }, 0);
   }
 
   // ============================================
@@ -476,6 +501,27 @@ export class EditarProductoComponent implements OnInit {
     if (this.tipoProducto() === TipoPaquete.ENERGICO) {
       this.productForm.patchValue({ stock: null });
     }
+  }
+
+  deseleccionarPlantilla(): void {
+    Swal.fire({
+      title: '¿Deseleccionar plantilla?',
+      text: 'El producto quedará sin plantilla asociada',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--error)',
+      confirmButtonText: 'Sí, deseleccionar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.selectedTemplate.set(null);
+        this.selectedAttributes.set({});
+        this.selectedAttributesTouched.set({});
+        this.productForm.patchValue({ plantillaId: null });
+        this.toast.info('Plantilla deseleccionada');
+      }
+    });
   }
 
   // ============================================
@@ -514,95 +560,6 @@ export class EditarProductoComponent implements OnInit {
   }
 
   // ============================================
-  // MANEJO DE IMÁGENES
-  // ============================================
-
-  onFileSelected(event: Event, index: number): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-
-      if (!file.type.startsWith('image/')) {
-        this.toast.error('Solo se permiten archivos de imagen');
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        this.toast.error('La imagen no puede superar los 5MB');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const newSlots = [...this.imageSlots()];
-        newSlots[index] = {
-          file,
-          preview: e.target.result,
-          existingUrl: undefined,
-          isExisting: false,
-        };
-        this.imageSlots.set(newSlots);
-      };
-      reader.readAsDataURL(file);
-    }
-    input.value = '';
-  }
-
-  removeImage(index: number, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    const newSlots = [...this.imageSlots()];
-    newSlots[index] = {
-      file: null,
-      preview: null,
-      existingUrl: undefined,
-      isExisting: false,
-    };
-    this.imageSlots.set(newSlots);
-  }
-
-  // ============================================
-  // DRAG & DROP
-  // ============================================
-
-  onDragStart(index: number, event: DragEvent): void {
-    this.draggedIndex.set(index);
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-    }
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = 'move';
-    }
-  }
-
-  onDrop(targetIndex: number, event: DragEvent): void {
-    event.preventDefault();
-    const dragIndex = this.draggedIndex();
-
-    if (dragIndex === null || dragIndex === targetIndex) {
-      this.draggedIndex.set(null);
-      return;
-    }
-
-    const newSlots = [...this.imageSlots()];
-    const temp = newSlots[dragIndex];
-    newSlots[dragIndex] = newSlots[targetIndex];
-    newSlots[targetIndex] = temp;
-
-    this.imageSlots.set(newSlots);
-    this.draggedIndex.set(null);
-  }
-
-  onDragEnd(): void {
-    this.draggedIndex.set(null);
-  }
-
-  // ============================================
   // ENVÍO DEL FORMULARIO
   // ============================================
 
@@ -615,7 +572,7 @@ export class EditarProductoComponent implements OnInit {
       return;
     }
 
-    if (!this.hasMainImage()) {
+    if (!this.imagenPrincipalCargada() && !this.subidorImagenes()?.hasMainImage()) {
       this.toast.error('Debés tener al menos la imagen principal del producto');
       return;
     }
@@ -632,8 +589,9 @@ export class EditarProductoComponent implements OnInit {
       return;
     }
 
+    const slotsParaEnviar = this.subidorImagenes()?.getSlots() ?? [];
     this.isLoading.set(true);
-    const formData = this.buildFormData();
+    const formData = this.buildFormData(slotsParaEnviar);
 
     // Agregar tipo de producto
     const tipoBackend = this.tipoMap[this.tipoProducto()];
@@ -661,20 +619,24 @@ export class EditarProductoComponent implements OnInit {
     });
   }
 
-  private buildFormData(): FormData {
+  private buildFormData(slots: ImageSlot[]): FormData {
     const formData = new FormData();
 
     // Agregar campos básicos
     Object.entries(this.productForm.value).forEach(([key, value]) => {
+      // Caso especial para desvincular plantilla: enviar cadena vacía si el valor es null
+      if (key === 'plantillaId' && value === null) {
+        formData.append(key, '');
+        return;
+      }
+
       if (value !== null && value !== undefined && value !== '') {
         formData.append(key, value.toString());
       }
     });
 
-    const slots = this.imageSlots();
-
     // Imagen principal solo si es nueva
-    if (slots[0].file) {
+    if (slots.length > 0 && slots[0].file) {
       formData.append('icono', slots[0].file);
     }
 
