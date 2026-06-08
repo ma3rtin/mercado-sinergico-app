@@ -28,7 +28,7 @@ import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/share
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
-import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
+import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
 
 import Swal from 'sweetalert2';
 
