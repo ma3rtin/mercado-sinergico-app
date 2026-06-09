@@ -9,6 +9,7 @@ export interface Direccion {
     numero: number;
     piso?: number;
     departamento?: string;
+    observaciones?: string;
 
     // Relaciones
     usuario?: Usuario;

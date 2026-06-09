@@ -4,25 +4,25 @@
     <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
       <!-- MOBILE -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="md:hidden flex items-center justify-center relative h-10">
+      <div class="md:hidden grid grid-cols-[3rem_1fr_3rem] items-center h-10 gap-2">
         <!-- Hamburguesa -->
         <button (click)="toggleDrawer()"
-          class="absolute left-0 flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
+          class="flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
           aria-label="Abrir menú">
           <app-icon name="Menu" size="20"></app-icon>
         </button>
 
         <!-- Logo Centrado -->
-        <div class="cursor-pointer" (click)="navigateToHome()">
-          <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-10 w-auto" />
+        <div class="cursor-pointer flex items-center justify-center overflow-hidden gap-2" (click)="navigateToHome()">
+          <img src="/assets/images/Logo2.png" alt="Mercado Sinérgico" class="h-8 min-[420px]:h-10 w-auto shrink-0" />
           <span
-            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[60vw] leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden">
+            class="text-white font-semibold whitespace-nowrap overflow-hidden text-ellipsis leading-tight text-lg min-[420px]:text-xl max-[400px]:hidden">
             Mercado Sinérgico
           </span>
         </div>
 
         <!-- Usuario MÓVIL -->
-        <div class="relative profile-menu-area">
+        <div class="flex justify-end relative profile-menu-area">
           <button (click)="toggleProfileMenu()"
             class="inline-flex w-10 h-10 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10 active:scale-95 transition-all duration-200"
             aria-label="Mi perfil">
