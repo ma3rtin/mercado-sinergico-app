@@ -4,7 +4,7 @@
   <section class="page-layout">
 
     <!-- 🎨 Filtros -->
-    <app-filtros [config]="configFiltrosProductos()" [titulo]="'Filtrar Productos'"
+    <app-filtros [config]="configFiltrosProductos()" [valoresIniciales]="valoresFiltrosIniciales()" [titulo]="'Filtrar Productos'"
       (filtrosAplicados)="aplicarFiltros($event)" (filtrosLimpiados)="limpiarFiltros()" />
 
     <!-- 📦 Contenido -->
