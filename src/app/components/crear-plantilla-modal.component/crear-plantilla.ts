@@ -77,7 +77,13 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
     this.document.body.classList.remove('overflow-hidden');
   }
 
-  closeModal(): void {
+  closeModal(force: boolean = false): void {
+    if (force) {
+      this.resetForm();
+      this.close.emit();
+      return;
+    }
+
     // Verificar si hay cambios en el formulario
     const hasChanges = this.plantilla.nombre.trim() !== '' ||
       this.plantilla.caracteristicas.length > 0;
@@ -165,11 +171,10 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
         return;
       }
 
+      const opcionesValidas = caracteristica.opciones.filter(o => o.nombre.trim() !== '');
+
       // Opciones vacías
-      if (
-        caracteristica.opciones.length === 0 ||
-        caracteristica.opciones.some(opcion => opcion.nombre.trim() === '')
-      ) {
+      if (opcionesValidas.length === 0) {
         this.toast.warning(
           `Por favor ingresa el nombre de las opciones de la característica: ${caracteristica.nombre || '(sin nombre)'} 🚨`
         );
@@ -177,7 +182,7 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
       }
 
       // Al menos 2 opciones por característica
-      if (caracteristica.opciones.length < 2) {
+      if (opcionesValidas.length < 2) {
         this.toast.warning(
           `Por favor ingresa al menos 2 opciones para: ${caracteristica.nombre || '(sin nombre)'} 🚨`
         );
@@ -185,27 +190,36 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
       }
 
       // Opciones duplicadas
-      for (const opcion of caracteristica.opciones) {
-        const existingOption = caracteristica.opciones.find(
-          (o) => o.nombre.trim() === opcion.nombre.trim()
+      for (const opcion of opcionesValidas) {
+        const existingOption = opcionesValidas.find(
+          (o) => o !== opcion && o.nombre.trim().toLowerCase() === opcion.nombre.trim().toLowerCase()
         );
-        if (existingOption && existingOption !== opcion) {
+        if (existingOption) {
           this.toast.warning(`La opción "${opcion.nombre}" ya existe en ${caracteristica.nombre}`);
           return;
         }
       }
     }
 
+    // Prepare payload filtering empty options
+    const plantillaFinal: Plantilla = {
+      ...this.plantilla,
+      caracteristicas: this.plantilla.caracteristicas.map(c => ({
+        ...c,
+        opciones: c.opciones.filter(o => o.nombre.trim() !== '')
+      }))
+    };
+
     // ✅ Crear o actualizar con loading
-    if (this.isEditMode && this.plantilla.id) {
+    if (this.isEditMode && plantillaFinal.id) {
       const loading = this.toast.loading('Actualizando plantilla...');
 
-      this.plantillaService.actualizarPlantilla(this.plantilla).subscribe({
+      this.plantillaService.actualizarPlantilla(plantillaFinal).subscribe({
         next: (actualizada) => {
           this.toast.dismiss(loading);
-          this.toast.success(`Plantilla "${this.plantilla.nombre}" actualizada exitosamente 🎉`);
+          this.toast.success(`Plantilla "${plantillaFinal.nombre}" actualizada exitosamente 🎉`);
           this.plantillaCreated.emit(actualizada);
-          this.closeModal();
+          this.closeModal(true);
         },
         error: (err) => {
           this.toast.dismiss(loading);
@@ -216,12 +230,12 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
     } else {
       const loading = this.toast.loading('Creando plantilla...');
 
-      this.plantillaService.crearPlantilla(this.plantilla).subscribe({
+      this.plantillaService.crearPlantilla(plantillaFinal).subscribe({
         next: (nueva) => {
           this.toast.dismiss(loading);
-          this.toast.success(`Plantilla "${this.plantilla.nombre}" creada exitosamente 🎉`);
+          this.toast.success(`Plantilla "${plantillaFinal.nombre}" creada exitosamente 🎉`);
           this.plantillaCreated.emit(nueva);
-          this.closeModal();
+          this.closeModal(true);
         },
         error: (err) => {
           this.toast.dismiss(loading);
@@ -243,28 +257,6 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
   }
 
   cancelarYVolver(): void {
-    const hasChanges = this.plantilla.nombre.trim() !== '' ||
-      this.plantilla.caracteristicas.length > 0;
-
-    if (hasChanges) {
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Perderás todos los cambios no guardados',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#2E608C',
-        cancelButtonColor: '#B92905',
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Continuar editando'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.resetForm();
-          this.close.emit();
-        }
-      });
-    } else {
-      this.resetForm();
-      this.close.emit();
-    }
+    this.closeModal();
   }
 }
