@@ -14,12 +14,19 @@
 
     <!-- 🏷️ BADGES (top) -->
     <div class="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-      <!-- Categoría -->
-      <span
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-brand-secondary border border-brand-primary/30 shadow-sm backdrop-blur-sm">
-        <app-icon name="Layers" size="14"></app-icon>
-        {{ categoriaNombre() }}
-      </span>
+      <div class="flex flex-col gap-2">
+        <!-- Categoría -->
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-brand-secondary border border-brand-primary/30 shadow-sm backdrop-blur-sm">
+          <app-icon name="Layers" size="14"></app-icon>
+          {{ categoriaNombre() }}
+        </span>
+
+        <!-- Badge Tipo Paquete -->
+        @if (producto().tipo) {
+        <app-tipo-badge [tipo]="producto().tipo" mode="icon" />
+        }
+      </div>
 
       <!-- Descuento badge (si aplica) -->
       @if (tieneDescuento() && !descuento()?.aplicado) {

@@ -28,6 +28,9 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { UsuarioService } from '@app/services/usuario/usuario.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-detalle-producto-sumarse',
@@ -39,7 +42,8 @@ import { ToastService } from '@app/services/toast/toast.service';
     PaqueteCard,
     SelectorVariantesComponent,
     ButtonComponent,
-  ],
+    TipoBadgeComponent
+],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
@@ -54,6 +58,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
+  private readonly usuarioService = inject(UsuarioService);
 
   // ✅ igual que productos-del-paquete
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -80,8 +85,43 @@ export class DetalleProductoSumarse implements OnInit {
   // 🧩 Computed
   hasProducto = computed(() => !!this.producto());
   hasPaqueteSeleccionado = computed(() => !!this.paqueteSeleccionado());
-  maxQuantity = computed(() => 25);
+
+  // --- LÓGICA DE STOCK Y DISPONIBILIDAD REFACTORIZADA ---
+
+  // 1. Cupos del Paquete (Capacidad de la campaña)
+  cuposTotalesPaquete = computed(() => this.paqueteSeleccionado()?.cant_productos || 0);
+  cuposReservadosPaquete = computed(() => this.paqueteSeleccionado()?.cant_productos_reservados || 0);
+  cuposRestantesPaquete = computed(() => Math.max(0, this.cuposTotalesPaquete() - this.cuposReservadosPaquete()));
+
+  // 2. Información de la Variante Seleccionada
+  varianteSeleccionada = computed(() => {
+    const id = this.varianteIdSeleccionada();
+    if (!id) return null;
+    return this.producto()?.variantes?.find(v => v.id === id) || null;
+  });
+
+  // 3. Stock Físico (null significa SINÉRGICO/Ilimitado)
+  stockFisicoVariante = computed(() => this.varianteSeleccionada()?.stockFisico ?? null);
+
+  // 4. Disponibilidad Real (El "Cuello de Botella")
+  disponibilidadRealParaUsuario = computed(() => {
+    const cupos = this.cuposRestantesPaquete();
+    const stock = this.stockFisicoVariante();
+
+    // Si el paquete está lleno, disponibilidad es 0
+    if (cupos <= 0) return 0;
+
+    // Si no hay variante seleccionada o es SINÉRGICO (null), el límite es el cupo del paquete
+    if (stock === null) return cupos;
+
+    // Si es ENÉRGICO, el límite es el menor entre cupo y stock físico
+    return Math.min(cupos, stock);
+  });
+
+  maxQuantity = computed(() => this.disponibilidadRealParaUsuario());
   minQuantity = computed(() => 1);
+
+  // --- ESTADOS DE UI ---
 
   productoTieneVariantes = computed(() => {
     const prod = this.producto();
@@ -89,16 +129,27 @@ export class DetalleProductoSumarse implements OnInit {
   });
 
   puedeAgregarAlCarrito = computed(() => {
-    if (!this.paqueteEstaActivo()) return false;
-
-    if (!this.productoTieneVariantes()) return true;
-
-    return this.variantesValidas();
+    return this.paqueteEstaActivo() && 
+           this.disponibilidadRealParaUsuario() > 0 && 
+           (!this.productoTieneVariantes() || this.variantesValidas());
   });
 
+  tipoPaquete = computed(() => this.paqueteSeleccionado()?.tipo || null);
+
+  // Progreso de Campaña (Sinergico)
   participantesActuales = computed(() => this.paqueteSeleccionado()?.cant_usuarios_registrados || 0);
-  maxParticipantes = computed(() => this.paqueteSeleccionado()?.cant_productos || 0);
-  faltanParaCerrar = computed(() => this.maxParticipantes() - this.participantesActuales());
+  faltanParaCerrar = computed(() => Math.max(0, this.cuposTotalesPaquete() - this.participantesActuales()));
+
+  // Motivo del límite (para feedback al usuario)
+  motivoLimite = computed(() => {
+    const cupos = this.cuposRestantesPaquete();
+    const stock = this.stockFisicoVariante();
+    
+    if (cupos <= 0) return 'PAQUETE_LLENO';
+    if (stock !== null && stock < cupos) return 'STOCK_FISICO_LIMITADO';
+    return 'CUPO_PAQUETE_LIMITADO';
+  });
+
   zonaDelPaquete = computed(() => this.paqueteSeleccionado()?.zona?.nombre || 'Sin zona');
   estadoDelPaquete = computed(() => this.paqueteSeleccionado()?.estado?.nombre || 'Sin estado');
 
@@ -276,9 +327,17 @@ export class DetalleProductoSumarse implements OnInit {
 
   changeQuantity(delta: number): void {
     const newQuantity = this.quantity() + delta;
-    if (newQuantity >= this.minQuantity() && newQuantity <= this.maxQuantity()) {
-      this.quantity.set(newQuantity);
+    const max = this.maxQuantity();
+    
+    if (newQuantity < this.minQuantity()) return;
+    
+    if (newQuantity > max) {
+      this.toast.warning(`Solo hay ${max} unidades disponibles por el momento`);
+      this.quantity.set(max);
+      return;
     }
+    
+    this.quantity.set(newQuantity);
   }
 
   addToCart(): void {
@@ -308,8 +367,44 @@ export class DetalleProductoSumarse implements OnInit {
 
     console.log('🧪 Body enviado:', body);
 
+    // 🌟 Verificar que el perfil esté completo antes de permitir sumarse a un paquete/pedido
+    this.usuarioService.getPerfil().subscribe({
+      next: () => {
+        if (!this.usuarioService.perfilCompleto()) {
+          Swal.fire({
+            title: '¡Faltan datos obligatorios!',
+            html: '<p class="text-gray-600 mb-4">Para poder sumarte a un paquete y realizar pedidos, primero debes completar los campos obligatorios en tu perfil (teléfono, fecha de nacimiento y dirección de entrega).</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Completar perfil',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: 'var(--brand-secondary)', // Azul
+            cancelButtonColor: 'var(--error)', // Rojo
+            customClass: {
+              confirmButton: 'px-5 py-2.5 rounded-xl text-white font-bold transition-all shadow-md',
+              cancelButton: 'px-5 py-2.5 rounded-xl text-white font-bold transition-all shadow-md'
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.router.navigate(['/perfil']);
+            }
+          });
+          return;
+        }
+
+        // Si el perfil está completo, procedemos a realizar la acción
+        this.procederSumarAlPaquete(paquete.id_paquete_publicado!, body);
+      },
+      error: (err) => {
+        console.error('❌ Error al validar perfil antes de comprar:', err);
+        this.toast.error('No se pudo verificar tu información de perfil. Intentá nuevamente.');
+      }
+    });
+  }
+
+  private procederSumarAlPaquete(paqueteId: number, body: any): void {
     this.pedidoService
-      .sumarseAlPaquete(paquete.id_paquete_publicado!, body)
+      .sumarseAlPaquete(paqueteId, body)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

@@ -15,11 +15,12 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent, TipoBadgeComponent],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {
@@ -131,6 +132,11 @@ export class AdministrarProductosComponent {
       return;
     }
 
+    if (!producto.plantillaId && !producto.plantilla) {
+      this.toast.warning('Este producto no tiene una plantilla de variantes asignada');
+      return;
+    }
+
     this.router.navigate([
       '/admin/gestionar-variantes',
       producto.id_producto
@@ -152,7 +158,7 @@ export class AdministrarProductosComponent {
         <p><strong>Categoría:</strong> ${this.getCategoriaNombre(producto)}</p>
         <p><strong>Stock:</strong> ${producto.stock !== null && producto.stock !== undefined ? producto.stock + ' unidades' : 'Sin stock definido'}</p>
         <p><strong>Tipo:</strong> ${producto.tipo || 'Por definir'}</p>
-        ${producto.tieneVariantes ? '<p><strong>Tiene variantes:</strong> Sí (' + (producto.cantidadVariantes || 0) + ')</p>' : ''}
+        ${(producto.plantillaId || producto.plantilla) ? '<p><strong>Tiene variantes:</strong> Sí (' + (producto.cantidadVariantes || 0) + ')</p>' : ''}
         ${producto.altura ? `<p><strong>Dimensiones:</strong> ${producto.altura}cm x ${producto.ancho}cm x ${producto.profundidad}cm</p>` : ''}
         ${producto.peso ? `<p><strong>Peso:</strong> ${producto.peso}kg</p>` : ''}
       </div>

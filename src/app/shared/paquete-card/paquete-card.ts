@@ -54,7 +54,7 @@ export class PaqueteCard implements OnInit {
 
   // ──── Helpers de tipo ────
 
-  private isEnergico(): boolean {
+  isEnergico(): boolean {
     return this.paquete.tipo === TipoPaquete.ENERGICO;
   }
 

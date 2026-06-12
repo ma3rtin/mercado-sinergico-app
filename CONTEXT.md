@@ -166,7 +166,7 @@ export enum EstadoPaquete {
   INCOMPLETO = 'Incompleto', PENDIENTE = 'Pendiente',
 }
 export enum TipoPaquete {
-  SINERGICO = 'SINERGICO', ENERGICO = 'Enérgico', POR_DEFINIR = 'POR_DEFINIR',
+  SINERGICO = 'SINERGICO', ENERGICO = 'Enérgico',
 }
 
 // src/app/models/PaquetesInterfaces/EstadoPaquetePublicado.ts

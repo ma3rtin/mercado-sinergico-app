@@ -42,7 +42,7 @@
         <!-- COLUMNA DERECHA: Información, Variantes y Compra -->
         <div class="w-full lg:w-[45%] p-6 lg:p-8 flex flex-col">
             
-            <!-- Badges: Marca y Categoría -->
+            <!-- Badges: Marca, Categoría y Tipo -->
             <div class="flex flex-wrap gap-2 mb-4">
                 @if (marcaNombre()) {
                 <span
@@ -57,6 +57,10 @@
                     <app-icon name="Layers" size="14"></app-icon>
                     {{ categoriaNombre() }}
                 </span>
+                }
+                <!-- Badge Tipo Paquete -->
+                @if (tipoPaquete()) {
+                <app-tipo-badge [tipo]="tipoPaquete()" mode="icon" />
                 }
             </div>
 
@@ -114,21 +118,37 @@
                     </div>
                 </div>
 
-                <!-- Progreso de participantes -->
+                <!-- Progreso de participantes / stock -->
                 <div class="flex items-start gap-4 mt-2">
+                    @if (tipoPaquete() === 'ENERGICO') {
+                    <app-icon name="Box" size="24" class="text-gray-400 shrink-0 mt-0.5" />
+                    <div class="w-full">
+                        <p class="text-gray-900 font-bold text-sm mb-1">
+                            Cupos disponibles: {{ cuposRestantesPaquete() }} / {{ cuposTotalesPaquete() }}
+                        </p>
+                        <!-- Barra de progreso (progreso de reservas de stock de izquierda a derecha) -->
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1 overflow-hidden">
+                            <div class="bg-brand-secondary h-1.5 rounded-full transition-all duration-500" [style.width.%]="(cuposReservadosPaquete() / cuposTotalesPaquete()) * 100"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            {{ cuposReservadosPaquete() }} unidades ya reservadas en este paquete.
+                        </p>
+                    </div>
+                    } @else {
                     <app-icon name="Users" size="24" class="text-gray-400 shrink-0 mt-0.5" />
                     <div class="w-full">
                         <p class="text-gray-800 font-semibold text-sm mb-1">
-                            Participantes: {{ participantesActuales() }}
+                            Participantes: {{ participantesActuales() }} / {{ cuposTotalesPaquete() }}
                         </p>
                         <!-- Barra de progreso simple -->
                         <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1 overflow-hidden">
-                            <div class="bg-success h-1.5 rounded-full" [style.width.%]="(participantesActuales() / maxParticipantes()) * 100"></div>
+                            <div class="bg-success h-1.5 rounded-full transition-all duration-500" [style.width.%]="(participantesActuales() / cuposTotalesPaquete()) * 100"></div>
                         </div>
                         <p class="text-xs text-gray-500">
                             Faltan {{ faltanParaCerrar() }} para llegar al objetivo.
                         </p>
                     </div>
+                    }
                 </div>
 
                 <!-- Enlace volver -->

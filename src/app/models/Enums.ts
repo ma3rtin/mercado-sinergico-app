@@ -9,5 +9,4 @@ export enum EstadoPaquete {
 export enum TipoPaquete {
   SINERGICO  = 'SINERGICO',
   ENERGICO   = 'ENERGICO',
-  POR_DEFINIR = 'POR_DEFINIR',
 }

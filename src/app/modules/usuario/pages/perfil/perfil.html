@@ -79,17 +79,24 @@
               <app-select formControlName="localidad" labelValue="Localidad" [optionsValue]="opcionesLocalidades()"
                 [requiredValue]="true" [clearableValue]="false" placeholderValue="Seleccione localidad"
                 [searchableValue]="true"></app-select>
-              <app-input formControlName="cp" labelValue="Código postal" [readonlyValue]="true"></app-input>
+              <app-input formControlName="cp" labelValue="Código postal" placeholderValue="Ej: 1642"
+                [requiredValue]="true"></app-input>
 
               <!-- Fila 2: Calle y Número -->
               <app-input formControlName="calle" labelValue="Calle" placeholderValue="Ingresá tu calle"
                 [requiredValue]="true"></app-input>
-              <app-input formControlName="numero" labelValue="Número" typeValue="text"
-                placeholderValue="Ej: 123" [requiredValue]="true"></app-input>
+              <app-input formControlName="numero" labelValue="Número" typeValue="text" placeholderValue="Ej: 123"
+                [requiredValue]="true"></app-input>
 
               <!-- Fila 3: Dpto y Piso -->
-              <app-input formControlName="dpto" labelValue="Dpto" placeholderValue="Ej: 2B"></app-input>
-              <app-input formControlName="piso" labelValue="Piso" placeholderValue="Ej: 4"></app-input>
+              <app-input formControlName="dpto" labelValue="Dpto" placeholderValue="Ej: A"></app-input>
+              <app-input formControlName="piso" labelValue="Piso" typeValue="number" placeholderValue="Ej: 13"></app-input>
+
+              <!-- Fila 4: Observaciones -->
+              <div class="md:col-span-2">
+                <app-input formControlName="observaciones" labelValue="Observaciones"
+                  placeholderValue="Ej: puerta verde, frente al parque, etc."></app-input>
+              </div>
             </div>
           </div>
 

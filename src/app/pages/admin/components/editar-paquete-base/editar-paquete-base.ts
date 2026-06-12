@@ -22,17 +22,27 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
-import { SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-editar-paquete-base',
   standalone: true,
-  imports: [FormsModule, AdminCreateWrapperComponent, ButtonComponent, IconComponent, AdminBackButtonComponent, InputComponent, SelectComponent],
+  imports: [
+    FormsModule, 
+    AdminCreateWrapperComponent, 
+    ButtonComponent, 
+    IconComponent, 
+    AdminBackButtonComponent, 
+    InputComponent, 
+    SelectComponent,
+    SelectorTipoCardComponent
+  ],
   templateUrl: './editar-paquete-base.html',
 })
 export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
@@ -61,6 +71,12 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     }
   };
 
+  // Mapeo para asegurar consistencia con el backend
+  readonly tipoMap: Record<TipoPaquete, string> = {
+    [TipoPaquete.SINERGICO]: 'SINERGICO',
+    [TipoPaquete.ENERGICO]: 'ENERGICO',
+  };
+
   idPaquete = signal<number | null>(null);
   nombre = signal<string>('');
   descripcion = signal<string>('');
@@ -83,8 +99,10 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   selectedProductoId = signal<number | null>(null);
   productosOptions = computed<SelectOption[]>(() => {
     const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id_producto));
+    const tipoActual = this.tipoPaquete();
+
     return this.resultadosBusqueda()
-      .filter(p => !seleccionadosIds.has(p.id_producto))
+      .filter(p => !seleccionadosIds.has(p.id_producto) && p.tipo === tipoActual)
       .map(p => ({
         value: p.id_producto,
         label: p.nombre
@@ -135,6 +153,42 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  onTipoPaqueteChange(nuevoTipo: TipoPaquete): void {
+    const productosActuales = this.productosSeleccionados();
+
+    if (productosActuales.length === 0) {
+      this.tipoPaquete.set(nuevoTipo);
+      return;
+    }
+
+    const productosIncompatibles = productosActuales.filter(p => p.tipo !== nuevoTipo);
+
+    if (productosIncompatibles.length > 0) {
+      Swal.fire({
+        title: '¿Cambiar tipo de paquete?',
+        html: `
+          <p class="mb-4 text-sm text-gray-600">Al cambiar a <b>${nuevoTipo}</b>, se removerán <b>${productosIncompatibles.length}</b> producto(s) incompatibles.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--brand-secondary)',
+        cancelButtonColor: 'var(--text-muted)',
+        confirmButtonText: 'Sí, cambiar y limpiar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.tipoPaquete.set(nuevoTipo);
+          this.productosSeleccionados.set(productosActuales.filter(p => p.tipo === nuevoTipo));
+          this.toast.info('Se han removido los productos incompatibles.');
+        }
+        // El componente selector mantendrá visualmente el estado anterior si no se hace el .set()
+      });
+    } else {
+      this.tipoPaquete.set(nuevoTipo);
+    }
+  }
+
   agregarProducto(p: Producto): void {
     this.productosSeleccionados.update(prods => [...prods, p]);
   }
@@ -172,7 +226,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
       descripcion: this.descripcion(),
       categoria_id: this.categoriaSeleccionada()!,
       marcaId: this.marcaSeleccionada()!,
-      tipo: this.tipoPaquete(),
+      tipo: this.tipoMap[this.tipoPaquete()],
       productos: this.productosSeleccionados().map(p => p.id_producto!)
     };
 

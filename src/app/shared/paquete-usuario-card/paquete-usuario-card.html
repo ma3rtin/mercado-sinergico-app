@@ -14,10 +14,13 @@
   <div class="flex-1 min-w-0 flex flex-col">
 
     <!-- Título + flecha -->
-    <div class="flex justify-between items-center mb-1">
-      <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
-        {{ paquete.paqueteBase?.nombre }}
-      </h3>
+    <div class="flex justify-between items-center mb-1 gap-2">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
+          {{ paquete.paqueteBase?.nombre }}
+        </h3>
+        <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+      </div>
 
       <div class="flex items-center gap-1.5">
         <!-- Estado Badge como Tooltip -->
@@ -86,9 +89,12 @@
     <div class="flex-1 min-w-0">
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="font-display text-xl text-text-primary font-bold">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
+          <div class="flex items-center gap-2.5">
+            <h3 class="font-display text-xl text-text-primary font-bold">
+              {{ paquete.paqueteBase?.nombre }}
+            </h3>
+            <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+          </div>
           <p class="text-xs text-text-secondary mt-1">Detalles de tu participación en este paquete</p>
         </div>
 
@@ -130,9 +136,12 @@
           <img [src]="paquete.paqueteBase?.imagen_url" class="w-full h-full object-contain" (error)="onImageError($event)">
         </div>
         <div class="min-w-0 font-body">
-          <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
-            {{ paquete.paqueteBase?.nombre }}
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
+              {{ paquete.paqueteBase?.nombre }}
+            </h3>
+            <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+          </div>
           <p class="text-xs text-text-muted font-bold uppercase tracking-wider">Detalle del Pedido</p>
         </div>
       </div>
@@ -150,9 +159,9 @@
         <!-- RESUMEN RÁPIDO (Celdas más grandes y legibles) -->
         <div class="grid grid-cols-4 gap-2.5">
           <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
-            <app-icon name="clock" size="18" [class]="esUrgente ? 'text-error mx-auto mb-1.5' : 'text-brand-primary mx-auto mb-1.5'" />
+            <app-icon name="clock" size="18" [class]="esUrgente() ? 'text-error mx-auto mb-1.5' : 'text-brand-primary mx-auto mb-1.5'" />
             <p class="text-[10px] text-text-muted font-bold uppercase">Cierre</p>
-            <p class="text-xs font-bold truncate" [ngClass]="{'text-error': esUrgente}">{{ tiempoRestante }}</p>
+            <p class="text-xs font-bold truncate" [ngClass]="{'text-error': esUrgente()}">{{ tiempoRestante() }}</p>
           </div>
           <div class="bg-white rounded-2xl p-3 border border-border-default text-center shadow-sm">
             <app-icon name="package" size="18" class="text-brand-primary mx-auto mb-1.5" />
@@ -384,9 +393,9 @@
             <div class="p-3 rounded-xl bg-bg-app border border-border-default">
               <p class="text-[9px] font-bold text-text-muted uppercase tracking-widest mb-1">Cierra en</p>
               <div class="flex items-center gap-2">
-                <app-icon name="clock" size="16" [class]="esUrgente ? 'text-error' : 'text-brand-primary'" />
-                <p class="text-base font-bold" [ngClass]="{'text-error': esUrgente, 'text-text-primary': !esUrgente}">
-                  {{ tiempoRestante }}
+                <app-icon name="clock" size="16" [class]="esUrgente() ? 'text-error' : 'text-brand-primary'" />
+                <p class="text-base font-bold" [ngClass]="{'text-error': esUrgente(), 'text-text-primary': !esUrgente()}">
+                  {{ tiempoRestante() }}
                 </p>
               </div>
             </div>

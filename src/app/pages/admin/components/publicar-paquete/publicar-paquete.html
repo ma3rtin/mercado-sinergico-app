@@ -47,10 +47,24 @@
 
             <!-- Indicador de paquete seleccionado -->
             @if (paqueteBaseSeleccionado()) {
-            <p class="mt-1 text-xs text-success flex items-center gap-1">
-                <app-icon name="checkCircle" size="14" />
-                Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
-            </p>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <p class="text-xs text-success flex items-center gap-1">
+                  <app-icon name="checkCircle" size="14" />
+                  Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
+              </p>
+              <!-- Badge de tipo -->
+              @if (isEnergico()) {
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-dark/10 text-secondary-dark border border-secondary-dark/30">
+                <app-icon name="zap" size="12" />
+                Enérgico
+              </span>
+              } @else if (isSinergico()) {
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/30">
+                <app-icon name="users" size="12" />
+                Sinérgico
+              </span>
+              }
+            </div>
             }
 
             <!-- Lista desplegable -->
@@ -74,6 +88,24 @@
             </div>
             }
         </div>
+
+        <!-- ────────────────────────────────────── -->
+        <!-- BANNER TIPO ENÉRGICO                   -->
+        <!-- ────────────────────────────────────── -->
+        @if (isEnergico()) {
+        <div class="mb-6 p-4 bg-secondary-dark/10 border border-secondary-dark/30 rounded-lg flex items-start gap-3">
+            <app-icon name="zap" size="20" class="flex-shrink-0 mt-0.5 text-secondary-dark" />
+            <div>
+                <p class="font-bold text-sm text-secondary-dark">Paquete Enérgico — revisá el stock antes de publicar</p>
+                <p class="text-sm text-secondary-dark/80 mt-1">
+                    Este tipo de paquete tiene <strong>stock físico limitado</strong>.
+                    Asegurate de haber configurado el <strong>stock físico de cada variante</strong> del producto
+                    desde <em>Gestionar Variantes</em> antes de publicar.
+                    Los usuarios verán el stock disponible en tiempo real y recibirán un aviso cuando se agote.
+                </p>
+            </div>
+        </div>
+        }
 
         <!-- ────────────────────────────────────── -->
         <!-- IMAGEN DE LA PUBLICACIÓN               -->

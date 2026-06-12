@@ -5,6 +5,8 @@ import {
   signal,
   DestroyRef,
   computed,
+  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -37,16 +39,14 @@ import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
+import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
+import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
+import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
+import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
-
-interface ImageSlot {
-  file: File | null;
-  preview: string | null;
-  existingUrl?: string;
-  isExisting?: boolean;
-}
 
 @Component({
   selector: 'app-editar-producto',
@@ -60,10 +60,20 @@ interface ImageSlot {
     IconComponent,
     CrearPlantillaModalComponent,
     AdminBackButtonComponent,
+    AdminCreateWrapperComponent,
+    SelectorTipoCardComponent,
+    SelectCategoriaMarca,
+    MapOptionsPipe,
+    SubidorImagenes,
   ],
   standalone: true,
 })
 export class EditarProductoComponent implements OnInit {
+  @ViewChild('marcaSelector') private marcaSelector!: SelectCategoriaMarca;
+  @ViewChild('categoriaSelector') private categoriaSelector!: SelectCategoriaMarca;
+
+  private subidorImagenes = viewChild(SubidorImagenes);
+
   // Injections
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
@@ -79,8 +89,22 @@ export class EditarProductoComponent implements OnInit {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
-    [TipoPaquete.ENERGICO]: 'Enérgico',
-    [TipoPaquete.POR_DEFINIR]: 'POR_DEFINIR',
+    [TipoPaquete.ENERGICO]: 'ENERGICO',
+  };
+
+  readonly tipoCardContenido: SelectorTipoCardContenido = {
+    energico: {
+      titulo: 'Enérgico',
+      subtitulo: 'Con stock físico',
+      descripcion: 'El stock se controla físicamente. Ideal para productos con inventario real.',
+      items: ['Control de inventario preciso', 'Evita sobreventa', 'Stock compartido entre paquetes']
+    },
+    sinergico: {
+      titulo: 'Sinérgico',
+      subtitulo: 'Bajo pedido',
+      descripcion: 'Sin control de stock físico. Se produce o gestiona bajo pedido.',
+      items: ['Sin límites de inventario', 'Ideal para productos custom', 'Pedidos bajo demanda']
+    }
   };
 
   // Form
@@ -91,45 +115,45 @@ export class EditarProductoComponent implements OnInit {
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
 
+  creandoMarca = signal(false);
+  creandoCategoria = signal(false);
+
   // Signals - Estado del producto
   productoId = signal<number | null>(null);
   productoOriginal = signal<Producto | null>(null);
-  tipoProducto = signal<TipoPaquete>(TipoPaquete.POR_DEFINIR);
+  tipoProducto = signal<TipoPaquete>(TipoPaquete.SINERGICO);
 
   // Signals - Plantilla y atributos
   selectedTemplate = signal<Plantilla | null>(null);
   selectedAttributes = signal<{ [key: string]: string[] }>({});
   selectedAttributesTouched = signal<{ [key: string]: boolean }>({});
 
-  // Signals - Imágenes
-  imageSlots = signal<ImageSlot[]>(
-    Array(8)
-      .fill(null)
-      .map(() => ({
-        file: null,
-        preview: null,
-        isExisting: false,
-      })),
-  );
-
   // Signals - Estado UI
   isLoading = signal(false);
   formSubmitted = signal(false);
-  draggedIndex = signal<number | null>(null);
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
+  tipoSeleccionadoManual = signal<boolean>(false);
+  imagenPrincipalCargada = signal<boolean>(false);
 
   // Computed signals
-  hasImages = computed(() =>
-    this.imageSlots().some((slot) => slot.file !== null || slot.isExisting),
-  );
+  hasImages = computed(() => (this.subidorImagenes()?.getCantidadImagenesCargadas() ?? 0) > 0);
 
-  hasMainImage = computed(() => {
-    const mainSlot = this.imageSlots()[0];
-    return mainSlot.file !== null || mainSlot.isExisting === true;
+  isFormValid = computed(() => this.productForm?.valid && (this.imagenPrincipalCargada() || (this.subidorImagenes()?.hasMainImage() ?? false)));
+
+esTipoBloqueado = computed(() => {
+  const p = this.productoOriginal();
+  if (!p) return false;
+  const cantPaquetes = (p as any).cantPaquetes ?? 0;
+  if (cantPaquetes === 0) return false;
+  // Solo bloquear si hay paquetes activos con estado conocido
+  const paquetes = p.paquetes || [];
+  if (paquetes.length === 0) return false; // Sin info de estado, no bloquear
+  return paquetes.some(pkg => {
+    const estado = (pkg as any).paquetePublicado?.estado?.nombre?.toLowerCase() || '';
+    return !['finalizado', 'cancelado'].includes(estado);
   });
-
-  isFormValid = computed(() => this.productForm?.valid && this.hasMainImage());
+});
 
   mostrarStock = computed(() => {
     const tipo = this.tipoProducto();
@@ -160,6 +184,74 @@ export class EditarProductoComponent implements OnInit {
       peso: [null, [Validators.min(0)]],
       plantillaId: [null],
     });
+  }
+
+  crearMarca(nombre: string): void {
+    this.creandoMarca.set(true);
+    this.marcaService.createMarca(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Marca) => {
+          this.marcas.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ marca_id: nueva.id_marca });
+          this.toast.success(`Marca "${nombre}" creada exitosamente`);
+          this.creandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la marca');
+          this.creandoMarca.set(false);
+        }
+      });
+  }
+
+  crearCategoria(nombre: string): void {
+    this.creandoCategoria.set(true);
+    this.categoriaService.createCategoria(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Categoria) => {
+          this.categorias.update(prev => [...prev, nueva]);
+          this.productForm.patchValue({ categoria_id: nueva.id_categoria });
+          this.toast.success(`Categoría "${nombre}" creada exitosamente`);
+          this.creandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la categoría');
+          this.creandoCategoria.set(false);
+        }
+      });
+  }
+
+  editarMarca(event: { id: number; nombre: string }): void {
+    this.marcaService.updateMarca(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Marca) => {
+          this.marcas.update(prev => prev.map(m => m.id_marca === event.id ? actualizada : m));
+          this.toast.success(`Marca actualizada a "${event.nombre}"`);
+          this.marcaSelector?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la marca');
+          this.marcaSelector?.finishEditError();
+        }
+      });
+  }
+
+  editarCategoria(event: { id: number; nombre: string }): void {
+    this.categoriaService.updateCategoria(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Categoria) => {
+          this.categorias.update(prev => prev.map(c => c.id_categoria === event.id ? actualizada : c));
+          this.toast.success(`Categoría actualizada a "${event.nombre}"`);
+          this.categoriaSelector?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la categoría');
+          this.categoriaSelector?.finishEditError();
+        }
+      });
   }
 
   loadInitialData(): void {
@@ -193,18 +285,19 @@ export class EditarProductoComponent implements OnInit {
   // ============================================
 
   private getMarcaId(producto: Producto): number | undefined {
-    if (typeof producto.marca === 'object' && producto.marca?.id_marca) {
-      return producto.marca.id_marca;
+    if (typeof producto.marca === 'object' && producto.marca !== null) {
+      // El backend puede devolver { id_marca } o { id } según el endpoint usado
+      const m = producto.marca as { id_marca?: number; id?: number };
+      return m.id_marca ?? m.id;
     }
     return producto.marca_id;
   }
 
   private getCategoriaId(producto: Producto): number | undefined {
-    if (
-      typeof producto.categoria === 'object' &&
-      producto.categoria?.id_categoria
-    ) {
-      return producto.categoria.id_categoria;
+    if (typeof producto.categoria === 'object' && producto.categoria !== null) {
+      // El backend puede devolver { id_categoria } o { id } según el endpoint usado
+      const c = producto.categoria as { id_categoria?: number; id?: number };
+      return c.id_categoria ?? c.id;
     }
     return producto.categoria_id;
   }
@@ -219,6 +312,7 @@ export class EditarProductoComponent implements OnInit {
 
   cambiarTipoProducto(tipo: TipoPaquete): void {
     this.tipoProducto.set(tipo);
+    this.tipoSeleccionadoManual.set(true);
 
     if (tipo === TipoPaquete.SINERGICO) {
       this.productForm.patchValue({ stock: null });
@@ -264,7 +358,8 @@ export class EditarProductoComponent implements OnInit {
   }
 
   populateForm(producto: Producto): void {
-    console.log('🔄 Poblando formulario con:', producto);
+    console.log('📦 estructura producto completa:', JSON.stringify(producto));
+    console.log(' Poblando formulario con:', producto);
     console.log('  ↳ Tipo:', producto.tipo);
     console.log('  ↳ Marca:', producto.marca);
     console.log('  ↳ Categoría:', producto.categoria);
@@ -272,10 +367,14 @@ export class EditarProductoComponent implements OnInit {
 
     // ✅ 1. Cargar tipo de producto
     if (producto.tipo) {
-      const tipoEnum = producto.tipo as TipoPaquete;
+      // Normalizar: el backend envía 'ENERGICO' o 'SINERGICO', mapeamos al enum local
+      const tipoStr = String(producto.tipo).toUpperCase();
+      const tipoEnum = tipoStr === 'ENERGICO' ? TipoPaquete.ENERGICO : TipoPaquete.SINERGICO;
       this.tipoProducto.set(tipoEnum);
-      console.log('✅ Tipo cargado:', tipoEnum);
+      this.tipoSeleccionadoManual.set(true);
     }
+
+    const dim = (producto as any).dimensiones ?? producto;
 
     // ✅ 2. Cargar datos básicos del formulario
     this.productForm.patchValue({
@@ -289,13 +388,18 @@ export class EditarProductoComponent implements OnInit {
 
       // ✅ Manejar categoría (string u objeto)
       categoria_id: this.getCategoriaId(producto),
-
-      altura: producto.altura,
-      ancho: producto.ancho,
-      profundidad: producto.profundidad,
-      peso: producto.peso,
       plantillaId: producto.plantilla?.id,
     });
+
+    // Bug 2 fix: move dimensions to a setTimeout to ensure app-input is ready
+    setTimeout(() => {
+      this.productForm.patchValue({
+        altura: dim.altura != null ? Number(dim.altura) : null,
+        ancho: dim.ancho != null ? Number(dim.ancho) : null,
+        profundidad: dim.profundidad != null ? Number(dim.profundidad) : null,
+        peso: dim.peso != null ? Number(dim.peso) : null,
+      });
+    }, 0);
 
     // ✅ 3. Cargar plantilla si existe
     if (producto.plantilla) {
@@ -319,7 +423,7 @@ export class EditarProductoComponent implements OnInit {
   }
 
   loadProductImages(producto: Producto): void {
-    const newSlots: ImageSlot[] = Array(8)
+    const newSlots: ImageSlot[] = Array(16)
       .fill(null)
       .map(() => ({
         file: null,
@@ -341,7 +445,7 @@ export class EditarProductoComponent implements OnInit {
     // Imágenes adicionales
     if (producto.imagenes && Array.isArray(producto.imagenes)) {
       producto.imagenes.forEach((imagen, index) => {
-        if (index < 7) {
+        if (index < 15) {
           const imageUrl = (imagen as any).url || (imagen as any).imagen_url;
           if (imageUrl) {
             newSlots[index + 1] = {
@@ -355,11 +459,15 @@ export class EditarProductoComponent implements OnInit {
       });
     }
 
-    this.imageSlots.set(newSlots);
-    console.log(
-      '✅ Imágenes cargadas:',
-      newSlots.filter((s) => s.preview),
-    );
+    // ⏳ Deferimos la carga al siguiente tick para asegurar que el viewChild ya esté instanciado
+    setTimeout(() => {
+      this.subidorImagenes()?.loadSlots(newSlots);
+      this.imagenPrincipalCargada.set(newSlots[0]?.preview !== null);
+      console.log(
+        '✅ Imágenes enviadas al subidor:',
+        newSlots.filter((s) => s.preview).length
+      );
+    }, 0);
   }
 
   // ============================================
@@ -393,6 +501,27 @@ export class EditarProductoComponent implements OnInit {
     if (this.tipoProducto() === TipoPaquete.ENERGICO) {
       this.productForm.patchValue({ stock: null });
     }
+  }
+
+  deseleccionarPlantilla(): void {
+    Swal.fire({
+      title: '¿Deseleccionar plantilla?',
+      text: 'El producto quedará sin plantilla asociada',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--error)',
+      confirmButtonText: 'Sí, deseleccionar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.selectedTemplate.set(null);
+        this.selectedAttributes.set({});
+        this.selectedAttributesTouched.set({});
+        this.productForm.patchValue({ plantillaId: null });
+        this.toast.info('Plantilla deseleccionada');
+      }
+    });
   }
 
   // ============================================
@@ -431,95 +560,6 @@ export class EditarProductoComponent implements OnInit {
   }
 
   // ============================================
-  // MANEJO DE IMÁGENES
-  // ============================================
-
-  onFileSelected(event: Event, index: number): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-
-      if (!file.type.startsWith('image/')) {
-        this.toast.error('Solo se permiten archivos de imagen');
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        this.toast.error('La imagen no puede superar los 5MB');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const newSlots = [...this.imageSlots()];
-        newSlots[index] = {
-          file,
-          preview: e.target.result,
-          existingUrl: undefined,
-          isExisting: false,
-        };
-        this.imageSlots.set(newSlots);
-      };
-      reader.readAsDataURL(file);
-    }
-    input.value = '';
-  }
-
-  removeImage(index: number, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    const newSlots = [...this.imageSlots()];
-    newSlots[index] = {
-      file: null,
-      preview: null,
-      existingUrl: undefined,
-      isExisting: false,
-    };
-    this.imageSlots.set(newSlots);
-  }
-
-  // ============================================
-  // DRAG & DROP
-  // ============================================
-
-  onDragStart(index: number, event: DragEvent): void {
-    this.draggedIndex.set(index);
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = 'move';
-    }
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = 'move';
-    }
-  }
-
-  onDrop(targetIndex: number, event: DragEvent): void {
-    event.preventDefault();
-    const dragIndex = this.draggedIndex();
-
-    if (dragIndex === null || dragIndex === targetIndex) {
-      this.draggedIndex.set(null);
-      return;
-    }
-
-    const newSlots = [...this.imageSlots()];
-    const temp = newSlots[dragIndex];
-    newSlots[dragIndex] = newSlots[targetIndex];
-    newSlots[targetIndex] = temp;
-
-    this.imageSlots.set(newSlots);
-    this.draggedIndex.set(null);
-  }
-
-  onDragEnd(): void {
-    this.draggedIndex.set(null);
-  }
-
-  // ============================================
   // ENVÍO DEL FORMULARIO
   // ============================================
 
@@ -532,8 +572,14 @@ export class EditarProductoComponent implements OnInit {
       return;
     }
 
-    if (!this.hasMainImage()) {
+    if (!this.imagenPrincipalCargada() && !this.subidorImagenes()?.hasMainImage()) {
       this.toast.error('Debés tener al menos la imagen principal del producto');
+      return;
+    }
+
+    // ✅ Validar tipo de producto (asegurar que esté confirmado)
+    if (!this.tipoSeleccionadoManual()) {
+      this.toast.error('Debés confirmar el tipo de producto');
       return;
     }
 
@@ -543,8 +589,9 @@ export class EditarProductoComponent implements OnInit {
       return;
     }
 
+    const slotsParaEnviar = this.subidorImagenes()?.getSlots() ?? [];
     this.isLoading.set(true);
-    const formData = this.buildFormData();
+    const formData = this.buildFormData(slotsParaEnviar);
 
     // Agregar tipo de producto
     const tipoBackend = this.tipoMap[this.tipoProducto()];
@@ -572,20 +619,24 @@ export class EditarProductoComponent implements OnInit {
     });
   }
 
-  private buildFormData(): FormData {
+  private buildFormData(slots: ImageSlot[]): FormData {
     const formData = new FormData();
 
     // Agregar campos básicos
     Object.entries(this.productForm.value).forEach(([key, value]) => {
+      // Caso especial para desvincular plantilla: enviar cadena vacía si el valor es null
+      if (key === 'plantillaId' && value === null) {
+        formData.append(key, '');
+        return;
+      }
+
       if (value !== null && value !== undefined && value !== '') {
         formData.append(key, value.toString());
       }
     });
 
-    const slots = this.imageSlots();
-
     // Imagen principal solo si es nueva
-    if (slots[0].file) {
+    if (slots.length > 0 && slots[0].file) {
       formData.append('icono', slots[0].file);
     }
 

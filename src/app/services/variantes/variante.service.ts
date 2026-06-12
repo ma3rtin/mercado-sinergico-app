@@ -84,7 +84,6 @@ export interface ActualizarStockVariantesDTO {
 export interface ActualizarVarianteDTO {
   sku?: string;
   stockFisico?: number | null;
-  precioExtra?: number;
   activo?: boolean;
 }
 
@@ -106,7 +105,7 @@ export interface StockGlobalResponse {
   precio: number;
   marca_id: number;
   categoria_id: number;
-  stockTotal: number | null; // null si es producto POR_DEFINIR
+  stockTotal: number | null;
   distribucion: DistribucionStockVariante[];
 }
 
@@ -225,7 +224,6 @@ export class VarianteService extends ApiService {
       const formData = new FormData();
       formData.append('imagen', imagenFile);
       if (data.sku !== undefined) formData.append('sku', data.sku);
-      if (data.precioExtra !== undefined) formData.append('precioExtra', String(data.precioExtra));
       if (data.activo !== undefined) formData.append('activo', String(data.activo));
       if (data.stockFisico !== undefined && data.stockFisico !== null) {
         formData.append('stockFisico', String(data.stockFisico));
@@ -313,13 +311,6 @@ export class VarianteService extends ApiService {
     return variante.opciones
       .map(opt => opt.opcion)
       .join(' - ');
-  }
-
-  /**
-   * Helper: Calcula el precio final de una variante
-   */
-  calcularPrecioFinal(precioBase: number, variante: ProductoVariante): number {
-    return precioBase + (variante.precioExtra || 0);
   }
 
   /**

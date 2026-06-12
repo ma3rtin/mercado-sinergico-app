@@ -18,7 +18,7 @@ export interface Producto {
   profundidad?: number;
   peso?: number;
   stock?: number;
-  plantillaId?: number;
+  plantillaId?: number | null;
   categoria_id: number;
   tieneVariantes?: boolean;
   cantidadVariantes?: number;

@@ -29,12 +29,21 @@ import {
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { computed } from '@angular/core';
+import { IconComponent } from '@app/shared/icono/icono';
+import Swal from 'sweetalert2';
 
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
-  imports: [FormsModule, AdminCreateWrapperComponent, SelectorTipoCardComponent, AdminBackButtonComponent, SelectComponent],
+  imports: [
+    FormsModule, 
+    AdminCreateWrapperComponent, 
+    SelectorTipoCardComponent, 
+    AdminBackButtonComponent, 
+    SelectComponent,
+    IconComponent
+  ],
   templateUrl: './crear-paquete.html',
 })
 export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
@@ -62,6 +71,12 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     }
   };
 
+  // Mapeo para asegurar consistencia con el backend
+  readonly tipoMap: Record<TipoPaquete, string> = {
+    [TipoPaquete.SINERGICO]: 'SINERGICO',
+    [TipoPaquete.ENERGICO]: 'ENERGICO',
+  };
+
   // 🧠 Signals principales
   nombre = signal<string>('');
   descripcion = signal<string>('');
@@ -82,8 +97,10 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   selectedProductoId = signal<number | null>(null);
   productosOptions = computed<SelectOption[]>(() => {
     const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id_producto));
+    const tipoActual = this.tipoPaquete();
+
     return this.resultadosBusqueda()
-      .filter(p => !seleccionadosIds.has(p.id_producto))
+      .filter(p => !seleccionadosIds.has(p.id_producto) && p.tipo === tipoActual)
       .map(p => ({
         value: p.id_producto,
         label: `${p.nombre} - $${p.precio}`
@@ -125,8 +142,41 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  onTipoPaqueteChange(tipo: TipoPaquete): void {
-    this.tipoPaquete.set(tipo);
+  onTipoPaqueteChange(nuevoTipo: TipoPaquete): void {
+    const productosActuales = this.productosSeleccionados();
+
+    // Si no hay productos, cambiamos el tipo directamente
+    if (productosActuales.length === 0) {
+      this.tipoPaquete.set(nuevoTipo);
+      return;
+    }
+
+    // Verificar si hay productos incompatibles
+    const productosIncompatibles = productosActuales.filter(p => p.tipo !== nuevoTipo);
+
+    if (productosIncompatibles.length > 0) {
+      Swal.fire({
+        title: '¿Cambiar tipo de paquete?',
+        html: `
+          <p class="mb-4 text-sm text-gray-600">Al cambiar a <b>${nuevoTipo}</b>, se removerán <b>${productosIncompatibles.length}</b> producto(s) que no coinciden con el nuevo tipo.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'var(--brand-secondary)',
+        cancelButtonColor: 'var(--text-muted)',
+        confirmButtonText: 'Sí, cambiar y limpiar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.tipoPaquete.set(nuevoTipo);
+          this.productosSeleccionados.set(productosActuales.filter(p => p.tipo === nuevoTipo));
+          this.toast.info('Se han removido los productos incompatibles.');
+        }
+      });
+    } else {
+      this.tipoPaquete.set(nuevoTipo);
+    }
   }
 
   private cargarCategorias(): void {
@@ -209,7 +259,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     formData.append('nombre', this.nombre());
     formData.append('descripcion', this.descripcion());
     formData.append('categoria_id', this.categoriaSeleccionada()!.toString());
-    formData.append('tipo', this.tipoPaquete());
+    formData.append('tipo', this.tipoMap[this.tipoPaquete()]);
     if (this.marcaSeleccionada()) {
       formData.append('marcaId', this.marcaSeleccionada()!.toString());
     }
