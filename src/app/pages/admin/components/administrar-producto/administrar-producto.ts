@@ -34,6 +34,7 @@ export class AdministrarProductosComponent {
   isLoading = signal(true);
   currentPage = signal(1);
   itemsPerPage = signal(10);
+  mostrarArchivados = signal(false);
 
 
   filteredProductos = computed(() => {
@@ -85,7 +86,10 @@ export class AdministrarProductosComponent {
   });
 
   constructor() {
-    this.loadProductos();
+    effect(() => {
+      this.mostrarArchivados();
+      this.loadProductos();
+    }, { allowSignalWrites: true });
 
     effect(() => {
       console.log('🔍 Buscando:', this.searchTerm(), '| Orden:', this.sortOrder());
@@ -98,17 +102,11 @@ export class AdministrarProductosComponent {
   }
 
   private loadProductos(): void {
-
     this.isLoading.set(true);
-    this.productosService.getProductos().subscribe({
+    this.productosService.getProductos(this.mostrarArchivados()).subscribe({
       next: (productos) => {
         this.productos.set(productos);
         this.isLoading.set(false);
-        for (const producto of productos) {
-          console.log('La marca del producto es:', producto.marca);
-          console.log('La imagen del producto es:', producto.imagen_url);
-          console.log('La variante del producto es:', producto.plantilla);
-        }
       },
       error: (error) => {
         console.error('Error cargando productos:', error);
@@ -190,6 +188,34 @@ export class AdministrarProductosComponent {
           error: (error) => {
             console.error('Error duplicando producto:', error);
             this.toast.error('No se pudo duplicar el producto');
+          }
+        });
+      }
+    });
+  }
+
+  archivarProducto(producto: Producto): void {
+    const nuevoEstado = !producto.archivado;
+    const accion = nuevoEstado ? 'archivar' : 'desarchivar';
+    Swal.fire({
+      title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} producto?`,
+      text: `Se cambiará el estado de "${producto.nombre}".`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.productosService.archivarProducto(producto.id_producto!, nuevoEstado).subscribe({
+          next: () => {
+            this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
+            this.loadProductos();
+          },
+          error: (error) => {
+            console.error(`Error al ${accion} producto:`, error);
+            this.toast.error(`No se pudo ${accion} el producto`);
           }
         });
       }

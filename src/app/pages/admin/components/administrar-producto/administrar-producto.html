@@ -57,6 +57,18 @@
       </div>
     </div>
 
+    <!-- Mostrar Archivados Toggle -->
+    <div class="flex items-center gap-2 mb-8">
+      <button (click)="mostrarArchivados.set(!mostrarArchivados())"
+        [class]="'px-4 py-2.5 rounded-xl border-2 font-medium flex items-center gap-2 transition-all text-sm ' +
+                  (mostrarArchivados() 
+                    ? 'bg-brand-primary text-white border-brand-primary shadow-sm shadow-brand-primary/20' 
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')">
+        <app-icon [name]="mostrarArchivados() ? 'checkSquare' : 'square'" size="16" class="mt-0.5" />
+        <span>Mostrar productos archivados</span>
+      </button>
+    </div>
+
     <!-- Loading State -->
     @if (isLoading()) {
     <div class="flex flex-col items-center justify-center py-20">
@@ -131,6 +143,15 @@
               <!-- Tipo de Producto Badge -->
               <app-tipo-badge [tipo]="producto.tipo" class="mr-1" />
 
+              <!-- Archivado Badge -->
+              @if (producto.archivado) {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 mr-1 bg-gray-100 text-gray-700 border border-gray-200 rounded-full text-xs font-bold uppercase tracking-wider">
+                <app-icon name="archive" [size]="'12'" class="text-current mt-0.5" />
+                Archivado
+              </span>
+              }
+
               <!-- Badge de variantes (si tiene) -->
               @if (producto.plantillaId || producto.plantilla) {
               <span
@@ -175,6 +196,13 @@
               class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-secondary hover:bg-brand-cta/5 rounded-xl transition-all active:scale-90"
               title="Editar">
               <app-icon name="edit-2" [size]="'20'" />
+            </button>
+
+            <!-- Archivar/Desarchivar -->
+            <button (click)="archivarProducto(producto)"
+              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-xl transition-all active:scale-90"
+              [title]="producto.archivado ? 'Desarchivar' : 'Archivar'">
+              <app-icon [name]="producto.archivado ? 'rotateCcw' : 'archive'" [size]="'20'" class="mt-0.5" />
             </button>
 
             <!-- Eliminar -->

@@ -22,6 +22,7 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Output() notify = new EventEmitter<PaquetePublicado>(); // Notificar compradores
   @Output() duplicate = new EventEmitter<PaquetePublicado>(); // Duplicar
   @Output() viewDetail = new EventEmitter<PaquetePublicado>(); // Ver detalle
+  @Output() archive = new EventEmitter<PaquetePublicado>(); // Archivar
 
   private toast = inject(ToastService);
 
@@ -223,5 +224,11 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     event?.stopPropagation();
     this.cerrarMenu();
     this.viewDetail.emit(this.paquete);
+  }
+
+  onArchive(event?: Event): void {
+    event?.stopPropagation();
+    this.cerrarMenu();
+    this.archive.emit(this.paquete);
   }
 }

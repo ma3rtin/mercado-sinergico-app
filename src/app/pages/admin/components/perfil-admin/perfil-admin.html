@@ -239,9 +239,9 @@
                             </div>
                         </div>
 
-                        <!-- Botones de reporte — solo para paquetes Recibidos -->
-                        @if (esRecibido(paquete)) {
-                        <div class="flex gap-2 flex-shrink-0 w-full sm:w-auto">
+                        <!-- Botones de reporte y archivo -->
+                        <div class="flex gap-2 flex-shrink-0 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                            @if (esRecibido(paquete)) {
                             <app-button variant="secondary" size="sm" [iconStart]="'download'"
                                 (click)="descargarPlanillaFabrica(paquete.id_paquete_publicado)">
                                 Reporte proveedor
@@ -250,8 +250,12 @@
                                 (click)="descargarPlanillaLogistica(paquete.id_paquete_publicado)">
                                 Hoja de ruta
                             </app-button>
+                            }
+                            <app-button variant="secondary" size="sm" [iconStart]="'archive'"
+                                (click)="archivarPaquete(paquete)">
+                                Archivar
+                            </app-button>
                         </div>
-                        }
 
                     </div>
                 </div>

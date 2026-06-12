@@ -257,6 +257,30 @@ export class PerfilAdmin implements OnInit {
     });
   }
 
+  archivarPaquete(paquete: PaquetePublicado) {
+    import('sweetalert2').then((Swal) => {
+      Swal.default.fire({
+        title: '¿Archivar paquete?',
+        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" se ocultará de esta lista.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, archivar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--brand-secondary)',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.paquetePublicadoService.archivarPaquete(paquete.id_paquete_publicado!, true).subscribe({
+            next: () => {
+              this.toastService.success('Paquete archivado con éxito');
+              this.loadPaquetesFinalizados();
+            },
+            error: () => this.toastService.error('Error al archivar el paquete'),
+          });
+        }
+      });
+    });
+  }
+
   navigateToPublicacionDetalle(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/administrar-publicacion', paquete.id_paquete_publicado]);
   }

@@ -52,6 +52,18 @@
       </div>
     </div>
 
+    <!-- Mostrar Archivadas Toggle -->
+    <div class="flex items-center gap-2 mb-6">
+      <button (click)="mostrarArchivadas.set(!mostrarArchivadas())"
+        [class]="'px-4 py-2.5 rounded-xl border-2 font-medium flex items-center gap-2 transition-all text-sm ' +
+                  (mostrarArchivadas() 
+                    ? 'bg-brand-primary text-white border-brand-primary shadow-sm shadow-brand-primary/20' 
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')">
+        <app-icon [name]="mostrarArchivadas() ? 'checkSquare' : 'square'" size="16" class="mt-0.5" />
+        <span>Mostrar publicaciones archivadas</span>
+      </button>
+    </div>
+
     <!-- Highlight activo -->
     @if (highlightedId()) {
     <div
@@ -103,7 +115,8 @@
           (refund)="cancelarPaquete(paquete)"
           (duplicate)="duplicarPaquete(paquete)"
           (notify)="notificarCompradores(paquete)"
-          (viewDetail)="verDetalle(paquete)" />
+          (viewDetail)="verDetalle(paquete)"
+          (archive)="archivarPaquete(paquete)" />
 
       </div>
       }

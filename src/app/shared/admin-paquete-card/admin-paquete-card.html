@@ -55,6 +55,13 @@
                     [class]="'text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ' + getStatusBgColor() + ' ' + getStatusColor()">
                     {{ paquete.estado?.nombre || 'Sin estado' }}
                 </span>
+                @if (paquete.archivado) {
+                <span
+                    class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 flex items-center gap-1">
+                    <app-icon name="archive" size="11" class="mt-0.5" />
+                    Archivado
+                </span>
+                }
                 <span class="w-1 h-1 rounded-full bg-border-default"></span>
                 <span class="text-xs text-text-muted flex items-center gap-1">
                     <app-icon name="mapPin" size="12" />
@@ -111,13 +118,18 @@
         <div
             class="dropdown-menu-container relative flex-shrink-0 pt-4 lg:pt-0 border-t border-border-default lg:border-none w-full lg:w-auto">
 
-            <!-- Solo duplicar: estados terminales -->
+            <!-- Solo duplicar y archivar: estados terminales -->
             @if (esEntregado || esCancelado) {
-            <div class="flex items-center justify-end gap-2">
+            <div class="flex items-center justify-end gap-2 flex-wrap">
                 <button (click)="onDuplicate($event)"
                     class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
                     <app-icon name="copy" size="15" />
                     Duplicar publicación
+                </button>
+                <button (click)="onArchive($event)"
+                    class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition-colors border border-border-default">
+                    <app-icon [name]="paquete.archivado ? 'rotateCcw' : 'archive'" size="15" />
+                    {{ paquete.archivado ? 'Desarchivar' : 'Archivar' }}
                 </button>
             </div>
             }
