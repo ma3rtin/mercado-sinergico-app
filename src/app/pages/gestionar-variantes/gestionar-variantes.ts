@@ -38,7 +38,6 @@ import Swal from 'sweetalert2';
 // ============================================
 interface VarianteExtendida extends ProductoVariante {
   stockOriginal?: number | null;
-  precioExtraOriginal?: number;
   activoOriginal?: boolean;
   imagenOriginal?: string | null;
   hasChanges?: boolean;
@@ -284,7 +283,6 @@ export class GestionarVariantesComponent implements OnInit {
             response.variantes.map((v) => ({
               ...v,
               stockOriginal: v.stockFisico ?? null,
-              precioExtraOriginal: v.precioExtra || 0,
               activoOriginal: v.activo ?? true,
               imagenOriginal: v.imagen_url ?? null,
               hasChanges: false,
@@ -387,31 +385,23 @@ export class GestionarVariantesComponent implements OnInit {
         const inicio = Math.min(indiceAnterior, indiceActual);
         const fin = Math.max(indiceAnterior, indiceActual);
 
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsEnRango = variantesPaginadas
-            .slice(inicio, fin + 1)
-            .map((v) => v.id);
+        const idsEnRango = variantesPaginadas
+          .slice(inicio, fin + 1)
+          .map((v) => v.id);
 
-          updated.forEach((v) => {
-            if (idsEnRango.includes(v.id)) {
-              v.seleccionada = true;
-            }
-          });
-
-          return updated;
-        });
+        this.variantes.update((current) =>
+          current.map((v) =>
+            idsEnRango.includes(v.id) ? { ...v, seleccionada: true } : v
+          )
+        );
       }
     } else {
       // Toggle simple
-      this.variantes.update((current) => {
-        const updated = [...current];
-        const varianteEncontrada = updated.find((v) => v.id === varianteId);
-        if (varianteEncontrada) {
-          varianteEncontrada.seleccionada = !varianteEncontrada.seleccionada;
-        }
-        return updated;
-      });
+      this.variantes.update((current) =>
+        current.map((v) =>
+          v.id === varianteId ? { ...v, seleccionada: !v.seleccionada } : v
+        )
+      );
     }
 
     this.lastSelectedId.set(varianteId);
@@ -422,20 +412,15 @@ export class GestionarVariantesComponent implements OnInit {
    */
   toggleTodasLasSelecciones(): void {
     const todasSeleccionadas = this.todasSeleccionadas();
-    const variantesPaginadas = this.paginatedVariantes();
+    const filtradas = this.variantesFiltradas();
 
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const idsPaginadas = variantesPaginadas.map((v) => v.id);
+    const idsFiltradas = filtradas.map((v) => v.id);
 
-      updated.forEach((v) => {
-        if (idsPaginadas.includes(v.id)) {
-          v.seleccionada = !todasSeleccionadas;
-        }
-      });
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) =>
+        idsFiltradas.includes(v.id) ? { ...v, seleccionada: !todasSeleccionadas } : v
+      )
+    );
   }
 
   /**
@@ -492,20 +477,15 @@ export class GestionarVariantesComponent implements OnInit {
       reader.onload = (event: ProgressEvent<FileReader>) => {
         const preview = event.target?.result as string;
 
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
+        const idsSeleccionados = seleccionadas.map((v) => v.id);
 
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.imagenFile = file;
-              v.imagenPreview = preview;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
+        this.variantes.update((current) =>
+          current.map((v) =>
+            idsSeleccionados.includes(v.id)
+              ? { ...v, imagenFile: file, imagenPreview: preview, hasChanges: true }
+              : v
+          )
+        );
 
         this.toastr.success(
           `Imagen aplicada a ${seleccionadas.length} variante(s)`,
@@ -517,66 +497,6 @@ export class GestionarVariantesComponent implements OnInit {
     };
 
     input.click();
-  }
-
-  // ============================================
-  // 💰 ACCIONES MASIVAS - PRECIO EXTRA
-  // ============================================
-
-  /**
-   * Aplicar precio extra a todas las seleccionadas
-   */
-  aplicarPrecioExtraASeleccionadas(): void {
-    const seleccionadas = this.variantesSeleccionadas();
-
-    if (seleccionadas.length === 0) {
-      this.toastr.warning('No hay variantes seleccionadas');
-      return;
-    }
-
-    Swal.fire({
-      title: 'Aplicar precio extra',
-      input: 'number',
-      inputLabel: `Precio extra para ${seleccionadas.length} variante(s) seleccionada(s)`,
-      inputPlaceholder: 'Ej: 500',
-      inputAttributes: {
-        min: '0',
-        step: '0.01',
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Aplicar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: 'var(--brand-secondary)',
-      inputValidator: (value) => {
-        if (!value || parseFloat(value) < 0) {
-          return 'Ingresá un precio válido';
-        }
-        return null;
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const precioNuevo = parseFloat(result.value);
-
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
-
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.precioExtra = precioNuevo;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
-
-        this.toastr.success(
-          `Precio extra de $${precioNuevo} aplicado a ${seleccionadas.length} variante(s)`,
-        );
-        this.deseleccionarTodas();
-      }
-    });
   }
 
   // ============================================
@@ -617,19 +537,15 @@ export class GestionarVariantesComponent implements OnInit {
       if (result.isConfirmed) {
         const stockNuevo = parseInt(result.value);
 
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
+        const idsSeleccionados = seleccionadas.map((v) => v.id);
 
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.stockFisico = stockNuevo;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
+        this.variantes.update((current) =>
+          current.map((v) =>
+            idsSeleccionados.includes(v.id)
+              ? { ...v, stockFisico: stockNuevo, hasChanges: true }
+              : v
+          )
+        );
 
         this.toastr.success(
           `Stock de ${stockNuevo} aplicado a ${seleccionadas.length} variante(s)`,
@@ -651,16 +567,15 @@ export class GestionarVariantesComponent implements OnInit {
       nuevoStock = 0;
     }
 
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-      if (variante) {
-        variante.stockFisico = nuevoStock;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, stockFisico: nuevoStock };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
@@ -671,34 +586,30 @@ export class GestionarVariantesComponent implements OnInit {
       nuevoPrecio = 0;
     }
 
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-      
-      if (variante) {
-        variante.precioExtra = nuevoPrecio;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, precioExtra: nuevoPrecio };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
    * Toggle activo/inactivo de una variante
    */
   toggleVarianteActiva(varianteId: number): void {
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-
-      if (variante) {
-        variante.activo = !variante.activo;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, activo: !v.activo };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
@@ -709,7 +620,6 @@ export class GestionarVariantesComponent implements OnInit {
 
     return (
       (esEnergico && variante.stockFisico !== variante.stockOriginal) ||
-      variante.precioExtra !== variante.precioExtraOriginal ||
       variante.activo !== variante.activoOriginal ||
       variante.imagenFile !== null
     );
@@ -747,18 +657,14 @@ export class GestionarVariantesComponent implements OnInit {
     // Generar preview
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.variantes.update((current) => {
-        const updated = [...current];
-        const variante = updated.find(v => v.id === varianteId);
-
-        if (variante) {
-          variante.imagenFile = file;
-          variante.imagenPreview = e.target?.result as string;
-          variante.hasChanges = true;
-        }
-
-        return updated;
-      });
+      const preview = e.target?.result as string;
+      this.variantes.update((current) =>
+        current.map((v) =>
+          v.id === varianteId
+            ? { ...v, imagenFile: file, imagenPreview: preview, hasChanges: true }
+            : v
+        )
+      );
     };
 
     reader.readAsDataURL(file);
@@ -771,18 +677,15 @@ export class GestionarVariantesComponent implements OnInit {
    * Eliminar imagen seleccionada
    */
   removeImagen(varianteId: number): void {
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-
-      if (variante) {
-        variante.imagenFile = null;
-        variante.imagenPreview = null;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, imagenFile: null, imagenPreview: null };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
@@ -848,7 +751,6 @@ export class GestionarVariantesComponent implements OnInit {
 
     variantesConCambios.forEach((variante) => {
       const dto: ActualizarVarianteDTO = {
-        precioExtra: variante.precioExtra,
         activo: variante.activo,
       };
 
@@ -870,7 +772,6 @@ export class GestionarVariantesComponent implements OnInit {
                   ? {
                     ...v,
                     stockOriginal: v.stockFisico ?? null,
-                    precioExtraOriginal: v.precioExtra ?? 0,
                     activoOriginal: v.activo ?? true,
                     imagenOriginal: varianteActualizada.imagen_url ?? v.imagenOriginal,
                     hasChanges: false,
@@ -933,7 +834,6 @@ export class GestionarVariantesComponent implements OnInit {
           current.map((v) => ({
             ...v,
             stockFisico: v.stockOriginal ?? 0,
-            precioExtra: v.precioExtraOriginal ?? 0,
             activo: v.activoOriginal ?? true,
             hasChanges: false,
             imagenFile: null,
@@ -1018,15 +918,11 @@ export class GestionarVariantesComponent implements OnInit {
         const stockNuevo = parseInt(result.value);
 
         this.variantes.update((current) =>
-          current.map((v) =>
-            v.activo
-              ? {
-                ...v,
-                stockFisico: stockNuevo,
-                hasChanges: true,
-              }
-              : v,
-          ),
+          current.map((v) => {
+            if (!v.activo) return v;
+            const updated = { ...v, stockFisico: stockNuevo };
+            return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+          })
         );
 
         this.toastr.success(
@@ -1099,60 +995,6 @@ export class GestionarVariantesComponent implements OnInit {
    */
   getVarianteDescripcion(variante: ProductoVariante): string {
     return this.varianteService.getVarianteDescripcion(variante);
-  }
-
-  /**
-   * Calcular precio final de una variante
-   */
-  calcularPrecioFinal(variante: ProductoVariante): number {
-    const precioBase = this.precioBaseProducto();
-    const extra = variante.precioExtra || 0;
-    return precioBase + extra;
-  }
-
-  /**
-   * Generar reporte de variantes
-   */
-  generarReporte(): void {
-    const producto = this.productoInfo()?.producto;
-    if (!producto) return;
-
-    const reporte = {
-      producto: {
-        id: producto.id,
-        nombre: producto.nombre,
-        tipo: producto.tipo,
-        precioBase: this.precioBaseProducto(),
-      },
-      stockTotal: this.stockTotal(),
-      cantidadVariantes: this.variantes().length,
-      variantesActivas: this.variantesActivas().length,
-      variantesInactivas: this.variantesInactivas().length,
-      variantes: this.variantes().map((v) => ({
-        id: v.id,
-        descripcion: this.getVarianteDescripcion(v),
-        sku: v.sku,
-        stockFisico: v.stockFisico,
-        precioExtra: v.precioExtra,
-        precioFinal: this.calcularPrecioFinal(v),
-        activo: v.activo,
-        hasChanges: v.hasChanges,
-      })),
-    };
-
-    // Convertir a JSON y descargar
-    const dataStr = JSON.stringify(reporte, null, 2);
-    const dataUri =
-      'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `reporte-variantes-${producto.id}-${Date.now()}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-
-    this.toastr.success('Reporte descargado');
   }
 
   /**
