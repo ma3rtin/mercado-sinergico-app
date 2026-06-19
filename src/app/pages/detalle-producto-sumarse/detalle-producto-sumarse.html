@@ -93,7 +93,7 @@
             </div>
 
             <!-- Selector de Variantes -->
-            @if (productoTieneVariantes()) {
+            @if (producto() && productoTieneVariantes()) {
             <div class="mb-8">
                 <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
                     (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
