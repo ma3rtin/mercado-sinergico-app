@@ -301,11 +301,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p) return;
 
-    // 1. Obtener pedidos aprobados
-    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId === 3);
+    // 1. Obtener pedidos aprobados (todos los que no son Pendientes o Reembolsados)
+    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId !== 1 && ped.estadoId !== 3);
     
     // 2. Mapear productos base para asegurar que todos aparezcan (incluso con 0)
-    const consolidado = new Map<string, { id: number, nombre: string, marca: string, precio: number, cantidad: number, variante: string }>();
+    const consolidado = new Map<string, { id: number, nombre: string, marca: string, precio: number, cantidad: number, variante: string, sku?: string }>();
     
     // Inicializar con productos base del paquete
     p.paqueteBase?.productos?.forEach(pp => {
@@ -318,7 +318,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
         marca: typeof prod.marca === 'string' ? prod.marca : (prod.marca?.nombre ?? 'N/A'),
         precio: prod.precio,
         cantidad: 0,
-        variante: '-'
+        variante: '-',
+        sku: prod.sku || String(prod.id_producto || prod.id)
       });
     });
 
@@ -332,7 +333,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
           marca: typeof pp.producto?.marca === 'string' ? pp.producto.marca : (pp.producto?.marca?.nombre ?? 'N/A'),
           precio: pp.producto?.precio ?? 0, 
           cantidad: 0,
-          variante: pp.variante ?? '-'
+          variante: pp.variante ?? '-',
+          sku: pp.sku || pp.producto?.sku || String(pp.productoId)
         };
         current.cantidad += pp.cantidad;
         consolidado.set(key, current);
@@ -344,7 +346,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const itemRows = Array.from(consolidado.values()).map(info => {
       const subtotal = info.precio * info.cantidad;
       totalGral += subtotal;
-      return `${info.id};"${this.scrubForCsv(info.nombre)}";"${this.scrubForCsv(info.variante)}";"${this.scrubForCsv(info.marca)}";${info.precio};${info.cantidad};${subtotal}`;
+      return `${info.sku || info.id};"${this.scrubForCsv(info.nombre)}";"${this.scrubForCsv(info.variante)}";"${this.scrubForCsv(info.marca)}";${info.precio};${info.cantidad};${subtotal}`;
     });
 
     // 4. Construir el CSV final
@@ -376,7 +378,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p) return;
 
-    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId === 3);
+    const pedidosAprobados = (p.pedidos ?? []).filter(ped => ped.estadoId !== 1 && ped.estadoId !== 3);
     const now = new Date().toLocaleString('es-AR');
     let totalRecaudado = 0;
 
@@ -388,11 +390,16 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       totalRecaudado += total;
       const estado = this.getEstadoPedidoLabel(ped.estadoId);
       
+      const dir = ped.usuario?.direccion;
+      const direccion = dir
+        ? `${dir.calle} ${dir.numero}${dir.piso ? ', Piso ' + dir.piso : ''}${dir.departamento ? ', Depto ' + dir.departamento : ''}${dir.localidad?.nombre ? ', ' + dir.localidad.nombre : ''}`
+        : 'N/A';
+
       const detalle = this.scrubForCsv((ped.pedidoProductos ?? [])
         .map(pp => `${pp.cantidad}x ${pp.producto?.nombre}${pp.variante ? ' ('+pp.variante+')' : ''}`)
         .join(' | '));
 
-      return `${id};"${nombre}";"${detalle}";"${email}";${total};"${estado}"`;
+      return `${id};"${nombre}";"${this.scrubForCsv(direccion)}";"${detalle}";"${email}";${total};"${estado}"`;
     });
 
     const rows: string[] = [
@@ -404,10 +411,10 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       `"Fecha Generacion";"${now}"`,
       `"Pedidos Pagados";"${pedidosAprobados.length}"`,
       '',
-      '"ID Pedido";"Comprador";"Detalle Productos";"Email";"Total Pedido";"Estado"',
+      '"ID Pedido";"Comprador";"Dirección de Entrega";"Detalle Productos";"Email";"Total Pedido";"Estado"',
       ...buyerRows,
       '',
-      `"";"";"";"";"TOTAL PAGADO RECAUDADO";${totalRecaudado}`
+      `"";"";"";"";"";"TOTAL PAGADO RECAUDADO";${totalRecaudado}`
     ];
 
 
@@ -460,9 +467,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   getEstadoPedidoClasses(estadoId?: number): string {
     switch (estadoId) {
       case 1: return 'bg-status-pending-bg text-status-pending-text';   // Pendiente
-      case 2: return 'bg-status-info-bg text-status-info-text';         // En proceso
-      case 3: return 'bg-status-active-bg text-status-active-text';     // Aprobado/Pagado
-      case 4: return 'bg-status-closed-bg text-status-closed-text';     // Cancelado
+      case 2: return 'bg-status-active-bg text-status-active-text';     // Pagado
+      case 3: return 'bg-status-closed-bg text-status-closed-text';     // Reembolsado
+      case 4: return 'bg-status-info-bg text-status-info-text';         // En preparación
+      case 5: return 'bg-status-info-bg text-status-info-text';         // En camino
+      case 6: return 'bg-status-active-bg text-status-active-text';     // Recibido
       default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
@@ -470,9 +479,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   getEstadoPedidoLabel(estadoId?: number): string {
     switch (estadoId) {
       case 1: return 'Pendiente';
-      case 2: return 'En proceso';
-      case 3: return 'Aprobado';
-      case 4: return 'Cancelado';
+      case 2: return 'Pagado';
+      case 3: return 'Reembolsado';
+      case 4: return 'En preparación';
+      case 5: return 'En camino';
+      case 6: return 'Recibido';
       default: return 'Desconocido';
     }
   }

@@ -152,6 +152,7 @@ export class EditarProductoComponent implements OnInit {
       descripcion: [''],
       precio: [null, [Validators.required, Validators.min(0)]],
       stock: [null, [Validators.min(0)]],
+      sku: [''],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
       altura: [null, [Validators.min(0)]],
@@ -283,6 +284,7 @@ export class EditarProductoComponent implements OnInit {
       descripcion: producto.descripcion,
       precio: producto.precio,
       stock: producto.stock,
+      sku: producto.variantes?.[0]?.sku || '',
 
       // ✅ Manejar marca (string u objeto)
       marca_id: this.getMarcaId(producto),
@@ -680,6 +682,7 @@ export class EditarProductoComponent implements OnInit {
       .generarVariantes({
         productoId,
         opcionesDisponibles: atributosParaBackend,
+        sku: this.productForm.get('sku')?.value || undefined
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

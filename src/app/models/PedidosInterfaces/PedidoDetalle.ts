@@ -8,5 +8,6 @@ export interface PedidoDetalle {
     precio_unitario: number;
     subtotal: number;
     variante?: string;
+    sku?: string;
     producto: Producto;
 }

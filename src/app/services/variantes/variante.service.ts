@@ -61,6 +61,7 @@ export interface ProductoVariantesResponse {
 export interface GenerarVariantesDTO {
   productoId: number;
   opcionesDisponibles: Record<string, number[]>;
+  sku?: string;
 }
 
 /**
@@ -158,7 +159,8 @@ export class VarianteService extends ApiService {
     // Enviar solo el objeto que el DTO espera
     const payload = {
       productoId: data.productoId,
-      opcionesDisponibles: data.opcionesDisponibles
+      opcionesDisponibles: data.opcionesDisponibles,
+      sku: data.sku
     };
 
     return this.post<any>(

@@ -176,6 +176,18 @@
               }
             </div>
 
+            <!-- SKU (Opcional) -->
+            <div class="lg:col-span-2">
+              <app-input
+                formControlName="sku"
+                [labelValue]="'SKU (Código único - Opcional)'"
+                [placeholderValue]="'Ej: CASCO-REV-001'"
+                [clearableValue]="true"
+                [sizeValue]="'md'"
+                [helperTextValue]="'Código de identificación del producto. Si se deja vacío, se generará uno automáticamente.'"
+              />
+            </div>
+
             <!-- Descripción -->
             <div class="lg:col-span-2">
               <label class="block text-lg font-medium text-black mb-2">Descripción</label>

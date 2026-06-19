@@ -153,6 +153,7 @@ readonly tipoMap: Record<TipoPaquete, string> = {
       descripcion: [''],
       precio: [null, [Validators.required, Validators.min(0)]],
       stock: [null, [Validators.min(0)]],
+      sku: [''],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
       altura: [null, [Validators.min(0)]],
@@ -504,7 +505,8 @@ if (tipoBackend) {
     // Llamar al endpoint POST /api/productos/:id/variantes/generar
     this.varianteService.generarVariantes({
       productoId,
-      opcionesDisponibles: atributosParaBackend
+      opcionesDisponibles: atributosParaBackend,
+      sku: this.productForm.get('sku')?.value || undefined
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

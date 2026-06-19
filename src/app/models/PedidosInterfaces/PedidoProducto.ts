@@ -9,6 +9,7 @@ export interface PedidoProducto {
     precio_unitario?: number;
     subtotal?: number;
     variante?: string;
+    sku?: string;
 
     producto?: Producto;
 }

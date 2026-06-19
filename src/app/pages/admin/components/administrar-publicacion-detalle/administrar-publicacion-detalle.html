@@ -192,18 +192,28 @@
                   </button>
                   <button
                     (click)="filtrEstadoPedido.set(2)"
-                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 2 ? 'bg-status-info-bg text-status-info-text border-status-info-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
-                    En proceso
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 2 ? 'bg-status-active-bg text-status-active-text border-status-active-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Pagado
                   </button>
                   <button
                     (click)="filtrEstadoPedido.set(3)"
-                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 3 ? 'bg-status-active-bg text-status-active-text border-status-active-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
-                    Aprobado
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 3 ? 'bg-status-closed-bg text-status-closed-text border-status-closed-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Reembolsado
                   </button>
                   <button
                     (click)="filtrEstadoPedido.set(4)"
-                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 4 ? 'bg-status-closed-bg text-status-closed-text border-status-closed-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
-                    Cancelado
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 4 ? 'bg-status-info-bg text-status-info-text border-status-info-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    En preparación
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(5)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 5 ? 'bg-status-info-bg text-status-info-text border-status-info-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    En camino
+                  </button>
+                  <button
+                    (click)="filtrEstadoPedido.set(6)"
+                    [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 6 ? 'bg-status-active-bg text-status-active-text border-status-active-text/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                    Recibido
                   </button>
                 </div>
               </div>
@@ -445,6 +455,18 @@
                             {{ pedidoSeleccionado()!.usuario!.telefono }}
                           </a>
                         } @else { – }
+                      </span>
+                    </div>
+                    <div class="px-4 py-3">
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-text-muted block mb-0.5">Dirección de Entrega</span>
+                      <span class="text-sm font-medium text-text-primary break-words">
+                        @if (pedidoSeleccionado()!.usuario?.direccion; as dir) {
+                          {{ dir.calle }} {{ dir.numero }}
+                          @if (dir.piso) { , Piso {{ dir.piso }} }
+                          @if (dir.departamento) { , Depto {{ dir.departamento }} }
+                          @if (dir.localidad?.nombre) { , {{ dir.localidad.nombre }} }
+                          @if (dir.codigo_postal) { (CP {{ dir.codigo_postal }}) }
+                        } @else { No especificada }
                       </span>
                     </div>
                     <div class="px-4 py-3">
