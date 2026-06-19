@@ -87,7 +87,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const total = this.paquete?.cant_productos ?? 0;
     const reservados = this.paquete?.cant_productos_reservados ?? 0;
     if (total === 0) return 0;
-    return Math.round((reservados / total) * 100);
+    return Math.max(0, Math.min(100, Math.round((reservados / total) * 100)));
   }
 
   get cantidadProductosUsuario(): number {
@@ -261,6 +261,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
   onDisminuirCantidad(prod: any): void {
     if (!this.puedeEditarCantidades) return;
+    if ((prod.cantidad ?? 1) <= 1) return;
 
     const limpio = {
       ...prod,
@@ -271,15 +272,23 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     this.disminuirCantidad.emit(limpio);
   }
 
+  onKeyDownCantidad(event: KeyboardEvent): void {
+    if (['.', ',', 'e', 'E', '-', '+'].includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   onCambiarCantidadManual(prod: any, event: Event): void {
     if (!this.puedeEditarCantidades) return;
     const input = event.target as HTMLInputElement;
-    let valor = parseInt(input.value, 10);
+    const valor = Number(input.value);
 
-    if (isNaN(valor) || valor < 1) {
-      input.value = '1';
-      valor = 1;
+    if (!Number.isInteger(valor) || valor < 1) {
+      input.value = String(prod.cantidad ?? 1);
+      return;
     }
+
+    input.value = valor.toString();
 
     const limpio = {
       ...prod,
@@ -307,7 +316,12 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     this.salirDelPaquete.emit();
   }
 
+  get puedePagar(): boolean {
+    return this.pedido?.estado?.nombre?.toLowerCase() === 'pendiente';
+  }
+
   onFinalizarCompra(): void {
+    if (!this.puedePagar) return;
     this.finalizarCompra.emit();
   }
 
