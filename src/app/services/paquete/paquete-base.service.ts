@@ -58,11 +58,22 @@ export class PaqueteBaseService extends ApiService {
     );
   }
 
-  getPaquetes(): Observable<PaqueteBase[]> {
-    return this.get<PaqueteBase[]>('paquetes-base').pipe(
+  getPaquetes(includeArchived = false): Observable<PaqueteBase[]> {
+    const url = includeArchived ? 'paquetes-base?includeArchived=true' : 'paquetes-base';
+    return this.get<PaqueteBase[]>(url).pipe(
       timeout(60000),
       catchError((error) => {
         console.error('Error en PaqueteBaseService.getPaquetes:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  archivarPaquete(id: number, archivado: boolean): Observable<PaqueteBase> {
+    return this.patch<PaqueteBase>(`paquetes-base/${id}/archivar`, { archivado }).pipe(
+      timeout(60000),
+      catchError((error) => {
+        console.error('Error en PaqueteBaseService.archivarPaquete:', error);
         return throwError(() => error);
       })
     );

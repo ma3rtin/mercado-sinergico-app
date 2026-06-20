@@ -221,34 +221,6 @@ export class AdministrarProductosComponent {
       }
     });
   }
-
-
-
-  deleteProducto(producto: Producto): void {
-    Swal.fire({
-      title: '¿Eliminar producto?',
-      text: `Se eliminará "${producto.nombre}" permanentemente`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Eliminar',
-      confirmButtonColor: '#B92905',
-      cancelButtonText: 'Cancelar',
-      cancelButtonColor: '#9ca3af'
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.productosService.deleteProducto(producto.id_producto ?? 0).subscribe({
-          next: () => {
-            this.toast.success('Producto eliminado correctamente');
-            this.loadProductos();
-          },
-          error: () => {
-            this.toast.error('Error al eliminar producto');
-          }
-        });
-      }
-    });
-  }
-
   formatPrice(price: number): string {
     return `$${price.toFixed(2)}`;
   }
@@ -356,19 +328,7 @@ export class AdministrarProductosComponent {
                 <p class="text-sm font-black text-gray-900 uppercase tracking-tight leading-none mb-1">Editar</p>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Modificar datos</p>
               </div>
-            </div>
-
-            <!-- Item: Eliminar -->
-            <div class="flex items-center gap-4 p-4 bg-red-50 rounded-[22px] border border-red-100 shadow-sm active:scale-95 transition-all">
-              <div class="w-12 h-12 flex items-center justify-center bg-white text-red-500 rounded-2xl shadow-sm shrink-0 border border-red-200">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-              </div>
-              <div class="min-w-0">
-                <p class="text-sm font-black text-red-700 uppercase tracking-tight leading-none mb-1">Eliminar</p>
-                <p class="text-[10px] font-bold text-red-400 uppercase tracking-widest leading-tight">Borrar definitivo</p>
-              </div>
-            </div>
-          </div>
+            </div>          </div>
         </div>
 
         <!-- Sección: Estados -->
