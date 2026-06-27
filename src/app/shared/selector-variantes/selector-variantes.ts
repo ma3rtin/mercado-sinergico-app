@@ -164,11 +164,14 @@ export class SelectorVariantesComponent {
       const seleccionadas = this.seleccionadas();
       const todas = this.todasSeleccionadas();
       const valida = this.varianteValida();
+      const formables = this.tieneVariantesFormables();
 
       this.variantesChange.emit(seleccionadas);
-      this.valido.emit(todas && valida);
+      
+      const esValido = !formables || (todas && valida);
+      this.valido.emit(esValido);
 
-      if (todas && valida) {
+      if (formables && todas && valida) {
         const varianteId = this.encontrarVarianteId();
         this.varianteSeleccionada.emit(varianteId);
       } else {
