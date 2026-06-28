@@ -23,7 +23,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
 
     // 🔑 Intentar obtener token válido (JWT o Firebase)
-    const token = authService.getJwtToken() ?? authService.getFirebaseToken();
+    // Para el intercambio de tokens, necesitamos específicamente el de Firebase
+    let token = authService.getJwtToken() ?? authService.getFirebaseToken();
+    if (req.url.includes('login-firebase')) {
+        token = authService.getFirebaseToken();
+    }
 
     // 📨 Clonar request con encabezado Authorization si hay token
     const authReq = token
