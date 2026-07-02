@@ -106,6 +106,7 @@ import {
   featherSmile,
   featherTag,
   featherArchive,
+  featherRotateCcw,
   featherClipboard,
   featherAward,
   featherGrid,
@@ -181,6 +182,8 @@ export class IconsService {
     star: featherStar,
     heart: featherHeart,
     tag: featherTag,
+    archive: featherArchive,
+    rotateCcw: featherRotateCcw,
 
     // 🗺️ Ubicación
     mapPin: featherMapPin,

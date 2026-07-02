@@ -45,7 +45,8 @@ export class AdministrarProductosComponent {
   currentPage = signal(1);
   itemsPerPage = signal(10);
   isDuplicating = signal<number | null>(null);
-  isDeleting = signal<number | null>(null);
+  isArchiving = signal<number | null>(null);
+  mostrarArchivados = signal(false);
 
 
   filteredProductos = computed(() => {
@@ -97,7 +98,10 @@ export class AdministrarProductosComponent {
   });
 
   constructor() {
-    this.loadProductos();
+    effect(() => {
+      this.mostrarArchivados();
+      this.loadProductos();
+    }, { allowSignalWrites: true });
 
     effect(() => {
       console.log('🔍 Buscando:', this.searchTerm(), '| Orden:', this.sortOrder());
@@ -110,17 +114,11 @@ export class AdministrarProductosComponent {
   }
 
   private loadProductos(): void {
-
     this.isLoading.set(true);
-    this.productosService.getProductos().subscribe({
+    this.productosService.getProductos(this.mostrarArchivados()).subscribe({
       next: (productos) => {
         this.productos.set(productos);
         this.isLoading.set(false);
-        for (const producto of productos) {
-          console.log('La marca del producto es:', producto.marca);
-          console.log('La imagen del producto es:', producto.imagen_url);
-          console.log('La variante del producto es:', producto.plantilla);
-        }
       },
       error: (error) => {
         console.error('Error cargando productos:', error);
@@ -182,7 +180,7 @@ export class AdministrarProductosComponent {
   }
 
   duplicateProducto(producto: Producto): void {
-    if (this.isDuplicating() !== null || this.isDeleting() !== null) return;
+    if (this.isDuplicating() !== null || this.isArchiving() !== null) return;
 
     Swal.fire({
       title: '¿Duplicar producto?',
@@ -217,41 +215,43 @@ export class AdministrarProductosComponent {
     });
   }
 
-  deleteProducto(producto: Producto): void {
-    if (this.isDuplicating() !== null || this.isDeleting() !== null) return;
+  archivarProducto(producto: Producto): void {
+    if (this.isDuplicating() !== null || this.isArchiving() !== null) return;
+
+    const nuevoEstado = !producto.archivado;
+    const accion = nuevoEstado ? 'archivar' : 'desarchivar';
 
     Swal.fire({
-      title: '¿Eliminar producto?',
-      text: `Se eliminará "${producto.nombre}" permanentemente`,
-      icon: 'warning',
+      title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} producto?`,
+      text: `Se cambiará el estado de "${producto.nombre}".`,
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'Eliminar',
-      confirmButtonColor: '#B92905',
+      confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
       cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
       cancelButtonColor: '#9ca3af',
       showLoaderOnConfirm: true,
       preConfirm: async () => {
         try {
-          this.isDeleting.set(producto.id_producto ?? 0);
-          await firstValueFrom(this.productosService.deleteProducto(producto.id_producto ?? 0));
+          this.isArchiving.set(producto.id_producto!);
+          await firstValueFrom(this.productosService.archivarProducto(producto.id_producto!, nuevoEstado));
           return true;
         } catch (error: any) {
-          console.error('Error al eliminar producto:', error);
-          Swal.showValidationMessage(`Error al eliminar producto: ${error.error?.message || error.message || 'Error desconocido'}`);
+          console.error(`Error al ${accion} producto:`, error);
+          Swal.showValidationMessage(`No se pudo ${accion} el producto: ${error.error?.message || error.message || 'Error desconocido'}`);
           throw error;
         } finally {
-          this.isDeleting.set(null);
+          this.isArchiving.set(null);
         }
       },
       allowOutsideClick: () => !Swal.isLoading()
-    }).then(result => {
+    }).then((result) => {
       if (result.isConfirmed) {
-        this.toast.success('Producto eliminado correctamente');
+        this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
         this.loadProductos();
       }
     });
   }
-
   formatPrice(price: number): string {
     return `$${price.toFixed(2)}`;
   }
@@ -359,19 +359,7 @@ export class AdministrarProductosComponent {
                 <p class="text-sm font-black text-gray-900 uppercase tracking-tight leading-none mb-1">Editar</p>
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Modificar datos</p>
               </div>
-            </div>
-
-            <!-- Item: Eliminar -->
-            <div class="flex items-center gap-4 p-4 bg-red-50 rounded-[22px] border border-red-100 shadow-sm active:scale-95 transition-all">
-              <div class="w-12 h-12 flex items-center justify-center bg-white text-red-500 rounded-2xl shadow-sm shrink-0 border border-red-200">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-              </div>
-              <div class="min-w-0">
-                <p class="text-sm font-black text-red-700 uppercase tracking-tight leading-none mb-1">Eliminar</p>
-                <p class="text-[10px] font-bold text-red-400 uppercase tracking-widest leading-tight">Borrar definitivo</p>
-              </div>
-            </div>
-          </div>
+            </div>          </div>
         </div>
 
         <!-- Sección: Estados -->

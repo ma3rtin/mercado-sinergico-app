@@ -9,23 +9,39 @@ import { ProductoDetalleDTO } from '@app/models/DTOs/Producto/productoDetalleDTO
 export class ProductosService extends ApiService {
   private productosCache$?: Observable<Producto[]>;
 
-  getProductos(): Observable<Producto[]> {
-    if (this.productosCache$) return this.productosCache$;
+  getProductos(includeArchived = false): Observable<Producto[]> {
+    if (!includeArchived && this.productosCache$) return this.productosCache$;
 
-    this.productosCache$ = this.get<Producto[]>('productos').pipe(
+    const url = includeArchived ? 'productos?includeArchived=true' : 'productos';
+    const obs$ = this.get<Producto[]>(url).pipe(
       timeout(30000),
       retry(2),
       map(response =>
         response.map(p => this.normalizeProducto(p))
       ),
       catchError(err => {
-        this.productosCache$ = undefined;
+        if (!includeArchived) this.productosCache$ = undefined;
         return throwError(() => err);
       }),
       shareReplay(1)
     );
 
-    return this.productosCache$;
+    if (!includeArchived) this.productosCache$ = obs$;
+    return obs$;
+  }
+
+  archivarProducto(id: number, archivado: boolean): Observable<Producto> {
+    return this.patch<Producto>(`productos/${id}/archivar`, { archivado }).pipe(
+      timeout(10000),
+      map(response => {
+        this.clearCache();
+        return response;
+      }),
+      catchError(err => {
+        console.error('❌ Error archivando producto:', err);
+        return throwError(() => err);
+      })
+    );
   }
 
   clearCache(): void {

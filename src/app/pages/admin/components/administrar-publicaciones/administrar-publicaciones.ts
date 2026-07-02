@@ -42,6 +42,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   highlightedId = signal<number | null>(null);
   currentPage = signal(1);
   itemsPerPage = signal(10);
+  mostrarArchivadas = signal(false);
 
   readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
@@ -73,6 +74,11 @@ export class AdministrarPublicacionesComponent implements OnInit {
       this.estadoFiltro();
       this.currentPage.set(1);
     }, { allowSignalWrites: true });
+
+    effect(() => {
+      this.mostrarArchivadas();
+      this.loadPaquetes();
+    }, { allowSignalWrites: true });
   }
 
   onPageChange(page: number): void {
@@ -86,8 +92,6 @@ export class AdministrarPublicacionesComponent implements OnInit {
     this.route.queryParamMap.subscribe(params => {
       const id = params.get('highlight');
       this.highlightedId.set(id ? Number(id) : null);
-      // Siempre recarga — tanto la carga inicial como al volver con reload=1
-      this.loadPaquetes();
     });
   }
 
@@ -95,7 +99,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   loadPaquetes() {
     this.loading.set(true);
     this.error.set(null);
-    this.paqueteService.getAllPaquetes().subscribe({
+    this.paqueteService.getAllPaquetes(this.mostrarArchivadas()).subscribe({
       next: (data) => {
         this.paquetes.set(data);
         this.loading.set(false);
@@ -207,6 +211,33 @@ export class AdministrarPublicacionesComponent implements OnInit {
   }
   verDetalle(paquete: PaquetePublicado) {
     this.router.navigate(['/admin/administrar-publicacion', paquete.id_paquete_publicado]);
+  }
+
+  archivarPaquete(paquete: PaquetePublicado) {
+    const nuevoEstado = !paquete.archivado;
+    const accion = nuevoEstado ? 'archivar' : 'desarchivar';
+    import('sweetalert2').then(({ default: Swal }) => {
+      Swal.fire({
+        title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} publicación?`,
+        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" se cambiará de estado.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'var(--brand-secondary)',
+      }).then(result => {
+        if (!result.isConfirmed) return;
+        this.paqueteService.archivarPaquete(paquete.id_paquete_publicado!, nuevoEstado).subscribe({
+          next: () => {
+            this.toast.success(`"${paquete.paqueteBase?.nombre || paquete.nombre}" ${nuevoEstado ? 'archivado' : 'desarchivado'} con éxito`);
+            this.loadPaquetes();
+          },
+          error: () => {
+            this.toast.error(`Error al intentar ${accion} el paquete.`, 'Error');
+          }
+        });
+      });
+    });
   }
 
   // ── Helpers de estilo ──────────────────────────────────────────

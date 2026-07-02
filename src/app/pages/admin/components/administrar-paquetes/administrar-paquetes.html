@@ -20,18 +20,27 @@
       </div>
     </div>
 
-    <!-- Buscador -->
-    <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col sm:flex-row gap-4 items-center">
-      <div class="relative w-full">
+    <!-- Buscador y Mostrar Archivados -->
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex items-center gap-4">
+      <div class="relative flex-1">
         <app-icon name="search" size="20" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="Buscar por nombre o descripción..."
           [value]="searchTerm()"
           (input)="searchTerm.set($any($event.target).value)"
-          class="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm"
+          class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary/20 text-sm focus:outline-none"
         >
       </div>
+
+      <button (click)="mostrarArchivados.set(!mostrarArchivados())"
+        [title]="mostrarArchivados() ? 'Ocultar paquetes archivados' : 'Mostrar paquetes archivados'"
+        [class]="'w-[42px] h-[42px] flex items-center justify-center rounded-xl border-2 transition-all active:scale-95 cursor-pointer shrink-0 ' +
+                  (mostrarArchivados() 
+                    ? 'bg-brand-cta border-brand-cta text-gray-900 shadow-md shadow-brand-cta/20' 
+                    : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600')">
+        <app-icon name="archive" [size]="'20'" />
+      </button>
     </div>
 
     <!-- Listado -->
@@ -48,6 +57,11 @@
                 <div class="flex items-center gap-2 mb-0.5">
                   <span class="text-xs uppercase tracking-wider font-medium opacity-80">{{ paquete.categoria?.nombre || 'General' }}</span>
                   <app-tipo-badge [tipo]="paquete.tipo" size="xs" mode="icon" />
+                  @if (paquete.archivado) {
+                    <span class="px-2 py-0.5 bg-gray-700/80 text-white rounded text-[10px] font-bold uppercase tracking-wider">
+                      Archivado
+                    </span>
+                  }
                 </div>
                 <h3 class="font-display text-lg truncate">{{ paquete.nombre }}</h3>
               </div>
@@ -63,8 +77,8 @@
                   <button (click)="duplicarPaqueteBase(paquete)" class="p-2 text-gray-400 hover:text-success hover:bg-success-light rounded-lg transition-colors" title="Duplicar">
                     <app-icon name="copy" size="18" />
                   </button>
-                  <button (click)="eliminarPaqueteBase(paquete)" class="p-2 text-gray-400 hover:text-error hover:bg-error-light rounded-lg transition-colors" title="Eliminar">
-                    <app-icon name="trash" size="18" />
+                  <button (click)="archivarPaqueteBase(paquete)" class="p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition-colors" [title]="paquete.archivado ? 'Desarchivar' : 'Archivar'">
+                    <app-icon [name]="paquete.archivado ? 'rotateCcw' : 'archive'" size="18" />
                   </button>
                 </div>
                 <app-button variant="secondary" size="sm" (buttonClick)="publicarPaquete(paquete)">

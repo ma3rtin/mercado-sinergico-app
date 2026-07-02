@@ -19,6 +19,7 @@ export interface PaquetePublicado {
   descuento?: number;
   imagen_url?: string;
   tipo?: TipoPaquete;
+  archivado?: boolean;
 
   // Relaciones
   paqueteBase?: PaqueteBase;
