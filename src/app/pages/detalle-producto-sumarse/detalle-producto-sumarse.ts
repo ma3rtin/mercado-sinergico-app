@@ -124,8 +124,8 @@ export class DetalleProductoSumarse implements OnInit {
   // --- ESTADOS DE UI ---
 
   productoTieneVariantes = computed(() => {
-    const prod = this.producto();
-    return !!(prod?.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+    const variantes = this.producto()?.variantes || [];
+    return variantes.some(v => v.activo !== false);
   });
 
   puedeAgregarAlCarrito = computed(() => {

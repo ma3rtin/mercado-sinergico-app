@@ -126,21 +126,9 @@
             <button (click)="cambiarFiltroEstado('todas')"
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">TODAS</button>
             <button (click)="cambiarFiltroEstado('activas')"
-              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'activas' ? 'bg-green-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">ACTIVAS</button>
+              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'activas' ? 'bg-secondary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">ACTIVAS</button>
             <button (click)="cambiarFiltroEstado('inactivas')"
               [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroEstado() === 'inactivas' ? 'bg-gray-500 text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">INACTIVAS</button>
-          </div>
-
-          <!-- Imagen -->
-          <div
-            class="flex items-center gap-2 bg-white/60 backdrop-blur-sm p-1.5 rounded-[20px] border border-gray-100 shadow-sm shrink-0">
-            <button (click)="cambiarFiltroImagen('todas')"
-              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'todas' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">IMAGEN:
-              TODO</button>
-            <button (click)="cambiarFiltroImagen('con')"
-              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'con' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">CON</button>
-            <button (click)="cambiarFiltroImagen('sin')"
-              [class]="'px-5 py-2.5 text-[10px] font-black rounded-2xl transition-all ' + (filtroImagen() === 'sin' ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:bg-gray-50')">SIN</button>
           </div>
 
           <!-- Stock -->
@@ -172,22 +160,18 @@
               <span class="text-xs font-bold text-text-muted uppercase tracking-widest">variantes</span>
             </div>
           </div>
-          <button (click)="generarReporte()"
-            class="w-14 h-14 flex items-center justify-center bg-success text-white rounded-[22px] active:scale-90 hover:bg-green-100 transition-all border border-white shadow-sm shadow-green-500/10 hover:text-success">
-            <app-icon name="download" size="24" />
-          </button>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <button (click)="activarTodas()"
-            class="flex items-center justify-center gap-2 py-4 bg-green-50 text-green-700 rounded-[20px] text-[10px] font-black uppercase tracking-[0.1em] border border-green-100 active:scale-95 hover:bg-green-100 transition-all">
+            class="flex items-center justify-center gap-2 py-4 bg-blue-50 text-primary rounded-[20px] text-[10px] font-black uppercase tracking-[0.1em] border border-primary active:scale-95 hover:bg-blue-100 transition-all">
             <app-icon name="checkCircle" size="16" />
-            Activar Todas
+            Activar todas
           </button>
           <button (click)="desactivarTodas()"
             class="flex items-center justify-center gap-2 py-4 bg-red-50 text-red-700 rounded-[20px] text-[10px] font-black uppercase tracking-[0.1em] border border-red-100 active:scale-95 hover:bg-red-100 transition-all">
-            <app-icon name="minusCircle" size="16" />
-            Desactivar
+            <app-icon name="minus" size="16" />
+            Desactivar todas
           </button>
         </div>
 
@@ -204,28 +188,32 @@
 
     <!-- 🔔 INDICADOR DE CAMBIOS PENDIENTES -->
     @if (hasChanges()) {
-    <div class="mb-8 p-5 bg-orange-50 border-2 border-orange-100 rounded-[28px] animate-bounce shrink-0">
+    <div class="mb-8 p-5 bg-white border-2 border-primary rounded-[28px] animate-bounce shrink-0">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
         <div class="flex items-center gap-4">
           <div
-            class="w-12 h-12 bg-orange-200 text-orange-700 rounded-2xl flex items-center justify-center border border-orange-300">
+            class="w-12 h-12 bg-orange-200 text-orange-700 rounded-2xl flex items-center justify-center border">
             <app-icon name="alertOctagon" size="24" />
           </div>
           <div>
-            <h4 class="text-sm font-black text-orange-900 uppercase tracking-widest">¡Atención!</h4>
+            <h4 class="text-sm font-black text-black uppercase tracking-widest">¡Atención!</h4>
             <p class="text-xs font-bold text-orange-700 uppercase">Tienes cambios sin guardar en la lista</p>
           </div>
         </div>
         <div class="flex gap-3 w-full sm:w-auto">
           <app-button type="button" variant="danger" size="sm" (click)="resetearCambios()" class="flex-1 sm:flex-none">
-            <app-icon name="x" size="16" class="mr-2" />
-            Descartar
+            <div class="flex items-center justify-center">
+              <app-icon name="x" size="18" class="mr-1" />
+              <span>Descartar</span>
+            </div>
           </app-button>
-          <app-button type="button" variant="success" size="sm" [disabled]="isSaving()" (click)="guardarCambios()"
+          <app-button type="button" variant="primary" size="sm" [disabled]="isSaving()" (click)="guardarCambios()"
             class="flex-1 sm:flex-none">
-            <app-icon [name]="isSaving() ? 'loader' : 'download'" size="16" class="mr-2"
-              [class.animate-spin]="isSaving()" />
-            {{ isSaving() ? "Guardando..." : "Guardar" }}
+            <!--Centrar los iconos-->
+            <div class="flex items-center justify-center">
+              <app-icon [name]="isSaving() ? 'loader' : 'download'" size="18" class="mr-1" [class.animate-spin]="isSaving()" />
+              <span>{{ isSaving() ? "Guardando..." : "Guardar" }}</span>
+            </div>
           </app-button>
         </div>
       </div>
@@ -235,6 +223,19 @@
     <!-- 📊 LISTADO DE VARIANTES (Mobile-First) -->
     @if (tieneVariantes()) {
 
+    <!-- 💡 BANNER DE SELECCIÓN MASIVA (Gmail-style) -->
+    @if (cantidadSeleccionadas() > 0 && cantidadSeleccionadas() < variantesFiltradas().length) {
+    <div class="mb-6 p-4 bg-brand-primary/5 border border-brand-primary/10 rounded-[28px] flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in">
+      <p class="text-[10px] font-black text-text-muted uppercase tracking-[0.1em] text-center">
+        Tenés <span class="text-brand-primary text-sm">{{ cantidadSeleccionadas() }}</span> variantes seleccionadas. 
+        ¿Seleccionar las <span class="text-brand-primary text-sm">{{ variantesFiltradas().length - cantidadSeleccionadas() }}</span> restantes?
+      </p>
+      <app-button variant="secondary" size="xs" (click)="toggleTodasLasSelecciones()" 
+        label="Seleccionar todas" class="font-black">
+      </app-button>
+    </div>
+    }
+
     <!-- Vista Desktop (Tabla) -->
     <div
       class="hidden md:block bg-white rounded-[32px] shadow-2xl shadow-black/[0.03] overflow-hidden border border-gray-100">
@@ -242,12 +243,16 @@
         <table class="min-w-full divide-y divide-gray-100">
           <thead class="bg-gray-50/50">
             <tr>
-              <th scope="col" class="px-8 py-5 text-left w-12">
-                <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
-                  (change)="toggleTodasLasSelecciones()"
-                  class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer transition-all" />
+              <th scope="col" class="px-8 py-4 text-left w-12">
+                <div class="flex flex-col items-center gap-1">
+                  <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
+                    (change)="toggleTodasLasSelecciones()"
+                    class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer transition-all" />
+                  <span class="text-[7px] font-black text-text-muted uppercase leading-none text-center">
+                    {{ todasSeleccionadas() ? 'Deselec.' : 'Todas (' + variantesFiltradas().length + ')' }}
+                  </span>
+                </div>
               </th>
-              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Img</th>
               <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
                 Descripción</th>
               <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">SKU</th>
@@ -255,14 +260,10 @@
               <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Stock
               </th>
               }
-              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Extra
-                ($)</th>
-              <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Final
-              </th>
               <th class="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Estado
               </th>
               <th class="px-6 py-5 text-center text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
-                Acciones</th>
+                Eliminar</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-50">
@@ -272,23 +273,6 @@
               <td class="px-8 py-6">
                 <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(variante.id!, $event)"
                   class="w-5 h-5 text-brand-primary border-gray-300 rounded-lg cursor-pointer" />
-              </td>
-              <td class="px-6 py-6">
-                <div class="w-14 h-14 rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden relative group">
-                  @if (tieneImagen(variante)) {
-                  <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
-                  <button (click)="removeImagen(variante.id!)"
-                    class="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <app-icon name="trash2" size="18" />
-                  </button>
-                  } @else {
-                  <label
-                    class="w-full h-full flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
-                    <app-icon name="upload" size="20" class="text-gray-300" />
-                    <input type="file" accept="image/*" (change)="onImagenSelected($event, variante.id!)" class="hidden">
-                  </label>
-                  }
-                </div>
               </td>
               <td class="px-6 py-6">
                 <p class="text-sm font-black text-text-primary leading-tight">{{ getVarianteDescripcion(variante) }}</p>
@@ -309,18 +293,8 @@
               </td>
               }
               <td class="px-6 py-6">
-                <div class="relative">
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                  <input type="number" [value]="variante.precioExtra"
-                    (input)="onPrecioExtraChange(variante.id!, +$any($event.target).value)"
-                    class="w-24 pl-7 pr-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-brand-primary outline-none text-sm font-bold">
-                </div>
-              </td>
-              <td class="px-6 py-6 font-black text-sm text-text-primary">${{ calcularPrecioFinal(variante).toFixed(2) }}
-              </td>
-              <td class="px-6 py-6">
                 <button (click)="toggleVarianteActiva(variante.id!)"
-                  [class]="'px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ' + (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
+                  [class]="'px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ' + (variante.activo ? 'bg-blue-50 text-primary border-primary' : 'bg-gray-100 text-gray-400 border-gray-200')">
                   {{ variante.activo ? 'ACTIVA' : 'INACTIVA' }}
                 </button>
               </td>
@@ -346,9 +320,12 @@
         <input type="checkbox" [checked]="todasSeleccionadas()" [indeterminate]="algunaSeleccionada()"
           (change)="toggleTodasLasSelecciones()"
           class="w-6 h-6 text-brand-primary border-gray-300 rounded-lg cursor-pointer" id="select-all-mobile" />
-        <label for="select-all-mobile"
-          class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Seleccionar todas las
-          variantes</label>
+        <div class="flex flex-col min-w-0">
+          <label for="select-all-mobile"
+            class="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] cursor-pointer leading-tight">
+            {{ todasSeleccionadas() ? 'Deseleccionar todas' : 'Seleccionar todas (' + variantesFiltradas().length + ')' }}
+          </label>
+        </div>
       </div>
 
       @for (variante of paginatedVariantes(); track variante.id) {
@@ -359,28 +336,12 @@
           <input type="checkbox" [checked]="variante.seleccionada" (click)="toggleSeleccion(variante.id!, $event)"
             class="w-6 h-6 text-brand-primary border-gray-300 rounded-lg shrink-0 mt-1" />
 
-          <div
-            class="w-20 h-20 rounded-[22px] bg-gray-50 border border-gray-100 overflow-hidden relative shrink-0 shadow-inner">
-            @if (tieneImagen(variante)) {
-            <img [src]="getVarianteImagen(variante)" class="w-full h-full object-cover">
-            <button (click)="removeImagen(variante.id!)"
-              class="absolute top-1 right-1 w-7 h-7 bg-red-600 text-white rounded-xl flex items-center justify-center shadow-lg border-2 border-white">
-              <app-icon name="x" size="14" />
-            </button>
-            } @else {
-            <label class="w-full h-full flex items-center justify-center cursor-pointer active:bg-gray-100">
-              <app-icon name="upload" size="24" class="text-gray-300" />
-              <input type="file" accept="image/*" (change)="onImagenSelected($event, variante.id!)" class="hidden">
-            </label>
-            }
-          </div>
-
           <div class="flex-1 min-w-0">
             <div class="flex justify-between items-start">
               <p class="text-base font-black text-text-primary leading-snug truncate">{{
                 getVarianteDescripcion(variante) }}</p>
-              <button (click)="eliminarVariante(variante.id!)" class="text-gray-300 active:text-red-500 -mt-1 -mr-2 p-2">
-                <app-icon name="trash2" size="20" />
+              <button (click)="eliminarVariante(variante.id!)" class="text-red-200 active:text-red-400 -mt-1 -mr-2 p-2">
+                <app-icon name="trash2" size="20" class="text-red-400"/>
               </button>
             </div>
             <div class="flex flex-wrap items-center gap-2 mt-2">
@@ -395,36 +356,19 @@
           </div>
         </div>
 
-        <!-- Inputs Group -->
-        <div class="grid grid-cols-2 gap-4 py-5 border-y border-gray-50">
-          <div class="space-y-2">
-            <label class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">Precio Extra
-              (+)</label>
-            <div class="relative">
-              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-              <input type="number" [value]="variante.precioExtra"
-                (input)="onPrecioExtraChange(variante.id!, +$any($event.target).value)"
-                class="w-full pl-9 pr-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
-            </div>
-          </div>
-
-          @if (esProductoEnergico()) {
+        <!-- Stock (solo Energético) -->
+        @if (esProductoEnergico()) {
+        <div class="py-5 border-y border-gray-50 mb-5">
           <div class="space-y-2">
             <label class="text-[9px] font-black text-text-muted uppercase tracking-[0.2em] pl-1">Stock Actual</label>
             <input type="number" [value]="variante.stockFisico" (input)="onStockChange(variante.id!, +$any($event.target).value)"
               class="w-full px-4 py-4 bg-gray-50 border border-transparent rounded-[20px] focus:bg-white focus:border-brand-primary outline-none text-sm font-black transition-all">
           </div>
-          }
         </div>
+        }
 
         <!-- Bottom Bar -->
         <div class="flex items-center justify-between pt-5">
-          <div class="space-y-0.5">
-            <p class="text-[9px] font-black text-text-muted uppercase tracking-widest leading-none">Precio Final</p>
-            <p class="text-2xl font-display font-black text-text-primary tracking-tight">${{
-              calcularPrecioFinal(variante).toFixed(2) }}</p>
-          </div>
-
           <button (click)="toggleVarianteActiva(variante.id!)"
             [class]="'flex items-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.1em] transition-all active:scale-95 border-2 ' + 
                    (variante.activo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-400 border-gray-200')">
@@ -480,15 +424,15 @@
     <!-- 💾 BOTÓN FLOTANTE EN MÓVIL (SAVE) -->
     @if (hasChanges() && !isLoading()) {
     <div class="fixed bottom-6 right-6 md:hidden z-50 animate-bounce">
-      <app-button type="button" variant="success" size="lg" [disabled]="isSaving()" (click)="guardarCambios()"
+      <app-button type="button" variant="primary" size="lg" [disabled]="isSaving()" (click)="guardarCambios()"
         class="shadow-[0_20px_50px_rgba(76,175,80,0.3)] rounded-[24px] px-8 border-4 border-white">
-        <app-icon [name]="isSaving() ? 'loader' : 'save'" size="20" [class.animate-spin]="isSaving()" class="mr-2" />
+        <app-icon [name]="isSaving() ? 'loader' : 'save'" size="20" [class.animate-spin]="isSaving()" />
         <span class="font-black uppercase tracking-widest">{{ isSaving() ? "Guardando" : "Guardar" }}</span>
       </app-button>
     </div>
     }
 
-    <!-- 🎯 BARRA MULTI-SELECCIÓN (Mobile/Desktop Balanced) -->
+    <!-- 🎯 BARRA MULTI-SELECCIÓN -->
     @if (cantidadSeleccionadas() > 0) {
     <div
       class="fixed bottom-6 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 animate-[slideUp_0.5s_cubic-bezier(0.19,1,0.22,1)]">
@@ -501,12 +445,6 @@
         </div>
 
         <div class="flex-1 flex items-center gap-3 overflow-x-auto scrollbar-hide py-1 pr-4">
-          <button (click)="aplicarImagenASeleccionadas()"
-            class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
-            <app-icon name="image" size="20" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Imagen</span>
-          </button>
-
           @if (esProductoEnergico()) {
           <button (click)="aplicarStockASeleccionadas()"
             class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
@@ -514,12 +452,6 @@
             <span class="text-[10px] font-black uppercase tracking-widest">Stock</span>
           </button>
           }
-
-          <button (click)="aplicarPrecioExtraASeleccionadas()"
-            class="flex flex-col sm:flex-row items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-[20px] transition-all shrink-0 border border-white/5">
-            <app-icon name="dollarSign" size="20" />
-            <span class="text-[10px] font-black uppercase tracking-widest">Precio</span>
-          </button>
 
           <button (click)="deseleccionarTodas()"
             class="flex items-center justify-center w-12 h-12 sm:w-auto sm:px-8 bg-red-500/90 hover:bg-red-600 rounded-[20px] transition-all shrink-0 border border-white/20 shadow-lg">

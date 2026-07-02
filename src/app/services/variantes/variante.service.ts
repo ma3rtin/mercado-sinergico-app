@@ -84,8 +84,23 @@ export interface ActualizarStockVariantesDTO {
 export interface ActualizarVarianteDTO {
   sku?: string;
   stockFisico?: number | null;
-  precioExtra?: number;
   activo?: boolean;
+}
+
+/**
+ * Item individual para actualización bulk de variantes
+ */
+export interface ActualizarVarianteBulkItem {
+  id: number;
+  stockFisico?: number | null;
+  activo?: boolean;
+}
+
+/**
+ * DTO para actualizar múltiples variantes (activo + stock) en una sola operación
+ */
+export interface ActualizarVariantesBulkDTO {
+  variantes: ActualizarVarianteBulkItem[];
 }
 
 /**
@@ -209,6 +224,32 @@ export class VarianteService extends ApiService {
   }
 
   /**
+   * Actualiza múltiples variantes (activo + stockFisico) en una sola operación
+   * PATCH /api/productos/:id/variantes/bulk
+   */
+  actualizarVarianteBulk(
+    productoId: number,
+    data: ActualizarVariantesBulkDTO
+  ): Observable<any> {
+    console.log(`🎨 VarianteService - PATCH actualizar variantes bulk producto ${productoId}`);
+
+    return this.patch<any>(
+      `productos/${productoId}/variantes/bulk`,
+      data
+    ).pipe(
+      timeout(15000),
+      map(response => {
+        console.log('✅ Variantes actualizadas en bulk:', response);
+        return response;
+      }),
+      catchError(err => {
+        console.error('❌ Error actualizando variantes en bulk:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
    * Actualiza una variante específica
    * PATCH /api/variantes/:id
    */
@@ -225,7 +266,6 @@ export class VarianteService extends ApiService {
       const formData = new FormData();
       formData.append('imagen', imagenFile);
       if (data.sku !== undefined) formData.append('sku', data.sku);
-      if (data.precioExtra !== undefined) formData.append('precioExtra', String(data.precioExtra));
       if (data.activo !== undefined) formData.append('activo', String(data.activo));
       if (data.stockFisico !== undefined && data.stockFisico !== null) {
         formData.append('stockFisico', String(data.stockFisico));
@@ -313,13 +353,6 @@ export class VarianteService extends ApiService {
     return variante.opciones
       .map(opt => opt.opcion)
       .join(' - ');
-  }
-
-  /**
-   * Helper: Calcula el precio final de una variante
-   */
-  calcularPrecioFinal(precioBase: number, variante: ProductoVariante): number {
-    return precioBase + (variante.precioExtra || 0);
   }
 
   /**

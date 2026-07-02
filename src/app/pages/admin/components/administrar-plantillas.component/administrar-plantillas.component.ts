@@ -76,10 +76,8 @@ export class AdministrarPlantillasComponent implements OnInit {
       this.plantillas.update(prev =>
         prev.map(p => (p.id === plantilla.id ? plantilla : p))
       );
-      this.toast.success('Plantilla actualizada correctamente');
     } else {
       this.plantillas.update(prev => [...prev, plantilla]);
-      this.toast.success('Plantilla creada correctamente');
     }
 
     this.plantillaToEdit.set(undefined);
@@ -120,7 +118,7 @@ export class AdministrarPlantillasComponent implements OnInit {
   deletePlantilla(plantilla: Plantilla): void {
     Swal.fire({
       title: '¿Estás seguro?',
-      text: `Se eliminará la plantilla "${plantilla.nombre}".`,
+      text: `Se eliminará la plantilla "${plantilla.nombre}". Nota: Si la plantilla tiene productos asociados, la eliminación fallará.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#2E608C',
@@ -138,7 +136,12 @@ export class AdministrarPlantillasComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error eliminando plantilla:', err);
-            this.toast.error('No se pudo eliminar la plantilla');
+            const message = err.error?.message || 'No se pudo eliminar la plantilla';
+            if (err.status === 409) {
+              this.toast.warning(message);
+            } else {
+              this.toast.error(message);
+            }
           },
         });
       }

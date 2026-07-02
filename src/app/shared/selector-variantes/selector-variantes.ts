@@ -57,14 +57,14 @@ export class SelectorVariantesComponent {
    */
   tieneVariantes = computed(() => {
     const prod = this.producto();
-    return !!(prod.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+    return !!(prod?.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
   });
 
   /**
    * Verifica si existen variantes activas armables
    */
   tieneVariantesFormables = computed(() => {
-    const variantes = this.producto().variantes || [];
+    const variantes = this.producto()?.variantes || [];
     return variantes.some(v => v.activo !== false);
   });
 
@@ -72,7 +72,7 @@ export class SelectorVariantesComponent {
    * Obtiene las características de la plantilla
    */
   caracteristicas = computed(() => {
-    return this.producto().plantilla?.caracteristicas || [];
+    return this.producto()?.plantilla?.caracteristicas || [];
   });
 
   /**
@@ -140,7 +140,7 @@ export class SelectorVariantesComponent {
 
   private encontrarVarianteId(): number | null {
     const seleccionadas = this.seleccionadas();
-    const variantes = this.producto().variantes || [];
+    const variantes = this.producto()?.variantes || [];
 
     console.log('--- ENCONTRAR VARIANTE ---');
     console.log('Seleccionadas:', seleccionadas);
@@ -164,11 +164,14 @@ export class SelectorVariantesComponent {
       const seleccionadas = this.seleccionadas();
       const todas = this.todasSeleccionadas();
       const valida = this.varianteValida();
+      const formables = this.tieneVariantesFormables();
 
       this.variantesChange.emit(seleccionadas);
-      this.valido.emit(todas && valida);
+      
+      const esValido = !formables || (todas && valida);
+      this.valido.emit(esValido);
 
-      if (todas && valida) {
+      if (formables && todas && valida) {
         const varianteId = this.encontrarVarianteId();
         this.varianteSeleccionada.emit(varianteId);
       } else {
@@ -202,7 +205,7 @@ export class SelectorVariantesComponent {
 
       // Validamos si la nueva combinación existe en alguna variante activa.
       // Si no existe, limpiamos las otras selecciones para no bloquear al usuario.
-      const variantes = this.producto().variantes || [];
+      const variantes = this.producto()?.variantes || [];
       if (variantes.length > 0) {
         const existeAlgunaVariante = variantes.some(variante => {
           if (variante.activo === false) return false;
@@ -244,7 +247,7 @@ export class SelectorVariantesComponent {
    */
   esOpcionCombinable(caracteristicaId: number, opcionId: number): boolean {
     const seleccionadas = this.seleccionadas();
-    const variantes = this.producto().variantes || [];
+    const variantes = this.producto()?.variantes || [];
     if (variantes.length === 0) return false;
 
     // Simular cómo quedaría la selección incluyendo la opción que estamos evaluando

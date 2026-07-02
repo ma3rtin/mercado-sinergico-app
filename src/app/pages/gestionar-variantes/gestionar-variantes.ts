@@ -22,7 +22,7 @@ import {
   VarianteService,
   ProductoVariantesResponse,
   ProductoVariante,
-  ActualizarVarianteDTO,
+  ActualizarVariantesBulkDTO,
 } from '@app/services/variantes/variante.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { TipoPaquete } from '@app/models/Enums';
@@ -38,13 +38,9 @@ import Swal from 'sweetalert2';
 // ============================================
 interface VarianteExtendida extends ProductoVariante {
   stockOriginal?: number | null;
-  precioExtraOriginal?: number;
   activoOriginal?: boolean;
-  imagenOriginal?: string | null;
   hasChanges?: boolean;
-  imagenFile?: File | null;
-  imagenPreview?: string | null;
-  seleccionada?: boolean; // 🆕 Para selección múltiple
+  seleccionada?: boolean;
 }
 
 @Component({
@@ -83,7 +79,6 @@ export class GestionarVariantesComponent implements OnInit {
 
   // 🔍 BÚSQUEDA Y FILTROS
   searchTerm = signal<string>('');
-  filtroImagen = signal<'todas' | 'con' | 'sin'>('todas');
   filtroStock = signal<'todas' | 'con' | 'sin'>('todas');
   filtroEstado = signal<'todas' | 'activas' | 'inactivas'>('todas');
 
@@ -133,7 +128,6 @@ export class GestionarVariantesComponent implements OnInit {
   variantesFiltradas = computed(() => {
     let variantes = this.variantes();
     const termino = this.searchTerm().toLowerCase().trim();
-    const filtroImg = this.filtroImagen();
     const filtroStk = this.filtroStock();
     const filtroEst = this.filtroEstado();
 
@@ -143,14 +137,6 @@ export class GestionarVariantesComponent implements OnInit {
         const descripcion = this.getVarianteDescripcion(v).toLowerCase();
         const sku = (v.sku || '').toLowerCase();
         return descripcion.includes(termino) || sku.includes(termino);
-      });
-    }
-
-    // Filtro por imagen
-    if (filtroImg !== 'todas') {
-      variantes = variantes.filter((v) => {
-        const tieneImg = this.tieneImagen(v);
-        return filtroImg === 'con' ? tieneImg : !tieneImg;
       });
     }
 
@@ -207,12 +193,11 @@ export class GestionarVariantesComponent implements OnInit {
   // ============================================
   // LIFECYCLE
   // ============================================
-  
+
   constructor() {
     effect(() => {
       this.searchTerm();
       this.filtroEstado();
-      this.filtroImagen();
       this.filtroStock();
       this.currentPage.set(1);
     }, { allowSignalWrites: true });
@@ -250,7 +235,6 @@ export class GestionarVariantesComponent implements OnInit {
       .subscribe({
         next: (producto) => {
           this.precioBaseProducto.set(producto.precio || 0);
-          console.log('✅ Precio base del producto:', producto.precio);
         },
         error: (err) => {
           console.error('❌ Error cargando producto:', err);
@@ -271,32 +255,19 @@ export class GestionarVariantesComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.productoInfo.set(response);
-          console.log(
-            'tipo producto:',
-            this.productoInfo()?.producto.tipo,
-            'enum:',
-            TipoPaquete.ENERGICO,
-            'comparacion:',
-            this.productoInfo()?.producto.tipo === TipoPaquete.ENERGICO,
-          );
+
           // Añadir metadata para tracking de cambios
           const variantesConMetadata: VarianteExtendida[] =
             response.variantes.map((v) => ({
               ...v,
               stockOriginal: v.stockFisico ?? null,
-              precioExtraOriginal: v.precioExtra || 0,
               activoOriginal: v.activo ?? true,
-              imagenOriginal: v.imagen_url ?? null,
               hasChanges: false,
-              imagenFile: null,
-              imagenPreview: null,
               seleccionada: false,
             }));
 
           this.variantes.set(variantesConMetadata);
           this.isLoading.set(false);
-
-          console.log('✅ Variantes cargadas:', response);
         },
         error: (err) => {
           console.error('❌ Error cargando variantes:', err);
@@ -326,13 +297,6 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   /**
-   * Cambiar filtro de imagen
-   */
-  cambiarFiltroImagen(filtro: 'todas' | 'con' | 'sin'): void {
-    this.filtroImagen.set(filtro);
-  }
-
-  /**
    * Cambiar filtro de stock
    */
   cambiarFiltroStock(filtro: 'todas' | 'con' | 'sin'): void {
@@ -351,7 +315,6 @@ export class GestionarVariantesComponent implements OnInit {
    */
   resetearFiltros(): void {
     this.searchTerm.set('');
-    this.filtroImagen.set('todas');
     this.filtroStock.set('todas');
     this.filtroEstado.set('todas');
   }
@@ -362,7 +325,6 @@ export class GestionarVariantesComponent implements OnInit {
   hayFiltrosActivos = computed(() => {
     return (
       this.searchTerm().trim() !== '' ||
-      this.filtroImagen() !== 'todas' ||
       this.filtroStock() !== 'todas' ||
       this.filtroEstado() !== 'todas'
     );
@@ -387,31 +349,23 @@ export class GestionarVariantesComponent implements OnInit {
         const inicio = Math.min(indiceAnterior, indiceActual);
         const fin = Math.max(indiceAnterior, indiceActual);
 
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsEnRango = variantesPaginadas
-            .slice(inicio, fin + 1)
-            .map((v) => v.id);
+        const idsEnRango = variantesPaginadas
+          .slice(inicio, fin + 1)
+          .map((v) => v.id);
 
-          updated.forEach((v) => {
-            if (idsEnRango.includes(v.id)) {
-              v.seleccionada = true;
-            }
-          });
-
-          return updated;
-        });
+        this.variantes.update((current) =>
+          current.map((v) =>
+            idsEnRango.includes(v.id) ? { ...v, seleccionada: true } : v
+          )
+        );
       }
     } else {
       // Toggle simple
-      this.variantes.update((current) => {
-        const updated = [...current];
-        const varianteEncontrada = updated.find((v) => v.id === varianteId);
-        if (varianteEncontrada) {
-          varianteEncontrada.seleccionada = !varianteEncontrada.seleccionada;
-        }
-        return updated;
-      });
+      this.variantes.update((current) =>
+        current.map((v) =>
+          v.id === varianteId ? { ...v, seleccionada: !v.seleccionada } : v
+        )
+      );
     }
 
     this.lastSelectedId.set(varianteId);
@@ -422,20 +376,15 @@ export class GestionarVariantesComponent implements OnInit {
    */
   toggleTodasLasSelecciones(): void {
     const todasSeleccionadas = this.todasSeleccionadas();
-    const variantesPaginadas = this.paginatedVariantes();
+    const filtradas = this.variantesFiltradas();
 
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const idsPaginadas = variantesPaginadas.map((v) => v.id);
+    const idsFiltradas = filtradas.map((v) => v.id);
 
-      updated.forEach((v) => {
-        if (idsPaginadas.includes(v.id)) {
-          v.seleccionada = !todasSeleccionadas;
-        }
-      });
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) =>
+        idsFiltradas.includes(v.id) ? { ...v, seleccionada: !todasSeleccionadas } : v
+      )
+    );
   }
 
   /**
@@ -449,138 +398,7 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   // ============================================
-  // 🖼️ ACCIONES MASIVAS - IMÁGENES
-  // ============================================
-
-  /**
-   * Aplicar imagen a todas las seleccionadas
-   */
-  aplicarImagenASeleccionadas(): void {
-    const seleccionadas = this.variantesSeleccionadas();
-
-    if (seleccionadas.length === 0) {
-      this.toastr.warning('No hay variantes seleccionadas');
-      return;
-    }
-
-    // Crear input file dinámico
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-
-    input.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (!target.files || target.files.length === 0) return;
-
-      const file = target.files[0];
-
-      // Validar tipo
-      if (!file.type.startsWith('image/')) {
-        this.toastr.error('Solo se permiten archivos de imagen');
-        return;
-      }
-
-      // Validar tamaño (5MB)
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.toastr.error('La imagen no puede superar los 5MB');
-        return;
-      }
-
-      // Generar preview y aplicar a todas las seleccionadas
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const preview = event.target?.result as string;
-
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
-
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.imagenFile = file;
-              v.imagenPreview = preview;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
-
-        this.toastr.success(
-          `Imagen aplicada a ${seleccionadas.length} variante(s)`,
-        );
-        this.deseleccionarTodas();
-      };
-
-      reader.readAsDataURL(file);
-    };
-
-    input.click();
-  }
-
-  // ============================================
-  // 💰 ACCIONES MASIVAS - PRECIO EXTRA
-  // ============================================
-
-  /**
-   * Aplicar precio extra a todas las seleccionadas
-   */
-  aplicarPrecioExtraASeleccionadas(): void {
-    const seleccionadas = this.variantesSeleccionadas();
-
-    if (seleccionadas.length === 0) {
-      this.toastr.warning('No hay variantes seleccionadas');
-      return;
-    }
-
-    Swal.fire({
-      title: 'Aplicar precio extra',
-      input: 'number',
-      inputLabel: `Precio extra para ${seleccionadas.length} variante(s) seleccionada(s)`,
-      inputPlaceholder: 'Ej: 500',
-      inputAttributes: {
-        min: '0',
-        step: '0.01',
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Aplicar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: 'var(--brand-secondary)',
-      inputValidator: (value) => {
-        if (!value || parseFloat(value) < 0) {
-          return 'Ingresá un precio válido';
-        }
-        return null;
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const precioNuevo = parseFloat(result.value);
-
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
-
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.precioExtra = precioNuevo;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
-
-        this.toastr.success(
-          `Precio extra de $${precioNuevo} aplicado a ${seleccionadas.length} variante(s)`,
-        );
-        this.deseleccionarTodas();
-      }
-    });
-  }
-
-  // ============================================
-  // 📦 ACCIONES MASIVAS - STOCK
+  // 📦 ACCIONES MASIVAS - STOCK (selección)
   // ============================================
 
   /**
@@ -617,19 +435,15 @@ export class GestionarVariantesComponent implements OnInit {
       if (result.isConfirmed) {
         const stockNuevo = parseInt(result.value);
 
-        this.variantes.update((current) => {
-          const updated = [...current];
-          const idsSeleccionados = seleccionadas.map((v) => v.id);
+        const idsSeleccionados = seleccionadas.map((v) => v.id);
 
-          updated.forEach((v) => {
-            if (idsSeleccionados.includes(v.id)) {
-              v.stockFisico = stockNuevo;
-              v.hasChanges = true;
-            }
-          });
-
-          return updated;
-        });
+        this.variantes.update((current) =>
+          current.map((v) =>
+            idsSeleccionados.includes(v.id)
+              ? { ...v, stockFisico: stockNuevo, hasChanges: true }
+              : v
+          )
+        );
 
         this.toastr.success(
           `Stock de ${stockNuevo} aplicado a ${seleccionadas.length} variante(s)`,
@@ -651,158 +465,43 @@ export class GestionarVariantesComponent implements OnInit {
       nuevoStock = 0;
     }
 
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-      if (variante) {
-        variante.stockFisico = nuevoStock;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
-  }
-
-  /**
-   * Actualizar precio extra de una variante
-   */
-  onPrecioExtraChange(varianteId: number, nuevoPrecio: number): void {
-    if (nuevoPrecio < 0) {
-      nuevoPrecio = 0;
-    }
-
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-      
-      if (variante) {
-        variante.precioExtra = nuevoPrecio;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, stockFisico: nuevoStock };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
    * Toggle activo/inactivo de una variante
    */
   toggleVarianteActiva(varianteId: number): void {
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-
-      if (variante) {
-        variante.activo = !variante.activo;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
+    this.variantes.update((current) =>
+      current.map((v) => {
+        if (v.id === varianteId) {
+          const updated = { ...v, activo: !v.activo };
+          return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+        }
+        return v;
+      })
+    );
   }
 
   /**
-   * Verificar si una variante tiene cambios sin guardar
+   * Verificar si una variante tiene cambios sin guardar.
+   * Solo compara stockFisico (Energético) y activo.
    */
   private hasVarianteChanges(variante: VarianteExtendida): boolean {
     const esEnergico = this.esProductoEnergico();
 
     return (
       (esEnergico && variante.stockFisico !== variante.stockOriginal) ||
-      variante.precioExtra !== variante.precioExtraOriginal ||
-      variante.activo !== variante.activoOriginal ||
-      variante.imagenFile !== null
+      variante.activo !== variante.activoOriginal
     );
-  }
-
-  // ============================================
-  // MANEJO DE IMÁGENES
-  // ============================================
-
-  /**
-   * Manejar selección de imagen
-   */
-  onImagenSelected(event: Event, varianteId: number): void {
-    const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-
-    const file = input.files[0];
-
-    // Validar tipo de archivo
-    if (!file.type.startsWith('image/')) {
-      this.toastr.error('Solo se permiten archivos de imagen');
-      return;
-    }
-
-    // Validar tamaño (5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      this.toastr.error('La imagen no puede superar los 5MB');
-      return;
-    }
-
-    // Generar preview
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.variantes.update((current) => {
-        const updated = [...current];
-        const variante = updated.find(v => v.id === varianteId);
-
-        if (variante) {
-          variante.imagenFile = file;
-          variante.imagenPreview = e.target?.result as string;
-          variante.hasChanges = true;
-        }
-
-        return updated;
-      });
-    };
-
-    reader.readAsDataURL(file);
-
-    // Resetear input para permitir seleccionar el mismo archivo
-    input.value = '';
-  }
-
-  /**
-   * Eliminar imagen seleccionada
-   */
-  removeImagen(varianteId: number): void {
-    this.variantes.update((current) => {
-      const updated = [...current];
-      const variante = updated.find(v => v.id === varianteId);
-
-      if (variante) {
-        variante.imagenFile = null;
-        variante.imagenPreview = null;
-        variante.hasChanges = this.hasVarianteChanges(variante);
-      }
-
-      return updated;
-    });
-  }
-
-  /**
-   * Verificar si la variante tiene imagen
-   */
-  tieneImagen(variante: VarianteExtendida): boolean {
-    return !!(variante.imagenPreview || variante.imagenOriginal);
-  }
-
-  /**
-   * Obtener URL de imagen de la variante
-   */
-  getVarianteImagen(variante: VarianteExtendida): string {
-    if (variante.imagenPreview) {
-      return variante.imagenPreview;
-    }
-    if (variante.imagenOriginal) {
-      return variante.imagenOriginal;
-    }
-    return '/assets/images/placeholder-variant.png';
   }
 
   // ============================================
@@ -810,7 +509,7 @@ export class GestionarVariantesComponent implements OnInit {
   // ============================================
 
   /**
-   * Guardar todos los cambios
+   * Guardar todos los cambios usando un único llamado bulk
    */
   guardarCambios(): void {
     const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
@@ -837,81 +536,53 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   /**
-   * Ejecutar el guardado de cambios
+   * Ejecutar el guardado bulk de cambios
    */
   private ejecutarGuardado(): void {
     this.isSaving.set(true);
 
     const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
-    let guardadas = 0;
-    let errores = 0;
 
-    variantesConCambios.forEach((variante) => {
-      const dto: ActualizarVarianteDTO = {
-        precioExtra: variante.precioExtra,
-        activo: variante.activo,
-      };
+    const payload: ActualizarVariantesBulkDTO = {
+      variantes: variantesConCambios.map((v) => ({
+        id: v.id,
+        activo: v.activo,
+        ...(this.esProductoEnergico() ? { stockFisico: v.stockFisico } : {}),
+      })),
+    };
 
-      if (this.esProductoEnergico()) {
-        dto.stockFisico = variante.stockFisico;
-      }
+    this.varianteService
+      .actualizarVarianteBulk(this.productoId()!, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          // Actualizar valores originales y limpiar hasChanges
+          const idsGuardados = variantesConCambios.map((v) => v.id);
 
-      this.varianteService
-        .actualizarVariante(variante.id, dto, variante.imagenFile)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: (varianteActualizada) => {
-            guardadas++;
-
-            // Actualizar valores originales (incluyendo imagen_url devuelta por el backend)
-            this.variantes.update((current) =>
-              current.map((v) =>
-                v.id === variante.id
-                  ? {
+          this.variantes.update((current) =>
+            current.map((v) =>
+              idsGuardados.includes(v.id)
+                ? {
                     ...v,
                     stockOriginal: v.stockFisico ?? null,
-                    precioExtraOriginal: v.precioExtra ?? 0,
-                    activoOriginal: v.activo ?? true,
-                    imagenOriginal: varianteActualizada.imagen_url ?? v.imagenOriginal,
+                    activoOriginal: v.activo,
                     hasChanges: false,
-                    imagenFile: null,
-                    imagenPreview: null,
                   }
-                  : v,
-              ),
-            );
+                : v,
+            ),
+          );
 
-            if (guardadas + errores === variantesConCambios.length) {
-              this.finalizarGuardado(guardadas, errores);
-            }
-          },
-          error: (err) => {
-            errores++;
-            console.error('❌ Error guardando variante:', err);
-
-            if (guardadas + errores === variantesConCambios.length) {
-              this.finalizarGuardado(guardadas, errores);
-            }
-          },
-        });
-    });
-  }
-
-  /**
-   * Finalizar proceso de guardado
-   */
-  private finalizarGuardado(guardadas: number, errores: number): void {
-    this.isSaving.set(false);
-
-    if (errores === 0) {
-      this.toastr.success(
-        ` ${guardadas} variante(s) actualizada(s) correctamente`,
-      );
-    } else if (guardadas > 0) {
-      this.toastr.warning(` ${guardadas} guardada(s), ${errores} con errores`);
-    } else {
-      this.toastr.error(' Error al guardar las variantes');
-    }
+          this.isSaving.set(false);
+          this.toastr.success(
+            `${variantesConCambios.length} variante(s) actualizada(s) correctamente`,
+          );
+        },
+        error: (err) => {
+          console.error('❌ Error guardando variantes en bulk:', err);
+          this.isSaving.set(false);
+          this.toastr.error('Error al guardar las variantes');
+        },
+      });
   }
 
   /**
@@ -933,11 +604,8 @@ export class GestionarVariantesComponent implements OnInit {
           current.map((v) => ({
             ...v,
             stockFisico: v.stockOriginal ?? 0,
-            precioExtra: v.precioExtraOriginal ?? 0,
             activo: v.activoOriginal ?? true,
             hasChanges: false,
-            imagenFile: null,
-            imagenPreview: null,
           })),
         );
         this.toastr.info('Cambios descartados');
@@ -1018,15 +686,11 @@ export class GestionarVariantesComponent implements OnInit {
         const stockNuevo = parseInt(result.value);
 
         this.variantes.update((current) =>
-          current.map((v) =>
-            v.activo
-              ? {
-                ...v,
-                stockFisico: stockNuevo,
-                hasChanges: true,
-              }
-              : v,
-          ),
+          current.map((v) => {
+            if (!v.activo) return v;
+            const updated = { ...v, stockFisico: stockNuevo };
+            return { ...updated, hasChanges: this.hasVarianteChanges(updated) };
+          })
         );
 
         this.toastr.success(
@@ -1099,60 +763,6 @@ export class GestionarVariantesComponent implements OnInit {
    */
   getVarianteDescripcion(variante: ProductoVariante): string {
     return this.varianteService.getVarianteDescripcion(variante);
-  }
-
-  /**
-   * Calcular precio final de una variante
-   */
-  calcularPrecioFinal(variante: ProductoVariante): number {
-    const precioBase = this.precioBaseProducto();
-    const extra = variante.precioExtra || 0;
-    return precioBase + extra;
-  }
-
-  /**
-   * Generar reporte de variantes
-   */
-  generarReporte(): void {
-    const producto = this.productoInfo()?.producto;
-    if (!producto) return;
-
-    const reporte = {
-      producto: {
-        id: producto.id,
-        nombre: producto.nombre,
-        tipo: producto.tipo,
-        precioBase: this.precioBaseProducto(),
-      },
-      stockTotal: this.stockTotal(),
-      cantidadVariantes: this.variantes().length,
-      variantesActivas: this.variantesActivas().length,
-      variantesInactivas: this.variantesInactivas().length,
-      variantes: this.variantes().map((v) => ({
-        id: v.id,
-        descripcion: this.getVarianteDescripcion(v),
-        sku: v.sku,
-        stockFisico: v.stockFisico,
-        precioExtra: v.precioExtra,
-        precioFinal: this.calcularPrecioFinal(v),
-        activo: v.activo,
-        hasChanges: v.hasChanges,
-      })),
-    };
-
-    // Convertir a JSON y descargar
-    const dataStr = JSON.stringify(reporte, null, 2);
-    const dataUri =
-      'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `reporte-variantes-${producto.id}-${Date.now()}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-
-    this.toastr.success('Reporte descargado');
   }
 
   /**
