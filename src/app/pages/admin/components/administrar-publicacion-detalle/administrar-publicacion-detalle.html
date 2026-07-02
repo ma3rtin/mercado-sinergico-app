@@ -613,7 +613,7 @@
                 <div class="flex items-start gap-3 px-4 py-3 hover:bg-bg-raised/30 transition-colors">
                   <div
                     class="w-12 h-12 rounded-xl overflow-hidden bg-bg-raised border border-border-default flex-shrink-0">
-                    @if (prod.imagenes?.[0]?.url) {
+                    @if (prod.imagenes[0]?.url) {
                     <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
                     } @else {
                     <div class="w-full h-full flex items-center justify-center">
