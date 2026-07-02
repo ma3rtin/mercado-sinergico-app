@@ -72,15 +72,7 @@
 
     <!-- ⏳ LOADING STATE -->
     @if (isLoading()) {
-    <div class="flex flex-col items-center justify-center py-24 animate-pulse">
-      <div class="relative w-20 h-20 mb-8">
-        <div class="absolute inset-0 border-4 border-brand-primary/10 rounded-full"></div>
-        <div class="absolute inset-0 border-4 border-brand-primary border-t-transparent rounded-full animate-spin">
-        </div>
-        <app-icon name="loader" size="32" class="absolute inset-0 m-auto text-brand-primary animate-bounce" />
-      </div>
-      <h3 class="text-sm font-black text-text-muted uppercase tracking-[0.3em] animate-pulse">Sincronizando datos</h3>
-    </div>
+      <app-loader mensaje="Sincronizando datos..." padding="py-24" />
     }
 
     <!-- ✅ CONTENIDO PRINCIPAL -->

@@ -29,6 +29,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
+import { LoaderComponent } from '@app/shared/loader/loader';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -42,7 +43,8 @@ import Swal from 'sweetalert2';
     AdminBackButtonComponent,
     InputComponent,
     SelectComponent,
-    SelectorTipoCardComponent
+    SelectorTipoCardComponent,
+    LoaderComponent,
   ],
   templateUrl: './editar-paquete-base.html',
 })

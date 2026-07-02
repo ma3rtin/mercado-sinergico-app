@@ -17,6 +17,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-administrar-paquetes',
@@ -27,7 +28,8 @@ import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
     IconComponent,
     AdminBackButtonComponent,
     PaginationComponent,
-    TipoBadgeComponent
+    TipoBadgeComponent,
+    LoaderComponent,
   ],
   templateUrl: './administrar-paquetes.html',
 })
