@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 
 // Models
@@ -16,11 +17,20 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-administrar-productos',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent, TipoBadgeComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    IconComponent,
+    AdminBackButtonComponent,
+    PaginationComponent,
+    TipoBadgeComponent,
+    LoaderComponent,
+  ],
   templateUrl: './administrar-producto.html',
 })
 export class AdministrarProductosComponent {
@@ -34,6 +44,8 @@ export class AdministrarProductosComponent {
   isLoading = signal(true);
   currentPage = signal(1);
   itemsPerPage = signal(10);
+  isDuplicating = signal<number | null>(null);
+  isDeleting = signal<number | null>(null);
 
 
   filteredProductos = computed(() => {
@@ -170,6 +182,8 @@ export class AdministrarProductosComponent {
   }
 
   duplicateProducto(producto: Producto): void {
+    if (this.isDuplicating() !== null || this.isDeleting() !== null) return;
+
     Swal.fire({
       title: '¿Duplicar producto?',
       text: `Se creará una copia de "${producto.nombre}".`,
@@ -178,27 +192,34 @@ export class AdministrarProductosComponent {
       confirmButtonText: 'Duplicar',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#9ca3af'
+      cancelButtonColor: '#9ca3af',
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          this.isDuplicating.set(producto.id_producto!);
+          const response = await firstValueFrom(this.productosService.duplicateProduct(producto.id_producto!));
+          return response;
+        } catch (error: any) {
+          console.error('Error duplicando producto:', error);
+          Swal.showValidationMessage(`No se pudo duplicar el producto: ${error.error?.message || error.message || 'Error desconocido'}`);
+          throw error;
+        } finally {
+          this.isDuplicating.set(null);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
-      if (result.isConfirmed) {
-        this.productosService.duplicateProduct(producto.id_producto!).subscribe({
-          next: (response) => {
-            this.productos.update((prev) => [...prev, response]);
-            this.toast.success('Producto duplicado correctamente');
-            this.loadProductos();
-          },
-          error: (error) => {
-            console.error('Error duplicando producto:', error);
-            this.toast.error('No se pudo duplicar el producto');
-          }
-        });
+      if (result.isConfirmed && result.value) {
+        this.productos.update((prev) => [...prev, result.value]);
+        this.toast.success('Producto duplicado correctamente');
+        this.loadProductos();
       }
     });
   }
 
-
-
   deleteProducto(producto: Producto): void {
+    if (this.isDuplicating() !== null || this.isDeleting() !== null) return;
+
     Swal.fire({
       title: '¿Eliminar producto?',
       text: `Se eliminará "${producto.nombre}" permanentemente`,
@@ -207,18 +228,26 @@ export class AdministrarProductosComponent {
       confirmButtonText: 'Eliminar',
       confirmButtonColor: '#B92905',
       cancelButtonText: 'Cancelar',
-      cancelButtonColor: '#9ca3af'
+      cancelButtonColor: '#9ca3af',
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          this.isDeleting.set(producto.id_producto ?? 0);
+          await firstValueFrom(this.productosService.deleteProducto(producto.id_producto ?? 0));
+          return true;
+        } catch (error: any) {
+          console.error('Error al eliminar producto:', error);
+          Swal.showValidationMessage(`Error al eliminar producto: ${error.error?.message || error.message || 'Error desconocido'}`);
+          throw error;
+        } finally {
+          this.isDeleting.set(null);
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading()
     }).then(result => {
       if (result.isConfirmed) {
-        this.productosService.deleteProducto(producto.id_producto ?? 0).subscribe({
-          next: () => {
-            this.toast.success('Producto eliminado correctamente');
-            this.loadProductos();
-          },
-          error: () => {
-            this.toast.error('Error al eliminar producto');
-          }
-        });
+        this.toast.success('Producto eliminado correctamente');
+        this.loadProductos();
       }
     });
   }
