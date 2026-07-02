@@ -42,6 +42,7 @@ export class AdministrarPaquetesComponent implements OnInit {
   isLoading = signal(true);
   currentPage = signal(1);
   itemsPerPage = signal(10);
+  mostrarArchivados = signal(false);
 
   // Computed
   filteredBase = computed(() => {
@@ -62,6 +63,11 @@ export class AdministrarPaquetesComponent implements OnInit {
 
   constructor() {
     effect(() => {
+      this.mostrarArchivados();
+      this.loadData();
+    }, { allowSignalWrites: true });
+
+    effect(() => {
       this.searchTerm();
       this.currentPage.set(1);
     }, { allowSignalWrites: true });
@@ -72,12 +78,12 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadData();
+    // La carga inicial la realiza el efecto del constructor al evaluar mostrarArchivados()
   }
 
   loadData(): void {
     this.isLoading.set(true);
-    this.baseService.getPaquetes().pipe(
+    this.baseService.getPaquetes(this.mostrarArchivados()).pipe(
       finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (data) => this.paquetesBase.set(data),
@@ -105,23 +111,29 @@ export class AdministrarPaquetesComponent implements OnInit {
     });
   }
 
-  eliminarPaqueteBase(paquete: PaqueteBase): void {
+  archivarPaqueteBase(paquete: PaqueteBase): void {
+    const nuevoEstado = !paquete.archivado;
+    const accion = nuevoEstado ? 'archivar' : 'desarchivar';
     Swal.fire({
-      title: '¿Eliminar paquete base?',
-      text: `Se eliminará "${paquete.nombre}" y sus asociaciones.`,
-      icon: 'warning',
+      title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} paquete base?`,
+      text: `Se cambiará el estado de "${paquete.nombre}".`,
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#B92905',
-      confirmButtonText: 'Eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af'
     }).then(result => {
       if (result.isConfirmed) {
-        this.baseService.deletePaquete(paquete.id_paquete_base!).subscribe({
+        this.baseService.archivarPaquete(paquete.id_paquete_base!, nuevoEstado).subscribe({
           next: () => {
-            this.toast.success('Paquete eliminado');
+            this.toast.success(`Paquete base ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
             this.loadData();
           },
-          error: () => this.toast.error('Error al eliminar. Verificá si tiene publicaciones activas.')
+          error: (error) => {
+            console.error(`Error al ${accion} paquete base:`, error);
+            this.toast.error(`No se pudo ${accion} el paquete base`);
+          }
         });
       }
     });

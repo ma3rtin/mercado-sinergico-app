@@ -35,9 +35,9 @@
         </div>
       </div>
 
-      <!-- Selector de ordenamiento -->
-      <div class="w-full md:w-80">
-        <div class="relative">
+      <!-- Selector de ordenamiento y Mostrar Archivados -->
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="relative flex-1 md:w-80 md:flex-none">
           <app-icon name="sliders" [size]="'16'"
             class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <select title="Orden" [value]="sortOrder()" (change)="sortOrder.set($any($event.target).value)"
@@ -54,6 +54,15 @@
           <app-icon name="chevron-down" [size]="'16'"
             class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none pt-1" />
         </div>
+
+        <button (click)="mostrarArchivados.set(!mostrarArchivados())"
+          [title]="mostrarArchivados() ? 'Ocultar productos archivados' : 'Mostrar productos archivados'"
+          [class]="'w-[52px] h-[52px] flex items-center justify-center rounded-xl border-2 transition-all active:scale-95 cursor-pointer shrink-0 ' +
+                    (mostrarArchivados() 
+                      ? 'bg-brand-cta border-brand-cta text-gray-900 shadow-md shadow-brand-cta/20' 
+                      : 'bg-white border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600')">
+          <app-icon name="archive" [size]="'20'" />
+        </button>
       </div>
     </div>
 
@@ -131,6 +140,15 @@
               <!-- Tipo de Producto Badge -->
               <app-tipo-badge [tipo]="producto.tipo" class="mr-1" />
 
+              <!-- Archivado Badge -->
+              @if (producto.archivado) {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 mr-1 bg-gray-100 text-gray-700 border border-gray-200 rounded-full text-xs font-bold uppercase tracking-wider">
+                <app-icon name="archive" [size]="'12'" class="text-current mt-0.5" />
+                Archivado
+              </span>
+              }
+
               <!-- Badge de variantes (si tiene) -->
               @if (producto.plantillaId || producto.plantilla) {
               <span
@@ -177,11 +195,11 @@
               <app-icon name="edit-2" [size]="'20'" />
             </button>
 
-            <!-- Eliminar -->
-            <button (click)="deleteProducto(producto)"
-              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-error hover:bg-error/5 rounded-xl transition-all active:scale-90"
-              title="Eliminar">
-              <app-icon name="trash" [size]="'20'" />
+            <!-- Archivar/Desarchivar -->
+            <button (click)="archivarProducto(producto)"
+              class="flex-1 sm:flex-none p-2.5 sm:p-2 text-gray-400 hover:text-brand-primary hover:bg-brand-primary/5 rounded-xl transition-all active:scale-90"
+              [title]="producto.archivado ? 'Desarchivar' : 'Archivar'">
+              <app-icon [name]="producto.archivado ? 'rotateCcw' : 'archive'" [size]="'20'" class="mt-0.5" />
             </button>
           </div>
         </div>

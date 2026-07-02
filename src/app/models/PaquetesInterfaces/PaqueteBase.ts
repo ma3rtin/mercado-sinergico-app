@@ -14,4 +14,5 @@ export interface PaqueteBase {
   categoria?: Categoria;
   tipo?: TipoPaquete;
   productos?: PaqueteBaseProducto[];
+  archivado?: boolean;
 }

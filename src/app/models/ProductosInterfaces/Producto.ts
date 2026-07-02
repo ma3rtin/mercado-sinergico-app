@@ -23,6 +23,7 @@ export interface Producto {
   tieneVariantes?: boolean;
   cantidadVariantes?: number;
   tipo: TipoPaquete;
+  archivado?: boolean;
 
   // Relaciones
   marca?: string | { id_marca?: number; nombre: string };
