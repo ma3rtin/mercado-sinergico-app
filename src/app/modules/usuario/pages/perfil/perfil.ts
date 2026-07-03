@@ -9,11 +9,12 @@ import { SelectComponent } from '@app/shared/select/select-component';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent, ButtonComponent, IconComponent],
+  imports: [CommonModule, ReactiveFormsModule, InputComponent, SelectComponent, ButtonComponent, IconComponent, LoaderComponent],
   templateUrl: './perfil.html',
   styleUrls: ['./perfil.css']
 })
