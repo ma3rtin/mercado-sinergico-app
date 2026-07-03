@@ -30,6 +30,7 @@ import { TipoPaquete } from '@app/models/Enums';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 import Swal from 'sweetalert2';
 
@@ -53,6 +54,7 @@ interface VarianteExtendida extends ProductoVariante {
     ButtonComponent,
     IconComponent,
     PaginationComponent,
+    LoaderComponent,
   ],
   templateUrl: './gestionar-variantes.html',
 })

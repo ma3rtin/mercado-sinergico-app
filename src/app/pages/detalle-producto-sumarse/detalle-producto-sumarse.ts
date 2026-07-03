@@ -18,6 +18,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -42,8 +43,9 @@ import Swal from 'sweetalert2';
     PaqueteCard,
     SelectorVariantesComponent,
     ButtonComponent,
-    TipoBadgeComponent
-],
+    TipoBadgeComponent,
+    LoaderComponent
+  ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })

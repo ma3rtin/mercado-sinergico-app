@@ -34,6 +34,7 @@ import { FiltrosComponent } from '@app/shared/filtros/filtros';
 import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaqueteBannerComponent } from '@app/shared/paquete-banner/paquete-banner';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-productos-del-paquete',
@@ -43,7 +44,8 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ 
     FiltrosComponent,
     ProductoCard,
     PaqueteBannerComponent,
-    PaginationComponent // ✅ AGREGAR AQUÍ
+    PaginationComponent, // ✅ AGREGAR AQUÍ
+    LoaderComponent
   ],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css',

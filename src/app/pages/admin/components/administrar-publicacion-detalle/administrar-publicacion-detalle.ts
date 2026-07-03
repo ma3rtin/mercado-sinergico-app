@@ -10,12 +10,13 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { ToastService } from '@app/services/toast/toast.service';
+import { LoaderComponent } from '@app/shared/loader/loader';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-administrar-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, AdminBackButtonComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, AdminBackButtonComponent, LoaderComponent],
   templateUrl: './administrar-publicacion-detalle.html',
 })
 export class AdministrarPublicacionDetalleComponent implements OnInit {

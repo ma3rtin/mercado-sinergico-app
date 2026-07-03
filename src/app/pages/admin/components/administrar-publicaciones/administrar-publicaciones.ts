@@ -11,11 +11,21 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-administrar-publicaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminPaqueteCard, AdminBackButtonComponent, PaginationComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonComponent,
+    IconComponent,
+    AdminPaqueteCard,
+    AdminBackButtonComponent,
+    PaginationComponent,
+    LoaderComponent,
+  ],
   templateUrl: './administrar-publicaciones.html',
 })
 export class AdministrarPublicacionesComponent implements OnInit {

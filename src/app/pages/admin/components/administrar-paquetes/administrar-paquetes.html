@@ -45,10 +45,7 @@
 
     <!-- Listado -->
     @if (isLoading()) {
-      <div class="flex flex-col items-center justify-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-        <p class="text-gray-500 animate-pulse">Cargando paquetes base...</p>
-      </div>
+      <app-loader mensaje="Cargando paquetes base..." />
     } @else {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (paquete of paginatedBase(); track paquete.id_paquete_base) {
