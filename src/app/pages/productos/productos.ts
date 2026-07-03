@@ -2,7 +2,8 @@ import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
+import { forkJoin, map, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -25,6 +26,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
 import { ErrorState } from '@app/shared/error-state/error-state';
+import { IconComponent } from "@app/shared/icono/icono";
 
 @Component({
   selector: 'app-productos',
@@ -36,8 +38,9 @@ import { ErrorState } from '@app/shared/error-state/error-state';
     PaginationComponent,
     CatalogoWrapperComponent,
     DelayedSkeleton,
-    ErrorState
-  ],
+    ErrorState,
+    IconComponent
+],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
@@ -70,11 +73,8 @@ export class ProductosComponent implements OnInit {
   // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario
   valoresFiltrosIniciales = computed<Partial<FiltrosAplicados>>(() => {
     const perfil = this.usuarioService.perfilUsuario();
-    console.log('🔍 [ProductosComponent] Perfil del usuario:', perfil);
     const zonas = perfil?.direccion?.localidad?.zonas || [];
-    console.log('🔍 [ProductosComponent] Zonas del usuario:', zonas);
     if (zonas.length > 0 && zonas[0].id_zona) {
-      console.log('🔍 [ProductosComponent] Pre-filtro de zona inicial:', zonas[0].id_zona);
       return {
         zonas: [zonas[0].id_zona]
       };
@@ -96,11 +96,8 @@ export class ProductosComponent implements OnInit {
     let resultado = [...this.productosOriginales()];
     let filtros = this.filtrosActuales();
 
-    console.log('🔍 [ProductosComponent] filtrosActuales cambiados:', filtros);
-
     if (!filtros) {
       const init = this.valoresFiltrosIniciales();
-      console.log('🔍 [ProductosComponent] Usando init para pre-filtrado:', init);
       if (init && Object.keys(init).length > 0) {
         filtros = {
           categorias: init.categorias || [],
@@ -112,6 +109,25 @@ export class ProductosComponent implements OnInit {
           zonas: init.zonas || []
         };
       }
+    }
+
+    // 🔒 BASE FILTER: Always restrict to products in active packages (regardless of zone)
+    const activePackages = this.paquetesActivos();
+    const productIdsPermitidos = new Set<number>();
+    activePackages.forEach(paq => {
+      const prods = paq.paqueteBase?.productos || [];
+      prods.forEach(bp => {
+        const pid = Number(bp.productoId || 0);
+        if (pid > 0) productIdsPermitidos.add(pid);
+      });
+    });
+
+    if (productIdsPermitidos.size > 0) {
+      resultado = resultado.filter(p =>
+        productIdsPermitidos.has(Number(p.id_producto || p.id || 0))
+      );
+    } else {
+      return [];
     }
 
     if (filtros) {
@@ -137,29 +153,32 @@ export class ProductosComponent implements OnInit {
         resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
       }
 
-      // Filtrar por zonas
-      if (filtros.zonas && filtros.zonas.length > 0) {
-        const activePackages = this.paquetesActivos();
-        console.log('🔍 [ProductosComponent] Paquetes activos para cruzar:', activePackages);
-        const paquetesEnZonas = activePackages.filter(paq => 
-          filtros.zonas.includes(paq.zonaId || 0)
+      // 🗺️ ZONE FILTER: Additional constraint within already-permitted products
+      const zonasParaFiltrar = filtros.zonas?.length > 0
+        ? filtros.zonas
+        : this.valoresFiltrosIniciales().zonas || [];
+
+      if (zonasParaFiltrar.length > 0) {
+        const paquetesEnZonas = activePackages.filter(paq =>
+          zonasParaFiltrar.includes(Number(paq.zonaId) || 0)
         );
-        console.log('🔍 [ProductosComponent] Paquetes en zonas seleccionadas:', paquetesEnZonas);
-        
-        const productIdsPermitidos = new Set<number>();
+
+        const zonaProductIds = new Set<number>();
         paquetesEnZonas.forEach(paq => {
           const prods = paq.paqueteBase?.productos || [];
           prods.forEach(bp => {
-            if (bp.productoId) {
-              productIdsPermitidos.add(bp.productoId);
-            }
+            const pid = Number(bp.productoId || 0);
+            if (pid > 0) zonaProductIds.add(pid);
           });
         });
-        console.log('🔍 [ProductosComponent] IDs de productos permitidos:', Array.from(productIdsPermitidos));
 
-        resultado = resultado.filter(p => 
-          productIdsPermitidos.has(p.id_producto || 0)
-        );
+        if (zonaProductIds.size > 0) {
+          resultado = resultado.filter(p =>
+            zonaProductIds.has(Number(p.id_producto || p.id || 0))
+          );
+        } else {
+          return [];
+        }
       }
     }
 
@@ -168,7 +187,6 @@ export class ProductosComponent implements OnInit {
       resultado = this.ordenarProductos(resultado, this.ordenSeleccionado());
     }
 
-    console.log('🔍 [ProductosComponent] Productos finales resultantes:', resultado.length);
     return resultado;
   });
 
@@ -269,7 +287,6 @@ export class ProductosComponent implements OnInit {
 
   // 📥 CARGA DE DATOS
   private loadProductos(): void {
-    console.log('🔄 Cargando productos...');
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -277,7 +294,6 @@ export class ProductosComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (productos) => {
-          console.log('✅ Productos cargados:', productos.length);
           const productosOrdenados = this.ordenarProductos(productos, 'recientes');
 
           this.productosOriginales.set(productosOrdenados);
@@ -321,11 +337,31 @@ export class ProductosComponent implements OnInit {
 
   private loadPaquetesActivos(): void {
     this.paquetePublicadoService.getPaquetes()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        switchMap(paquetes => {
+          const activos = paquetes.filter(p =>
+            p.estado?.nombre?.toLowerCase() === 'activo'
+          );
+          if (activos.length === 0) return of([]);
+
+          const todosConProductos = activos.every(p =>
+            p.paqueteBase?.productos && p.paqueteBase.productos.length > 0
+          );
+          if (todosConProductos) return of(activos);
+
+          return forkJoin(
+            activos.map(p =>
+              this.paquetePublicadoService.getPaqueteById(p.id_paquete_publicado!).pipe(
+                catchError(() => of(p))
+              )
+            )
+          ).pipe(catchError(() => of(activos)));
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: (paquetes) => {
-          const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
-          this.paquetesActivos.set(activos);
+          this.paquetesActivos.set(paquetes);
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes publicados:', error);
@@ -337,7 +373,6 @@ export class ProductosComponent implements OnInit {
 
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
-    console.log('🎯 Filtros recibidos:', filtros);
     this.filtrosActuales.set(filtros);
   }
 
@@ -365,7 +400,20 @@ export class ProductosComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
-    this.filtrosActuales.set(null);
+    const init = this.valoresFiltrosIniciales();
+    if (init && Object.keys(init).length > 0) {
+      this.filtrosActuales.set({
+        categorias: init.categorias || [],
+        marcas: init.marcas || [],
+        tiposPaquete: init.tiposPaquete || [],
+        ordenamiento: init.ordenamiento || '',
+        rangoPrecio: init.rangoPrecio || { min: null, max: null },
+        estados: init.estados || [],
+        zonas: init.zonas || []
+      });
+    } else {
+      this.filtrosActuales.set(null);
+    }
   }
 
   // 🔄 Recargar productos
@@ -417,12 +465,10 @@ export class ProductosComponent implements OnInit {
   // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
     this.paginaActual.set(page);
-    console.log(`📄 Cambiando a página ${page}`);
   }
 
   onItemsPerPageChange(itemsPerPage: number): void {
     this.itemsPorPagina.set(itemsPerPage);
     this.paginaActual.set(1); // Resetear a página 1
-    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
 }

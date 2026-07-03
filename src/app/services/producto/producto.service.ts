@@ -157,23 +157,41 @@ export class ProductosService extends ApiService {
       imagenes[0]?.url ||
       undefined;
 
+    // Normalizar marca
+    const rawMarca = producto.marca;
+    const marca =
+      typeof rawMarca === 'string'
+        ? { nombre: rawMarca }
+        : rawMarca ?? undefined;
+
+    // Normalizar categoría
+    const rawCategoria = producto.categoria;
+    const categoria =
+      typeof rawCategoria === 'string'
+        ? { nombre: rawCategoria }
+        : rawCategoria ?? undefined;
+
     return {
       ...producto,
       id_producto: producto.id_producto || producto.id,
       imagen_url,
       imagenes,
+      marca,
+      categoria,
 
-      // Normalizar marca
-      marca:
-        typeof producto.marca === 'string'
-          ? { nombre: producto.marca }
-          : producto.marca ?? undefined,
+      // Normalizar categoria_id: extraer del objeto categoria si no viene como campo directo
+      categoria_id:
+        producto.categoria_id ??
+        (typeof rawCategoria === 'object' && rawCategoria !== null
+          ? rawCategoria.id_categoria ?? rawCategoria.id
+          : undefined),
 
-      // Normalizar categoría
-      categoria:
-        typeof producto.categoria === 'string'
-          ? { nombre: producto.categoria }
-          : producto.categoria ?? undefined,
+      // Normalizar marca_id: extraer del objeto marca si no viene como campo directo
+      marca_id:
+        producto.marca_id ??
+        (typeof rawMarca === 'object' && rawMarca !== null
+          ? rawMarca.id_marca ?? rawMarca.id
+          : undefined),
     };
   }
 }
