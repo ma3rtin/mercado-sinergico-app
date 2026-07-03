@@ -62,26 +62,29 @@ export class PaquetePublicadoService extends ApiService {
     }
 
     /** Admin: obtiene TODOS los paquetes publicados */
-    getAllPaquetes(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(this.apiUrl);
+    getAllPaquetes(includeArchived = false): Observable<PaquetePublicado[]> {
+        const url = includeArchived ? `${this.apiUrl}?includeArchived=true` : this.apiUrl;
+        return this.get<PaquetePublicado[]>(url);
     }
 
     /** Admin: obtiene paquetes en estado Completo o Confirmado (requieren acción del admin) */
-    getPaquetesCompletos(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
+    getPaquetesCompletos(includeArchived = false): Observable<PaquetePublicado[]> {
+        return this.getAllPaquetes(includeArchived).pipe(
             map(paquetes => paquetes.filter(p => {
                 const nombre = p.estado?.nombre?.toLowerCase();
-                return nombre === 'completo' || nombre === 'confirmado';
+                const matchedEstado = nombre === 'completo' || nombre === 'confirmado';
+                return matchedEstado && (includeArchived || !p.archivado);
             }))
         );
     }
 
     /** Admin: obtiene paquetes finalizados (Recibido + Cancelado) */
-    getPaquetesFinalizados(): Observable<PaquetePublicado[]> {
-        return this.get<PaquetePublicado[]>(this.apiUrl).pipe(
+    getPaquetesFinalizados(includeArchived = false): Observable<PaquetePublicado[]> {
+        return this.getAllPaquetes(includeArchived).pipe(
             map(paquetes => paquetes.filter(p => {
                 const nombre = p.estado?.nombre?.toLowerCase();
-                return nombre === 'recibido' || nombre === 'cancelado';
+                const matchedEstado = nombre === 'recibido' || nombre === 'cancelado';
+                return matchedEstado && (includeArchived || !p.archivado);
             }))
         );
     }
@@ -144,6 +147,10 @@ export class PaquetePublicadoService extends ApiService {
     /** Descarta una publicación duplicada sin pedidos (hard delete limpio) */
     descartarDuplicado(id: number): Observable<{ message: string }> {
         return this.post<{ message: string }>(`${this.apiUrl}/${id}/descartar`, {});
+    }
+
+    archivarPaquete(id: number, archivado: boolean): Observable<PaquetePublicado> {
+        return this.patch<PaquetePublicado>(`${this.apiUrl}/${id}/archivar`, { archivado });
     }
 
     /** Exportaciones */

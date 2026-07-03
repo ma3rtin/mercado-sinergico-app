@@ -60,7 +60,15 @@ export class ProductosComponent implements OnInit {
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
   productoSeleccionado = signal<Producto | null>(null);
-  isLoading = signal(true);
+  
+  // Estados de carga individuales
+  isLoadingProductos = signal(true);
+  isLoadingZonas = signal(true);
+  isLoadingPaquetes = signal(true);
+  
+  // isLoading computado reactivo
+  isLoading = computed(() => this.isLoadingProductos() || this.isLoadingZonas() || this.isLoadingPaquetes());
+  
   errorMessage = signal('');
   todasLasZonas = signal<Zona[]>([]);
   paquetesActivos = signal<PaquetePublicado[]>([]);
@@ -287,7 +295,8 @@ export class ProductosComponent implements OnInit {
 
   // 📥 CARGA DE DATOS
   private loadProductos(): void {
-    this.isLoading.set(true);
+    console.log('🔄 Cargando productos...');
+    this.isLoadingProductos.set(true);
     this.errorMessage.set('');
 
     this.productosService.getProductos()
@@ -297,11 +306,11 @@ export class ProductosComponent implements OnInit {
           const productosOrdenados = this.ordenarProductos(productos, 'recientes');
 
           this.productosOriginales.set(productosOrdenados);
-          this.isLoading.set(false);
+          this.isLoadingProductos.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando productos:', error);
-          this.isLoading.set(false);
+          this.isLoadingProductos.set(false);
 
           // Manejo de errores específicos
           if (error.name === 'TimeoutError') {
@@ -323,19 +332,23 @@ export class ProductosComponent implements OnInit {
   }
 
   private loadZonas(): void {
+    this.isLoadingZonas.set(true);
     this.zonaService.getZonas()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (zonas) => {
           this.todasLasZonas.set(zonas);
+          this.isLoadingZonas.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando zonas:', error);
+          this.isLoadingZonas.set(false);
         }
       });
   }
 
   private loadPaquetesActivos(): void {
+    this.isLoadingPaquetes.set(true);
     this.paquetePublicadoService.getPaquetes()
       .pipe(
         switchMap(paquetes => {
@@ -361,10 +374,13 @@ export class ProductosComponent implements OnInit {
       )
       .subscribe({
         next: (paquetes) => {
-          this.paquetesActivos.set(paquetes);
+          const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
+          this.paquetesActivos.set(activos);
+          this.isLoadingPaquetes.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes publicados:', error);
+          this.isLoadingPaquetes.set(false);
         }
       });
   }

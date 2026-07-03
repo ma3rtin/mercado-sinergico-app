@@ -5,10 +5,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Localidad, LocalidadService } from '../../services/localidad/localidad.service';
 import { LocationStateService } from '../../services/localidad/location-state.service';
 
+import { LoaderComponent } from '../../shared/loader/loader';
+
 @Component({
     selector: 'app-location-modal',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LoaderComponent],
     templateUrl: './location-modal.component.html',
     styleUrl: './location-modal.component.css'
 })

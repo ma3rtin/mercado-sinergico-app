@@ -9,9 +9,7 @@
     <!-- Body -->
     <div class="p-6">
       @if (isLoading()) {
-        <div class="flex justify-center py-8">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <app-loader mensaje="Cargando localidades..." size="sm" padding="py-8" />
       } @else {
         <div class="space-y-6">
             <!-- Buscador
