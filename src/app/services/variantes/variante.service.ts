@@ -87,6 +87,17 @@ export interface ActualizarVarianteDTO {
   activo?: boolean;
 }
 
+export interface VarianteBulkItem {
+  id: number;
+  sku?: string;
+  stockFisico?: number | null;
+  activo?: boolean;
+}
+
+export interface ActualizarVarianteBulkDTO {
+  variantes: VarianteBulkItem[];
+}
+
 /**
  * Distribución del stock de una variante
  */
@@ -202,6 +213,32 @@ export class VarianteService extends ApiService {
       }),
       catchError(err => {
         console.error('❌ Error actualizando stock en bulk:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /**
+   * Actualiza múltiples variantes en una sola operación (cualquier campo)
+   * PATCH /api/productos/:id/variantes/bulk
+   */
+  actualizarVarianteBulk(
+    productoId: number,
+    data: ActualizarVarianteBulkDTO
+  ): Observable<any> {
+    console.log(`🎨 VarianteService - PATCH actualizar variantes bulk producto ${productoId}`);
+
+    return this.patch<any>(
+      `productos/${productoId}/variantes/bulk`,
+      data
+    ).pipe(
+      timeout(20000),
+      map(response => {
+        console.log('✅ Variantes actualizadas en bulk:', response);
+        return response;
+      }),
+      catchError(err => {
+        console.error('❌ Error actualizando variantes en bulk:', err);
         return throwError(() => err);
       })
     );
