@@ -2,6 +2,7 @@ import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { getProductSlugUrl } from '@app/shared/utils/obfuscator';
 import { map } from 'rxjs';
 
 // Services
@@ -393,7 +394,13 @@ export class ProductosComponent implements OnInit {
       console.error('❌ ID de producto inválido');
       return;
     }
-    this.router.navigate(['producto', id]);
+    const producto = this.productosOriginales().find(p => (p.id_producto ?? p.id) === id);
+    if (producto) {
+      const slugUrl = getProductSlugUrl(producto);
+      this.router.navigate(['producto', slugUrl]);
+    } else {
+      this.router.navigate(['producto', id]);
+    }
   }
 
   // 🎨 HELPERS VISUALES
