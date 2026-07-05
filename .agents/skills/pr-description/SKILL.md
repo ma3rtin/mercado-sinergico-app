@@ -25,12 +25,18 @@ Cuando se invoque esta skill para generar la descripción de un PR:
    - Analiza los archivos modificados, creados o eliminados y sus implicancias.
 
 3. **Generar y guardar la descripción**:
-   - Crea un archivo llamado `PR-DESCRIPTION.md` en la raíz del repositorio actual con la descripción estructurada en español.
+   - Busca si existe el archivo `.github/pull_request_template.md` en el repositorio actual.
+   - Si el archivo de plantilla existe:
+     - Utiliza ese archivo como base exacta para el formato del PR.
+     - Rellena cada una de sus secciones (como Descripción, Cambios principales, Cómo probarlo, Checklist, etc.) analizando los cambios reales de la rama.
+     - En el checklist de la plantilla, marca con `[x]` los ítems correspondientes según los cambios realizados (por ejemplo, si se corrieron y pasaron tests, si se formateó, etc.).
+   - Si no existe un archivo de plantilla en `.github/`, utiliza la plantilla por defecto detallada abajo.
+   - Crea un archivo llamado `PR-DESCRIPTION.md` en la raíz del repositorio actual con el resultado en español.
    - Muestra el contenido generado en la conversación del asistente de IA para que el usuario pueda revisarlo.
 
 ---
 
-## Plantilla y Formato de PR a generar
+## Plantilla por Defecto (si no existe plantilla de GitHub)
 
 El archivo `PR-DESCRIPTION.md` debe seguir el siguiente formato:
 
