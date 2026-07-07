@@ -1,6 +1,6 @@
-# AGENTS.md — Mercado Sinérgico
+# AGENTS.md — Mercado Sinérgico (Frontend)
 
-Instrucciones generales que se aplican a toda tarea que se te asigne en este proyecto, sin importar si es un feat, fix, refactor, chore o hotfix.
+Instrucciones generales que se aplican a toda tarea que se te asigne en este repositorio (frontend), sin importar si es un feat, fix, refactor, chore o hotfix.
 
 ---
 
@@ -46,9 +46,8 @@ Todas tus respuestas, resúmenes de cambios, explicaciones y comentarios en cons
 
 ---
 
-## Contexto técnico del proyecto
+## Contexto técnico del proyecto (Frontend)
 
-- Frontend: Angular (zoneless, signals-based), TypeScript, Tailwind CSS, Vitest.
-- Backend: NestJS, Prisma ORM, MariaDB/MySQL.
-- Convenciones: standalone components, `@if`/`@for` (nunca `*ngIf`/`*ngFor`), signal inputs/outputs, ToastService para notificaciones, SweetAlert2 para confirmaciones destructivas.
-- Dominio: productos Sinérgicos (sin stock físico) vs Energéticos (con stock físico controlado). Las variantes activas son la fuente de verdad sobre si un producto requiere selección antes de la compra, no la existencia de plantilla.
+- **Tecnologías**: Angular (zoneless, signals-based), TypeScript, Tailwind CSS, Vitest.
+- **Convenciones**: standalone components, `@if`/`@for` (nunca `*ngIf`/`*ngFor`), signal inputs/outputs, ToastService para notificaciones, SweetAlert2 para confirmaciones destructivas.
+- **Dominio**: productos Sinérgicos (sin stock físico) vs Energéticos (con stock físico controlado). Las variantes activas son la fuente de verdad sobre si un producto requiere selección antes de la compra, no la existencia de plantilla.
