@@ -46,7 +46,7 @@ export class PaqueteBaseService extends ApiService {
     paqueteBaseId: number,
     productosId: number[]
   ): Observable<PaqueteBase> {
-    return this.post<PaqueteBase>(`paquetes-base/agregar-productos`, {
+    return this.post<PaqueteBase>('paquetes-base/agregar-productos', {
       paqueteBaseId,
       productosId,
     }).pipe(

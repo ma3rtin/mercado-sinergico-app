@@ -26,7 +26,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { CatalogoWrapperComponent } from '@app/shared/catalogo-wrapper/catalogo-wrapper';
 import { DelayedSkeleton } from '@app/shared/skeleton/delayed-skeleton';
 import { ErrorState } from '@app/shared/error-state/error-state';
-import { IconComponent } from "@app/shared/icono/icono";
+import { IconComponent } from '@app/shared/icono/icono';
 
 @Component({
   selector: 'app-productos',
