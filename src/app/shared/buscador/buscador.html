@@ -75,7 +75,7 @@
       @if (mostrarProductos() && resultados().productos.length > 0) {
       <div class="mb-4">
         <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-          <app-icon name="Box" class="text-primary" size="24" />
+          <app-icon name="Box" class="w-6 h-6 text-primary" size="24" />
           Productos ({{ resultados().productos.length }})
         </h3>
         <div class="space-y-1">
@@ -92,7 +92,7 @@
               </p>
               <p class="text-xs text-gray-500 flex items-center gap-1">
                 <app-icon name="Tag" size="12" class="flex-shrink-0" />
-                {{ producto.marca || 'Sin marca' }}
+                {{ obtenerNombreMarca(producto) }}
               </p>
               <p class="text-sm font-bold text-primary mt-1 flex items-center gap-1">
                 <app-icon name="dollar" size="12" />
@@ -111,7 +111,7 @@
       @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
       <div>
         <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-          <app-icon name="Package" class="w-4 h-4 text-primary" />
+          <app-icon name="Package" class="w-6 h-6 text-primary" size="24" />
           Paquetes ({{ resultados().paquetes.length }})
         </h3>
         <div class="space-y-1">
@@ -268,7 +268,7 @@
                 </p>
                 <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
                   <app-icon name="Tag" size="12" />
-                  {{ producto.marca || 'Sin marca' }}
+                  {{ obtenerNombreMarca(producto) }}
                 </p>
                 <p class="text-base font-bold text-primary flex items-center gap-1">
                   <app-icon name="dollar" size="12" />

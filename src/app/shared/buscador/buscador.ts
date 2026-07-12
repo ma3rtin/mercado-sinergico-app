@@ -21,7 +21,6 @@ import {
   catchError,
   finalize,
   take,
-  tap,
 } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -40,6 +39,8 @@ type TipoBusqueda = 'todo' | 'productos' | 'paquetes';
 interface ResultadoBusqueda {
   productos: Producto[];
   paquetes: PaquetePublicado[];
+  totalProductos: number;
+  totalPaquetes: number;
   cargando: boolean;
   error: string | null;
 }
@@ -91,6 +92,8 @@ export class BuscadorComponent {
   resultados = signal<ResultadoBusqueda>({
     productos: [],
     paquetes: [],
+    totalProductos: 0,
+    totalPaquetes: 0,
     cargando: false,
     error: null,
   });
@@ -103,7 +106,7 @@ export class BuscadorComponent {
 
   totalResultados = computed(() => {
     const res = this.resultados();
-    return res.productos.length + res.paquetes.length;
+    return res.totalProductos + res.totalPaquetes;
   });
 
   mostrarProductos = computed(() => {
@@ -138,6 +141,8 @@ export class BuscadorComponent {
             this.resultados.set({
               productos: [],
               paquetes: [],
+              totalProductos: 0,
+              totalPaquetes: 0,
               cargando: false,
               error: null,
             });
@@ -211,13 +216,12 @@ export class BuscadorComponent {
         this.resultados.set({
           productos: productosFiltrados.slice(0, 6),
           paquetes: paquetesFiltrados.slice(0, 6),
+          totalProductos: productosFiltrados.length,
+          totalPaquetes: paquetesFiltrados.length,
           cargando: false,
           error: null,
         });
-
       });
-    tap(() => console.log('🟡 loading true')),
-      finalize(() => console.log('🟢 finalize ejecutado'));
   }
 
 
@@ -254,6 +258,8 @@ export class BuscadorComponent {
     this.resultados.set({
       productos: [],
       paquetes: [],
+      totalProductos: 0,
+      totalPaquetes: 0,
       cargando: false,
       error: null,
     });
@@ -273,7 +279,7 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/detalleSeleccionProducto', producto.id_producto]);
+      this.router.navigate(['/producto', producto.id_producto]);
     }
   }
 
@@ -282,7 +288,7 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/productos-del-paquete', paquete.id_paquete_publicado]);
+      this.router.navigate(['/paquete', paquete.id_paquete_publicado, 'productos']);
     }
   }
 
@@ -299,6 +305,12 @@ export class BuscadorComponent {
   }
 
   // 🎨 Helpers
+  obtenerNombreMarca(producto: Producto): string {
+    const rawMarca = producto.marca;
+    if (!rawMarca) return 'Sin marca';
+    return typeof rawMarca === 'string' ? rawMarca : rawMarca.nombre;
+  }
+
   obtenerImagenProducto(producto: Producto): string {
     return producto.imagen_url || '/assets/images/placeholder-product.png';
   }
