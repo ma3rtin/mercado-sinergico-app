@@ -369,8 +369,8 @@ describe('BuscadorComponent', () => {
   // 5. Límite de 6 resultados y conteo total
   // ═══════════════════════════════════════════════════════════
 
-  describe('Límite de 6 resultados', () => {
-    it('debe mostrar como máximo 6 productos aunque haya más coincidencias', async () => {
+  describe('Límite de 6 resultados y Carga Incremental', () => {
+    it('debe mostrar como máximo 6 productos aunque haya más coincidencias inicialmente', async () => {
       vi.useFakeTimers();
 
       const muchosProductos: Producto[] = Array.from({ length: 10 }, (_, i) => ({
@@ -392,10 +392,10 @@ describe('BuscadorComponent', () => {
       await vi.advanceTimersByTimeAsync(300);
       fixture.detectChanges();
 
-      expect(component.resultados().productos.length).toBe(6);
+      expect(component.productosSlices().length).toBe(6);
     });
 
-    it('debe mostrar como máximo 6 paquetes aunque haya más coincidencias', async () => {
+    it('debe mostrar como máximo 6 paquetes aunque haya más coincidencias inicialmente', async () => {
       vi.useFakeTimers();
 
       const muchosPaquetes: PaquetePublicado[] = Array.from({ length: 8 }, (_, i) => ({
@@ -422,7 +422,7 @@ describe('BuscadorComponent', () => {
       await vi.advanceTimersByTimeAsync(300);
       fixture.detectChanges();
 
-      expect(component.resultados().paquetes.length).toBe(6);
+      expect(component.paquetesSlices().length).toBe(6);
     });
 
     it('totalResultados debe reflejar la cantidad real de matches (no el limitado a 6)', async () => {
@@ -447,10 +447,52 @@ describe('BuscadorComponent', () => {
       await vi.advanceTimersByTimeAsync(300);
       fixture.detectChanges();
 
-      // resultados() tiene .slice(0,6) → 6
-      expect(component.resultados().productos.length).toBe(6);
-      // totalResultados() refleja el total real de matches antes del slice
+      // productosSlices() tiene 6 inicialmente
+      expect(component.productosSlices().length).toBe(6);
+      // totalResultados() refleja el total real de matches
       expect(component.totalResultados()).toBe(8);
+    });
+
+    it('debe cargar más resultados al hacer scroll cerca del final', async () => {
+      vi.useFakeTimers();
+
+      const muchosProductos: Producto[] = Array.from({ length: 15 }, (_, i) => ({
+        id_producto: i + 1,
+        nombre: `Producto Delta ${i + 1}`,
+        precio: 1000,
+        marca: { nombre: 'MarcaZ' },
+        categoria: { nombre: 'CatZ' },
+        descripcion: `Descripción delta ${i + 1}`,
+        tipo: TipoPaquete.SINERGICO,
+        imagenes: [],
+        marca_id: 1,
+        categoria_id: 1,
+      }));
+
+      mockProductosService.getProductos.mockReturnValue(of(muchosProductos));
+
+      component.onSearchChange('Delta');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      // Inicialmente muestra 6
+      expect(component.productosSlices().length).toBe(6);
+      expect(component.limiteMostrado()).toBe(6);
+
+      // Gatillamos scroll
+      const mockEvent = {
+        target: {
+          scrollHeight: 1000,
+          scrollTop: 860, // 1000 - 860 - 100 = 40 (menos de 50px del final)
+          clientHeight: 100
+        }
+      } as unknown as Event;
+
+      component.onScroll(mockEvent);
+
+      // Ahora el límite debe incrementarse en 6
+      expect(component.limiteMostrado()).toBe(12);
+      expect(component.productosSlices().length).toBe(12);
     });
   });
 
