@@ -39,8 +39,6 @@ type TipoBusqueda = 'todo' | 'productos' | 'paquetes';
 interface ResultadoBusqueda {
   productos: Producto[];
   paquetes: PaquetePublicado[];
-  totalProductos: number;
-  totalPaquetes: number;
   cargando: boolean;
   error: string | null;
 }
@@ -89,11 +87,11 @@ export class BuscadorComponent {
   searchTerm = signal('');
   tipoBusqueda = signal<TipoBusqueda>('todo');
 
+  limiteMostrado = signal<number>(6);
+
   resultados = signal<ResultadoBusqueda>({
     productos: [],
     paquetes: [],
-    totalProductos: 0,
-    totalPaquetes: 0,
     cargando: false,
     error: null,
   });
@@ -106,7 +104,21 @@ export class BuscadorComponent {
 
   totalResultados = computed(() => {
     const res = this.resultados();
-    return res.totalProductos + res.totalPaquetes;
+    return res.productos.length + res.paquetes.length;
+  });
+
+  productosSlices = computed(() => {
+    const res = this.resultados();
+    return res.productos.slice(0, this.limiteMostrado());
+  });
+
+  paquetesSlices = computed(() => {
+    const res = this.resultados();
+    return res.paquetes.slice(0, this.limiteMostrado());
+  });
+
+  totalMostrados = computed(() => {
+    return this.productosSlices().length + this.paquetesSlices().length;
   });
 
   mostrarProductos = computed(() => {
@@ -138,11 +150,10 @@ export class BuscadorComponent {
         distinctUntilChanged(),
         switchMap(term => {
           if (!term.trim()) {
+            this.limiteMostrado.set(6);
             this.resultados.set({
               productos: [],
               paquetes: [],
-              totalProductos: 0,
-              totalPaquetes: 0,
               cargando: false,
               error: null,
             });
@@ -213,11 +224,10 @@ export class BuscadorComponent {
           paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
         );
 
+        this.limiteMostrado.set(6);
         this.resultados.set({
-          productos: productosFiltrados.slice(0, 6),
-          paquetes: paquetesFiltrados.slice(0, 6),
-          totalProductos: productosFiltrados.length,
-          totalPaquetes: paquetesFiltrados.length,
+          productos: productosFiltrados,
+          paquetes: paquetesFiltrados,
           cargando: false,
           error: null,
         });
@@ -255,11 +265,10 @@ export class BuscadorComponent {
 
   limpiarBusqueda(): void {
     this.searchTerm.set('');
+    this.limiteMostrado.set(6);
     this.resultados.set({
       productos: [],
       paquetes: [],
-      totalProductos: 0,
-      totalPaquetes: 0,
       cargando: false,
       error: null,
     });
@@ -292,15 +301,19 @@ export class BuscadorComponent {
     }
   }
 
-  verTodosResultados(): void {
-    const term = this.searchTerm();
-    if (term.trim()) {
-      this.closeSearch();
-      this.limpiarBusqueda();
-      this.resultadoSeleccionado.emit();
-      this.router.navigate(['/buscar'], {
-        queryParams: { q: term, tipo: this.tipoBusqueda() },
-      });
+  onScroll(event: Event): void {
+    const container = event.target as HTMLElement;
+    // Si el usuario llega a menos de 50px del final del scroll vertical del contenedor
+    if (container.scrollHeight - container.scrollTop - container.clientHeight < 50) {
+      this.cargarMasResultados();
+    }
+  }
+
+  cargarMasResultados(): void {
+    const totalActualMostrado = this.totalMostrados();
+    const totalCoincidencias = this.totalResultados();
+    if (totalActualMostrado < totalCoincidencias) {
+      this.limiteMostrado.update(lim => lim + 6);
     }
   }
 
