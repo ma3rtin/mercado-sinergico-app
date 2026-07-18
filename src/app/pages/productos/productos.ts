@@ -1,9 +1,17 @@
-import { Component, computed, inject, OnInit, signal, DestroyRef, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { getProductSlugUrl } from '@app/shared/utils/obfuscator';
-import { map } from 'rxjs';
+import { map, switchMap, of, forkJoin, catchError } from 'rxjs';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -15,7 +23,11 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
-import { ConfigFiltros, FiltrosAplicados, OpcionFiltro } from '@app/shared/filtros/filtros';
+import {
+  ConfigFiltros,
+  FiltrosAplicados,
+  OpcionFiltro,
+} from '@app/shared/filtros/filtros';
 import { Zona } from '@app/models/ZonasInterfaces/Zona';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
@@ -39,13 +51,12 @@ import { IconComponent } from '@app/shared/icono/icono';
     CatalogoWrapperComponent,
     DelayedSkeleton,
     ErrorState,
-    IconComponent
-],
+    IconComponent,
+  ],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
 export class ProductosComponent implements OnInit {
-
   // 🔧 Services
   private readonly productosService = inject(ProductosService);
   private readonly categoriaService = inject(CategoriaService);
@@ -67,7 +78,12 @@ export class ProductosComponent implements OnInit {
   isLoadingPaquetes = signal(true);
 
   // isLoading computado reactivo
-  isLoading = computed(() => this.isLoadingProductos() || this.isLoadingZonas() || this.isLoadingPaquetes());
+  isLoading = computed(
+    () =>
+      this.isLoadingProductos() ||
+      this.isLoadingZonas() ||
+      this.isLoadingPaquetes(),
+  );
 
   errorMessage = signal('');
   todasLasZonas = signal<Zona[]>([]);
@@ -84,7 +100,7 @@ export class ProductosComponent implements OnInit {
     const zonas = perfil?.direccion?.localidad?.zonas || [];
     if (zonas.length > 0 && zonas[0].id_zona) {
       return {
-        zonas: [zonas[0].id_zona]
+        zonas: [zonas[0].id_zona],
       };
     }
     return {};
@@ -114,7 +130,7 @@ export class ProductosComponent implements OnInit {
           ordenamiento: init.ordenamiento || '',
           rangoPrecio: init.rangoPrecio || { min: null, max: null },
           estados: init.estados || [],
-          zonas: init.zonas || []
+          zonas: init.zonas || [],
         };
       }
     }
@@ -122,17 +138,17 @@ export class ProductosComponent implements OnInit {
     // 🔒 BASE FILTER: Always restrict to products in active packages (regardless of zone)
     const activePackages = this.paquetesActivos();
     const productIdsPermitidos = new Set<number>();
-    activePackages.forEach(paq => {
+    activePackages.forEach((paq) => {
       const prods = paq.paqueteBase?.productos || [];
-      prods.forEach(bp => {
+      prods.forEach((bp) => {
         const pid = Number(bp.productoId || 0);
         if (pid > 0) productIdsPermitidos.add(pid);
       });
     });
 
     if (productIdsPermitidos.size > 0) {
-      resultado = resultado.filter(p =>
-        productIdsPermitidos.has(Number(p.id_producto || p.id || 0))
+      resultado = resultado.filter((p) =>
+        productIdsPermitidos.has(Number(p.id_producto || p.id || 0)),
       );
     } else {
       return [];
@@ -141,48 +157,53 @@ export class ProductosComponent implements OnInit {
     if (filtros) {
       // Filtrar por categorías
       if (filtros.categorias.length > 0) {
-        resultado = resultado.filter(p =>
-          filtros.categorias.includes(p.categoria_id)
+        resultado = resultado.filter((p) =>
+          filtros.categorias.includes(p.categoria_id),
         );
       }
 
       // Filtrar por marcas
       if (filtros.marcas.length > 0) {
-        resultado = resultado.filter(p =>
-          filtros.marcas.includes(p.marca_id)
+        resultado = resultado.filter((p) =>
+          filtros.marcas.includes(p.marca_id),
         );
       }
 
       // Filtrar por rango de precio
       if (filtros.rangoPrecio.min !== null) {
-        resultado = resultado.filter(p => p.precio >= filtros.rangoPrecio.min!);
+        resultado = resultado.filter(
+          (p) => p.precio >= filtros.rangoPrecio.min!,
+        );
       }
       if (filtros.rangoPrecio.max !== null) {
-        resultado = resultado.filter(p => p.precio <= filtros.rangoPrecio.max!);
+        resultado = resultado.filter(
+          (p) => p.precio <= filtros.rangoPrecio.max!,
+        );
       }
 
       // 🗺️ ZONE FILTER: Additional constraint within already-permitted products
-      const zonasParaFiltrar = filtros.zonas?.length > 0
-        ? filtros.zonas
-        : this.valoresFiltrosIniciales().zonas || [];
+      const zonasParaFiltrar =
+        filtros.zonas?.length > 0
+          ? filtros.zonas
+          : this.valoresFiltrosIniciales().zonas || [];
 
       if (zonasParaFiltrar.length > 0) {
-        const paquetesEnZonas = activePackages.filter(paq =>
-          zonasParaFiltrar.includes(Number(paq.zonaId) || 0)
+        const paquetesEnZonas = activePackages.filter((paq) =>
+          zonasParaFiltrar.includes(Number(paq.zonaId) || 0),
         );
 
         const zonaProductIds = new Set<number>();
-        paquetesEnZonas.forEach(paq => {
+        paquetesEnZonas.forEach((paq) => {
           const prods = paq.paqueteBase?.productos || [];
-          prods.forEach(bp => {
+          prods.forEach((bp) => {
             const pid = Number(bp.productoId || 0);
             if (pid > 0) zonaProductIds.add(pid);
           });
         });
 
         if (zonaProductIds.size > 0) {
-          resultado = resultado.filter(p =>
-            zonaProductIds.has(Number(p.id_producto || p.id || 0))
+          resultado = resultado.filter((p) =>
+            zonaProductIds.has(Number(p.id_producto || p.id || 0)),
           );
         } else {
           return [];
@@ -234,36 +255,54 @@ export class ProductosComponent implements OnInit {
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS
   configFiltrosProductos = computed<ConfigFiltros>(() => ({
     // 📊 Servicios para obtener datos
-    obtenerCategorias: () => this.categoriaService.getCategorias().pipe(
-      map(categorias => categorias.map(cat => ({
-        id: cat.id_categoria,
-        nombre: cat.nombre,
-        valor: cat.id_categoria
-      } as OpcionFiltro)))
-    ),
+    obtenerCategorias: () =>
+      this.categoriaService.getCategorias().pipe(
+        map((categorias) =>
+          categorias.map(
+            (cat) =>
+              ({
+                id: cat.id_categoria,
+                nombre: cat.nombre,
+                valor: cat.id_categoria,
+              }) as OpcionFiltro,
+          ),
+        ),
+      ),
 
-    obtenerMarcas: () => this.marcaService.getMarcas().pipe(
-      map(marcas => marcas.map(marca => ({
-        id: marca.id_marca,
-        nombre: marca.nombre,
-        valor: marca.id_marca
-      } as OpcionFiltro)))
-    ),
+    obtenerMarcas: () =>
+      this.marcaService.getMarcas().pipe(
+        map((marcas) =>
+          marcas.map(
+            (marca) =>
+              ({
+                id: marca.id_marca,
+                nombre: marca.nombre,
+                valor: marca.id_marca,
+              }) as OpcionFiltro,
+          ),
+        ),
+      ),
 
-    obtenerZonas: () => this.zonaService.getZonas().pipe(
-      map(zonas => zonas.map(zona => ({
-        id: zona.id_zona,
-        nombre: zona.nombre,
-        valor: zona.id_zona
-      } as OpcionFiltro)))
-    ),
+    obtenerZonas: () =>
+      this.zonaService.getZonas().pipe(
+        map((zonas) =>
+          zonas.map(
+            (zona) =>
+              ({
+                id: zona.id_zona,
+                nombre: zona.nombre,
+                valor: zona.id_zona,
+              }) as OpcionFiltro,
+          ),
+        ),
+      ),
 
     // 🎨 Filtros a mostrar (solo para productos)
     mostrarCategoria: true,
     mostrarMarca: true,
     mostrarZona: true,
     mostrarTipoPaquete: false, // No aplica para productos
-    mostrarRangoPrecio: true,  // SÍ para productos
+    mostrarRangoPrecio: true, // SÍ para productos
     mostrarOrdenamiento: false, // Ahora está arriba a la derecha
     mostrarEstados: false, // No aplica para productos
 
@@ -299,11 +338,15 @@ export class ProductosComponent implements OnInit {
     this.isLoadingProductos.set(true);
     this.errorMessage.set('');
 
-    this.productosService.getProductos()
+    this.productosService
+      .getProductos()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (productos) => {
-          const productosOrdenados = this.ordenarProductos(productos, 'recientes');
+          const productosOrdenados = this.ordenarProductos(
+            productos,
+            'recientes',
+          );
 
           this.productosOriginales.set(productosOrdenados);
           this.isLoadingProductos.set(false);
@@ -314,26 +357,30 @@ export class ProductosComponent implements OnInit {
 
           // Manejo de errores específicos
           if (error.name === 'TimeoutError') {
-            this.errorMessage.set('El servidor no respondió a tiempo. Por favor, intentá de nuevo.');
-          }
-          else if (error.status === 0) {
-            this.errorMessage.set('No se pudo conectar con el servidor. Verificá tu conexión.');
-          }
-          else if (error.status >= 500) {
-            this.errorMessage.set('Error interno del servidor. Intentá más tarde.');
-          }
-          else {
+            this.errorMessage.set(
+              'El servidor no respondió a tiempo. Por favor, intentá de nuevo.',
+            );
+          } else if (error.status === 0) {
+            this.errorMessage.set(
+              'No se pudo conectar con el servidor. Verificá tu conexión.',
+            );
+          } else if (error.status >= 500) {
+            this.errorMessage.set(
+              'Error interno del servidor. Intentá más tarde.',
+            );
+          } else {
             this.errorMessage.set('Ocurrió un error inesperado.');
           }
 
           this.productosOriginales.set([]);
-        }
+        },
       });
   }
 
   private loadZonas(): void {
     this.isLoadingZonas.set(true);
-    this.zonaService.getZonas()
+    this.zonaService
+      .getZonas()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (zonas) => {
@@ -343,45 +390,49 @@ export class ProductosComponent implements OnInit {
         error: (error) => {
           console.error('❌ Error cargando zonas:', error);
           this.isLoadingZonas.set(false);
-        }
+        },
       });
   }
 
   private loadPaquetesActivos(): void {
     this.isLoadingPaquetes.set(true);
-    this.paquetePublicadoService.getPaquetes()
+    this.paquetePublicadoService
+      .getPaquetes()
       .pipe(
-        switchMap(paquetes => {
-          const activos = paquetes.filter(p =>
-            p.estado?.nombre?.toLowerCase() === 'activo'
+        switchMap((paquetes) => {
+          const activos = paquetes.filter(
+            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
           );
           if (activos.length === 0) return of([]);
 
-          const todosConProductos = activos.every(p =>
-            p.paqueteBase?.productos && p.paqueteBase.productos.length > 0
+          const todosConProductos = activos.every(
+            (p) =>
+              p.paqueteBase?.productos && p.paqueteBase.productos.length > 0,
           );
           if (todosConProductos) return of(activos);
 
           return forkJoin(
-            activos.map(p =>
-              this.paquetePublicadoService.getPaqueteById(p.id_paquete_publicado!).pipe(
-                catchError(() => of(p))
-              )
-            )
+            activos.map((p) =>
+              this.paquetePublicadoService
+                .getPaqueteById(p.id_paquete_publicado!)
+                .pipe(catchError(() => of(p))),
+            ),
           ).pipe(catchError(() => of(activos)));
         }),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: (paquetes) => {
-          const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
+          const activos = paquetes.filter(
+            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
+          );
           this.paquetesActivos.set(activos);
           this.isLoadingPaquetes.set(false);
         },
         error: (error) => {
           console.error('❌ Error cargando paquetes publicados:', error);
           this.isLoadingPaquetes.set(false);
-        }
+        },
       });
   }
 
@@ -425,7 +476,7 @@ export class ProductosComponent implements OnInit {
         ordenamiento: init.ordenamiento || '',
         rangoPrecio: init.rangoPrecio || { min: null, max: null },
         estados: init.estados || [],
-        zonas: init.zonas || []
+        zonas: init.zonas || [],
       });
     } else {
       this.filtrosActuales.set(null);
@@ -443,7 +494,9 @@ export class ProductosComponent implements OnInit {
       console.error('❌ ID de producto inválido');
       return;
     }
-    const producto = this.productosOriginales().find(p => (p.id_producto ?? p.id) === id);
+    const producto = this.productosOriginales().find(
+      (p) => (p.id_producto ?? p.id) === id,
+    );
     if (producto) {
       const slugUrl = getProductSlugUrl(producto);
       this.router.navigate(['producto', slugUrl]);
@@ -456,14 +509,14 @@ export class ProductosComponent implements OnInit {
   getCategoriaNombre(producto: Producto): string {
     return typeof producto.categoria === 'string'
       ? producto.categoria
-      : producto.categoria?.nombre ?? 'Sin categoría';
+      : (producto.categoria?.nombre ?? 'Sin categoría');
   }
 
   // 🆕 NUEVO: Helper para obtener el nombre de la marca
   getMarcaNombre(producto: Producto): string {
     return typeof producto.marca === 'string'
       ? producto.marca
-      : producto.marca?.nombre ?? 'Sin marca';
+      : (producto.marca?.nombre ?? 'Sin marca');
   }
 
   formatPrice(price?: number): string {
