@@ -22,7 +22,7 @@ import {
   VarianteService,
   ProductoVariantesResponse,
   ProductoVariante,
-  ActualizarVariantesBulkDTO,
+  ActualizarVarianteDTO,
 } from '@app/services/variantes/variante.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { TipoPaquete } from '@app/models/Enums';
@@ -42,6 +42,9 @@ interface VarianteExtendida extends ProductoVariante {
   activoOriginal?: boolean;
   hasChanges?: boolean;
   seleccionada?: boolean;
+  imagenFile?: File | null;
+  imagenPreview?: string | ArrayBuffer | null;
+  imagenOriginal?: string | null;
 }
 
 @Component({
@@ -544,47 +547,129 @@ export class GestionarVariantesComponent implements OnInit {
     this.isSaving.set(true);
 
     const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
+    if (variantesConCambios.length === 0) {
+      this.isSaving.set(false);
+      return;
+    }
 
-    const payload: ActualizarVariantesBulkDTO = {
-      variantes: variantesConCambios.map((v) => ({
-        id: v.id,
-        activo: v.activo,
-        ...(this.esProductoEnergico() ? { stockFisico: v.stockFisico } : {}),
-      })),
+    const conImagen = variantesConCambios.filter((v) => v.imagenFile);
+    const sinImagen = variantesConCambios.filter((v) => !v.imagenFile);
+
+    let totalOperaciones = conImagen.length + (sinImagen.length > 0 ? 1 : 0);
+    let completadas = 0;
+    let guardadas = 0;
+    let errores = 0;
+
+    const alCompletarOperacion = (exito: boolean, cant: number) => {
+      completadas++;
+      if (exito) {
+        guardadas += cant;
+      } else {
+        errores += cant;
+      }
+
+      if (completadas === totalOperaciones) {
+        this.finalizarGuardado(guardadas, errores);
+      }
     };
 
-    this.varianteService
-      .actualizarVarianteBulk(this.productoId()!, payload)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          // Actualizar valores originales y limpiar hasChanges
-          const idsGuardados = variantesConCambios.map((v) => v.id);
+    // 1. Guardar las individuales con imagen
+    conImagen.forEach((variante) => {
+      const dto: ActualizarVarianteDTO = {
+        activo: variante.activo,
+      };
+      if (this.esProductoEnergico()) {
+        dto.stockFisico = variante.stockFisico;
+      }
 
-          this.variantes.update((current) =>
-            current.map((v) =>
-              idsGuardados.includes(v.id)
-                ? {
+      this.varianteService
+        .actualizarVariante(variante.id, dto, variante.imagenFile)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (varianteActualizada) => {
+            // Actualizar valores originales
+            this.variantes.update((current) =>
+              current.map((v) =>
+                v.id === variante.id
+                  ? {
+                      ...v,
+                      stockOriginal: v.stockFisico ?? null,
+                      activoOriginal: v.activo ?? true,
+                      imagenOriginal: varianteActualizada.imagen_url ?? v.imagenOriginal,
+                      hasChanges: false,
+                      imagenFile: null,
+                      imagenPreview: null,
+                    }
+                  : v
+              )
+            );
+            alCompletarOperacion(true, 1);
+          },
+          error: (err) => {
+            console.error('❌ Error guardando variante:', err);
+            alCompletarOperacion(false, 1);
+          },
+        });
+    });
+
+    // 2. Guardar en bulk las que no tienen imagen
+    if (sinImagen.length > 0) {
+      const bulkItems = sinImagen.map((v) => {
+        const item: any = {
+          id: v.id,
+          activo: v.activo,
+        };
+        if (this.esProductoEnergico()) {
+          item.stockFisico = v.stockFisico;
+        }
+        return item;
+      });
+
+      this.varianteService
+        .actualizarVarianteBulk(this.productoId() ?? 0, { variantes: bulkItems })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            // Actualizar valores originales para todas las de sin imagen
+            this.variantes.update((current) =>
+              current.map((v) => {
+                const itemModificado = sinImagen.find((si) => si.id === v.id);
+                if (itemModificado) {
+                  return {
                     ...v,
                     stockOriginal: v.stockFisico ?? null,
-                    activoOriginal: v.activo,
+                    activoOriginal: v.activo ?? true,
                     hasChanges: false,
-                  }
-                : v,
-            ),
-          );
+                    imagenFile: null,
+                    imagenPreview: null,
+                  };
+                }
+                return v;
+              })
+            );
+            alCompletarOperacion(true, sinImagen.length);
+          },
+          error: (err) => {
+            console.error('❌ Error guardando variantes en bulk:', err);
+            alCompletarOperacion(false, sinImagen.length);
+          },
+        });
+    }
+  }
 
-          this.isSaving.set(false);
-          this.toastr.success(
-            `${variantesConCambios.length} variante(s) actualizada(s) correctamente`,
-          );
-        },
-        error: (err) => {
-          console.error('❌ Error guardando variantes en bulk:', err);
-          this.isSaving.set(false);
-          this.toastr.error('Error al guardar las variantes');
-        },
-      });
+  private finalizarGuardado(guardadas: number, errores: number): void {
+    this.isSaving.set(false);
+
+    if (errores === 0) {
+      const msg = guardadas === 1
+        ? '1 variante actualizada con éxito'
+        : `${guardadas} variantes actualizadas con éxito`;
+      this.toastr.success(msg);
+    } else if (guardadas > 0) {
+      this.toastr.warning(`${guardadas} guardadas, ${errores} con errores`);
+    } else {
+      this.toastr.error('Error al guardar las variantes');
+    }
   }
 
   /**
