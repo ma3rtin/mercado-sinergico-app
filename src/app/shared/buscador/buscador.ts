@@ -99,7 +99,9 @@ export class BuscadorComponent {
   // 📊 Computed
   hayResultados = computed(() => {
     const res = this.resultados();
-    return res.productos.length > 0 || res.paquetes.length > 0;
+    const hayProductos = this.mostrarProductos() && res.productos.length > 0;
+    const hayPaquetes = this.mostrarPaquetes() && res.paquetes.length > 0;
+    return hayProductos || hayPaquetes;
   });
 
   totalResultados = computed(() => {
@@ -272,6 +274,11 @@ export class BuscadorComponent {
       cargando: false,
       error: null,
     });
+  }
+
+  limpiarFiltrosYBusqueda(): void {
+    this.tipoBusqueda.set('todo');
+    this.limpiarBusqueda();
   }
 
   // 🎯 Cambiar filtro
