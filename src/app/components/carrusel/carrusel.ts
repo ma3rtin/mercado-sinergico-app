@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Router } from '@angular/router';
+import { getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 
 @Component({
   selector: 'app-carrusel',
@@ -86,9 +87,12 @@ export class Carrusel implements AfterViewInit {
   }
 
   // 🔗 Manejo del click de la card
-  onPaqueteClick(id: number): void {
+  onPaqueteClick(item: PaquetePublicado): void {
+    const id = item.id_paquete_publicado;
+    if (!id) return;
     console.log('🔗 Paquete clickeado:', id);
     this.paqueteSelected.emit(id);
-    this.router.navigate(['/paquete/', id, '/productos']);
+    const slugUrl = getPaqueteSlugUrl(item);
+    this.router.navigate(['/paquete', slugUrl, 'productos']);
   }
 }

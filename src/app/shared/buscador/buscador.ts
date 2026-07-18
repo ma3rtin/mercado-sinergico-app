@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { FormsModule } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import {
@@ -295,7 +296,8 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/producto', producto.id_producto]);
+      const slugUrl = getProductSlugUrl(producto);
+      this.router.navigate(['/producto', slugUrl]);
     }
   }
 
@@ -304,7 +306,8 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/paquete', paquete.id_paquete_publicado, 'productos']);
+      const slugUrl = getPaqueteSlugUrl(paquete);
+      this.router.navigate(['/paquete', slugUrl, 'productos']);
     }
   }
 

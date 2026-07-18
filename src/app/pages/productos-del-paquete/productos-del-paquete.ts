@@ -10,6 +10,7 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { decodeId, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { map } from 'rxjs';
 
 // Interfaces
@@ -62,6 +63,11 @@ export class ProductosDelPaquete implements OnInit {
   errorMessage = signal<string>('');
   idPaquete = signal<number>(0);
   paqueteIdActual = signal<number | null>(null);
+  
+  paqueteSlug = computed(() => {
+    const p = this.paquete();
+    return p ? getPaqueteSlugUrl(p) : '';
+  });
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
@@ -193,9 +199,15 @@ export class ProductosDelPaquete implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const paqueteId = Number(params.get('paqueteId'));
+        const rawPaqueteId = params.get('paqueteId');
+        let paqueteId: number | null = null;
 
-        console.log('🔄 Cambio de ruta detectado, paquete ID:', paqueteId);
+        if (rawPaqueteId) {
+          const match = rawPaqueteId.match(/-p([a-z0-9]+)$/);
+          paqueteId = match ? decodeId(match[1]) : Number(rawPaqueteId);
+        }
+
+        console.log('🔄 Cambio de ruta detectado, paquete ID original:', rawPaqueteId, '-> decodificado:', paqueteId);
 
         if (!paqueteId || isNaN(paqueteId)) {
           this.errorMessage.set('No se proporcionó un ID de paquete válido');

@@ -7,6 +7,7 @@ import { TipoPaquete } from '@app/models/Enums';
 import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
 import {TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 
@@ -126,7 +127,8 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     console.log('🧭 Navegando a paquete:', idPaquete);
 
-    this.router.navigate(['/paquete', idPaquete, 'productos']);
+    const slugUrl = getPaqueteSlugUrl(this.paquete);
+    this.router.navigate(['/paquete', slugUrl, 'productos']);
   }
 
   getTipoPaqueteIcono(tipo?: string | TipoPaquete) {

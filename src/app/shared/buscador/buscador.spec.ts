@@ -9,6 +9,7 @@ import { vi } from 'vitest';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { TipoPaquete } from '@app/models/Enums';
+import { getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 
 describe('BuscadorComponent', () => {
   let component: BuscadorComponent;
@@ -197,7 +198,7 @@ describe('BuscadorComponent', () => {
 
       component.verProducto(producto);
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/producto', producto.id_producto]);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/producto', getProductSlugUrl(producto)]);
     });
 
     it('verProducto() debe cerrar búsqueda, limpiar término y emitir resultadoSeleccionado', () => {
@@ -225,7 +226,7 @@ describe('BuscadorComponent', () => {
 
       component.verPaquete(paquete);
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/paquete', paquete.id_paquete_publicado, 'productos']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/paquete', getPaqueteSlugUrl(paquete), 'productos']);
     });
 
     it('verPaquete() debe cerrar búsqueda, limpiar término y emitir resultadoSeleccionado', () => {
