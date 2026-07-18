@@ -60,8 +60,8 @@
         <div class="h-2 rounded-full transition-all duration-500" [ngClass]="{
         'bg-success': porcentajeReservado < 50,
         'bg-brand-pta': porcentajeReservado >= 50 && porcentajeReservado < 80,
-        'bg-brand-primary': porcentajeReservado >= 50,
-        'bg-error': porcentajeReservado >= 80
+        'bg-brand-primary': porcentajeReservado >= 80 && porcentajeReservado < 100,
+        'bg-error': porcentajeReservado >= 100
       }" [style.width.%]="porcentajeReservado">
         </div>
       </div>
@@ -219,11 +219,13 @@
                   <div class="flex items-center justify-between mt-auto">
                     <!-- Controles de cantidad: Botones circulares en píldora -->
                     <div class="flex items-center gap-1 bg-bg-app rounded-full p-1 border border-border-default shadow-inner">
-                      <button type="button" (click)="onDisminuirCantidad(producto)"
-                        class="w-7 h-7 flex items-center justify-center rounded-full bg-bg-surface text-text-primary shadow-sm active:scale-90 transition-all">
+                      <button type="button" (click)="onDisminuirCantidad(producto)" [disabled]="(producto.cantidad ?? 1) <= 1"
+                        class="w-7 h-7 flex items-center justify-center rounded-full bg-bg-surface text-text-primary shadow-sm active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 transition-all">
                         <app-icon name="minus" size="12" />
                       </button>
-                      <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                      <input type="number" min="1" step="1" [value]="producto.cantidad" 
+                        (change)="onCambiarCantidadManual(producto, $event)"
+                        (keydown)="onKeyDownCantidad($event)"
                         class="w-8 h-6 mx-0.5 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 focus:bg-white rounded [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         style="-moz-appearance: textfield; appearance: textfield;" />
                       <button type="button" (click)="onAumentarCantidad(producto)"
@@ -347,11 +349,13 @@
             <div class="flex flex-col items-end gap-2 shrink-0">
               <div class="flex items-center gap-1.5">
                 @if (puedeEditarCantidades) {
-                  <button type="button" (click)="onDisminuirCantidad(producto)"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default active:scale-90 cursor-pointer">
+                  <button type="button" (click)="onDisminuirCantidad(producto)" [disabled]="(producto.cantidad ?? 1) <= 1"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-bg-raised hover:bg-border-default text-text-primary transition-colors border border-border-default active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer">
                     <app-icon name="minus" size="12" />
                   </button>
-                  <input type="number" min="1" [value]="producto.cantidad" (change)="onCambiarCantidadManual(producto, $event)"
+                  <input type="number" min="1" step="1" [value]="producto.cantidad" 
+                    (change)="onCambiarCantidadManual(producto, $event)"
+                    (keydown)="onKeyDownCantidad($event)"
                     class="w-8 h-7 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0 rounded focus:bg-white [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     style="-moz-appearance: textfield; appearance: textfield;" />
                   <button type="button" (click)="onAumentarCantidad(producto)"

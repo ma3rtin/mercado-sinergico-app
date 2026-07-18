@@ -44,6 +44,7 @@ import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/share
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
@@ -65,6 +66,7 @@ import Swal from 'sweetalert2';
     SelectCategoriaMarca,
     MapOptionsPipe,
     SubidorImagenes,
+    LoaderComponent,
   ],
   standalone: true,
 })

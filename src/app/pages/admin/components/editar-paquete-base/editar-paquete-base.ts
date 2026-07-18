@@ -9,6 +9,7 @@ import {
   inject,
   computed,
 } from '@angular/core';
+import { switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -28,20 +29,22 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
+import { LoaderComponent } from '@app/shared/loader/loader';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-editar-paquete-base',
   standalone: true,
   imports: [
-    FormsModule, 
-    AdminCreateWrapperComponent, 
-    ButtonComponent, 
-    IconComponent, 
-    AdminBackButtonComponent, 
-    InputComponent, 
+    FormsModule,
+    AdminCreateWrapperComponent,
+    ButtonComponent,
+    IconComponent,
+    AdminBackButtonComponent,
+    InputComponent,
     SelectComponent,
-    SelectorTipoCardComponent
+    SelectorTipoCardComponent,
+    LoaderComponent,
   ],
   templateUrl: './editar-paquete-base.html',
 })
@@ -217,29 +220,38 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   }
 
   guardar(): void {
-    console.log('💾 Guardando cambios en paquete base:', this.idPaquete());
+    const id = this.idPaquete();
+    if (!id) {
+      this.toast.error('ID de paquete no válido.');
+      return;
+    }
+
     this.guardando.set(true);
-    // TODO: El service requiere updatePaquete con FormData para la imagen
+
     const paqueteActualizado = {
-      id_paquete_base: this.idPaquete()!,
+      id_paquete_base: id,
       nombre: this.nombre(),
       descripcion: this.descripcion(),
+      imagen_url: this.imagenUrl() ?? '',
       categoria_id: this.categoriaSeleccionada()!,
       marcaId: this.marcaSeleccionada()!,
-      tipo: this.tipoMap[this.tipoPaquete()],
-      productos: this.productosSeleccionados().map(p => p.id_producto!)
+      tipo: this.tipoPaquete(),
     };
 
-    // @ts-ignore
-    this.baseService.updatePaquete(paqueteActualizado).subscribe({
+    const productosIds = this.productosSeleccionados()
+      .map(p => p.id_producto)
+      .filter((pid): pid is number => pid !== undefined);
+
+    this.baseService.updatePaquete(paqueteActualizado).pipe(
+      switchMap(() => this.baseService.agregarProductos(id, productosIds))
+    ).subscribe({
       next: () => {
-        console.log('✅ Paquete actualizado con éxito');
-        this.toast.success('Paquete actualizado');
+        this.toast.success('Paquete y productos actualizados. Los cambios ya se reflejan en la publicación activa.');
         this.router.navigate(['/admin/administrar-paquetes']);
       },
       error: (err) => {
         console.error('❌ Error al actualizar paquete:', err);
-        this.toast.error('Error al actualizar');
+        this.toast.error('Error al actualizar. Verificá los datos e intentá de nuevo.');
         this.guardando.set(false);
       }
     });

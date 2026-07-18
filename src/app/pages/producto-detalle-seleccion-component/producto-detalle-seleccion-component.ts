@@ -26,6 +26,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-producto-detalle-seleccion',
@@ -37,8 +38,9 @@ import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
     IconComponent,
     PaginationComponent,
     VisorImagenesComponent,
-    TipoBadgeComponent
-],
+    TipoBadgeComponent,
+    LoaderComponent
+  ],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {

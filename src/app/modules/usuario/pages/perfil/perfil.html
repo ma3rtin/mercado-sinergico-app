@@ -1,8 +1,7 @@
 @if (cargando()) {
-<div class="flex flex-col items-center justify-center min-h-[50vh]">
-  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-  <p class="text-gray-500 font-medium">Cargando perfil...</p>
-</div>
+  <div class="flex flex-col items-center justify-center min-h-[50vh]">
+    <app-loader mensaje="Cargando perfil..." padding="py-0" />
+  </div>
 } @else if (!cargando() && !sesionIniciada()) {
 <div class="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
   <div class="bg-blue-50 p-6 rounded-full mb-6">

@@ -186,7 +186,7 @@ export class MisPedidosComponent implements OnInit {
           const precioConDescuento = precio - (precio * descuento / 100);
 
           return {
-            id_detalle: x.id, // <-- agregamos el id real del detalle
+            id_detalle: x.id,
             id_producto: x.productoId,
             nombre: x.producto!.nombre,
             precio,
@@ -236,7 +236,6 @@ export class MisPedidosComponent implements OnInit {
   }
 
   aumentarCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
-    // 1. Reemplazar el array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
         p.id_detalle === producto.id_detalle
@@ -244,22 +243,18 @@ export class MisPedidosComponent implements OnInit {
           : p
     );
 
-    // 2. Recalcular totales
     this.recalcularPedido(pedido);
 
-    // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
       (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
-    // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
       actualizado.id_detalle,
       { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
-        // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
             p.id_detalle === producto.id_detalle
@@ -274,7 +269,10 @@ export class MisPedidosComponent implements OnInit {
   }
 
   disminuirCantidad(pedido: PedidoDelUsuario, producto: ProductoEnPedido) {
-    // 1. Reemplazar el array sin mutar objetos
+    if (producto.cantidad <= 1) {
+      return;
+    }
+
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
         p.id_detalle === producto.id_detalle
@@ -282,22 +280,18 @@ export class MisPedidosComponent implements OnInit {
           : p
     );
 
-    // 2. Recalcular totales
     this.recalcularPedido(pedido);
 
-    // 3. Buscar nueva versión del producto (ya actualizada)
     const actualizado = pedido.productosSeleccionados.find(
       (x: ProductoEnPedido) => x.id_detalle === producto.id_detalle
     )!;
 
-    // 4. Enviar update al backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
       actualizado.id_detalle,
       { cantidad: actualizado.cantidad }
     ).subscribe({
       error: () => {
-        // revertir cambios en caso de error
         pedido.productosSeleccionados = pedido.productosSeleccionados.map(
           (p: ProductoEnPedido) =>
             p.id_detalle === producto.id_detalle
@@ -312,13 +306,18 @@ export class MisPedidosComponent implements OnInit {
   }
 
   setCantidadManual(pedido: PedidoDelUsuario, payload: any) {
-    const nuevaCantidad = payload.nuevaCantidad;
+    const nuevaCantidad = Number(payload.nuevaCantidad);
+
+    if (!Number.isInteger(nuevaCantidad) || nuevaCantidad < 1) {
+      this.toast.error('La cantidad debe ser un número entero mayor a 0.');
+      return;
+    }
+
     const productoOriginal = pedido.productosSeleccionados.find(p => p.id_detalle === payload.id_detalle);
     if (!productoOriginal) return;
-    
+
     const cantidadAnterior = productoOriginal.cantidad;
 
-    // 1. Reemplazar array sin mutar objetos
     pedido.productosSeleccionados = pedido.productosSeleccionados.map(
       (p: ProductoEnPedido) =>
         p.id_detalle === payload.id_detalle
@@ -326,10 +325,8 @@ export class MisPedidosComponent implements OnInit {
           : p
     );
 
-    // 2. Recalcular
     this.recalcularPedido(pedido);
 
-    // 3. Update backend
     this.pedidoService.actualizarCantidad(
       pedido.id_pedido!,
       payload.id_detalle,
@@ -353,7 +350,6 @@ export class MisPedidosComponent implements OnInit {
 
     const esUltimoProducto = pedido.productosSeleccionados.length === 1;
 
-    // 🧨 CASO B: último producto → eliminar pedido completo
     if (esUltimoProducto) {
       Swal.fire({
         title: '¿Eliminar pedido completo?',
@@ -381,7 +377,6 @@ export class MisPedidosComponent implements OnInit {
           return;
         }
 
-        // 👉 reutilizamos la lógica existente
         this.pedidoService
           .salirDelPaquete(paqueteId)
           .pipe(takeUntilDestroyed(this.destroyRef))
@@ -392,8 +387,8 @@ export class MisPedidosComponent implements OnInit {
               );
               this.toast.success('Pedido eliminado y salida del paquete confirmada.');
             },
-            error: () => {
-              this.toast.error('No se pudo eliminar el pedido.');
+            error: (err) => {
+              this.toast.error(this.extractErrorMsg(err, 'No se pudo eliminar el pedido.'));
             }
           });
       });
@@ -468,8 +463,8 @@ export class MisPedidosComponent implements OnInit {
             );
             this.toast.success('Saliste del paquete.');
           },
-          error: () => {
-            this.toast.error('No se pudo salir del paquete.');
+          error: (err) => {
+            this.toast.error(this.extractErrorMsg(err, 'No se pudo salir del paquete. Intentá nuevamente.'));
           }
         });
     });
@@ -483,25 +478,30 @@ export class MisPedidosComponent implements OnInit {
       return;
     }
 
+    const estadoActual = pedido.estado?.nombre?.toLowerCase();
+    if (estadoActual !== 'pendiente') {
+      this.toast.error('Este pedido ya fue procesado y no puede volver a pagarse.');
+      return;
+    }
+
     sessionStorage.setItem('pedido_en_pago', pedidoId.toString());
 
     this.pedidoService.iniciarCheckout(pedidoId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          const url: string = response.checkoutUrl.checkoutUrl;
-          const dominiosPermitidos = ['mercadopago.com', 'mercadopago.com.ar', 'mercadolibre.com'];
-          const esSeguро = dominiosPermitidos.some(d => {
-            try { return new URL(url).hostname.endsWith(d); } catch { return false; }
-          });
-          if (!esSeguро) {
+          const url = response?.checkoutUrl?.checkoutUrl;
+          const esSeguro = this.isAllowedCheckoutUrl(url);
+          if (!esSeguro) {
+            sessionStorage.removeItem('pedido_en_pago');
             this.toast.error('URL de pago inválida. Contactá soporte.');
             return;
           }
           window.location.href = url;
         },
         error: (err) => {
-          this.toast.error('No se pudo iniciar el pago');
+          sessionStorage.removeItem('pedido_en_pago');
+          this.toast.error(this.extractErrorMsg(err, 'No se pudo iniciar el pago. Intentá nuevamente.'));
           console.error('Error al crear preferencia:', err);
         }
       });
@@ -539,6 +539,66 @@ export class MisPedidosComponent implements OnInit {
   // ------------------------------
   // HELPERS
   // ------------------------------
+  private isAllowedCheckoutUrl(url: unknown): url is string {
+    if (typeof url !== 'string') return false;
+
+    const dominiosPermitidos = ['mercadopago.com', 'mercadopago.com.ar', 'mercadolibre.com'];
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:') return false;
+
+      const hostname = parsed.hostname.toLowerCase();
+      return dominiosPermitidos.some(
+        (dominio) => hostname === dominio || hostname.endsWith(`.${dominio}`)
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  private extractErrorMsg(err: any, fallback: string): string {
+    const body = err?.error;
+
+    const normalize = (value: any): string | null => {
+      if (!value) return null;
+
+      if (typeof value === 'string') {
+        return value.includes('[object') ? null : value;
+      }
+
+      if (Array.isArray(value)) {
+        const joined = value
+          .map((item) => normalize(item))
+          .filter((item): item is string => Boolean(item))
+          .join('. ');
+        return joined || null;
+      }
+
+      if (typeof value === 'object') {
+        if (value.constraints && typeof value.constraints === 'object') {
+          return normalize(Object.values(value.constraints));
+        }
+
+        const keys = ['message', 'mensaje', 'error', 'errors'];
+        for (const key of keys) {
+          const norm = normalize(value[key]);
+          if (norm) return norm;
+        }
+      }
+
+      return null;
+    };
+
+    const bodyMsg = normalize(body);
+    if (bodyMsg) return bodyMsg;
+
+    const topMsg = normalize(err?.message);
+    if (topMsg) return topMsg;
+
+    return fallback;
+  }
+
   onImageError(ev: Event): void {
     (ev.target as HTMLImageElement).src = '/assets/images/placeholder-product.png';
   }

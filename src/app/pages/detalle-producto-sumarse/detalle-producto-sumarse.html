@@ -1,9 +1,6 @@
 <!-- Loading State -->
 @if (isLoading()) {
-<div class="flex flex-col items-center justify-center py-20">
-    <app-icon name="Loader" class="w-16 h-16 text-info mb-4 animate-spin" />
-    <p class="text-gray-600 text-lg">Cargando...</p>
-</div>
+  <app-loader mensaje="Cargando información del pedido..." />
 }
 
 <!-- Error State -->
@@ -93,7 +90,7 @@
             </div>
 
             <!-- Selector de Variantes -->
-            @if (productoTieneVariantes()) {
+            @if (producto() && productoTieneVariantes()) {
             <div class="mb-8">
                 <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
                     (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
