@@ -128,16 +128,16 @@ export class CrearProductoComponent implements OnInit {
 
   private initializeForm(): void {
     this.productForm = this.fb.group({
-      nombre: ['', [Validators.required, Validators.minLength(3)]],
-      descripcion: [''],
-      precio: [null, [Validators.required, Validators.min(0)]],
-      stock: [null, [Validators.min(0)]],
+      nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      precio: [null, [Validators.required, Validators.min(0), Validators.max(99999999)]],
+      stock: [null, [Validators.min(0), Validators.max(1000000)]],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
-      altura: [null, [Validators.min(0)]],
-      ancho: [null, [Validators.min(0)]],
-      profundidad: [null, [Validators.min(0)]],
-      peso: [null, [Validators.min(0)]],
+      altura: [null, [Validators.min(0), Validators.max(10000)]],
+      ancho: [null, [Validators.min(0), Validators.max(10000)]],
+      profundidad: [null, [Validators.min(0), Validators.max(10000)]],
+      peso: [null, [Validators.min(0), Validators.max(10000)]],
       plantillaId: [null],
       tipo: [TipoPaquete.SINERGICO]
     });
@@ -449,13 +449,15 @@ export class CrearProductoComponent implements OnInit {
     const fieldLabel = this.getFieldLabel(fieldName);
     if (errors['required']) return `${fieldLabel} es requerido`;
     if (errors['minlength']) return `${fieldLabel} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
+    if (errors['maxlength']) return `${fieldLabel} no puede superar los ${errors['maxlength'].requiredLength} caracteres`;
     if (errors['min']) return `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
+    if (errors['max']) return `${fieldLabel} debe ser menor o igual a ${errors['max'].max}`;
     return '';
   }
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      nombre: 'El nombre', precio: 'El precio', stock: 'El stock',
+      nombre: 'El nombre', descripcion: 'La descripción', precio: 'El precio', stock: 'El stock',
       categoria_id: 'La categoría', marca_id: 'La marca',
       altura: 'La altura', ancho: 'El ancho', profundidad: 'La profundidad', peso: 'El peso'
     };
