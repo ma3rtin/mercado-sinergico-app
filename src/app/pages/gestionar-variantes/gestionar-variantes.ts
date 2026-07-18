@@ -22,7 +22,7 @@ import {
   VarianteService,
   ProductoVariantesResponse,
   ProductoVariante,
-  ActualizarVariantesBulkDTO,
+  ActualizarVarianteDTO,
 } from '@app/services/variantes/variante.service';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { TipoPaquete } from '@app/models/Enums';
@@ -42,6 +42,9 @@ interface VarianteExtendida extends ProductoVariante {
   activoOriginal?: boolean;
   hasChanges?: boolean;
   seleccionada?: boolean;
+  imagenFile?: File | null;
+  imagenPreview?: string | ArrayBuffer | null;
+  imagenOriginal?: string | null;
 }
 
 @Component({
