@@ -6,11 +6,15 @@ import {
   computed,
   effect,
   inject,
+  DestroyRef,
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '../icono/icono';
 
@@ -36,17 +40,11 @@ export interface FiltrosAplicados {
   zonas: (string | number)[];
 }
 
-/**
- * Configuración de filtros disponibles
- * Define qué filtros mostrar y cómo obtener sus datos
- */
 export interface ConfigFiltros {
-  // 🎯 Servicios para obtener datos
   obtenerCategorias?: () => Observable<OpcionFiltro[]>;
   obtenerMarcas?: () => Observable<OpcionFiltro[]>;
   obtenerZonas?: () => Observable<OpcionFiltro[]>;
 
-  // 🎨 Filtros a mostrar (true = mostrar, false = ocultar)
   mostrarCategoria?: boolean;
   mostrarMarca?: boolean;
   mostrarTipoPaquete?: boolean;
@@ -55,13 +53,11 @@ export interface ConfigFiltros {
   mostrarEstados?: boolean;
   mostrarZona?: boolean;
 
-  // 📋 Opciones personalizadas
   opcionesTipoPaquete?: OpcionFiltro[];
   opcionesOrdenamiento?: OpcionFiltro[];
   opcionesEstados?: OpcionFiltro[];
   opcionesZonas?: OpcionFiltro[];
 
-  // 🎯 Textos personalizables
   tituloCategoria?: string;
   tituloMarca?: string;
   tituloTipoPaquete?: string;
@@ -171,14 +167,29 @@ export class FiltrosComponent {
     return count;
   });
 
+  // 🚀 NUEVO: estado combinado de filtros, fuente única para la emisión reactiva
+  private filtrosActuales = computed<FiltrosAplicados>(() => ({
+    categorias: this.categoriasSeleccionadas(),
+    marcas: this.marcasSeleccionadas(),
+    tiposPaquete: this.tiposPaqueteSeleccionados(),
+    ordenamiento: this.ordenSeleccionado(),
+    rangoPrecio: {
+      min: this.precioMin(),
+      max: this.precioMax(),
+    },
+    estados: this.estadosSeleccionados(),
+    zonas: this.zonasSeleccionadas(),
+  }));
+
   // 🎯 EFFECTS - Cargar datos cuando cambia la config
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     // 📱 En mobile, colapsar la mayoría por defecto
     if (isPlatformBrowser(this.platformId) && window.innerWidth < 1024) {
       this.expandedSections.set({
-        Categoria: false, // Ahora todo colapsado por defecto
+        Categoria: false,
         Marca: false,
         Zona: false,
         TipoPaquete: false,
@@ -210,6 +221,20 @@ export class FiltrosComponent {
         }
       }
     });
+
+    // 🚀 NUEVO: emisión reactiva de filtros, sin botón "Aplicar"
+    // skip(1) evita emitir el estado vacío inicial (antes de valoresIniciales)
+    // debounceTime(300) evita emitir en cada tecla/click, junta cambios seguidos
+    toObservable(this.filtrosActuales)
+      .pipe(
+        skip(1),
+        debounceTime(300),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(filtros => {
+        this.filtrosAplicados.emit(filtros);
+      });
   }
 
   // 📥 Cargar datos de categorías, marcas y zonas
@@ -221,7 +246,6 @@ export class FiltrosComponent {
     this.error.set(null);
 
     try {
-      // Cargar categorías si está configurado
       if (cfg.obtenerCategorias && cfg.mostrarCategoria) {
         cfg.obtenerCategorias().subscribe({
           next: (categorias: OpcionFiltro[]) => {
@@ -233,7 +257,6 @@ export class FiltrosComponent {
         });
       }
 
-      // Cargar marcas si está configurado
       if (cfg.obtenerMarcas && cfg.mostrarMarca) {
         cfg.obtenerMarcas().subscribe({
           next: (marcas: OpcionFiltro[]) => {
@@ -245,7 +268,6 @@ export class FiltrosComponent {
         });
       }
 
-      // Cargar zonas si está configurado
       if (cfg.obtenerZonas && cfg.mostrarZona) {
         cfg.obtenerZonas().subscribe({
           next: (zonas: OpcionFiltro[]) => {
@@ -267,17 +289,11 @@ export class FiltrosComponent {
 
   // 🎯 MÉTODOS DE SELECCIÓN
 
-  // Categorías
   toggleCategoria(categoriaId: string | number): void {
     const seleccionadas = [...this.categoriasSeleccionadas()];
     const index = seleccionadas.indexOf(categoriaId);
-
-    if (index > -1) {
-      seleccionadas.splice(index, 1);
-    } else {
-      seleccionadas.push(categoriaId);
-    }
-
+    if (index > -1) seleccionadas.splice(index, 1);
+    else seleccionadas.push(categoriaId);
     this.categoriasSeleccionadas.set(seleccionadas);
   }
 
@@ -285,17 +301,11 @@ export class FiltrosComponent {
     return this.categoriasSeleccionadas().includes(categoriaId);
   }
 
-  // Marcas
   toggleMarca(marcaId: string | number): void {
     const seleccionadas = [...this.marcasSeleccionadas()];
     const index = seleccionadas.indexOf(marcaId);
-
-    if (index > -1) {
-      seleccionadas.splice(index, 1);
-    } else {
-      seleccionadas.push(marcaId);
-    }
-
+    if (index > -1) seleccionadas.splice(index, 1);
+    else seleccionadas.push(marcaId);
     this.marcasSeleccionadas.set(seleccionadas);
   }
 
@@ -303,17 +313,11 @@ export class FiltrosComponent {
     return this.marcasSeleccionadas().includes(marcaId);
   }
 
-  // Zonas
   toggleZona(zonaId: string | number): void {
     const seleccionadas = [...this.zonasSeleccionadas()];
     const index = seleccionadas.indexOf(zonaId);
-
-    if (index > -1) {
-      seleccionadas.splice(index, 1);
-    } else {
-      seleccionadas.push(zonaId);
-    }
-
+    if (index > -1) seleccionadas.splice(index, 1);
+    else seleccionadas.push(zonaId);
     this.zonasSeleccionadas.set(seleccionadas);
   }
 
@@ -321,17 +325,11 @@ export class FiltrosComponent {
     return this.zonasSeleccionadas().includes(zonaId);
   }
 
-  // Tipos de Paquete
   toggleTipoPaquete(tipo: string): void {
     const seleccionados = [...this.tiposPaqueteSeleccionados()];
     const index = seleccionados.indexOf(tipo);
-
-    if (index > -1) {
-      seleccionados.splice(index, 1);
-    } else {
-      seleccionados.push(tipo);
-    }
-
+    if (index > -1) seleccionados.splice(index, 1);
+    else seleccionados.push(tipo);
     this.tiposPaqueteSeleccionados.set(seleccionados);
   }
 
@@ -339,17 +337,11 @@ export class FiltrosComponent {
     return this.tiposPaqueteSeleccionados().includes(tipo);
   }
 
-  // Estados
   toggleEstado(estado: string): void {
     const seleccionados = [...this.estadosSeleccionados()];
     const index = seleccionados.indexOf(estado);
-
-    if (index > -1) {
-      seleccionados.splice(index, 1);
-    } else {
-      seleccionados.push(estado);
-    }
-
+    if (index > -1) seleccionados.splice(index, 1);
+    else seleccionados.push(estado);
     this.estadosSeleccionados.set(seleccionados);
   }
 
@@ -357,12 +349,10 @@ export class FiltrosComponent {
     return this.estadosSeleccionados().includes(estado);
   }
 
-  // Ordenamiento
   cambiarOrdenamiento(orden: string): void {
     this.ordenSeleccionado.set(orden);
   }
 
-  // Rango de Precio
   cambiarPrecioMin(precio: number | null): void {
     this.precioMin.set(precio);
   }
@@ -392,26 +382,9 @@ export class FiltrosComponent {
     return this.expandedSections()[section] ?? false;
   }
 
-  // 🎯 APLICAR Y LIMPIAR FILTROS
-  aplicarFiltros(): void {
-    const filtros: FiltrosAplicados = {
-      categorias: this.categoriasSeleccionadas(),
-      marcas: this.marcasSeleccionadas(),
-      tiposPaquete: this.tiposPaqueteSeleccionados(),
-      ordenamiento: this.ordenSeleccionado(),
-      rangoPrecio: {
-        min: this.precioMin(),
-        max: this.precioMax(),
-      },
-      estados: this.estadosSeleccionados(),
-      zonas: this.zonasSeleccionadas(),
-    };
-
-    console.log('🎯 Filtros aplicados:', filtros);
-    this.filtrosAplicados.emit(filtros);
-    this.closeDrawer();
-  }
-
+  // 🧹 LIMPIAR FILTROS
+  // Ya no llama a aplicarFiltros(): el reset de signals dispara la
+  // emisión reactiva sola a través del observable de filtrosActuales.
   limpiarFiltros(): void {
     this.categoriasSeleccionadas.set([]);
     this.marcasSeleccionadas.set([]);
@@ -423,8 +396,22 @@ export class FiltrosComponent {
     this.precioMax.set(null);
     this.searchZona.set('');
 
+    // Re-aplicar valores iniciales (perfil del usuario: zona, etc.)
+    const init = this.valoresIniciales();
+    if (init) {
+      if (init.zonas) this.zonasSeleccionadas.set(init.zonas);
+      if (init.categorias) this.categoriasSeleccionadas.set(init.categorias);
+      if (init.marcas) this.marcasSeleccionadas.set(init.marcas);
+      if (init.tiposPaquete) this.tiposPaqueteSeleccionados.set(init.tiposPaquete);
+      if (init.estados) this.estadosSeleccionados.set(init.estados);
+      if (init.ordenamiento) this.ordenSeleccionado.set(init.ordenamiento);
+      if (init.rangoPrecio) {
+        this.precioMin.set(init.rangoPrecio.min);
+        this.precioMax.set(init.rangoPrecio.max);
+      }
+    }
+
     this.filtrosLimpiados.emit();
-    this.aplicarFiltros();
   }
 
   // 🎨 HELPERS PARA EL TEMPLATE
