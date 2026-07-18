@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
@@ -468,7 +469,13 @@ export class PaquetesPublicosComponent implements OnInit {
   // 🧭 Navegar al detalle del paquete
   navegarAPaqueteDetalle(idPaquete: number): void {
     console.log('🧭 Navegando a paquete:', idPaquete);
-    this.router.navigate(['/paquete/', idPaquete, 'productos']);
+    const paquete = this.paquetesOriginales().find(p => p.id_paquete_publicado === idPaquete);
+    if (paquete) {
+      const slugUrl = getPaqueteSlugUrl(paquete);
+      this.router.navigate(['/paquete', slugUrl, 'productos']);
+    } else {
+      this.router.navigate(['/paquete', idPaquete, 'productos']);
+    }
   }
 
   // 🖼️ Imagen fallback
