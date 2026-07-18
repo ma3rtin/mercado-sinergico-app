@@ -87,20 +87,15 @@ export interface ActualizarVarianteDTO {
   activo?: boolean;
 }
 
-/**
- * Item individual para actualización bulk de variantes
- */
-export interface ActualizarVarianteBulkItem {
+export interface VarianteBulkItem {
   id: number;
+  sku?: string;
   stockFisico?: number | null;
   activo?: boolean;
 }
 
-/**
- * DTO para actualizar múltiples variantes (activo + stock) en una sola operación
- */
-export interface ActualizarVariantesBulkDTO {
-  variantes: ActualizarVarianteBulkItem[];
+export interface ActualizarVarianteBulkDTO {
+  variantes: VarianteBulkItem[];
 }
 
 /**
@@ -224,12 +219,12 @@ export class VarianteService extends ApiService {
   }
 
   /**
-   * Actualiza múltiples variantes (activo + stockFisico) en una sola operación
+   * Actualiza múltiples variantes en una sola operación (cualquier campo)
    * PATCH /api/productos/:id/variantes/bulk
    */
   actualizarVarianteBulk(
     productoId: number,
-    data: ActualizarVariantesBulkDTO
+    data: ActualizarVarianteBulkDTO
   ): Observable<any> {
     console.log(`🎨 VarianteService - PATCH actualizar variantes bulk producto ${productoId}`);
 
@@ -237,7 +232,7 @@ export class VarianteService extends ApiService {
       `productos/${productoId}/variantes/bulk`,
       data
     ).pipe(
-      timeout(15000),
+      timeout(20000),
       map(response => {
         console.log('✅ Variantes actualizadas en bulk:', response);
         return response;
