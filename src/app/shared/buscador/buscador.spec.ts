@@ -279,6 +279,62 @@ describe('BuscadorComponent', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
+  // 2.B hayResultados respetando filtro activo
+  // ═══════════════════════════════════════════════════════════
+
+  describe('hayResultados según filtro activo', () => {
+    it('con filtro "productos" y término que solo matchea un paquete, hayResultados debe ser false', async () => {
+      vi.useFakeTimers();
+
+      component.cambiarTipoBusqueda('productos');
+      component.onSearchChange('Paquete');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(component.resultados().paquetes.length).toBe(1);
+      expect(component.resultados().productos.length).toBe(0);
+      expect(component.hayResultados()).toBe(false);
+    });
+
+    it('con filtro "paquetes" y término que solo matchea un producto, hayResultados debe ser false', async () => {
+      vi.useFakeTimers();
+
+      component.cambiarTipoBusqueda('paquetes');
+      component.onSearchChange('Camiseta');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(component.resultados().productos.length).toBe(1);
+      expect(component.resultados().paquetes.length).toBe(0);
+      expect(component.hayResultados()).toBe(false);
+    });
+
+    it('con filtro "todo" y matches en paquetes, hayResultados debe ser true', async () => {
+      vi.useFakeTimers();
+
+      component.onSearchChange('Paquete');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(component.resultados().paquetes.length).toBe(1);
+      expect(component.hayResultados()).toBe(true);
+    });
+
+    it('con filtro "productos" y término que matchea ambos, hayResultados debe ser true', async () => {
+      vi.useFakeTimers();
+
+      component.cambiarTipoBusqueda('productos');
+      component.onSearchChange('Ropa');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(component.resultados().productos.length).toBe(2);
+      expect(component.resultados().paquetes.length).toBe(1);
+      expect(component.hayResultados()).toBe(true);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
   // 3. Manejo de errores del backend
   // ═══════════════════════════════════════════════════════════
 
@@ -611,6 +667,54 @@ describe('BuscadorComponent', () => {
       // distinctUntilChanged bloquea el segundo emission del mismo valor
       expect(mockProductosService.getProductos).toHaveBeenCalledTimes(1);
       expect(mockPaquetesService.getPaquetes).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // 8. Botón limpiar — limpiarFiltrosYBusqueda()
+  // ═══════════════════════════════════════════════════════════
+
+  describe('Botón limpiar', () => {
+    it('cambiar filtro no debe volver a llamar a los servicios', async () => {
+      vi.useFakeTimers();
+
+      component.onSearchChange('algo');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(mockProductosService.getProductos).toHaveBeenCalledTimes(1);
+      expect(mockPaquetesService.getPaquetes).toHaveBeenCalledTimes(1);
+
+      component.cambiarTipoBusqueda('productos');
+
+      expect(mockProductosService.getProductos).toHaveBeenCalledTimes(1);
+      expect(mockPaquetesService.getPaquetes).toHaveBeenCalledTimes(1);
+    });
+
+    it('limpiarFiltrosYBusqueda() debe resetear tipoBusqueda, searchTerm y resultados', async () => {
+      vi.useFakeTimers();
+
+      component.tipoBusqueda.set('productos');
+      component.onSearchChange('Camiseta');
+      await vi.advanceTimersByTimeAsync(300);
+      fixture.detectChanges();
+
+      expect(component.resultados().productos.length).toBe(1);
+
+      component.limpiarFiltrosYBusqueda();
+
+      expect(component.tipoBusqueda()).toBe('todo');
+      expect(component.searchTerm()).toBe('');
+      expect(component.resultados().productos).toEqual([]);
+      expect(component.resultados().paquetes).toEqual([]);
+    });
+
+    it('limpiarFiltrosYBusqueda() no debe cerrar searchOpen', () => {
+      component.searchOpen.set(true);
+
+      component.limpiarFiltrosYBusqueda();
+
+      expect(component.searchOpen()).toBe(true);
     });
   });
 });
