@@ -6,17 +6,24 @@
   <div class="relative">
     <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
       (focus)="onSearchFocus()" (click)="onInputClick($event)" placeholder="Buscar productos, paquetes, categorías..."
-      class="w-full px-6 py-3 pl-12 pr-6 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
+      class="w-full px-6 py-3 pl-12 pr-10 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
       aria-label="Buscar en Mercado Sinérgico" autocomplete="off" />
     <app-icon name="Search"
       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+    @if (searchTerm()) {
+    <button (click)="limpiarFiltrosYBusqueda(); $event.stopPropagation()"
+      class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+      aria-label="Limpiar búsqueda" type="button">
+      <app-icon name="X" [size]="'14'" />
+    </button>
+    }
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- DROPDOWN DE RESULTADOS (DESKTOP) -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   @if (searchOpen()) {
-  <div
+  <div (scroll)="onScroll($event)"
     class="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 max-h-[70vh] overflow-y-auto z-50 animate-[slideDown_0.2s_ease-out]">
 
     <!-- Filtros -->
@@ -61,7 +68,7 @@
     <!-- Sin resultados -->
     @else if (!hayResultados()) {
     <div class="text-center py-8 px-4">
-      <app-icon name="Meh" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
+      <app-icon name="Search" class="w-20 h-20 text-gray-300 mx-auto" />
       <p class="text-gray-600 font-medium">No encontramos resultados</p>
       <p class="text-gray-500 text-sm mt-1">Intenta con otros términos</p>
     </div>
@@ -75,11 +82,11 @@
       @if (mostrarProductos() && resultados().productos.length > 0) {
       <div class="mb-4">
         <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-          <app-icon name="Box" class="text-primary" size="24" />
+          <app-icon name="Box" class="w-6 h-6 text-primary" size="24" />
           Productos ({{ resultados().productos.length }})
         </h3>
         <div class="space-y-1">
-          @for (producto of resultados().productos; track producto.id_producto) {
+          @for (producto of productosSlices(); track producto.id_producto) {
           <button (click)="verProducto(producto)"
             class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
             <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
@@ -92,7 +99,7 @@
               </p>
               <p class="text-xs text-gray-500 flex items-center gap-1">
                 <app-icon name="Tag" size="12" class="flex-shrink-0" />
-                {{ producto.marca || 'Sin marca' }}
+                {{ obtenerNombreMarca(producto) }}
               </p>
               <p class="text-sm font-bold text-primary mt-1 flex items-center gap-1">
                 <app-icon name="dollar" size="12" />
@@ -111,11 +118,11 @@
       @if (mostrarPaquetes() && resultados().paquetes.length > 0) {
       <div>
         <h3 class="text-sm font-bold text-gray-900 mb-3 px-2 flex items-center gap-2">
-          <app-icon name="Package" class="w-4 h-4 text-primary" />
+          <app-icon name="Package" class="w-6 h-6 text-primary" size="24" />
           Paquetes ({{ resultados().paquetes.length }})
         </h3>
         <div class="space-y-1">
-          @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
+          @for (paquete of paquetesSlices(); track paquete.id_paquete_publicado) {
           <button (click)="verPaquete(paquete)"
             class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
             <div class="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
@@ -147,13 +154,17 @@
       </div>
       }
 
-      <!-- Ver todos -->
-      @if (hayResultados() && totalResultados() > 6) {
-      <button (click)="verTodosResultados()"
-        class="w-full mt-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
-        Ver todos los resultados ({{ totalResultados() }})
-        <app-icon name="arrowRight" size="24" />
-      </button>
+      <!-- Barra de progreso/estado flotante (Desktop) -->
+      @if (hayResultados()) {
+      <div class="sticky bottom-0 left-0 right-0 py-3 text-center text-xs font-semibold text-gray-500 border-t border-gray-100 bg-white/90 backdrop-blur-md shadow-inner flex items-center justify-center gap-1 z-20">
+        @if (totalMostrados() < totalResultados()) {
+          <app-icon name="Info" size="14" class="text-primary animate-pulse" />
+          <span>Mostrando {{ totalMostrados() }} de {{ totalResultados() }} resultados (desplazá para ver más)</span>
+        } @else {
+          <app-icon name="Check" size="14" class="text-success" />
+          <span>Mostrando todos los {{ totalResultados() }} resultados</span>
+        }
+      </div>
       }
     </div>
     }
@@ -190,10 +201,17 @@
         <div class="flex-1 relative">
           <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
             placeholder="¿Qué estás buscando?"
-            class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
+            class="w-full px-4 py-2.5 pl-10 pr-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
             autocomplete="off" />
           <app-icon name="Search"
             class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          @if (searchTerm()) {
+          <button (click)="limpiarFiltrosYBusqueda(); $event.stopPropagation()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+            aria-label="Limpiar búsqueda" type="button">
+            <app-icon name="X" [size]="'14'" />
+          </button>
+          }
         </div>
       </div>
 
@@ -221,7 +239,7 @@
     </div>
 
     <!-- Contenido móvil -->
-    <div class="flex-1 overflow-y-auto">
+    <div (scroll)="onScroll($event)" class="flex-1 overflow-y-auto">
       @if (!searchTerm().trim()) {
       <div class="text-center py-16 px-4">
         <app-icon name="Search" class="w-20 h-20 text-gray-300 mx-auto mb-4" />
@@ -255,7 +273,7 @@
             Productos ({{ resultados().productos.length }})
           </h3>
           <div class="space-y-2">
-            @for (producto of resultados().productos; track producto.id_producto) {
+            @for (producto of productosSlices(); track producto.id_producto) {
             <button (click)="verProducto(producto)"
               class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left">
               <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
@@ -268,7 +286,7 @@
                 </p>
                 <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
                   <app-icon name="Tag" size="12" />
-                  {{ producto.marca || 'Sin marca' }}
+                  {{ obtenerNombreMarca(producto) }}
                 </p>
                 <p class="text-base font-bold text-primary flex items-center gap-1">
                   <app-icon name="dollar" size="12" />
@@ -289,7 +307,7 @@
             Paquetes ({{ resultados().paquetes.length }})
           </h3>
           <div class="space-y-2">
-            @for (paquete of resultados().paquetes; track paquete.id_paquete_publicado) {
+            @for (paquete of paquetesSlices(); track paquete.id_paquete_publicado) {
             <button (click)="verPaquete(paquete)"
               class="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary hover:shadow-md transition-all text-left">
               <div class="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
@@ -318,12 +336,17 @@
         </div>
         }
 
-        @if (hayResultados() && totalResultados() > 6) {
-        <button (click)="verTodosResultados()"
-          class="w-full mt-4 py-3 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
-          Ver todos los resultados ({{ totalResultados() }})
-          <app-icon name="arrowRight" size="24" />
-        </button>
+        <!-- Barra de progreso/estado flotante (Mobile) -->
+        @if (hayResultados()) {
+        <div class="sticky bottom-0 left-0 right-0 py-3 text-center text-xs font-semibold text-gray-500 border-t border-gray-100 bg-white/90 backdrop-blur-md shadow-inner flex items-center justify-center gap-1 z-20 mt-4">
+          @if (totalMostrados() < totalResultados()) {
+            <app-icon name="Info" size="14" class="text-primary animate-pulse" />
+            <span>Mostrando {{ totalMostrados() }} de {{ totalResultados() }} resultados (desplazá para ver más)</span>
+          } @else {
+            <app-icon name="Check" size="14" class="text-success" />
+            <span>Mostrando todos los {{ totalResultados() }} resultados</span>
+          }
+        </div>
         }
       </div>
       }

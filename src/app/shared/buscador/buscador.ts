@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { FormsModule } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import {
@@ -21,7 +22,6 @@ import {
   catchError,
   finalize,
   take,
-  tap,
 } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -88,6 +88,8 @@ export class BuscadorComponent {
   searchTerm = signal('');
   tipoBusqueda = signal<TipoBusqueda>('todo');
 
+  limiteMostrado = signal<number>(6);
+
   resultados = signal<ResultadoBusqueda>({
     productos: [],
     paquetes: [],
@@ -98,12 +100,28 @@ export class BuscadorComponent {
   // 📊 Computed
   hayResultados = computed(() => {
     const res = this.resultados();
-    return res.productos.length > 0 || res.paquetes.length > 0;
+    const hayProductos = this.mostrarProductos() && res.productos.length > 0;
+    const hayPaquetes = this.mostrarPaquetes() && res.paquetes.length > 0;
+    return hayProductos || hayPaquetes;
   });
 
   totalResultados = computed(() => {
     const res = this.resultados();
     return res.productos.length + res.paquetes.length;
+  });
+
+  productosSlices = computed(() => {
+    const res = this.resultados();
+    return res.productos.slice(0, this.limiteMostrado());
+  });
+
+  paquetesSlices = computed(() => {
+    const res = this.resultados();
+    return res.paquetes.slice(0, this.limiteMostrado());
+  });
+
+  totalMostrados = computed(() => {
+    return this.productosSlices().length + this.paquetesSlices().length;
   });
 
   mostrarProductos = computed(() => {
@@ -135,6 +153,7 @@ export class BuscadorComponent {
         distinctUntilChanged(),
         switchMap(term => {
           if (!term.trim()) {
+            this.limiteMostrado.set(6);
             this.resultados.set({
               productos: [],
               paquetes: [],
@@ -208,16 +227,14 @@ export class BuscadorComponent {
           paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
         );
 
+        this.limiteMostrado.set(6);
         this.resultados.set({
-          productos: productosFiltrados.slice(0, 6),
-          paquetes: paquetesFiltrados.slice(0, 6),
+          productos: productosFiltrados,
+          paquetes: paquetesFiltrados,
           cargando: false,
           error: null,
         });
-
       });
-    tap(() => console.log('🟡 loading true')),
-      finalize(() => console.log('🟢 finalize ejecutado'));
   }
 
 
@@ -251,12 +268,18 @@ export class BuscadorComponent {
 
   limpiarBusqueda(): void {
     this.searchTerm.set('');
+    this.limiteMostrado.set(6);
     this.resultados.set({
       productos: [],
       paquetes: [],
       cargando: false,
       error: null,
     });
+  }
+
+  limpiarFiltrosYBusqueda(): void {
+    this.tipoBusqueda.set('todo');
+    this.limpiarBusqueda();
   }
 
   // 🎯 Cambiar filtro
@@ -273,7 +296,8 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/detalleSeleccionProducto', producto.id_producto]);
+      const slugUrl = getProductSlugUrl(producto);
+      this.router.navigate(['/producto', slugUrl]);
     }
   }
 
@@ -282,23 +306,34 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/productos-del-paquete', paquete.id_paquete_publicado]);
+      const slugUrl = getPaqueteSlugUrl(paquete);
+      this.router.navigate(['/paquete', slugUrl, 'productos']);
     }
   }
 
-  verTodosResultados(): void {
-    const term = this.searchTerm();
-    if (term.trim()) {
-      this.closeSearch();
-      this.limpiarBusqueda();
-      this.resultadoSeleccionado.emit();
-      this.router.navigate(['/buscar'], {
-        queryParams: { q: term, tipo: this.tipoBusqueda() },
-      });
+  onScroll(event: Event): void {
+    const container = event.target as HTMLElement;
+    // Si el usuario llega a menos de 50px del final del scroll vertical del contenedor
+    if (container.scrollHeight - container.scrollTop - container.clientHeight < 50) {
+      this.cargarMasResultados();
+    }
+  }
+
+  cargarMasResultados(): void {
+    const totalActualMostrado = this.totalMostrados();
+    const totalCoincidencias = this.totalResultados();
+    if (totalActualMostrado < totalCoincidencias) {
+      this.limiteMostrado.update(lim => lim + 6);
     }
   }
 
   // 🎨 Helpers
+  obtenerNombreMarca(producto: Producto): string {
+    const rawMarca = producto.marca;
+    if (!rawMarca) return 'Sin marca';
+    return typeof rawMarca === 'string' ? rawMarca : rawMarca.nombre;
+  }
+
   obtenerImagenProducto(producto: Producto): string {
     return producto.imagen_url || '/assets/images/placeholder-product.png';
   }

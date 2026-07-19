@@ -18,6 +18,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -30,6 +31,7 @@ import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
+import { decodeId, getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -42,8 +44,9 @@ import Swal from 'sweetalert2';
     PaqueteCard,
     SelectorVariantesComponent,
     ButtonComponent,
-    TipoBadgeComponent
-],
+    TipoBadgeComponent,
+    LoaderComponent
+  ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
 })
@@ -124,8 +127,8 @@ export class DetalleProductoSumarse implements OnInit {
   // --- ESTADOS DE UI ---
 
   productoTieneVariantes = computed(() => {
-    const prod = this.producto();
-    return !!(prod?.plantilla?.caracteristicas && prod.plantilla.caracteristicas.length > 0);
+    const variantes = this.producto()?.variantes || [];
+    return variantes.some(v => v.activo !== false);
   });
 
   puedeAgregarAlCarrito = computed(() => {
@@ -209,10 +212,23 @@ export class DetalleProductoSumarse implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
-        const productoId = Number(params.get('productoId'));
-        const paqueteId = Number(params.get('paqueteId'));
+        const rawProductoId = params.get('productoId');
+        const rawPaqueteId = params.get('paqueteId');
 
-        console.log('🔢 IDs desde paramMap:', { productoId, paqueteId });
+        let productoId: number | null = null;
+        let paqueteId: number | null = null;
+
+        if (rawProductoId) {
+          const match = rawProductoId.match(/-p([a-z0-9]+)$/);
+          productoId = match ? decodeId(match[1]) : Number(rawProductoId);
+        }
+
+        if (rawPaqueteId) {
+          const match = rawPaqueteId.match(/-p([a-z0-9]+)$/);
+          paqueteId = match ? decodeId(match[1]) : Number(rawPaqueteId);
+        }
+
+        console.log('🔢 Parámetros desde paramMap:', { rawProductoId, rawPaqueteId, decodedProductoId: productoId, decodedPaqueteId: paqueteId });
 
         if (!productoId || !paqueteId || isNaN(productoId) || isNaN(paqueteId)) {
           console.error('❌ Parámetros inválidos:', { productoId, paqueteId });
@@ -421,14 +437,26 @@ export class DetalleProductoSumarse implements OnInit {
   goBack(): void {
     const productoId = this.currentProductoId();
     if (productoId) {
-      this.router.navigate(['/producto', productoId]);
+      const prod = this.producto();
+      if (prod) {
+        const slugUrl = getProductSlugUrl(prod);
+        this.router.navigate(['/producto', slugUrl]);
+      } else {
+        this.router.navigate(['/producto', productoId]);
+      }
     } else {
       this.router.navigate(['/paquetes']);
     }
   }
 
   onPaqueteClick(paqueteId: number): void {
-    this.router.navigate(['/paquete', paqueteId, 'productos']);
+    const paquete = this.paquetesRelacionados().find(p => p.id_paquete_publicado === paqueteId);
+    if (paquete) {
+      const slugUrl = getPaqueteSlugUrl(paquete);
+      this.router.navigate(['/paquete', slugUrl, 'productos']);
+    } else {
+      this.router.navigate(['/paquete', paqueteId, 'productos']);
+    }
   }
 
   toggleDescription(): void {

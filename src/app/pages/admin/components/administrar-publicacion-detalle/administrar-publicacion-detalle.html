@@ -8,10 +8,8 @@
     <!-- Cargando -->
     @if (loading()) {
     <div class="flex flex-col items-center justify-center min-h-[50vh]">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-brand-primary mb-4"></div>
-      <p class="text-text-secondary font-body">Cargando publicación...</p>
+      <app-loader mensaje="Cargando publicación..." padding="py-0" />
     </div>
-
     } @else if (error()) {
     <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
       <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4 mt-[2px]" />
@@ -291,10 +289,12 @@
 
             <!-- ZONA 3: Acciones secundarias -->
             <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
-              <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell" (buttonClick)="notificarCompradores()">
+              <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell"
+                (buttonClick)="notificarCompradores()">
                 Notificar compradores
               </app-button>
-              <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy" (buttonClick)="duplicarPaquete()">
+              <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy"
+                (buttonClick)="duplicarPaquete()">
                 Duplicar publicación
               </app-button>
               <!-- Zona de peligro -->
@@ -303,7 +303,8 @@
                   <app-icon name="alertTriangle" size="12" class="mt-[1px]" />
                   Acción irreversible
                 </p>
-                <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x" (buttonClick)="cancelarPaquete()">
+                <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x"
+                  (buttonClick)="cancelarPaquete()">
                   Cancelar y reembolsar
                 </app-button>
               </div>
@@ -315,7 +316,8 @@
             @case ('completo') {
 
             <!-- ZONA 1: Estado actual -->
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-success-light text-success">
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-success-light text-success">
               Completo
             </span>
             <p class="text-sm text-gray-600 mt-3 leading-relaxed">
@@ -342,7 +344,8 @@
                   <app-icon name="alertTriangle" size="12" class="mt-[1px]" />
                   Acción irreversible
                 </p>
-                <app-button variant="danger" [fullWidth]="true" size="md" iconStart="x" (buttonClick)="cancelarPaquete()">
+                <app-button variant="danger" [fullWidth]="true" size="md" iconStart="x"
+                  (buttonClick)="cancelarPaquete()">
                   Cancelar y reembolsar
                 </app-button>
               </div>
@@ -366,8 +369,7 @@
             <!-- Botón de navegación a gestión de envíos -->
             <div class="mt-4">
               <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="truck"
-                [disabled]="pedidosEnPreparacion().length === 0"
-                (buttonClick)="irAGestionEnvios()">
+                [disabled]="pedidosEnPreparacion().length === 0" (buttonClick)="irAGestionEnvios()">
                 Gestionar envíos ({{ pedidosEnPreparacion().length }})
               </app-button>
             </div>
@@ -437,7 +439,8 @@
             @case ('cancelado') {
 
             <!-- ZONA 1: Estado actual -->
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-error-light text-error">
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-error-light text-error">
               <app-icon name="xCircle" size="13" class="mr-1.5 mt-[1px]" />
               Cancelado
             </span>
@@ -610,7 +613,7 @@
                 <div class="flex items-start gap-3 px-4 py-3 hover:bg-bg-raised/30 transition-colors">
                   <div
                     class="w-12 h-12 rounded-xl overflow-hidden bg-bg-raised border border-border-default flex-shrink-0">
-                    @if (prod?.imagenes?.[0]?.url) {
+                    @if (prod.imagenes.length > 0 && prod.imagenes[0].url) {
                     <img [src]="prod.imagenes[0].url" [alt]="prod.nombre" class="w-full h-full object-cover" />
                     } @else {
                     <div class="w-full h-full flex items-center justify-center">

@@ -10,6 +10,7 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { decodeId, getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -26,6 +27,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-producto-detalle-seleccion',
@@ -37,8 +39,9 @@ import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
     IconComponent,
     PaginationComponent,
     VisorImagenesComponent,
-    TipoBadgeComponent
-],
+    TipoBadgeComponent,
+    LoaderComponent
+  ],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
 export class ProductoDetalleSeleccionComponent implements OnInit {
@@ -149,9 +152,21 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
-        const productoId = Number(params.get('id'));
+        const rawId = params.get('id');
+        let productoId: number | null = null;
 
-        console.log('🔄 Cambio de ruta detectado, producto ID:', productoId);
+        if (rawId) {
+          // Detectar patrón de slug con ID ofuscado al final (ej: "termo-stanley-p2y8")
+          const match = rawId.match(/-p([a-z0-9]+)$/);
+          if (match) {
+            productoId = decodeId(match[1]);
+          } else {
+            // Compatibilidad hacia atrás: intentar parsear como número directo
+            productoId = Number(rawId);
+          }
+        }
+
+        console.log('🔄 Cambio de ruta detectado, producto ID original:', rawId, '-> decodificado:', productoId);
 
         if (!productoId || isNaN(productoId)) {
           this.errorMessage.set('ID de producto inválido');
@@ -263,19 +278,24 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       return;
     }
 
-    const productoId = this.productoSeleccionado()?.id_producto;
-    if (!productoId) {
+    const producto = this.productoSeleccionado();
+    if (!producto) {
       console.error('❌ No hay producto seleccionado');
       return;
     }
 
+    const paquete = this.todosLosPaquetes().find(p => p.id_paquete_publicado === paqueteId);
+
+    const slugProducto = getProductSlugUrl(producto);
+    const slugPaquete = paquete ? getPaqueteSlugUrl(paquete) : String(paqueteId);
+
     console.log('🧭 Navegando a sumarse:', {
-      productoId,
+      productoId: producto.id_producto,
       paqueteId,
-      url: `/paquete/${paqueteId}/producto/${productoId}`
+      url: `/paquete/${slugPaquete}/producto/${slugProducto}`
     });
 
-    this.router.navigate(['/paquete', paqueteId, 'producto', productoId]);
+    this.router.navigate(['/paquete', slugPaquete, 'producto', slugProducto]);
   }
 
   /**

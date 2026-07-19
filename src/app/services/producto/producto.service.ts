@@ -9,23 +9,39 @@ import { ProductoDetalleDTO } from '@app/models/DTOs/Producto/productoDetalleDTO
 export class ProductosService extends ApiService {
   private productosCache$?: Observable<Producto[]>;
 
-  getProductos(): Observable<Producto[]> {
-    if (this.productosCache$) return this.productosCache$;
+  getProductos(includeArchived = false): Observable<Producto[]> {
+    if (!includeArchived && this.productosCache$) return this.productosCache$;
 
-    this.productosCache$ = this.get<Producto[]>('productos').pipe(
+    const url = includeArchived ? 'productos?includeArchived=true' : 'productos';
+    const obs$ = this.get<Producto[]>(url).pipe(
       timeout(30000),
       retry(2),
       map(response =>
         response.map(p => this.normalizeProducto(p))
       ),
       catchError(err => {
-        this.productosCache$ = undefined;
+        if (!includeArchived) this.productosCache$ = undefined;
         return throwError(() => err);
       }),
       shareReplay(1)
     );
 
-    return this.productosCache$;
+    if (!includeArchived) this.productosCache$ = obs$;
+    return obs$;
+  }
+
+  archivarProducto(id: number, archivado: boolean): Observable<Producto> {
+    return this.patch<Producto>(`productos/${id}/archivar`, { archivado }).pipe(
+      timeout(10000),
+      map(response => {
+        this.clearCache();
+        return response;
+      }),
+      catchError(err => {
+        console.error('❌ Error archivando producto:', err);
+        return throwError(() => err);
+      })
+    );
   }
 
   clearCache(): void {
@@ -157,23 +173,41 @@ export class ProductosService extends ApiService {
       imagenes[0]?.url ||
       undefined;
 
+    // Normalizar marca
+    const rawMarca = producto.marca;
+    const marca =
+      typeof rawMarca === 'string'
+        ? { nombre: rawMarca }
+        : rawMarca ?? undefined;
+
+    // Normalizar categoría
+    const rawCategoria = producto.categoria;
+    const categoria =
+      typeof rawCategoria === 'string'
+        ? { nombre: rawCategoria }
+        : rawCategoria ?? undefined;
+
     return {
       ...producto,
       id_producto: producto.id_producto || producto.id,
       imagen_url,
       imagenes,
+      marca,
+      categoria,
 
-      // Normalizar marca
-      marca:
-        typeof producto.marca === 'string'
-          ? { nombre: producto.marca }
-          : producto.marca ?? undefined,
+      // Normalizar categoria_id: extraer del objeto categoria si no viene como campo directo
+      categoria_id:
+        producto.categoria_id ??
+        (typeof rawCategoria === 'object' && rawCategoria !== null
+          ? rawCategoria.id_categoria ?? rawCategoria.id
+          : undefined),
 
-      // Normalizar categoría
-      categoria:
-        typeof producto.categoria === 'string'
-          ? { nombre: producto.categoria }
-          : producto.categoria ?? undefined,
+      // Normalizar marca_id: extraer del objeto marca si no viene como campo directo
+      marca_id:
+        producto.marca_id ??
+        (typeof rawMarca === 'object' && rawMarca !== null
+          ? rawMarca.id_marca ?? rawMarca.id
+          : undefined),
     };
   }
 }
