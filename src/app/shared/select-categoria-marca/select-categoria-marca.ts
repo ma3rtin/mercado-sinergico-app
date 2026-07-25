@@ -1,6 +1,7 @@
-import { Component, input, output, computed, signal, inject, forwardRef, effect, untracked } from '@angular/core';
+import { Component, input, output, computed, signal, inject, forwardRef, effect, untracked, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { OverlayModule, CdkOverlayOrigin, ConnectedPosition } from '@angular/cdk/overlay';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
@@ -14,7 +15,7 @@ export interface SelectOption {
 @Component({
   selector: 'app-select-categoria-marca',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, OverlayModule, IconComponent, ButtonComponent],
   templateUrl: './select-categoria-marca.html',
   providers: [
     {
@@ -24,7 +25,7 @@ export interface SelectOption {
     }
   ]
 })
-export class SelectCategoriaMarca implements ControlValueAccessor {
+export class SelectCategoriaMarca implements ControlValueAccessor, OnDestroy {
   private toast = inject(ToastService);
 
   options = input.required<SelectOption[]>();
@@ -44,6 +45,15 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
   selectedValue = signal<number | null>(null);
   isDisabled = signal(false);
   isEditLoading = signal(false);
+
+  hoveredOption = signal<SelectOption | null>(null);
+  hoveredOrigin = signal<CdkOverlayOrigin | null>(null);
+  private hoverTimer: ReturnType<typeof setTimeout> | null = null;
+
+  readonly tooltipPositions: ConnectedPosition[] = [
+    { originX: 'center', originY: 'top', overlayX: 'center', overlayY: 'bottom', offsetY: -8 },
+    { originX: 'center', originY: 'bottom', overlayX: 'center', overlayY: 'top', offsetY: 8 },
+  ];
 
   // Nombre normalizado enviado al backend. Permite verificar que el close
   // corresponde a la edición que está en vuelo, no a una ajena.
@@ -225,5 +235,40 @@ export class SelectCategoriaMarca implements ControlValueAccessor {
   onEditKeydown(event: KeyboardEvent): void {
     if (event.key === 'Enter') this.confirmEdit();
     if (event.key === 'Escape') this.cancelEdit();
+  }
+
+  // ─── Tooltip (CDK Overlay) ────────────────────────────────────────────────
+
+  onButtonEnter(option: SelectOption, origin: CdkOverlayOrigin): void {
+    if (this.hoverTimer) {
+      clearTimeout(this.hoverTimer);
+      this.hoverTimer = null;
+    }
+    this.hoveredOption.set(option);
+    this.hoveredOrigin.set(origin);
+  }
+
+  onButtonLeave(): void {
+    this.hoverTimer = setTimeout(() => {
+      this.hoveredOption.set(null);
+      this.hoveredOrigin.set(null);
+    }, 100);
+  }
+
+  onOverlayEnter(): void {
+    if (this.hoverTimer) {
+      clearTimeout(this.hoverTimer);
+      this.hoverTimer = null;
+    }
+  }
+
+  onOverlayLeave(): void {
+    this.onButtonLeave();
+  }
+
+  ngOnDestroy(): void {
+    if (this.hoverTimer) {
+      clearTimeout(this.hoverTimer);
+    }
   }
 }
