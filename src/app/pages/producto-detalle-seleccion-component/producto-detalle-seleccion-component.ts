@@ -28,6 +28,7 @@ import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { VisorImagenesComponent } from '@app/shared/visor-imagenes/visor-imagenes-component';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 @Component({
   selector: 'app-producto-detalle-seleccion',
@@ -40,7 +41,8 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     PaginationComponent,
     VisorImagenesComponent,
     TipoBadgeComponent,
-    LoaderComponent
+    LoaderComponent,
+    BackButtonComponent,
   ],
   templateUrl: './producto-detalle-seleccion-component.html',
 })
