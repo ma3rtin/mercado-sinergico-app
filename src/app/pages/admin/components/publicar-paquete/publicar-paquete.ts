@@ -22,7 +22,7 @@ import { SelectComponent, SelectOption } from '@app/shared/select/select-compone
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 interface ImageSlot {
   file: File | null;
@@ -42,7 +42,7 @@ interface ImageSlot {
     SelectComponent,
     AdminCreateWrapperComponent,
     IconComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
   ],
   templateUrl: './publicar-paquete.html',
 })
