@@ -31,7 +31,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 import Swal from 'sweetalert2';
 
@@ -56,7 +56,7 @@ interface VarianteExtendida extends ProductoVariante {
     IconComponent,
     PaginationComponent,
     LoaderComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
   ],
   templateUrl: './gestionar-variantes.html',
 })

@@ -33,11 +33,7 @@
 
     <!-- Breadcrumb / Back -->
     <div class="mb-6">
-      <button (click)="volverAProductos()"
-        class="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-brand-secondary transition-colors group cursor-pointer">
-        <app-icon name="arrowLeft" size="16" class="transition-transform group-hover:-translate-x-0.5"></app-icon>
-        <span>Volver a Productos</span>
-      </button>
+      <app-back-button label="Volver a productos" [customHandler]="true" (backClick)="volverAProductos()" />
     </div>
 
     <!-- ═══════════════════════════════════════════════════ -->

@@ -4,23 +4,23 @@ import { Router } from '@angular/router';
 import { IconComponent } from '@app/shared/icono/icono';
 
 /**
- * Botón de "Volver" reutilizable para todas las vistas del admin.
+ * Botón de "Volver" reutilizable para cualquier vista del sistema.
  * Usa Router para navegar a una ruta específica, o Location.back()
  * como fallback si no se provee ruta.
  * Puede ser interceptado usando el output (backClick).
  *
  * Uso:
- * <app-admin-back-button route="/admin/panel" />
- * <app-admin-back-button label="Volver al listado" route="/admin/productos" />
- * <app-admin-back-button label="Descartar" (backClick)="onDescartar()" />
+ * <app-back-button route="/admin/panel" />
+ * <app-back-button label="Volver a productos" route="/productos" />
+ * <app-back-button label="Descartar" (backClick)="onDescartar()" />
  */
 @Component({
-  selector: 'app-admin-back-button',
+  selector: 'app-back-button',
   standalone: true,
   imports: [IconComponent],
-  templateUrl: './admin-back-button.html',
+  templateUrl: './back-button.html',
 })
-export class AdminBackButtonComponent {
+export class BackButtonComponent {
   label = input<string>('Volver');
   route = input<string | null>(null);
   

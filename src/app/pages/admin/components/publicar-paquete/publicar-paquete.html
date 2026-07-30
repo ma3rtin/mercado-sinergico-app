@@ -1,9 +1,9 @@
 <app-admin-create-wrapper
     [titulo]="isDuplicate() ? 'Editando duplicación' : isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
     @if (isDuplicate()) {
-    <app-admin-back-button label="Descartar duplicación y volver" [customHandler]="true" (backClick)="descartarDuplicacion()" />
+    <app-back-button label="Descartar duplicación y volver" [customHandler]="true" (backClick)="descartarDuplicacion()" />
     } @else {
-    <app-admin-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
+    <app-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
     }
 
     <div class="space-y-6">

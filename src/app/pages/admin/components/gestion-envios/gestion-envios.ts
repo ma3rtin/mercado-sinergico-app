@@ -6,14 +6,14 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 
 @Component({
   selector: 'app-gestion-envios',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, AdminBackButtonComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, BackButtonComponent, PaginationComponent],
   templateUrl: './gestion-envios.html',
 })
 export class GestionEnviosComponent implements OnInit {
