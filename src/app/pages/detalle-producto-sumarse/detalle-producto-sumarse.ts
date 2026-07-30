@@ -19,6 +19,7 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -45,7 +46,8 @@ import Swal from 'sweetalert2';
     SelectorVariantesComponent,
     ButtonComponent,
     TipoBadgeComponent,
-    LoaderComponent
+    LoaderComponent,
+    BackButtonComponent
   ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
@@ -88,6 +90,10 @@ export class DetalleProductoSumarse implements OnInit {
   // 🧩 Computed
   hasProducto = computed(() => !!this.producto());
   hasPaqueteSeleccionado = computed(() => !!this.paqueteSeleccionado());
+
+  // 🧭 Navegación dinámica
+  fromProducto = signal<boolean>(false);
+  labelVolver = computed(() => this.fromProducto() ? 'Volver al producto' : 'Volver al paquete');
 
   // --- LÓGICA DE STOCK Y DISPONIBILIDAD REFACTORIZADA ---
 
@@ -207,6 +213,13 @@ export class DetalleProductoSumarse implements OnInit {
   ngOnInit(): void {
     // ✅ CLAVE: igual que productos-del-paquete que SÍ funciona
     if (!this.isBrowser) return;
+
+    // 🧭 Detectar origen de navegación (ej. si viene de la vista de producto)
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        this.fromProducto.set(queryParams.get('from') === 'producto');
+      });
 
     // ✅ paramMap observable, NO snapshot
     this.route.paramMap
@@ -435,17 +448,29 @@ export class DetalleProductoSumarse implements OnInit {
   }
 
   goBack(): void {
-    const productoId = this.currentProductoId();
-    if (productoId) {
+    if (this.fromProducto()) {
       const prod = this.producto();
+      const prodId = this.currentProductoId();
       if (prod) {
         const slugUrl = getProductSlugUrl(prod);
         this.router.navigate(['/producto', slugUrl]);
+      } else if (prodId) {
+        this.router.navigate(['/producto', prodId]);
       } else {
-        this.router.navigate(['/producto', productoId]);
+        this.router.navigate(['/productos']);
       }
     } else {
-      this.router.navigate(['/paquetes']);
+      const paquete = this.paqueteSeleccionado();
+      const paqueteId = this.currentPaqueteId();
+
+      if (paquete) {
+        const slugUrl = getPaqueteSlugUrl(paquete);
+        this.router.navigate(['/paquete', slugUrl, 'productos']);
+      } else if (paqueteId) {
+        this.router.navigate(['/paquete', paqueteId, 'productos']);
+      } else {
+        this.router.navigate(['/paquetes']);
+      }
     }
   }
 
