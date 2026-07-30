@@ -1,228 +1,215 @@
 <app-admin-create-wrapper
     [titulo]="isDuplicate() ? 'Editando duplicación' : isEditMode() ? 'Editar publicación' : 'Publicar paquete'">
-    <div class="mb-3">
-        @if (isDuplicate()) {
-        <button type="button" (click)="descartarDuplicacion()"
-            class="flex items-center gap-2 text-text-muted hover:text-error transition-colors text-sm font-medium">
-            <app-icon name="arrowLeft" size="20" />
-            Descartar duplicación y volver
-        </button>
-        } @else {
-        <app-admin-back-button label="Volver a gestionar publicaciones" route="/admin/administrar-publicaciones" />
-        }
-    </div>
-    <div class="w-full max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-md relative">
-        <!-- Banners removidos de aquí para ponerlos encima de la fecha -->
+    @if (isDuplicate()) {
+    <app-admin-back-button label="Descartar duplicación y volver" [customHandler]="true" (backClick)="descartarDuplicacion()" />
+    } @else {
+    <app-admin-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
+    }
 
-        <!-- ────────────────────────────────────── -->
-        <!-- NOMBRE DE LA PUBLICACIÓN               -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6">
-            <app-input [ngModel]="nombre()" (ngModelChange)="nombre.set($event)"
-                [labelValue]="'Nombre de la publicación'" [placeholderValue]="'Ej: Promo iPhone Verano CABA'"
-                [requiredValue]="true" [clearableValue]="true" />
-        </div>
+    <div class="space-y-6">
+        <!-- 📦 TARJETA 1: SELECCIÓN DEL PAQUETE -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Selección del Paquete</h3>
+            
+            <div class="relative mb-4" #scrollContainer>
+                <label class="block text-gray-700 font-body font-medium mb-1">
+                    Paquete base <span class="text-red-500">*</span>
+                </label>
 
-        <!-- ────────────────────────────────────── -->
-        <!-- BUSCADOR DE PAQUETE BASE               -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6 relative" #scrollContainer>
-            <label class="block text-gray-700 font-body font-medium mb-1">
-                Paquete base <span class="text-red-500">*</span>
-            </label>
-
-            <!-- Input + botón limpiar cuando hay selección -->
-            <div class="relative flex items-center gap-2">
-                <input #inputBusqueda type="text" [ngModel]="busqueda()"
-                    (ngModelChange)="busqueda.set($event); buscarPaquetes()" (focus)="abrirLista()"
-                    placeholder="Buscar paquete base..."
-                    class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors text-gray-600 pr-10" />
-                @if (paqueteBaseSeleccionado()) {
-                <span class="absolute right-2 top-1/2 -translate-y-1/2">
-                    <app-button variant="ghost" size="xs" [iconOnly]="true" iconEnd="x" title="Limpiar selección"
-                        (buttonClick)="limpiarPaqueteBase()" />
-                </span>
-                }
-            </div>
-
-            <!-- Indicador de paquete seleccionado -->
-            @if (paqueteBaseSeleccionado()) {
-            <div class="mt-2 flex flex-wrap items-center gap-2">
-              <p class="text-xs text-success flex items-center gap-1">
-                  <app-icon name="checkCircle" size="14" />
-                  Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
-              </p>
-              <!-- Badge de tipo -->
-              @if (isEnergico()) {
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-dark/10 text-secondary-dark border border-secondary-dark/30">
-                <app-icon name="zap" size="12" />
-                Enérgico
-              </span>
-              } @else if (isSinergico()) {
-              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/30">
-                <app-icon name="users" size="12" />
-                Sinérgico
-              </span>
-              }
-            </div>
-            }
-
-            <!-- Lista desplegable -->
-            @if (mostrandoResultados() && resultadosBusqueda().length > 0) {
-            <ul
-                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
-                @for (paquete of resultadosBusqueda(); track paquete.id_paquete_base) {
-                <li (click)="seleccionarPaquete(paquete)" class="p-2.5 hover:bg-gray-100 cursor-pointer"
-                    [class.bg-blue-50]="paquete.id_paquete_base === paqueteBaseSeleccionado()">
-                    {{ paquete.nombre }}
-                </li>
-                }
-            </ul>
-            }
-
-            <!-- Sin resultados -->
-            @if (mostrandoResultados() && resultadosBusqueda().length === 0) {
-            <div
-                class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
-                No se encontraron resultados.
-            </div>
-            }
-        </div>
-
-        <!-- ────────────────────────────────────── -->
-        <!-- BANNER TIPO ENÉRGICO                   -->
-        <!-- ────────────────────────────────────── -->
-        @if (isEnergico()) {
-        <div class="mb-6 p-4 bg-secondary-dark/10 border border-secondary-dark/30 rounded-lg flex items-start gap-3">
-            <app-icon name="zap" size="20" class="flex-shrink-0 mt-0.5 text-secondary-dark" />
-            <div>
-                <p class="font-bold text-sm text-secondary-dark">Paquete Enérgico — revisá el stock antes de publicar</p>
-                <p class="text-sm text-secondary-dark/80 mt-1">
-                    Este tipo de paquete tiene <strong>stock físico limitado</strong>.
-                    Asegurate de haber configurado el <strong>stock físico de cada variante</strong> del producto
-                    desde <em>Gestionar Variantes</em> antes de publicar.
-                    Los usuarios verán el stock disponible en tiempo real y recibirán un aviso cuando se agote.
-                </p>
-            </div>
-        </div>
-        }
-
-        <!-- ────────────────────────────────────── -->
-        <!-- IMAGEN DE LA PUBLICACIÓN               -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6">
-            <label class="block text-gray-700 font-body font-medium mb-2">
-                Imagen de la publicación
-                <span class="text-gray-400 text-xs font-normal ml-1">(opcional, máx. 5 MB)</span>
-            </label>
-            <div class="flex items-start gap-4">
-                <!-- Slot único de imagen -->
-                <div class="relative w-36 h-36 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all flex-shrink-0 group"
-                    [class.border-solid]="!imagenSlot().preview" [class.border-3]="!imagenSlot().preview"
-                    [class.border-accent]="!imagenSlot().preview" [class.bg-yellow-50]="!imagenSlot().preview"
-                    [class.border-2]="!!imagenSlot().preview" [class.border-blue-400]="!!imagenSlot().preview"
-                    (click)="fileInput.click()">
-                    @if (imagenSlot().preview) {
-                    <img [src]="imagenSlot().preview" alt="Imagen de la publicación"
-                        class="w-full h-full object-cover rounded-xl group-hover:opacity-90 transition-opacity" />
-                    <!-- Badge Principal -->
-                    <span
-                        class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
-                        Principal
+                <!-- Input + botón limpiar cuando hay selección -->
+                <div class="relative flex items-center gap-2">
+                    <input #inputBusqueda type="text" [ngModel]="busqueda()"
+                        (ngModelChange)="busqueda.set($event); buscarPaquetes()" (focus)="abrirLista()"
+                        placeholder="Buscar paquete base..."
+                        class="w-full border border-gray-300 rounded-lg p-2.5 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-colors text-gray-600 pr-10" />
+                    @if (paqueteBaseSeleccionado()) {
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2">
+                        <app-button variant="ghost" size="xs" [iconOnly]="true" iconEnd="x" title="Limpiar selección"
+                            (buttonClick)="limpiarPaqueteBase()" />
                     </span>
-                    <!-- Botón eliminar -->
-                    <button type="button" (click)="removeImage($event)"
-                        class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-20 transition-colors">×</button>
-                    <!-- Icono editar -->
-                    <div
-                        class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded z-10 pointer-events-none group-hover:bg-opacity-90 transition-all hover:scale-105">
-                        <app-icon name="edit" size="16" />
-                    </div>
-                    } @else {
-                    <div class="text-center pointer-events-none group-hover:scale-105 transition-transform">
-                        <app-icon name="upload" size="32" class="text-gray-500 mx-auto" />
-                        <p class="text-xs text-gray-500 mt-1">Imagen principal</p>
-                    </div>
                     }
-                    <!-- Input file oculto -->
-                    <input #fileInput type="file" accept="image/jpeg,image/png,image/gif,image/webp"
-                        (change)="onFileSelected($event)" class="hidden" />
                 </div>
 
-                <!-- Instrucciones -->
-                <div class="text-sm text-gray-500 mt-2">
-                    <p>Hacé click en el cuadro para subir una imagen.</p>
-                    <p class="mt-1">Formatos aceptados: JPG, PNG, GIF, WEBP.</p>
-                    <p class="mt-1">Tamaño máximo: <strong>5 MB</strong>.</p>
+                <!-- Indicador de paquete seleccionado -->
+                @if (paqueteBaseSeleccionado()) {
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                  <p class="text-xs text-success flex items-center gap-1">
+                      <app-icon name="checkCircle" size="14" />
+                      Paquete seleccionado: <strong class="ml-0.5">{{ busqueda() }}</strong>
+                  </p>
+                  <!-- Badge de tipo -->
+                  @if (isEnergico()) {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-secondary-dark/10 text-secondary-dark border border-secondary-dark/30">
+                    <app-icon name="zap" size="12" />
+                    Enérgico
+                  </span>
+                  } @else if (isSinergico()) {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/30">
+                    <app-icon name="users" size="12" />
+                    Sinérgico
+                  </span>
+                  }
+                </div>
+                }
+
+                <!-- Lista desplegable -->
+                @if (mostrandoResultados() && resultadosBusqueda().length > 0) {
+                <ul
+                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-y-auto">
+                    @for (paquete of resultadosBusqueda(); track paquete.id_paquete_base) {
+                    <li (click)="seleccionarPaquete(paquete)" class="p-2.5 hover:bg-gray-100 cursor-pointer"
+                        [class.bg-blue-50]="paquete.id_paquete_base === paqueteBaseSeleccionado()">
+                        {{ paquete.nombre }}
+                    </li>
+                    }
+                </ul>
+                }
+
+                <!-- Sin resultados -->
+                @if (mostrandoResultados() && resultadosBusqueda().length === 0) {
+                <div
+                    class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 p-3 text-gray-500 text-sm text-center">
+                    No se encontraron resultados.
+                </div>
+                }
+            </div>
+
+            <!-- BANNER TIPO ENÉRGICO -->
+            @if (isEnergico()) {
+            <div class="p-4 bg-secondary-dark/10 border border-secondary-dark/30 rounded-lg flex items-start gap-3 mt-4">
+                <app-icon name="zap" size="20" class="flex-shrink-0 mt-0.5 text-secondary-dark" />
+                <div>
+                    <p class="font-bold text-sm text-secondary-dark">Paquete Enérgico — revisá el stock antes de publicar</p>
+                    <p class="text-sm text-secondary-dark/80 mt-1">
+                        Este tipo de paquete tiene <strong>stock físico limitado</strong>.
+                        Asegurate de haber configurado el <strong>stock físico de cada variante</strong> del producto
+                        desde <em>Gestionar Variantes</em> antes de publicar.
+                        Los usuarios verán el stock disponible en tiempo real y recibirán un aviso cuando se agote.
+                    </p>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- 🖼️ TARJETA 2: IMAGEN Y ZONA -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Imagen y Alcance</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Imagen de la publicación -->
+                <div>
+                    <label class="block text-gray-700 font-body font-medium mb-2">
+                        Imagen de la publicación
+                        <span class="text-gray-400 text-xs font-normal ml-1">(opcional, máx. 5 MB)</span>
+                    </label>
+                    <div class="flex items-start gap-4">
+                        <!-- Slot único de imagen -->
+                        <div class="relative w-36 h-36 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-all flex-shrink-0 group"
+                            [class.border-solid]="!imagenSlot().preview" [class.border-3]="!imagenSlot().preview"
+                            [class.border-accent]="!imagenSlot().preview" [class.bg-yellow-50]="!imagenSlot().preview"
+                            [class.border-2]="!!imagenSlot().preview" [class.border-blue-400]="!!imagenSlot().preview"
+                            (click)="fileInput.click()">
+                            @if (imagenSlot().preview) {
+                            <img [src]="imagenSlot().preview" alt="Imagen de la publicación"
+                                class="w-full h-full object-cover rounded-xl group-hover:opacity-90 transition-opacity" />
+                            <!-- Badge Principal -->
+                            <span
+                                class="absolute top-2 left-2 bg-secondary-dark text-white text-xs font-semibold px-2 py-0.5 rounded z-10 pointer-events-none">
+                                Principal
+                            </span>
+                            <!-- Botón eliminar -->
+                            <button type="button" (click)="removeImage($event)"
+                                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 z-20 transition-colors">×</button>
+                            <!-- Icono editar -->
+                            <div
+                                class="absolute bottom-2 right-2 bg-gray-800 bg-opacity-70 text-white text-xs px-2 py-1 rounded z-10 pointer-events-none group-hover:bg-opacity-90 transition-all hover:scale-105">
+                                <app-icon name="edit" size="16" />
+                            </div>
+                            } @else {
+                            <div class="text-center pointer-events-none group-hover:scale-105 transition-transform">
+                                <app-icon name="upload" size="32" class="text-gray-500 mx-auto" />
+                                <p class="text-xs text-gray-500 mt-1">Imagen principal</p>
+                            </div>
+                            }
+                            <!-- Input file oculto -->
+                            <input #fileInput type="file" accept="image/jpeg,image/png,image/gif,image/webp"
+                                (change)="onFileSelected($event)" class="hidden" />
+                        </div>
+
+                        <!-- Instrucciones -->
+                        <div class="text-sm text-gray-500 mt-2">
+                            <p>Hacé click en el cuadro para subir una imagen.</p>
+                            <p class="mt-1">Formatos aceptados: JPG, PNG, GIF, WEBP.</p>
+                            <p class="mt-1">Tamaño máximo: <strong>5 MB</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zona de publicación -->
+                <div class="flex flex-col justify-start">
+                    <app-select [labelValue]="'Zona'" [placeholderValue]="'Elegí una zona'" [optionsValue]="zonasOptions()"
+                        [searchableValue]="true" [clearableValue]="true" [requiredValue]="true" [ngModel]="zonaSeleccionada()"
+                        (valueChange)="zonaSeleccionada.set($event)" />
                 </div>
             </div>
         </div>
 
+        <!-- 📅 TARJETA 3: CONDICIONES Y CONFIGURACIÓN -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Condiciones de Publicación y Cierre</h3>
 
+            <!-- Banners Explicativos -->
+            <div class="space-y-4 mb-6">
+                <!-- Condiciones generales -->
+                <div class="p-4 bg-info-light border border-info text-info rounded-lg flex items-start gap-3">
+                    <app-icon name="info" size="20" class="flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p class="font-bold text-sm">Condiciones de publicación</p>
+                        <p class="text-sm mt-1">
+                            El paquete se publicará automáticamente en estado <strong>Activo</strong>.
+                        </p>
+                    </div>
+                </div>
 
-        <!-- ────────────────────────────────────── -->
-        <!-- ZONA                                   -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6">
-            <app-select [labelValue]="'Zona'" [placeholderValue]="'Elegí una zona'" [optionsValue]="zonasOptions()"
-                [searchableValue]="true" [clearableValue]="true" [requiredValue]="true" [ngModel]="zonaSeleccionada()"
-                (valueChange)="zonaSeleccionada.set($event)" />
-        </div>
+                <!-- Banner Edición / Duplicado -->
+                @if (isEditMode()) {
+                <div class="p-4 rounded-lg border flex items-start gap-3" [class.bg-blue-50]="!isDuplicate()"
+                    [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
+                    [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()"
+                    [class.text-amber-800]="isDuplicate()">
+                    <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p class="font-bold text-sm">
+                            {{ isDuplicate() ? 'Estás creando desde una publicación duplicada' : 'Estás editando una publicación' }}
+                        </p>
+                        <p class="text-xs mt-1">
+                            {{ isDuplicate() ? 'Es OBLIGATORIO que asignes una nueva fecha de cierre para que el paquete sea válido.' : 'Asegurate de establecer correctamente la fecha de cierre.' }}
+                        </p>
+                    </div>
+                </div>
+                }
+            </div>
 
-        <!-- ────────────────────────────────────── -->
-        <!-- FECHA DE FIN                           -->
-        <!-- ────────────────────────────────────── -->
-
-        <!-- ────────────────────────────────────── -->
-        <!-- INFORMACIÓN FIJA                       -->
-        <!-- ────────────────────────────────────── -->
-        <div class="mb-6 p-4 bg-info-light border border-info text-info rounded-lg flex items-start gap-3">
-            <app-icon name="info" size="20" class="flex-shrink-0 mt-0.5" />
-            <div>
-                <p class="font-bold text-sm">Condiciones de publicación</p>
-                <p class="text-sm mt-1">
-                    El paquete se publicará automáticamente en estado <strong>Activo</strong>.
-                </p>
+            <!-- Grid de Configuración (Fecha de cierre, Cantidad, Descuento) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <app-input [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" [typeValue]="'date'"
+                        [labelValue]="'Fecha de cierre'" [requiredValue]="true" />
+                </div>
+                <div>
+                    <app-input [ngModel]="cantProductos()" (ngModelChange)="cantProductos.set($event)" [typeValue]="'number'"
+                        [labelValue]="'Cantidad total de productos'" [placeholderValue]="'Ej: 30'" [minValue]="1" />
+                </div>
+                <div>
+                    <app-input [ngModel]="descuento()" (ngModelChange)="setDescuento($event)" [typeValue]="'number'"
+                        [labelValue]="'Descuento (%)'" [placeholderValue]="'Ej: 15'" [suffixValue]="'%'" [minValue]="0"
+                        [maxValue]="100" [helperTextValue]="'Opcional · entre 0 y 100'" />
+                </div>
             </div>
         </div>
 
-        <!-- Banner Edición / Duplicado -->
-        @if (isEditMode()) {
-        <div class="mb-6 p-4 rounded-lg border flex items-start gap-3" [class.bg-blue-50]="!isDuplicate()"
-            [class.border-blue-200]="!isDuplicate()" [class.text-blue-800]="!isDuplicate()"
-            [class.bg-amber-50]="isDuplicate()" [class.border-amber-200]="isDuplicate()"
-            [class.text-amber-800]="isDuplicate()">
-            <app-icon [name]="isDuplicate() ? 'alertTriangle' : 'info'" size="20" class="flex-shrink-0 mt-0.5" />
-            <div>
-                <p class="font-bold text-sm">
-                    {{ isDuplicate() ? 'Estás creando desde una publicación duplicada' : 'Estás editando una publicación' }}
-                </p>
-                <p class="text-xs mt-1">
-                    {{ isDuplicate() ? 'Es OBLIGATORIO que asignes una nueva fecha de cierre para que el paquete sea válido.' : 'Asegurate de establecer correctamente la fecha de cierre.' }}
-                </p>
-            </div>
-        </div>
-        }
-        <div class="mb-6 max-w-full">
-            <app-input [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" [typeValue]="'date'"
-                [labelValue]="'Fecha de cierre'" [requiredValue]="true" />
-        </div>
-
-        <!-- ────────────────────────────────────── -->
-        <!-- CANTIDAD DE PRODUCTOS + DESCUENTO      -->
-        <!-- ────────────────────────────────────── -->
-        <div class=" grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-            <app-input [ngModel]="cantProductos()" (ngModelChange)="cantProductos.set($event)" [typeValue]="'number'"
-                [labelValue]="'Cantidad total de productos'" [placeholderValue]="'Ej: 30'" [minValue]="1" />
-            <app-input [ngModel]="descuento()" (ngModelChange)="setDescuento($event)" [typeValue]="'number'"
-                [labelValue]="'Descuento (%)'" [placeholderValue]="'Ej: 15'" [suffixValue]="'%'" [minValue]="0"
-                [maxValue]="100" [helperTextValue]="'Opcional · entre 0 y 100'" />
-        </div>
-
-        <!-- ────────────────────────────────────── -->
-        <!-- BOTÓN                                  -->
-        <!-- ────────────────────────────────────── -->
-        <div class="flex flex-col sm:flex-row justify-center gap-3">
+        <!-- 🔘 ACCIONES -->
+        <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
             @if (isDuplicate()) {
             <app-button variant="danger" label="Descartar duplicación"
                 [disabled]="cargando()" (buttonClick)="descartarDuplicacion()" />
