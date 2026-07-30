@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { FormsModule } from '@angular/forms';
 import { Subject, combineLatest } from 'rxjs';
 import {
@@ -99,7 +100,9 @@ export class BuscadorComponent {
   // 📊 Computed
   hayResultados = computed(() => {
     const res = this.resultados();
-    return res.productos.length > 0 || res.paquetes.length > 0;
+    const hayProductos = this.mostrarProductos() && res.productos.length > 0;
+    const hayPaquetes = this.mostrarPaquetes() && res.paquetes.length > 0;
+    return hayProductos || hayPaquetes;
   });
 
   totalResultados = computed(() => {
@@ -274,6 +277,11 @@ export class BuscadorComponent {
     });
   }
 
+  limpiarFiltrosYBusqueda(): void {
+    this.tipoBusqueda.set('todo');
+    this.limpiarBusqueda();
+  }
+
   // 🎯 Cambiar filtro
   cambiarTipoBusqueda(tipo: TipoBusqueda, event?: Event): void {
     if (event) {
@@ -288,7 +296,8 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/producto', producto.id_producto]);
+      const slugUrl = getProductSlugUrl(producto);
+      this.router.navigate(['/producto', slugUrl]);
     }
   }
 
@@ -297,7 +306,8 @@ export class BuscadorComponent {
       this.closeSearch();
       this.limpiarBusqueda();
       this.resultadoSeleccionado.emit();
-      this.router.navigate(['/paquete', paquete.id_paquete_publicado, 'productos']);
+      const slugUrl = getPaqueteSlugUrl(paquete);
+      this.router.navigate(['/paquete', slugUrl, 'productos']);
     }
   }
 

@@ -6,10 +6,17 @@
   <div class="relative">
     <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
       (focus)="onSearchFocus()" (click)="onInputClick($event)" placeholder="Buscar productos, paquetes, categorías..."
-      class="w-full px-6 py-3 pl-12 pr-6 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
+      class="w-full px-6 py-3 pl-12 pr-10 border border-white/30 rounded-full bg-white/90 backdrop-blur-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white transition-all duration-200 shadow-sm hover:shadow-md text-base"
       aria-label="Buscar en Mercado Sinérgico" autocomplete="off" />
     <app-icon name="Search"
       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+    @if (searchTerm()) {
+    <button (click)="limpiarFiltrosYBusqueda(); $event.stopPropagation()"
+      class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+      aria-label="Limpiar búsqueda" type="button">
+      <app-icon name="X" [size]="'14'" />
+    </button>
+    }
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
@@ -61,7 +68,7 @@
     <!-- Sin resultados -->
     @else if (!hayResultados()) {
     <div class="text-center py-8 px-4">
-      <app-icon name="Meh" class="w-16 h-16 text-gray-300 mx-auto mb-3" />
+      <app-icon name="Search" class="w-20 h-20 text-gray-300 mx-auto" />
       <p class="text-gray-600 font-medium">No encontramos resultados</p>
       <p class="text-gray-500 text-sm mt-1">Intenta con otros términos</p>
     </div>
@@ -194,10 +201,17 @@
         <div class="flex-1 relative">
           <input #searchInput type="text" [value]="searchTerm()" (input)="onSearchChange($any($event.target).value)"
             placeholder="¿Qué estás buscando?"
-            class="w-full px-4 py-2.5 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
+            class="w-full px-4 py-2.5 pl-10 pr-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
             autocomplete="off" />
           <app-icon name="Search"
             class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          @if (searchTerm()) {
+          <button (click)="limpiarFiltrosYBusqueda(); $event.stopPropagation()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+            aria-label="Limpiar búsqueda" type="button">
+            <app-icon name="X" [size]="'14'" />
+          </button>
+          }
         </div>
       </div>
 

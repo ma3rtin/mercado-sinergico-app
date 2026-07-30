@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { getProductSlugUrl } from '@app/shared/utils/obfuscator';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -55,7 +56,7 @@ export class ProductoCard {
   mostrarDescripcion = input<boolean>(true);
   longitudMaximaDescripcion = input<number>(120);
   tipoPaquete = input<string | null>(null);
-  paqueteId = input<number | null>(null);
+  paqueteId = input<number | string | null>(null);
   navegacion = input<ProductoCardNavegacion>('detalle-seleccion');
   tipoProducto = input<string | null>(null);
 
@@ -198,8 +199,9 @@ imagenUrl = computed(() => {
 
     // ✅ TIPO 1: Ir a detalle-seleccion (usuario elige paquete)
     if (nav === 'detalle-seleccion') {
-      console.log('🧭 Navegando a detalle-seleccion:', productoId);
-      this.router.navigate(['/producto', productoId]);
+      const slugUrl = getProductSlugUrl(this.producto());
+      console.log('🧭 Navegando a detalle-seleccion:', slugUrl);
+      this.router.navigate(['/producto', slugUrl]);
     }
     // ✅ TIPO 2: Ir a detalle-sumarse (usuario se suma a paquete)
     else if (nav === 'detalle-sumarse') {
@@ -208,12 +210,13 @@ imagenUrl = computed(() => {
         console.warn('⚠️ PaqueteId requerido para detalle-sumarse');
         return;
       }
+      const slugProducto = getProductSlugUrl(this.producto());
       console.log('🧭 Navegando a detalle-sumarse:', {
         paqueteId: paqId,
         productoId: productoId,
-        url: `/paquete/${paqId}/producto/${productoId}`
+        url: `/paquete/${paqId}/producto/${slugProducto}`
       });
-      this.router.navigate(['/paquete', paqId, 'producto', productoId]);
+      this.router.navigate(['/paquete', paqId, 'producto', slugProducto]);
     }
   }
 
