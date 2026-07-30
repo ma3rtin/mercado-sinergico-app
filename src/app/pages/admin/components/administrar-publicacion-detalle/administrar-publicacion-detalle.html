@@ -1,8 +1,8 @@
-<div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-bg-raised px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body">
   <div class="max-w-6xl mx-auto">
     <!-- 🔙 BOTÓN VOLVER -->
     <div class="mb-4">
-      <app-admin-back-button label="Volver al listado de publicaciones" route="/admin/administrar-publicaciones" />
+      <app-admin-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
     </div>
 
     <!-- Cargando -->
@@ -13,8 +13,10 @@
     } @else if (error()) {
     <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
       <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4 mt-[2px]" />
-      <p class="text-error font-semibold text-lg">{{ error() }}</p>
-      <app-admin-back-button label="Volver al listado" route="/admin/administrar-publicaciones" />
+      <p class="text-error font-semibold text-lg mb-4">{{ error() }}</p>
+      <div class="flex justify-center">
+        <app-admin-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
+      </div>
     </div>
 
     } @else if (paquete()) {
@@ -67,10 +69,15 @@
                     }
                   </p>
                 </div>
-                <span
-                  [class]="'px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide border ' + getEstadoClasses(paquete()?.estado)">
-                  {{ paquete()?.estado?.nombre || 'N/A' }}
-                </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span
+                    [class]="'px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide border ' + getEstadoClasses(paquete()?.estado)">
+                    {{ paquete()?.estado?.nombre || 'N/A' }}
+                  </span>
+                  <app-button variant="secondary" size="sm" iconStart="truck" (buttonClick)="irAGestionEnvios()">
+                    Gestionar envíos
+                  </app-button>
+                </div>
               </div>
 
               <!-- Fechas -->

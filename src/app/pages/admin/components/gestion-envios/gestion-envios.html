@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-bg-app py-8 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-bg-raised px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body">
   <div class="max-w-4xl mx-auto">
 
     <!-- 🔙 BOTÓN VOLVER -->
@@ -17,7 +17,9 @@
     <div class="text-center py-20 bg-bg-surface rounded-2xl shadow-sm border border-border-default">
       <app-icon name="alertCircle" size="64" class="text-error mx-auto mb-4" />
       <p class="text-error font-semibold text-lg">{{ error() }}</p>
-      <button (click)="volver()" class="mt-4 text-sm text-brand-primary hover:underline">Volver</button>
+      <div class="flex justify-center mt-4">
+        <app-admin-back-button label="Volver al detalle del paquete" [route]="'/admin/administrar-publicacion/' + paqueteId()" />
+      </div>
     </div>
 
     } @else {
@@ -120,7 +122,9 @@
         <app-icon name="inbox" size="56" class="text-text-muted mx-auto mb-4" />
         <p class="text-text-primary font-semibold text-lg mb-1">Sin pedidos en preparación</p>
         <p class="text-text-secondary text-sm">No hay pedidos listos para marcar en camino en este momento.</p>
-        <button (click)="volver()" class="mt-5 text-sm text-brand-primary hover:underline">Volver al detalle</button>
+        <div class="flex justify-center mt-5">
+          <app-admin-back-button label="Volver al detalle del paquete" [route]="'/admin/administrar-publicacion/' + paqueteId()" />
+        </div>
       </div>
 
       } @else if (pedidosFiltrados().length === 0) {

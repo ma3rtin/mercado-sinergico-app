@@ -196,12 +196,6 @@ export class GestionEnviosComponent implements OnInit {
     });
   }
 
-  // ── Navegación ───────────────────────────────────────────
-
-  volver() {
-    this.router.navigate(['/admin/administrar-publicacion', this.paqueteId()]);
-  }
-
   // ── Helpers ─────────────────────────────────────────────
 
   formatMonto(monto?: number | null): string {
