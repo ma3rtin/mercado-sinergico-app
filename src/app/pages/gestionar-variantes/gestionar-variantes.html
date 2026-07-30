@@ -2,16 +2,16 @@
 <!-- GESTIONAR-VARIANTES.COMPONENT.HTML -->
 <!-- ============================================ -->
 
-<div class="min-h-screen bg-bg-app pb-24 font-body text-text-primary">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-bg-raised px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body text-text-primary pb-24">
+  <div class="mx-auto max-w-7xl">
+
+    <!-- Botón Volver -->
+    <div class="mb-4">
+      <app-admin-back-button label="Volver a productos" [customHandler]="true" (backClick)="volver()" />
+    </div>
 
     <!-- 📱 HEADER -->
-    <header class="py-6 flex flex-col gap-5">
-      <button (click)="volver()"
-        class="flex items-center gap-2 text-brand-primary font-bold text-xs uppercase tracking-widest active:scale-95 transition-all w-fit group">
-        <app-icon name="arrowLeft" size="16" class="group-hover:-translate-x-1 transition-transform" />
-        Volver a productos
-      </button>
+    <header class="pb-6 flex flex-col gap-5">
 
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div class="space-y-2">
