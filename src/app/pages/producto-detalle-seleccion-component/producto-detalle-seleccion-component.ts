@@ -297,7 +297,9 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
       url: `/paquete/${slugPaquete}/producto/${slugProducto}`
     });
 
-    this.router.navigate(['/paquete', slugPaquete, 'producto', slugProducto]);
+    this.router.navigate(['/paquete', slugPaquete, 'producto', slugProducto], {
+      queryParams: { from: 'producto' }
+    });
   }
 
   /**
