@@ -38,7 +38,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { InputComponent } from '@app/shared/input/input-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-modal.component/crear-plantilla';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
@@ -60,7 +60,7 @@ import Swal from 'sweetalert2';
     InputComponent,
     IconComponent,
     CrearPlantillaModalComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     AdminCreateWrapperComponent,
     SelectorTipoCardComponent,
     SelectCategoriaMarca,
