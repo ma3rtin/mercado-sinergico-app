@@ -26,7 +26,7 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { computed } from '@angular/core';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -40,7 +40,7 @@ import Swal from 'sweetalert2';
     FormsModule, 
     AdminCreateWrapperComponent, 
     SelectorTipoCardComponent, 
-    AdminBackButtonComponent, 
+    BackButtonComponent, 
     SelectComponent,
     IconComponent
   ],
