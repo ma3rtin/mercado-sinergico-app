@@ -10,3 +10,7 @@
   visibility: visible;
   transform: scale(1);
 }
+
+.tooltip-trigger:hover {
+  z-index: 50;
+}
