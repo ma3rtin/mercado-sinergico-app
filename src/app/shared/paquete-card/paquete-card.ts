@@ -8,11 +8,12 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { TipoPaquete } from '@app/models/Enums';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent],
   templateUrl: './paquete-card.html',
   styleUrl: './paquete-card.css',
 })

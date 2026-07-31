@@ -3,7 +3,7 @@
 
 <article (click)="onCardClick()" class="group overflow-hidden bg-bg-surface rounded-2xl shadow-sm cursor-pointer
          flex flex-col h-full w-full border-l-[5px]
-         hover:shadow-lg hover:scale-[1.02]" [ngClass]="getBorderColorClass()">
+         hover:shadow-lg hover:scale-[1.02] relative hover:z-30" [ngClass]="getBorderColorClass()">
 
   <!-- IMAGEN -->
   <div class="relative w-full bg-bg-app overflow-hidden rounded-tl-[11px] rounded-tr-2xl" 
@@ -95,11 +95,17 @@
       <span>{{ paquete.cant_usuarios_registrados || 0 }} {{ (paquete.cant_usuarios_registrados === 1) ? 'comprador' : 'compradores' }}</span>
     </div>
 
-    <!-- Timer (fila propia) -->
-    <div class="flex items-center gap-1.5 text-sm" [ngClass]="getTimerTextClass()" [title]="getTimerTooltip()">
-      <app-icon name="Clock" size="14"></app-icon>
-      <span>Finaliza en {{ getTiempoRestante(paquete.fecha_fin) }}</span>
-    </div>
+    <!-- Timer (fila propia con tooltip) -->
+    <app-info-tooltip
+      [customTrigger]="true"
+      tooltipTitle="Tiempo del paquete"
+      [description]="getTimerTooltip()"
+      position="top-center">
+      <div class="flex items-center gap-1.5 text-sm cursor-help" [ngClass]="getTimerTextClass()">
+        <app-icon name="Clock" size="14"></app-icon>
+        <span>Finaliza en {{ getTiempoRestante(paquete.fecha_fin) }}</span>
+      </div>
+    </app-info-tooltip>
 
   </div>
 
