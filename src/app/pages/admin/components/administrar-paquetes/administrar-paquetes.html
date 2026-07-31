@@ -56,7 +56,7 @@
               <div class="absolute bottom-3 left-4 text-white">
                 <div class="flex items-center gap-2 mb-0.5">
                   <span class="text-xs uppercase tracking-wider font-medium opacity-80">{{ paquete.categoria?.nombre || 'General' }}</span>
-                  <app-tipo-badge [tipo]="paquete.tipo" size="xs" mode="icon" />
+                  <app-tipo-badge [tipo]="paquete.tipo" size="xs" mode="icon" [showTooltip]="false" />
                   @if (paquete.archivado) {
                     <span class="px-2 py-0.5 bg-gray-700/80 text-white rounded text-[10px] font-bold uppercase tracking-wider">
                       Archivado

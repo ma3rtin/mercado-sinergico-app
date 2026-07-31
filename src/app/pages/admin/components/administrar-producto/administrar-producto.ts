@@ -18,6 +18,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-administrar-productos',
@@ -30,6 +31,7 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     PaginationComponent,
     TipoBadgeComponent,
     LoaderComponent,
+    InfoTooltipComponent,
   ],
   templateUrl: './administrar-producto.html',
 })
