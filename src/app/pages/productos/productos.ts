@@ -354,7 +354,13 @@ export class ProductosComponent implements OnInit {
   private actualizarUrl(page: number): void {
     const queryParams: any = {
       page: page.toString(),
-      limit: this.itemsPorPagina().toString()
+      limit: this.itemsPorPagina().toString(),
+      categorias: null,
+      marcas: null,
+      zonas: null,
+      precioMin: null,
+      precioMax: null,
+      orden: null
     };
 
     const filtros = this.filtrosActuales();
