@@ -364,7 +364,13 @@ export class PaquetesPublicosComponent implements OnInit {
   private actualizarUrl(page: number): void {
     const queryParams: any = {
       page: page.toString(),
-      limit: this.itemsPorPagina().toString()
+      limit: this.itemsPorPagina().toString(),
+      categorias: null,
+      marcas: null,
+      zonas: null,
+      tiposPaquete: null,
+      estados: null,
+      orden: null
     };
 
     const filtros = this.filtrosActuales;
