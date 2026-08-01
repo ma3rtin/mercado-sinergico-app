@@ -26,7 +26,7 @@ import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/ad
 import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { LoaderComponent } from '@app/shared/loader/loader';
@@ -40,7 +40,7 @@ import Swal from 'sweetalert2';
     AdminCreateWrapperComponent,
     ButtonComponent,
     IconComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     InputComponent,
     SelectComponent,
     SelectorTipoCardComponent,

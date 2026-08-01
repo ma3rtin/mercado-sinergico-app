@@ -1,19 +1,11 @@
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-4xl mx-auto">
+<app-admin-create-wrapper [titulo]="'Importar / Exportar Productos'">
+  <app-back-button label="Volver al panel" route="/admin/perfil" />
 
-    <div class="mb-6">
-      <app-admin-back-button label="Volver a perfil admin" route="/admin/perfil"></app-admin-back-button>
-    </div>
-
-    <!-- Header -->
-    <div class="page-header mb-8">
-      <h1 class="page-title">Importar / Exportar Productos</h1>
-      <p class="page-subtitle">Gestioná tu catálogo de productos masivamente con archivos Excel</p>
-    </div>
+  <div class="space-y-6">
 
     <!-- Sección: Descargar Plantilla -->
     <div
-      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 flex gap-5 items-start hover:shadow-md transition-shadow">
+      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-5 items-start hover:shadow-md transition-shadow">
       <div class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl text-black shadow-lg">
         <app-icon name="grid" size="28" class="mt-1" />
       </div>
@@ -28,7 +20,7 @@
 
     <!-- Sección: Importar Productos -->
     <div
-      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 flex gap-5 items-start hover:shadow-md transition-shadow">
+      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-5 items-start hover:shadow-md transition-shadow">
       <div class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl text-black shadow-lg">
         <app-icon name="upload" size="28" class="mt-1" />
       </div>
@@ -76,7 +68,7 @@
 
     <!-- Resultados de importación -->
     <div
-      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 flex gap-5 items-start hover:shadow-md transition-shadow"
+      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-5 items-start hover:shadow-md transition-shadow"
       *ngIf="hasResult()">
       <div class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl"
         [class.bg-success]="importResult()!.success" [class.bg-error]="!importResult()!.success">
@@ -127,7 +119,7 @@
 
     <!-- Sección: Exportar Productos -->
     <div
-      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 flex gap-5 items-start hover:shadow-md transition-shadow">
+      class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex gap-5 items-start hover:shadow-md transition-shadow">
       <div class="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-xl text-black shadow-lg">
         <app-icon name="download" size="28" />
       </div>
@@ -141,7 +133,7 @@
     </div>
 
     <!-- Información útil -->
-    <div class="bg-gray-50 shadow-lg rounded-xl p-6">
+    <div class="bg-white border border-gray-100 shadow-sm rounded-xl p-6">
       <h3 class="text-base font-display text-success font-semibold mb-3 flex items-center gap-2">
         <app-icon name="info" size="20" class="text-success" />
         Información Importante
@@ -179,4 +171,4 @@
     </div>
 
   </div>
-</div>
+</app-admin-create-wrapper>

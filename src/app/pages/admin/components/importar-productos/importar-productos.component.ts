@@ -5,7 +5,8 @@ import { toast } from 'ngx-sonner';
 import { environment } from '../../../../../environments/environment';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 
 interface ImportResult {
     success: boolean;
@@ -23,7 +24,7 @@ interface ImportResult {
 @Component({
     selector: 'app-importar-productos',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent, AdminBackButtonComponent],
+    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent, BackButtonComponent, AdminCreateWrapperComponent],
     templateUrl: './importar-productos.component.html',
     styleUrls: ['./importar-productos.component.css'],
 })

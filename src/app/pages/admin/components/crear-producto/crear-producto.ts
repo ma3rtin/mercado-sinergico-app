@@ -25,7 +25,7 @@ import { CrearPlantillaModalComponent } from '@app/components/crear-plantilla-mo
 import { IconComponent } from '@app/shared/icono/icono';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { SelectorTipoCardComponent, SelectorTipoCardContenido } from '@app/shared/selector-tipo-card/selector-tipo-card';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
@@ -45,7 +45,7 @@ import Swal from 'sweetalert2';
     IconComponent,
     SelectorTipoCardComponent,
     AdminCreateWrapperComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     SelectCategoriaMarca,
     MapOptionsPipe,
     SubidorImagenes,
