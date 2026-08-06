@@ -400,8 +400,13 @@ export class ProductosComponent implements OnInit {
       .getPaquetes()
       .pipe(
         switchMap((paquetes) => {
+          const tieneProdsValidos = (p: PaquetePublicado): boolean => {
+            const prods = p.paqueteBase?.productos;
+            return Array.isArray(prods) && prods.length > 0 && prods.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+          };
+
           const activos = paquetes.filter(
-            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
+            (p) => p.estado?.nombre?.toLowerCase() === 'activo' && tieneProdsValidos(p),
           );
           if (activos.length === 0) return of([]);
 
@@ -423,8 +428,13 @@ export class ProductosComponent implements OnInit {
       )
       .subscribe({
         next: (paquetes) => {
+          const tieneProdsValidos = (p: PaquetePublicado): boolean => {
+            const prods = p.paqueteBase?.productos;
+            return Array.isArray(prods) && prods.length > 0 && prods.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+          };
+
           const activos = paquetes.filter(
-            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
+            (p) => p.estado?.nombre?.toLowerCase() === 'activo' && tieneProdsValidos(p),
           );
           this.paquetesActivos.set(activos);
           this.isLoadingPaquetes.set(false);

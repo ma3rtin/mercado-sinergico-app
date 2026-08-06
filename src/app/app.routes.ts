@@ -75,6 +75,8 @@ export const routes: Routes = [
           { path: 'crear-producto', component: CrearProductoComponent },
           { path: 'crear-paquete', component: CrearPaqueteComponent },
           { path: 'publicar-paquete', component: PublicarPaqueteComponent },
+          { path: 'publicar-paquete/:id/editar', component: PublicarPaqueteComponent },
+          { path: 'publicar-paquete/:id', component: PublicarPaqueteComponent },
           { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
           { path: 'administrar-productos', component: AdministrarProductosComponent },
           { path: 'editar-producto/:id', component: EditarProductoComponent },

@@ -168,6 +168,14 @@ export class PublicarPaqueteComponent implements OnInit {
     this.cargando.set(true);
     this.paquetePublicadoService.getPaqueteById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (paquete) => {
+        const estadoNombre = paquete.estado?.nombre?.toLowerCase().trim();
+        if (!this.isDuplicate() && (estadoNombre === 'cancelado' || estadoNombre === 'entregado' || estadoNombre === 'recibido')) {
+          this.toast.error(`Una publicación en estado "${paquete.estado?.nombre}" no puede ser modificada.`, 'Acción no permitida');
+          this.cargando.set(false);
+          this.router.navigate(['/admin/administrar-publicaciones']);
+          return;
+        }
+
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
         this.busqueda.set(paquete.paqueteBase?.nombre ?? '');
         this.zonaSeleccionada.set(paquete.zonaId ?? null);
@@ -225,15 +233,23 @@ export class PublicarPaqueteComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
-          this.paquetesBase.set(data);
+          // Filtrar paquetes base que no estén archivados Y que tengan productos asociados válidos
+          const validos = data.filter(
+            (p) =>
+              !p.archivado &&
+              Array.isArray(p.productos) &&
+              p.productos.length > 0 &&
+              p.productos.some((bp) => !!(bp.productoId || bp.producto || (bp as any).id_producto))
+          );
+          this.paquetesBase.set(validos);
 
           // Si hay un paquete pre-seleccionado, buscar su nombre para el input
           if (this.paqueteBaseSeleccionado()) {
-            const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
+            const pre = validos.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
             if (pre) this.busqueda.set(pre.nombre);
           }
 
-          const primeros = data.slice(0, 10);
+          const primeros = validos.slice(0, 10);
           this.resultadosBusqueda.set(primeros);
           this.cargando.set(false);
         },
@@ -368,16 +384,27 @@ export class PublicarPaqueteComponent implements OnInit {
       this.toast.error('El nombre de la publicación es requerido.', 'Error de validación');
       return;
     }
-    if (!this.paqueteBaseSeleccionado()) {
+    const baseId = this.paqueteBaseSeleccionado();
+    if (!baseId) {
       this.toast.error('Debés seleccionar un paquete base.', 'Error de validación');
       return;
     }
+
+    // Validar estado del paquete base seleccionado
+    const baseObj = this.paquetesBase().find(p => p.id_paquete_base === Number(baseId));
+    if (baseObj) {
+      if (baseObj.archivado) {
+        this.toast.error('El paquete base seleccionado está archivado y no puede ser publicado.', 'Estado de paquete inválido');
+        return;
+      }
+      if (Array.isArray(baseObj.productos) && baseObj.productos.length === 0) {
+        this.toast.error('El paquete base seleccionado no contiene productos.', 'Estado de paquete inválido');
+        return;
+      }
+    }
+
     if (!this.zonaSeleccionada()) {
       this.toast.error('Debés seleccionar una zona.', 'Error de validación');
-      return;
-    }
-    if (!this.estadoSeleccionado()) {
-      this.toast.error('Debés seleccionar un estado.', 'Error de validación');
       return;
     }
     if (!this.fechaInicio() || !this.fechaFin()) {
@@ -447,7 +474,7 @@ export class PublicarPaqueteComponent implements OnInit {
             'Éxito'
           );
           this.reiniciarFormulario();
-          const newId = result?.id_paquete_publicado;
+          const newId = result?.id_paquete_publicado || result?.id || result?.data?.id_paquete_publicado || result?.data?.id;
           this.router.navigate(['/admin/administrar-publicaciones'], {
             queryParams: {
               reload: '1',

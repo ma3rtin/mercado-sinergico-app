@@ -220,12 +220,18 @@ export class BuscadorComponent {
         });
 
 
-        const paquetesFiltrados = data.paquetes.filter(paq =>
-          paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
-          paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
-          paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||
-          paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
-        );
+        const paquetesFiltrados = data.paquetes.filter(paq => {
+          const prods = paq.paqueteBase?.productos;
+          const tieneProds = Array.isArray(prods) && prods.length > 0 && prods.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+          if (!tieneProds) return false;
+
+          return (
+            paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
+            paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
+            paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||
+            paq.paqueteBase?.categoria?.nombre?.toLowerCase().includes(term)
+          );
+        });
 
         this.limiteMostrado.set(6);
         this.resultados.set({

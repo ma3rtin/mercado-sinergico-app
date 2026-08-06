@@ -261,9 +261,13 @@ export class PaquetesPublicosComponent implements OnInit {
         next: (paquetes) => {
           console.log('✅ Paquetes cargados:', paquetes);
 
-          // Solo mostrar paquetes con estado Activo
+          // Solo mostrar paquetes con estado Activo y que tengan productos asociados válidos
           const paquetesActivos = paquetes.filter(
-            (p) => p.estado?.nombre === 'Activo'
+            (p) => {
+              const prods = p.paqueteBase?.productos;
+              const tieneProds = Array.isArray(prods) && prods.length > 0 && prods.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+              return p.estado?.nombre === 'Activo' && tieneProds;
+            }
           );
 
           const paquetesOrdenados = this.ordenarPaquetes(paquetesActivos, 'recientes');

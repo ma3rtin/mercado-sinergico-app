@@ -142,6 +142,15 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   publicarPaquete(paquete: PaqueteBase): void {
+    if (paquete.archivado) {
+      this.toast.error('El paquete base está archivado y no se puede publicar.', 'Acción no permitida');
+      return;
+    }
+    const tieneProductos = Array.isArray(paquete.productos) && paquete.productos.length > 0 && paquete.productos.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+    if (!tieneProductos) {
+      this.toast.error('No podés publicar un paquete sin productos asociados. Asigná productos antes de publicar.', 'Paquete sin productos');
+      return;
+    }
     this.router.navigate(['/admin/publicar-paquete'], { queryParams: { baseId: paquete.id_paquete_base } });
   }
 

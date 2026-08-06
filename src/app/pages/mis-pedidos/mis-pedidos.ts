@@ -10,6 +10,7 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -66,6 +67,8 @@ export class MisPedidosComponent implements OnInit {
   private readonly pedidoService = inject(PedidoService);
   private toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   // ------------------------------
   // SIGNALS PRINCIPALES
@@ -134,6 +137,40 @@ export class MisPedidosComponent implements OnInit {
   // ------------------------------
   ngOnInit(): void {
     this.cargarPedidos();
+    this.verificarEstadoPago();
+  }
+
+  private verificarEstadoPago(): void {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        const status = (params['status'] || params['collection_status'] || params['payment_status'] || '').toLowerCase();
+        const pedidoEnPago = sessionStorage.getItem('pedido_en_pago');
+
+        if (status === 'approved' || status === 'accredited' || status === 'success') {
+          this.toast.success('¡Compra realizada con éxito! Tu pedido ha sido procesado.', '¡Gracias por tu compra!');
+          sessionStorage.removeItem('pedido_en_pago');
+          this.limpiarQueryParams();
+        } else if (status === 'pending' || status === 'in_process') {
+          this.toast.info('Tu pago está siendo procesado. Te notificaremos cuando se acredite.', 'Pago en proceso');
+          sessionStorage.removeItem('pedido_en_pago');
+          this.limpiarQueryParams();
+        } else if (status === 'rejected' || status === 'failure' || status === 'cancelled') {
+          this.toast.error('El pago no pudo ser completado. Intentá nuevamente.', 'Pago rechazado');
+          sessionStorage.removeItem('pedido_en_pago');
+          this.limpiarQueryParams();
+        } else if (pedidoEnPago) {
+          sessionStorage.removeItem('pedido_en_pago');
+        }
+      });
+  }
+
+  private limpiarQueryParams(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
   }
 
   // ------------------------------
@@ -490,14 +527,17 @@ export class MisPedidosComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          const url = response?.checkoutUrl?.checkoutUrl;
-          const esSeguro = this.isAllowedCheckoutUrl(url);
-          if (!esSeguro) {
+          const rawUrl = typeof response === 'string'
+            ? response
+            : (response?.checkoutUrl?.checkoutUrl || response?.checkoutUrl || response?.init_point || response?.sandbox_init_point);
+
+          if (rawUrl && typeof rawUrl === 'string' && this.isAllowedCheckoutUrl(rawUrl)) {
+            window.location.href = rawUrl;
+          } else {
             sessionStorage.removeItem('pedido_en_pago');
-            this.toast.error('URL de pago inválida. Contactá soporte.');
-            return;
+            this.toast.success('¡Compra realizada con éxito!', '¡Gracias por tu compra!');
+            this.cargarPedidos();
           }
-          window.location.href = url;
         },
         error: (err) => {
           sessionStorage.removeItem('pedido_en_pago');

@@ -71,16 +71,22 @@ export class Home implements OnInit {
         console.log('📦 Paquetes recibidos:', paquetes);
         console.log('📊 Cantidad:', paquetes.length);
 
+        // Filtrar paquetes sin productos o sin productos asociados válidos
+        const paquetesValidos = paquetes.filter((p) => {
+          const prods = p.paqueteBase?.productos;
+          return Array.isArray(prods) && prods.length > 0 && prods.some(bp => !!(bp.productoId || bp.producto || (bp as any).id_producto));
+        });
+
         // Debug: mostrar primer paquete
-        if (paquetes.length > 0) {
-          console.log('🔍 Primer paquete:', paquetes[0]);
-          console.log('  - Nombre:', paquetes[0].paqueteBase?.nombre);
-          console.log('  - Marca:', paquetes[0].paqueteBase?.marca?.nombre);
-          console.log('  - Categoría:', paquetes[0].paqueteBase?.categoria?.nombre);
-          console.log('  - Imagen:', paquetes[0].imagen_url);
+        if (paquetesValidos.length > 0) {
+          console.log('🔍 Primer paquete:', paquetesValidos[0]);
+          console.log('  - Nombre:', paquetesValidos[0].paqueteBase?.nombre);
+          console.log('  - Marca:', paquetesValidos[0].paqueteBase?.marca?.nombre);
+          console.log('  - Categoría:', paquetesValidos[0].paqueteBase?.categoria?.nombre);
+          console.log('  - Imagen:', paquetesValidos[0].imagen_url);
         }
 
-        this.paquetesPorCerrarse.set(paquetes);
+        this.paquetesPorCerrarse.set(paquetesValidos);
         this.isLoading.set(false);
       });
   }
