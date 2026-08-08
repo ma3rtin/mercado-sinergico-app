@@ -46,6 +46,9 @@ import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
 import { LoaderComponent } from '@app/shared/loader/loader';
 
+// Validators
+import { mayorQueCero } from '@app/shared/validators/mayor-que-cero.validator';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import Swal from 'sweetalert2';
 
@@ -180,10 +183,10 @@ esTipoBloqueado = computed(() => {
       stock: [null, [Validators.min(0), Validators.max(1000000)]],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
-      altura: [null, [Validators.min(0), Validators.max(10000)]],
-      ancho: [null, [Validators.min(0), Validators.max(10000)]],
-      profundidad: [null, [Validators.min(0), Validators.max(10000)]],
-      peso: [null, [Validators.min(0), Validators.max(10000)]],
+      altura: [null, [mayorQueCero, Validators.max(10000)]],
+      ancho: [null, [mayorQueCero, Validators.max(10000)]],
+      profundidad: [null, [mayorQueCero, Validators.max(10000)]],
+      peso: [null, [mayorQueCero, Validators.max(10000)]],
       plantillaId: [null],
     });
   }
@@ -710,7 +713,9 @@ esTipoBloqueado = computed(() => {
       return `${fieldLabel} no puede superar los ${errors['maxlength'].requiredLength} caracteres`;
     }
     if (errors['min']) {
-      return `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
+      return errors['min'].min === 0
+        ? `${fieldLabel} debe ser mayor a 0`
+        : `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
     }
     if (errors['max']) {
       return `${fieldLabel} debe ser menor o igual a ${errors['max'].max}`;
