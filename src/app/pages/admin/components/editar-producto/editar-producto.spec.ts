@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import { featherArrowLeft, featherCheck, featherInfo, featherPlus, featherSearch, featherUpload, featherUsers, featherZap } from '@ng-icons/feather-icons';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { EditarProductoComponent } from './editar-producto';
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -169,6 +170,127 @@ describe('EditarProductoComponent', () => {
     it('carga las dimensiones decimales sin truncarlas', () => {
       expect(component.productForm.get('altura')!.value).toBe(0.5);
       expect(component.productForm.get('peso')!.value).toBe(0.3);
+    });
+  });
+});
+
+describe('EditarProductoComponent — validaciones del formulario', () => {
+  let component: EditarProductoComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [EditarProductoComponent],
+      providers: [
+        provideIcons({
+          featherArrowLeft,
+          featherCheck,
+          featherInfo,
+          featherPlus,
+          featherSearch,
+          featherUpload,
+          featherUsers,
+          featherZap,
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '1' } } },
+        },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: PlantillaService, useValue: { getPlantillas: () => of([]) } },
+        { provide: MarcaService, useValue: { getMarcas: () => of([]) } },
+        { provide: CategoriaService, useValue: { getCategorias: () => of([]) } },
+        {
+          provide: ProductosService,
+          useValue: {
+            getProductoById: () => of({
+              id_producto: 1,
+              nombre: 'Producto test',
+              descripcion: 'Descripción de prueba válida',
+              precio: 100,
+              marca_id: 1,
+              categoria_id: 1,
+              imagenes: [],
+            }),
+            updateProducto: () => of({}),
+          },
+        },
+        { provide: VarianteService, useValue: { generarVariantes: () => of({}) } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn() } },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(EditarProductoComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  describe('descripcion', () => {
+    it('debe ser inválido cuando está vacío (error required)', () => {
+      const control = component.productForm.get('descripcion');
+      control?.setValue('');
+      expect(control?.invalid).toBe(true);
+      expect(control?.errors?.['required']).toBeTruthy();
+    });
+
+    it('debe tener error minlength cuando tiene menos de 10 caracteres', () => {
+      const control = component.productForm.get('descripcion');
+      control?.setValue('abcde');
+      expect(control?.errors?.['minlength']).toBeTruthy();
+      expect(control?.errors?.['minlength'].requiredLength).toBe(10);
+    });
+
+    it('debe tener error maxlength cuando tiene más de 500 caracteres', () => {
+      const control = component.productForm.get('descripcion');
+      const textoLargo = 'a'.repeat(501);
+      control?.setValue(textoLargo);
+      expect(control?.errors?.['maxlength']).toBeTruthy();
+      expect(control?.errors?.['maxlength'].requiredLength).toBe(500);
+    });
+  });
+
+  describe('nombre', () => {
+    it('debe tener error maxlength cuando tiene más de 100 caracteres', () => {
+      const control = component.productForm.get('nombre');
+      const textoLargo = 'a'.repeat(101);
+      control?.setValue(textoLargo);
+      expect(control?.errors?.['maxlength']).toBeTruthy();
+      expect(control?.errors?.['maxlength'].requiredLength).toBe(100);
+    });
+  });
+
+  describe('precio', () => {
+    it('debe tener error max cuando supera el máximo definido', () => {
+      const control = component.productForm.get('precio');
+      control?.setValue(100000000);
+      expect(control?.errors?.['max']).toBeTruthy();
+      expect(control?.errors?.['max'].max).toBe(99999999);
+    });
+  });
+
+  describe('getErrorMessage', () => {
+    it('debe devolver el mensaje exacto para maxlength en descripcion', () => {
+      const control = component.productForm.get('descripcion');
+      const textoLargo = 'a'.repeat(501);
+      control?.setValue(textoLargo);
+      control?.markAsTouched();
+
+      const mensaje = component.getErrorMessage('descripcion');
+      expect(mensaje).toBe('La descripción no puede superar los 500 caracteres');
+    });
+  });
+
+  describe('getFieldLabel', () => {
+    it('debe devolver "La descripción" para el campo descripcion', () => {
+      const label = (component as any).getFieldLabel('descripcion');
+      expect(label).toBe('La descripción');
+    });
+  });
+
+  describe('happy path', () => {
+    it('no debe tener errores con valores válidos', () => {
+      const control = component.productForm.get('descripcion');
+      control?.setValue('Una descripción de longitud válida y correcta.');
+      expect(control?.valid).toBe(true);
     });
   });
 });

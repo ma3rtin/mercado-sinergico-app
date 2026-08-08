@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, timeout, catchError, retry, shareReplay } from 'rxjs/operators';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -28,6 +29,59 @@ export class ProductosService extends ApiService {
 
     if (!includeArchived) this.productosCache$ = obs$;
     return obs$;
+  }
+
+  getProductosPaginados(
+    page: number,
+    limit: number,
+    filtros?: any,
+    includeArchived = false
+  ): Observable<{ productos: Producto[]; total: number }> {
+    const params: any = {
+      page: page.toString(),
+      limit: limit.toString(),
+    };
+    if (includeArchived) params.includeArchived = 'true';
+
+    if (filtros) {
+      if (filtros.categorias && filtros.categorias.length > 0) {
+        params.categorias = filtros.categorias.join(',');
+      }
+      if (filtros.marcas && filtros.marcas.length > 0) {
+        params.marcas = filtros.marcas.join(',');
+      }
+      if (filtros.zonas && filtros.zonas.length > 0) {
+        params.zonas = filtros.zonas.join(',');
+      }
+      if (filtros.rangoPrecio) {
+        if (filtros.rangoPrecio.min !== null && filtros.rangoPrecio.min !== undefined) {
+          params.precioMin = filtros.rangoPrecio.min.toString();
+        }
+        if (filtros.rangoPrecio.max !== null && filtros.rangoPrecio.max !== undefined) {
+          params.precioMax = filtros.rangoPrecio.max.toString();
+        }
+      }
+    }
+
+    return this.http
+      .get<Producto[]>(this.buildUrl('productos'), {
+        observe: 'response',
+        params,
+      })
+      .pipe(
+        timeout(30000),
+        map((response: HttpResponse<Producto[]>) => {
+          const totalHeader = response.headers.get('X-Total-Count');
+          const total = totalHeader ? parseInt(totalHeader, 10) : 0;
+          const body = response.body || [];
+          const productos = body.map((p) => this.normalizeProducto(p));
+          return { productos, total };
+        }),
+        catchError((err) => {
+          console.error('❌ Error cargando productos paginados:', err);
+          return throwError(() => err);
+        })
+      );
   }
 
   archivarProducto(id: number, archivado: boolean): Observable<Producto> {

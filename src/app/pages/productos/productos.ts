@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
-import { getProductSlugUrl } from '@app/shared/utils/obfuscator';
+import { Router, ActivatedRoute } from '@angular/router';
+import { getProductSlugUrl, slugify } from '@app/shared/utils/obfuscator';
 import { map, switchMap, of, forkJoin, catchError } from 'rxjs';
 
 // Services
@@ -65,12 +65,16 @@ export class ProductosComponent implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
 
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
   productoSeleccionado = signal<Producto | null>(null);
+  todasLasCategorias = signal<any[]>([]);
+  todasLasMarcas = signal<any[]>([]);
+  totalProductos = signal<number>(0);
 
   // Estados de carga individuales
   isLoadingProductos = signal(true);
@@ -115,135 +119,25 @@ export class ProductosComponent implements OnInit {
     return this.valoresFiltrosIniciales().zonas || [];
   });
 
-  // 📊 COMPUTED: Productos filtrados reactivamente
+  // 📊 COMPUTED: Productos filtrados reactivamente (ahora filtrados en backend)
   productosFiltrados = computed(() => {
-    let resultado = [...this.productosOriginales()];
-    let filtros = this.filtrosActuales();
-
-    if (!filtros) {
-      const init = this.valoresFiltrosIniciales();
-      if (init && Object.keys(init).length > 0) {
-        filtros = {
-          categorias: init.categorias || [],
-          marcas: init.marcas || [],
-          tiposPaquete: init.tiposPaquete || [],
-          ordenamiento: init.ordenamiento || '',
-          rangoPrecio: init.rangoPrecio || { min: null, max: null },
-          estados: init.estados || [],
-          zonas: init.zonas || [],
-        };
-      }
-    }
-
-    // 🔒 BASE FILTER: Always restrict to products in active packages (regardless of zone)
-    const activePackages = this.paquetesActivos();
-    const productIdsPermitidos = new Set<number>();
-    activePackages.forEach((paq) => {
-      const prods = paq.paqueteBase?.productos || [];
-      prods.forEach((bp) => {
-        const pid = Number(bp.productoId || 0);
-        if (pid > 0) productIdsPermitidos.add(pid);
-      });
-    });
-
-    if (productIdsPermitidos.size > 0) {
-      resultado = resultado.filter((p) =>
-        productIdsPermitidos.has(Number(p.id_producto || p.id || 0)),
-      );
-    } else {
-      return [];
-    }
-
-    if (filtros) {
-      // Filtrar por categorías
-      if (filtros.categorias.length > 0) {
-        resultado = resultado.filter((p) =>
-          filtros.categorias.includes(p.categoria_id),
-        );
-      }
-
-      // Filtrar por marcas
-      if (filtros.marcas.length > 0) {
-        resultado = resultado.filter((p) =>
-          filtros.marcas.includes(p.marca_id),
-        );
-      }
-
-      // Filtrar por rango de precio
-      if (filtros.rangoPrecio.min !== null) {
-        resultado = resultado.filter(
-          (p) => p.precio >= filtros.rangoPrecio.min!,
-        );
-      }
-      if (filtros.rangoPrecio.max !== null) {
-        resultado = resultado.filter(
-          (p) => p.precio <= filtros.rangoPrecio.max!,
-        );
-      }
-
-      // 🗺️ ZONE FILTER: Additional constraint within already-permitted products
-      const zonasParaFiltrar =
-        filtros.zonas?.length > 0
-          ? filtros.zonas
-          : this.valoresFiltrosIniciales().zonas || [];
-
-      if (zonasParaFiltrar.length > 0) {
-        const paquetesEnZonas = activePackages.filter((paq) =>
-          zonasParaFiltrar.includes(Number(paq.zonaId) || 0),
-        );
-
-        const zonaProductIds = new Set<number>();
-        paquetesEnZonas.forEach((paq) => {
-          const prods = paq.paqueteBase?.productos || [];
-          prods.forEach((bp) => {
-            const pid = Number(bp.productoId || 0);
-            if (pid > 0) zonaProductIds.add(pid);
-          });
-        });
-
-        if (zonaProductIds.size > 0) {
-          resultado = resultado.filter((p) =>
-            zonaProductIds.has(Number(p.id_producto || p.id || 0)),
-          );
-        } else {
-          return [];
-        }
-      }
-    }
-
-    // Ordenar con el orden seleccionado
-    if (this.ordenSeleccionado()) {
-      resultado = this.ordenarProductos(resultado, this.ordenSeleccionado());
-    }
-
-    return resultado;
+    return this.productosOriginales();
   });
 
-  // 📊 COMPUTED: Productos paginados
+  // 📊 COMPUTED: Productos paginados (ahora paginados en backend)
   productosPaginados = computed(() => {
     const seleccionado = this.productoSeleccionado();
-
-    // Si hay un producto seleccionado, mostrar solo ese
     if (seleccionado) {
       return [seleccionado];
     }
-
-    // Si no, paginar los filtrados
-    const page = this.paginaActual();
-    const perPage = this.itemsPorPagina();
-    const filtrados = this.productosFiltrados();
-
-    const start = (page - 1) * perPage;
-    const end = start + perPage;
-
-    return filtrados.slice(start, end);
+    return this.productosOriginales();
   });
 
-  // 📊 COMPUTED: Total de items para la paginación
+  // 📊 COMPUTED: Total de items para la paginación (del total del backend)
   totalItemsPaginacion = computed(() => {
     const seleccionado = this.productoSeleccionado();
     if (seleccionado) return 1;
-    return this.productosFiltrados().length;
+    return this.totalProductos();
   });
 
   // 🌐 Platform check
@@ -326,55 +220,194 @@ export class ProductosComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isBrowser) {
-      this.loadProductos();
-      this.loadZonas();
-      this.loadPaquetesActivos();
+      this.isLoadingProductos.set(true);
+      this.isLoadingZonas.set(true);
+      this.isLoadingPaquetes.set(true);
+
+      // Cargar catálogos iniciales en paralelo
+      forkJoin({
+        categorias: this.categoriaService.getCategorias().pipe(catchError(() => of([]))),
+        marcas: this.marcaService.getMarcas().pipe(catchError(() => of([]))),
+        zonas: this.zonaService.getZonas().pipe(catchError(() => of([]))),
+        paquetes: this.paquetePublicadoService.getPaquetes().pipe(
+          switchMap(paquetes => {
+            const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
+            return of(activos);
+          }),
+          catchError(() => of([]))
+        )
+      }).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
+        next: (res) => {
+          this.todasLasCategorias.set(res.categorias);
+          this.todasLasMarcas.set(res.marcas);
+          this.todasLasZonas.set(res.zonas);
+          this.paquetesActivos.set(res.paquetes);
+
+          this.isLoadingZonas.set(false);
+          this.isLoadingPaquetes.set(false);
+
+          // Suscribirse a los queryParams una vez listos los catálogos
+          this.route.queryParams.pipe(
+            takeUntilDestroyed(this.destroyRef)
+          ).subscribe(params => {
+            this.procesarQueryParams(params);
+          });
+        },
+        error: (err) => {
+          console.error('❌ Error cargando catálogos iniciales:', err);
+          this.errorMessage.set('Error al inicializar la tienda.');
+          this.isLoadingProductos.set(false);
+          this.isLoadingZonas.set(false);
+          this.isLoadingPaquetes.set(false);
+        }
+      });
     }
   }
 
-  // 📥 CARGA DE DATOS
-  private loadProductos(): void {
-    console.log('🔄 Cargando productos...');
+  private procesarQueryParams(params: any): void {
+    let page = parseInt(params['page'], 10);
+    let limit = parseInt(params['limit'], 10);
+
+    // Validación del Frontend
+    if (isNaN(page) || page < 1) page = 1;
+    if (isNaN(limit) || limit < 1 || limit > 100) limit = 12;
+
+    this.paginaActual.set(page);
+    this.itemsPorPagina.set(limit);
+
+    // Decodificar filtros amigables desde la URL a IDs
+    const filtros: FiltrosAplicados = {
+      categorias: [],
+      marcas: [],
+      zonas: [],
+      tiposPaquete: [],
+      ordenamiento: params['orden'] || 'recientes',
+      rangoPrecio: {
+        min: params['precioMin'] ? parseFloat(params['precioMin']) : null,
+        max: params['precioMax'] ? parseFloat(params['precioMax']) : null
+      },
+      estados: []
+    };
+
+    if (params['categorias']) {
+      const slugs = params['categorias'].split(',');
+      slugs.forEach((slug: string) => {
+        const cat = this.todasLasCategorias().find(c => slugify(c.nombre) === slug);
+        if (cat) filtros.categorias.push(cat.id_categoria);
+      });
+    }
+
+    if (params['marcas']) {
+      const slugs = params['marcas'].split(',');
+      slugs.forEach((slug: string) => {
+        const m = this.todasLasMarcas().find(marca => slugify(marca.nombre) === slug);
+        if (m) filtros.marcas.push(m.id_marca);
+      });
+    }
+
+    if (params['zonas']) {
+      const slugs = params['zonas'].split(',');
+      slugs.forEach((slug: string) => {
+        const z = this.todasLasZonas().find(zona => slugify(zona.nombre) === slug);
+        if (z) filtros.zonas.push(z.id_zona);
+      });
+    }
+
+    this.filtrosActuales.set(filtros);
+
+    if (params['orden']) {
+      this.ordenSeleccionado.set(params['orden']);
+    }
+
+    this.loadProductosPaginados();
+  }
+
+  private loadProductosPaginados(): void {
     this.isLoadingProductos.set(true);
     this.errorMessage.set('');
 
-    this.productosService
-      .getProductos()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (productos) => {
-          const productosOrdenados = this.ordenarProductos(
-            productos,
-            'recientes',
-          );
+    this.productosService.getProductosPaginados(
+      this.paginaActual(),
+      this.itemsPorPagina(),
+      this.filtrosActuales(),
+      false
+    ).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.productosOriginales.set(res.productos);
+        this.totalProductos.set(res.total);
+        this.isLoadingProductos.set(false);
+      },
+      error: (err) => {
+        console.error('❌ Error cargando productos paginados:', err);
+        this.isLoadingProductos.set(false);
+        this.errorMessage.set('Error al cargar productos.');
+        this.productosOriginales.set([]);
+        this.totalProductos.set(0);
+      }
+    });
+  }
 
-          this.productosOriginales.set(productosOrdenados);
-          this.isLoadingProductos.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando productos:', error);
-          this.isLoadingProductos.set(false);
+  private actualizarUrl(page: number): void {
+    const queryParams: any = {
+      page: page.toString(),
+      limit: this.itemsPorPagina().toString(),
+      categorias: null,
+      marcas: null,
+      zonas: null,
+      precioMin: null,
+      precioMax: null,
+      orden: null
+    };
 
-          // Manejo de errores específicos
-          if (error.name === 'TimeoutError') {
-            this.errorMessage.set(
-              'El servidor no respondió a tiempo. Por favor, intentá de nuevo.',
-            );
-          } else if (error.status === 0) {
-            this.errorMessage.set(
-              'No se pudo conectar con el servidor. Verificá tu conexión.',
-            );
-          } else if (error.status >= 500) {
-            this.errorMessage.set(
-              'Error interno del servidor. Intentá más tarde.',
-            );
-          } else {
-            this.errorMessage.set('Ocurrió un error inesperado.');
-          }
+    const filtros = this.filtrosActuales();
+    if (filtros) {
+      if (filtros.categorias && filtros.categorias.length > 0) {
+        const slugs = filtros.categorias
+          .map(id => this.todasLasCategorias().find(c => c.id_categoria === id))
+          .map(c => c ? slugify(c.nombre) : '')
+          .filter(s => s !== '');
+        if (slugs.length > 0) queryParams.categorias = slugs.join(',');
+      }
 
-          this.productosOriginales.set([]);
-        },
-      });
+      if (filtros.marcas && filtros.marcas.length > 0) {
+        const slugs = filtros.marcas
+          .map(id => this.todasLasMarcas().find(m => m.id_marca === id))
+          .map(m => m ? slugify(m.nombre) : '')
+          .filter(s => s !== '');
+        if (slugs.length > 0) queryParams.marcas = slugs.join(',');
+      }
+
+      if (filtros.zonas && filtros.zonas.length > 0) {
+        const slugs = filtros.zonas
+          .map(id => this.todasLasZonas().find(z => z.id_zona === id))
+          .map(z => z ? slugify(z.nombre) : '')
+          .filter(s => s !== '');
+        if (slugs.length > 0) queryParams.zonas = slugs.join(',');
+      }
+
+      if (filtros.rangoPrecio) {
+        if (filtros.rangoPrecio.min !== null && filtros.rangoPrecio.min !== undefined) {
+          queryParams.precioMin = filtros.rangoPrecio.min.toString();
+        }
+        if (filtros.rangoPrecio.max !== null && filtros.rangoPrecio.max !== undefined) {
+          queryParams.precioMax = filtros.rangoPrecio.max.toString();
+        }
+      }
+    }
+
+    if (this.ordenSeleccionado()) {
+      queryParams.orden = this.ordenSeleccionado();
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    });
   }
 
   private loadZonas(): void {
@@ -441,12 +474,14 @@ export class ProductosComponent implements OnInit {
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
     this.filtrosActuales.set(filtros);
+    this.actualizarUrl(1);
   }
 
   // Al cambiar el orden desde el select
   cambiarOrden(event: Event): void {
     const orden = (event.target as HTMLSelectElement).value;
     this.ordenSeleccionado.set(orden);
+    this.actualizarUrl(1);
   }
 
   private ordenarProductos(productos: Producto[], orden: string): Producto[] {
@@ -461,31 +496,18 @@ export class ProductosComponent implements OnInit {
         return [...productos].sort((a, b) => b.precio - a.precio);
       case 'recientes':
       default:
-        // Mantener el orden original en el que vienen del backend
         return productos;
     }
   }
 
   limpiarFiltros(): void {
-    const init = this.valoresFiltrosIniciales();
-    if (init && Object.keys(init).length > 0) {
-      this.filtrosActuales.set({
-        categorias: init.categorias || [],
-        marcas: init.marcas || [],
-        tiposPaquete: init.tiposPaquete || [],
-        ordenamiento: init.ordenamiento || '',
-        rangoPrecio: init.rangoPrecio || { min: null, max: null },
-        estados: init.estados || [],
-        zonas: init.zonas || [],
-      });
-    } else {
-      this.filtrosActuales.set(null);
-    }
+    this.filtrosActuales.set(null);
+    this.actualizarUrl(1);
   }
 
   // 🔄 Recargar productos
   recargarProductos(): void {
-    this.loadProductos();
+    this.loadProductosPaginados();
   }
 
   // 🧭 NAVEGACIÓN
@@ -539,11 +561,11 @@ export class ProductosComponent implements OnInit {
 
   // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
-    this.paginaActual.set(page);
+    this.actualizarUrl(page);
   }
 
   onItemsPerPageChange(itemsPerPage: number): void {
     this.itemsPorPagina.set(itemsPerPage);
-    this.paginaActual.set(1); // Resetear a página 1
+    this.actualizarUrl(1);
   }
 }
