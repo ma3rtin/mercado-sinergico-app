@@ -56,9 +56,9 @@ describe('PaqueteBaseService', () => {
   it('should call agregarProductos with correct endpoint and payload in body', () => {
     service.agregarProductos(5, [1, 2, 3]).subscribe();
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/paquetes-base/agregar-productos`);
+    const req = httpMock.expectOne(`${environment.apiUrl}/paquetes-base/5/productos`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ paqueteBaseId: 5, productosId: [1, 2, 3] });
+    expect(req.request.body).toEqual({ productosId: [1, 2, 3] });
     req.flush({});
   });
 });
