@@ -104,7 +104,7 @@
             ? 'ring-4 ring-brand-primary ring-offset-2 rounded-xl animate-[highlightPulse_1.5s_ease-out]'
             : ''">
 
-        <app-admin-paquete-card [paquete]="paquete"
+        <app-admin-paquete-card [paquete]="paquete" [disabled]="isProcesando()"
           (confirm)="cerrarPaquete(paquete)"
           (refund)="cancelarPaquete(paquete)"
           (duplicate)="duplicarPaquete(paquete)"
@@ -131,4 +131,8 @@
     }
 
   </div>
+
+  <!-- ⏳ OVERLAY DE PROCESAMIENTO -->
+  <app-loading-overlay [visible]="isProcesando()" [titulo]="overlayTitulo()"
+    [mensajes]="overlayMensajes()" [duracionMs]="30000" />
 </div>

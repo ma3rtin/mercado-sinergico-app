@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, HostListener, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener, OnInit, OnDestroy, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
@@ -15,6 +15,9 @@ import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 })
 export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Input({ required: true }) paquete!: PaquetePublicado;
+
+  /** Deshabilita todas las acciones mientras una operación está en curso */
+  disabled = input<boolean>(false);
 
   // 📤 Outputs para acciones
   @Output() confirm = new EventEmitter<PaquetePublicado>(); // Completo → Confirmado
@@ -198,36 +201,42 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   onNotify(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.notify.emit(this.paquete);
   }
 
   onConfirm(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.confirm.emit(this.paquete);
   }
 
   onRefund(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.refund.emit(this.paquete);
   }
 
   onDuplicate(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.duplicate.emit(this.paquete);
   }
 
   onViewDetail(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.viewDetail.emit(this.paquete);
   }
 
   onArchive(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.archive.emit(this.paquete);
   }

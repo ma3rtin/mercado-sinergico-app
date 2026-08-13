@@ -221,6 +221,7 @@ export class BuscadorComponent {
 
 
         const paquetesFiltrados = data.paquetes.filter(paq =>
+          paq.nombre?.toLowerCase().includes(term) ||
           paq.paqueteBase?.nombre?.toLowerCase().includes(term) ||
           paq.paqueteBase?.descripcion?.toLowerCase().includes(term) ||
           paq.paqueteBase?.marca?.nombre?.toLowerCase().includes(term) ||

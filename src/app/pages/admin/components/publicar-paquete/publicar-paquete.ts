@@ -141,7 +141,11 @@ export class PublicarPaqueteComponent implements OnInit {
       const duplicadoId = params['duplicadoId'];
 
       if (baseId) {
-        this.paqueteBaseSeleccionado.set(Number(baseId));
+        const baseIdNum = Number(baseId);
+        this.paqueteBaseSeleccionado.set(baseIdNum);
+        // Si la lista ya está cargada, autocompletar el nombre de la publicación
+        const pre = this.paquetesBase().find(p => p.id_paquete_base === baseIdNum);
+        if (pre) this.nombre.set(pre.nombre);
       }
 
       if (duplicadoId) {
@@ -230,7 +234,11 @@ export class PublicarPaqueteComponent implements OnInit {
           // Si hay un paquete pre-seleccionado, buscar su nombre para el input
           if (this.paqueteBaseSeleccionado()) {
             const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
-            if (pre) this.busqueda.set(pre.nombre);
+            if (pre) {
+              this.busqueda.set(pre.nombre);
+              // Autocompletar el nombre de la publicación con el nombre del PaqueteBase
+              this.nombre.set(pre.nombre);
+            }
           }
 
           const primeros = data.slice(0, 10);
@@ -281,6 +289,8 @@ export class PublicarPaqueteComponent implements OnInit {
   seleccionarPaquete(paquete: any): void {
     this.paqueteBaseSeleccionado.set(paquete.id_paquete_base);
     this.busqueda.set(paquete.nombre);
+    // Autocompletar el nombre de la publicación con el nombre del PaqueteBase
+    this.nombre.set(paquete.nombre);
     this.mostrandoResultados.set(false);
   }
 

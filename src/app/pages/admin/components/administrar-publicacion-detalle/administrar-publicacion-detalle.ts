@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
@@ -11,6 +12,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
 import Swal from 'sweetalert2';
 
 @Component({

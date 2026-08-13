@@ -134,7 +134,10 @@ export class DetalleProductoSumarse implements OnInit {
 
   productoTieneVariantes = computed(() => {
     const variantes = this.producto()?.variantes || [];
-    return variantes.some(v => v.activo !== false);
+    // El producto tiene variantes definidas aunque todas estén inactivas:
+    // en ese caso debe bloquearse la compra (no hay variante seleccionable),
+    // no tratarse como si no tuviera variantes.
+    return variantes.length > 0;
   });
 
   puedeAgregarAlCarrito = computed(() => {

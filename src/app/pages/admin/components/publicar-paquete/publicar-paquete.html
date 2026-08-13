@@ -94,7 +94,15 @@
         <!-- 🖼️ TARJETA 2: IMAGEN Y ZONA -->
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Imagen y Alcance</h3>
-            
+
+            <!-- Nombre de la publicación -->
+            <div class="mb-6">
+                <app-input [ngModel]="nombre()" (ngModelChange)="nombre.set($event)"
+                    [labelValue]="'Nombre de la publicación'" [requiredValue]="true"
+                    [placeholderValue]="'Ej: iPhone 14 Campaña CABA'"
+                    [helperTextValue]="'Es el nombre que verán los usuarios en el paquete'" />
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Imagen de la publicación -->
                 <div>
