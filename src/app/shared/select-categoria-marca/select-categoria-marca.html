@@ -48,7 +48,11 @@
           <button
             type="button"
             (click)="select(option.id)"
+            (mouseenter)="onButtonEnter(option, btnTrigger)"
+            (mouseleave)="onButtonLeave()"
             [disabled]="isDisabled()"
+            cdkOverlayOrigin
+            #btnTrigger="cdkOverlayOrigin"
             [class]="'w-full relative flex items-center justify-center pl-3 pr-8 py-2.5 rounded-xl border text-xs font-bold transition-all active:scale-95 group/btn ' +
               (selectedValue() === option.id
                 ? 'bg-brand-cta text-gray-900 border-brand-cta shadow-sm'
@@ -73,6 +77,22 @@
       </div>
     }
   </div>
+
+  @if (hoveredOrigin()) {
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="hoveredOrigin()!"
+      [cdkConnectedOverlayOpen]="true"
+      [cdkConnectedOverlayPositions]="tooltipPositions"
+      [cdkConnectedOverlayPush]="true"
+      [cdkConnectedOverlayViewportMargin]="8"
+      (mouseenter)="onOverlayEnter()"
+      (mouseleave)="onOverlayLeave()">
+      <div class="px-2 py-1 bg-brand-secondary text-white text-xs rounded-lg shadow-lg whitespace-nowrap max-w-xs">
+        {{ hoveredOption()?.nombre }}
+      </div>
+    </ng-template>
+  }
 
   <!-- Campo de creación rápida -->
   <div class="flex gap-2 pt-2 border-t border-border-default/50">
