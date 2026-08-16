@@ -21,6 +21,7 @@ import { EditarProductoComponent } from './pages/admin/components/editar-product
 import { Perfil } from './modules/usuario/pages/perfil/perfil';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { gestionarVariantesGuard } from './guards/gestionar-variantes.guard';
 import { MisPedidosComponent } from './pages/mis-pedidos/mis-pedidos';
 import { ProductosDelPaquete } from './pages/productos-del-paquete/productos-del-paquete';
 import { MainLayout } from './layouts/main-layout/main-layout';
@@ -78,7 +79,7 @@ export const routes: Routes = [
           { path: 'administrar-plantillas', component: AdministrarPlantillasComponent },
           { path: 'administrar-productos', component: AdministrarProductosComponent },
           { path: 'editar-producto/:id', component: EditarProductoComponent },
-          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent },
+          { path: 'gestionar-variantes/:id', component: GestionarVariantesComponent, canDeactivate: [gestionarVariantesGuard] },
           { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) },
           { path: 'administrar-paquetes', component: AdministrarPaquetesComponent },
           { path: 'editar-paquete-base/:id', component: EditarPaqueteBaseComponent },
