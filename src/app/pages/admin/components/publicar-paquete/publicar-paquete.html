@@ -97,7 +97,7 @@
 
             <!-- Nombre de la publicación -->
             <div class="mb-6">
-                <app-input [ngModel]="nombre()" (ngModelChange)="nombre.set($event)"
+                <app-input [ngModel]="nombre()" (ngModelChange)="onNombreChange($event)"
                     [labelValue]="'Nombre de la publicación'" [requiredValue]="true"
                     [placeholderValue]="'Ej: iPhone 14 Campaña CABA'"
                     [helperTextValue]="'Es el nombre que verán los usuarios en el paquete'" />

@@ -62,6 +62,8 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // 🆕 Nuevos campos
   nombre = signal<string>('');
+  // Una vez que el admin toca el campo a mano, el autocompletado deja de pisarlo.
+  private nombreEditadoManualmente = signal<boolean>(false);
   descuento = signal<number | null>(null);
   imagenSlot = signal<ImageSlot>({ file: null, preview: null });
 
@@ -144,8 +146,9 @@ export class PublicarPaqueteComponent implements OnInit {
         const baseIdNum = Number(baseId);
         this.paqueteBaseSeleccionado.set(baseIdNum);
         // Si la lista ya está cargada, autocompletar el nombre de la publicación
+        // (solo si el admin todavía no escribió uno propio)
         const pre = this.paquetesBase().find(p => p.id_paquete_base === baseIdNum);
-        if (pre) this.nombre.set(pre.nombre);
+        if (pre && !this.nombreEditadoManualmente()) this.nombre.set(pre.nombre);
       }
 
       if (duplicadoId) {
@@ -236,8 +239,9 @@ export class PublicarPaqueteComponent implements OnInit {
             const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
             if (pre) {
               this.busqueda.set(pre.nombre);
-              // Autocompletar el nombre de la publicación con el nombre del PaqueteBase
-              this.nombre.set(pre.nombre);
+              // Autocompletar el nombre de la publicación con el nombre del
+              // PaqueteBase, solo si el admin todavía no escribió uno propio
+              if (!this.nombreEditadoManualmente()) this.nombre.set(pre.nombre);
             }
           }
 
@@ -289,9 +293,16 @@ export class PublicarPaqueteComponent implements OnInit {
   seleccionarPaquete(paquete: any): void {
     this.paqueteBaseSeleccionado.set(paquete.id_paquete_base);
     this.busqueda.set(paquete.nombre);
-    // Autocompletar el nombre de la publicación con el nombre del PaqueteBase
-    this.nombre.set(paquete.nombre);
+    // Autocompletar el nombre de la publicación con el nombre del PaqueteBase,
+    // solo si el admin todavía no escribió uno propio
+    if (!this.nombreEditadoManualmente()) this.nombre.set(paquete.nombre);
     this.mostrandoResultados.set(false);
+  }
+
+  // --- El admin edita el nombre de la publicación a mano ---
+  onNombreChange(value: string): void {
+    this.nombre.set(value);
+    this.nombreEditadoManualmente.set(true);
   }
 
   // --- 🆕 Limpiar selección de paquete base ---
