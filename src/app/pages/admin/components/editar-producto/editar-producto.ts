@@ -188,6 +188,7 @@ esTipoBloqueado = computed(() => {
       profundidad: [null, [mayorQueCero, Validators.max(10000)]],
       peso: [null, [mayorQueCero, Validators.max(10000)]],
       plantillaId: [null],
+      tipo: [TipoPaquete.SINERGICO],
     });
   }
 
@@ -318,6 +319,7 @@ esTipoBloqueado = computed(() => {
   cambiarTipoProducto(tipo: TipoPaquete): void {
     this.tipoProducto.set(tipo);
     this.tipoSeleccionadoManual.set(true);
+    this.productForm.patchValue({ tipo });
 
     if (tipo === TipoPaquete.SINERGICO) {
       this.productForm.patchValue({ stock: null });
@@ -377,6 +379,7 @@ esTipoBloqueado = computed(() => {
       const tipoEnum = tipoStr === 'ENERGICO' ? TipoPaquete.ENERGICO : TipoPaquete.SINERGICO;
       this.tipoProducto.set(tipoEnum);
       this.tipoSeleccionadoManual.set(true);
+      this.productForm.patchValue({ tipo: tipoEnum });
     }
 
     const dim = (producto as any).dimensiones ?? producto;
@@ -594,6 +597,57 @@ esTipoBloqueado = computed(() => {
       return;
     }
 
+    // Validar que cada característica de la plantilla tenga al menos una opción
+    if (this.selectedTemplate()) {
+      const faltanAtributos = this.selectedTemplate()!.caracteristicas.some(
+        (car) => (this.selectedAttributes()[car.nombre] || []).length === 0
+      );
+      if (faltanAtributos) {
+        this.toast.error('Debés seleccionar al menos una opción de cada característica');
+        return;
+      }
+    }
+
+    const huboCambioPlantilla =
+      (this.selectedTemplate()?.id ?? null) !==
+      (this.productoOriginal()?.plantilla?.id ?? null);
+
+    // Sin cambio de plantilla → actualización directa, sin confirmación extra.
+    if (!huboCambioPlantilla) {
+      this.ejecutarSubmit(id);
+      return;
+    }
+
+    // Cambio de plantilla (asignar, cambiar o deseleccionar): confirmar antes de
+    // enviar porque implica eliminar/regenerar las variantes actuales del producto.
+    const deseleccionando = !this.selectedTemplate();
+    const tieneVariantes = (this.productoOriginal()?.variantes?.length ?? 0) > 0;
+
+    let html =
+      '<p>Las variantes del producto se regenerarán según la nueva plantilla.</p>';
+    if (tieneVariantes) {
+      html = deseleccionando
+        ? '<p>Al quitar la plantilla se <strong>eliminarán las variantes actuales</strong> del producto.</p><p class="mt-2 text-sm text-gray-600">Esta acción es irreversible.</p>'
+        : '<p>Al cambiar la plantilla se <strong>eliminarán las variantes actuales</strong> y se regenerarán con la nueva.</p><p class="mt-2 text-sm text-gray-600">Esta acción es irreversible.</p>';
+    }
+
+    Swal.fire({
+      title: deseleccionando ? '¿Quitar la plantilla?' : '¿Cambiar la plantilla?',
+      html,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--text-muted)',
+      confirmButtonText: deseleccionando ? 'Sí, quitar' : 'Sí, cambiar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ejecutarSubmit(id);
+      }
+    });
+  }
+
+  private ejecutarSubmit(id: number): void {
     const slotsParaEnviar = this.subidorImagenes()?.getSlots() ?? [];
     this.isLoading.set(true);
     const formData = this.buildFormData(slotsParaEnviar);
@@ -606,9 +660,26 @@ esTipoBloqueado = computed(() => {
 
     this.productoService.updateProducto(id, formData).subscribe({
       next: () => {
-        // 🎨 Si tiene plantilla, generar variantes
-        // Solo generar variantes si antes NO tenía plantilla
-        if (!this.productoOriginal()?.plantilla && this.selectedTemplate()) {
+        // Generar variantes cuando hay una plantilla nueva (el producto no tenía
+        // o cambió de plantilla) O cuando la plantilla está asignada pero el
+        // producto aún no tiene variantes generadas (p. ej. la primera generación
+        // falló y quedó con plantillaId asignado pero 0 filas de ProductoVariante).
+        // Si la plantilla no cambió y ya hay variantes, o se deseleccionó, no se
+        // regenera nada.
+        const hayNuevaPlantilla = !!this.selectedTemplate();
+        const teniaPlantilla = !!this.productoOriginal()?.plantilla;
+        const nuevaPlantillaId = this.selectedTemplate()?.id;
+        const originalPlantillaId = this.productoOriginal()?.plantilla?.id;
+        const sinVariantesExistentes =
+          (this.productoOriginal()?.variantes?.length ?? 0) === 0;
+
+        const generaVariantes =
+          hayNuevaPlantilla &&
+          (!teniaPlantilla ||
+            nuevaPlantillaId !== originalPlantillaId ||
+            sinVariantesExistentes);
+
+        if (generaVariantes) {
           this.generarVariantesDelProducto(id);
         } else {
           this.isLoading.set(false);
@@ -629,7 +700,12 @@ esTipoBloqueado = computed(() => {
 
     // Agregar campos básicos
     Object.entries(this.productForm.value).forEach(([key, value]) => {
-      // Caso especial para desvincular plantilla: enviar cadena vacía si el valor es null
+      // El tipo se agrega aparte desde tipoMap (evitar duplicado en el FormData)
+      if (key === 'tipo') return;
+
+      // Desvincular plantilla: si el valor quedó en null, enviar cadena vacía
+      // para que el backend la quite ('' → plantillaId null). Si no se envía,
+      // el backend asume que el campo no se tocó.
       if (key === 'plantillaId' && value === null) {
         formData.append(key, '');
         return;

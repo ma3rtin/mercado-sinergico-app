@@ -1,12 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import { featherArrowLeft, featherCheck, featherInfo, featherPlus, featherSearch, featherUpload, featherUsers, featherZap } from '@ng-icons/feather-icons';
 import { of } from 'rxjs';
 
+const swalMocks = vi.hoisted(() => ({
+  fire: vi.fn().mockResolvedValue({ isConfirmed: true }),
+}));
+
+vi.mock('sweetalert2', () => ({
+  default: { fire: swalMocks.fire },
+}));
+
 import { EditarProductoComponent } from './editar-producto';
+import { TipoPaquete } from '@app/models/Enums';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
@@ -255,5 +264,227 @@ describe('EditarProductoComponent', () => {
         expect(control?.valid).toBe(true);
       });
     });
+  });
+});
+
+describe('EditarProductoComponent — cambio de plantilla', () => {
+  let component: EditarProductoComponent;
+  let fixture: ComponentFixture<EditarProductoComponent>;
+  let updateProducto: ReturnType<typeof vi.fn>;
+  let generarVariantes: ReturnType<typeof vi.fn>;
+  let toastSuccess: ReturnType<typeof vi.fn>;
+  let toastError: ReturnType<typeof vi.fn>;
+
+  const plantilla8 = {
+    id: 8,
+    nombre: 'Cascos',
+    caracteristicas: [
+      { id: 1, nombre: 'Color', opciones: [{ id: 1, nombre: 'Negro' }] },
+    ],
+  };
+
+  const plantilla5 = {
+    id: 5,
+    nombre: 'Otra plantilla',
+    caracteristicas: [
+      { id: 2, nombre: 'Talle', opciones: [{ id: 2, nombre: 'M' }] },
+    ],
+  };
+
+  beforeEach(async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    swalMocks.fire.mockReset();
+    swalMocks.fire.mockResolvedValue({ isConfirmed: true });
+
+    updateProducto = vi.fn().mockReturnValue(of({}));
+    generarVariantes = vi.fn().mockReturnValue(of({ variantes: [] }));
+    toastSuccess = vi.fn();
+    toastError = vi.fn();
+
+    const productoConPlantilla = {
+      ...baseMockProducto,
+      plantilla: plantilla8,
+      variantes: [],
+    };
+
+    TestBed.configureTestingModule({
+      imports: [EditarProductoComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        provideRouter([]),
+        provideIcons({
+          featherArrowLeft,
+          featherCheck,
+          featherInfo,
+          featherPlus,
+          featherSearch,
+          featherUpload,
+          featherUsers,
+          featherZap,
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '1' } } },
+        },
+        { provide: PlantillaService, useValue: { getPlantillas: () => of([plantilla8, plantilla5]) } },
+        { provide: MarcaService, useValue: { getMarcas: () => of([]) } },
+        { provide: CategoriaService, useValue: { getCategorias: () => of([]) } },
+        {
+          provide: ProductosService,
+          useValue: { getProductoById: () => of(productoConPlantilla), updateProducto },
+        },
+        { provide: VarianteService, useValue: { generarVariantes } },
+        { provide: ToastService, useValue: { success: toastSuccess, error: toastError, warning: vi.fn(), info: vi.fn() } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+      ],
+    });
+
+    await TestBed.compileComponents();
+    fixture = TestBed.createComponent(EditarProductoComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await flushTimers();
+    fixture.detectChanges();
+
+    component.imagenPrincipalCargada.set(true);
+  });
+
+  it('no pide confirmación ni regenera variantes si la plantilla no cambió y el producto ya tiene variantes', () => {
+    component.productoOriginal.set({
+      ...baseMockProducto,
+      plantilla: plantilla8,
+      variantes: [{ id: 1 }],
+    } as never);
+    component.selectTemplate(plantilla8);
+
+    component.onSubmit();
+
+    expect(swalMocks.fire).not.toHaveBeenCalled();
+    expect(updateProducto).toHaveBeenCalledTimes(1);
+    expect(generarVariantes).not.toHaveBeenCalled();
+    expect(toastSuccess).toHaveBeenCalled();
+  });
+
+  it('genera variantes sin confirmación si la plantilla no cambió pero el producto no tiene variantes', () => {
+    component.selectTemplate(plantilla8);
+
+    component.onSubmit();
+
+    expect(updateProducto).toHaveBeenCalledTimes(1);
+    expect(generarVariantes).toHaveBeenCalledTimes(1);
+    const titles = swalMocks.fire.mock.calls.map((c) => c[0].title);
+    expect(titles).not.toContain('¿Cambiar la plantilla?');
+    expect(titles).not.toContain('¿Quitar la plantilla?');
+  });
+
+  it('confirma el cambio de plantilla, actualiza y regenera las variantes', async () => {
+    component.selectTemplate(plantilla5);
+
+    component.onSubmit();
+    await flushTimers();
+
+    expect(swalMocks.fire.mock.calls[0][0].title).toBe('¿Cambiar la plantilla?');
+    expect(updateProducto).toHaveBeenCalledTimes(1);
+    expect(generarVariantes).toHaveBeenCalledTimes(1);
+  });
+
+  it('no envía la actualización si el admin cancela la confirmación', async () => {
+    swalMocks.fire.mockResolvedValue({ isConfirmed: false });
+    component.selectTemplate(plantilla5);
+
+    component.onSubmit();
+    await flushTimers();
+
+    expect(updateProducto).not.toHaveBeenCalled();
+    expect(generarVariantes).not.toHaveBeenCalled();
+  });
+
+  it('genera variantes la primera vez que se asigna una plantilla a un producto sin plantilla', async () => {
+    component.productoOriginal.set({
+      ...baseMockProducto,
+      plantilla: null,
+      variantes: [],
+    } as never);
+    component.productForm.patchValue({ plantillaId: null });
+    component.selectTemplate(plantilla8);
+
+    component.onSubmit();
+    await flushTimers();
+
+    expect(updateProducto).toHaveBeenCalledTimes(1);
+    expect(generarVariantes).toHaveBeenCalledTimes(1);
+  });
+
+  it('al deseleccionar la plantilla envía plantillaId vacío y no regenera variantes', async () => {
+    component.deseleccionarPlantilla();
+    await flushTimers();
+    expect(component.selectedTemplate()).toBeNull();
+
+    component.onSubmit();
+    await flushTimers();
+
+    const ultimoLlamado =
+      swalMocks.fire.mock.calls[swalMocks.fire.mock.calls.length - 1][0];
+    expect(ultimoLlamado.title).toBe('¿Quitar la plantilla?');
+    expect(updateProducto).toHaveBeenCalledTimes(1);
+    const formData = updateProducto.mock.calls[0][1] as FormData;
+    expect(formData.get('plantillaId')).toBe('');
+    expect(generarVariantes).not.toHaveBeenCalled();
+  });
+
+  it('advierte que la acción es irreversible cuando el producto ya tiene variantes', async () => {
+    component.productoOriginal.set({
+      ...baseMockProducto,
+      plantilla: plantilla8,
+      variantes: [{ id: 1 }],
+    } as never);
+    component.selectTemplate(plantilla5);
+
+    component.onSubmit();
+    await flushTimers();
+
+    const confirmacion = swalMocks.fire.mock.calls[0][0];
+    expect(confirmacion.title).toBe('¿Cambiar la plantilla?');
+    expect(confirmacion.html).toContain('irreversible');
+  });
+
+  it('sincroniza el control tipo con el signal al cargar el producto', () => {
+    expect(component.productForm.get('tipo')!.value).toBe(TipoPaquete.ENERGICO);
+    expect(component.tipoProducto()).toBe(TipoPaquete.ENERGICO);
+  });
+
+  it('cambiarTipoProducto sincroniza signal y control del formulario', () => {
+    component.cambiarTipoProducto(TipoPaquete.SINERGICO);
+
+    expect(component.tipoProducto()).toBe(TipoPaquete.SINERGICO);
+    expect(component.productForm.get('tipo')!.value).toBe(TipoPaquete.SINERGICO);
+    expect(component.productForm.get('stock')!.value).toBeNull();
+  });
+
+  it('buildFormData no incluye el campo tipo', () => {
+    const formData = (component as any).buildFormData([]) as FormData;
+    expect(formData.get('tipo')).toBeNull();
+  });
+
+  it('envía el tipo una sola vez en el FormData del submit', async () => {
+    component.onSubmit();
+    await flushTimers();
+
+    const formData = updateProducto.mock.calls[0][1] as FormData;
+    expect(formData.getAll('tipo')).toEqual(['ENERGICO']);
+  });
+
+  it('rechaza el submit si una característica de la plantilla queda sin opciones', () => {
+    component.selectTemplate(plantilla8);
+    component.selectedAttributes.set({ Color: [] });
+
+    component.onSubmit();
+
+    expect(updateProducto).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith(
+      'Debés seleccionar al menos una opción de cada característica'
+    );
   });
 });
