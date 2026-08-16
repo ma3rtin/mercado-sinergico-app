@@ -27,6 +27,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
+import { VarianteService } from '@app/services/variantes/variante.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
@@ -64,6 +65,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
   private readonly usuarioService = inject(UsuarioService);
+  private readonly varianteService = inject(VarianteService);
 
   // ✅ igual que productos-del-paquete
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -140,9 +142,16 @@ export class DetalleProductoSumarse implements OnInit {
     return variantes.length > 0;
   });
 
+  // Tiene variantes definidas, pero ninguna activa/con stock: distinto de
+  // "tiene variantes formables pero el usuario todavía no eligió opciones".
+  hayVariantesFormables = computed(() => {
+    const variantes = this.producto()?.variantes || [];
+    return this.varianteService.getVariantesDisponibles(variantes).length > 0;
+  });
+
   puedeAgregarAlCarrito = computed(() => {
-    return this.paqueteEstaActivo() && 
-           this.disponibilidadRealParaUsuario() > 0 && 
+    return this.paqueteEstaActivo() &&
+           this.disponibilidadRealParaUsuario() > 0 &&
            (!this.productoTieneVariantes() || this.variantesValidas());
   });
 

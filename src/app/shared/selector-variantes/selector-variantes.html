@@ -2,9 +2,19 @@
 <!-- SELECTOR DE VARIANTES - DISEÑO MERCADO LIBRE -->
 <!-- ============================================ -->
 
-<!-- Si el producto no tiene variantes activas, no mostrar nada -->
-@if (!tieneVariantesFormables()) {
+<!-- Si el producto no tiene variantes definidas, no mostrar nada -->
+@if (!tieneVariantes()) {
 <!-- No renderizar nada -->
+}
+
+<!-- Tiene variantes definidas, pero ninguna está activa/con stock -->
+@else if (!tieneVariantesFormables()) {
+<div class="flex items-center gap-3 p-4 bg-error-light border border-error-light rounded-xl">
+  <app-icon name="AlertTriangle" size="20" class="text-error flex-shrink-0" />
+  <span class="text-sm font-medium text-error">
+    Sin stock disponible por el momento
+  </span>
+</div>
 }
 
 <!-- Si tiene variantes activas, mostrar selector -->

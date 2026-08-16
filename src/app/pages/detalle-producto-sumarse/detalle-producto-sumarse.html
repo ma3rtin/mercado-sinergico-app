@@ -179,6 +179,8 @@
                     
                     @if (!paqueteEstaActivo()) {
                     Paquete no disponible
+                    } @else if (productoTieneVariantes() && !hayVariantesFormables()) {
+                    Sin stock disponible
                     } @else if (productoTieneVariantes() && !variantesValidas()) {
                     Elegí las opciones
                     } @else {
