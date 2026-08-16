@@ -4,7 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { provideIcons } from '@ng-icons/core';
 import { featherArrowLeft, featherCheck, featherInfo, featherPlus, featherSearch, featherUpload, featherUsers, featherZap } from '@ng-icons/feather-icons';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 const swalMocks = vi.hoisted(() => ({
   fire: vi.fn().mockResolvedValue({ isConfirmed: true }),
@@ -486,5 +486,59 @@ describe('EditarProductoComponent — cambio de plantilla', () => {
     expect(toastError).toHaveBeenCalledWith(
       'Debés seleccionar al menos una opción de cada característica'
     );
+  });
+});
+
+describe('EditarProductoComponent — carrera entre carga de plantillas y carga del producto', () => {
+  it('selecciona la plantilla del producto aunque la lista de plantillas resuelva después', async () => {
+    const plantilla8 = {
+      id: 8,
+      nombre: 'Cascos',
+      caracteristicas: [
+        { id: 1, nombre: 'Color', opciones: [{ id: 1, nombre: 'Negro' }] },
+      ],
+    };
+    const getPlantillasSubject = new Subject<typeof plantilla8[]>();
+
+    TestBed.configureTestingModule({
+      imports: [EditarProductoComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        provideRouter([]),
+        provideIcons({
+          featherArrowLeft, featherCheck, featherInfo, featherPlus,
+          featherSearch, featherUpload, featherUsers, featherZap,
+        }),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => '1' } } },
+        },
+        { provide: PlantillaService, useValue: { getPlantillas: () => getPlantillasSubject.asObservable() } },
+        { provide: MarcaService, useValue: { getMarcas: () => of([]) } },
+        { provide: CategoriaService, useValue: { getCategorias: () => of([]) } },
+        {
+          provide: ProductosService,
+          useValue: { getProductoById: () => of({ ...baseMockProducto, plantilla: plantilla8, variantes: [] }) },
+        },
+        { provide: VarianteService, useValue: { generarVariantes: () => of({ variantes: [] }) } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn() } },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(EditarProductoComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    await flushTimers();
+    fixture.detectChanges();
+
+    // El producto (con su plantilla) ya cargó, pero plantillas() todavía está vacío.
+    expect(component.selectedTemplate()).toBeNull();
+
+    // Recién ahora resuelve la carga de plantillas.
+    getPlantillasSubject.next([plantilla8]);
+    getPlantillasSubject.complete();
+    fixture.detectChanges();
+
+    expect(component.selectedTemplate()?.id).toBe(8);
   });
 });

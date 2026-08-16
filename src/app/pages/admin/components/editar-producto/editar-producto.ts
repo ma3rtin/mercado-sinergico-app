@@ -5,6 +5,7 @@ import {
   signal,
   DestroyRef,
   computed,
+  effect,
   ViewChild,
   viewChild,
 } from '@angular/core';
@@ -119,6 +120,25 @@ export class EditarProductoComponent implements OnInit {
   plantillas = signal<Plantilla[]>([]);
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
+
+  // Id de la plantilla del producto a editar, pendiente de seleccionar en
+  // cuanto plantillas() termine de cargar (loadInitialData() y
+  // loadProductoToEdit() corren en paralelo, sin orden garantizado).
+  private plantillaIdPendiente = signal<number | null>(null);
+
+  private seleccionarPlantillaPendiente = effect(() => {
+    const plantillas = this.plantillas();
+    const plantillaId = this.plantillaIdPendiente();
+    if (plantillaId === null || plantillas.length === 0) return;
+
+    const plantilla = plantillas.find((p) => p.id === plantillaId);
+    if (plantilla) {
+      this.selectTemplate(plantilla);
+    } else {
+      console.warn('⚠️ Plantilla no encontrada en la lista', plantillaId);
+    }
+    this.plantillaIdPendiente.set(null);
+  });
 
   creandoMarca = signal(false);
   creandoCategoria = signal(false);
@@ -409,21 +429,11 @@ esTipoBloqueado = computed(() => {
       });
     }, 0);
 
-    // ✅ 3. Cargar plantilla si existe
+    // ✅ 3. Cargar plantilla si existe. La selección real ocurre en el
+    // effect() de plantillaIdPendiente, apenas plantillas() esté disponible
+    // (loadInitialData() puede resolver antes o después que este método).
     if (producto.plantilla) {
-      // Esperar a que las plantillas se carguen
-      setTimeout(() => {
-        const plantilla = this.plantillas().find(
-          (p) => p.id === producto.plantilla?.id,
-        );
-
-        if (plantilla) {
-          console.log('✅ Plantilla encontrada y seleccionada:', plantilla);
-          this.selectTemplate(plantilla);
-        } else {
-          console.warn('⚠️ Plantilla no encontrada en la lista');
-        }
-      }, 500);
+      this.plantillaIdPendiente.set(producto.plantilla.id ?? null);
     }
 
     // ✅ 4. Cargar imágenes
