@@ -93,4 +93,28 @@ describe('PublicarPaqueteComponent — carrera entre carga de edición y autocom
 
     expect(component.nombre()).toBe('Paquete Base Genérico');
   });
+
+  it('no pisa el nombre personalizado si el admin usa el buscador durante una edición', () => {
+    const { component, getPaquetesSubject, getPaqueteByIdSubject } = setup('5');
+
+    getPaqueteByIdSubject.next(publicacionMock);
+    getPaqueteByIdSubject.complete();
+    getPaquetesSubject.next(paquetesBaseMock);
+    getPaquetesSubject.complete();
+    expect(component.nombre()).toBe('Nombre personalizado del admin');
+
+    component.seleccionarPaquete(paquetesBaseMock[0]);
+
+    expect(component.nombre()).toBe('Nombre personalizado del admin');
+  });
+
+  it('sigue autocompletando por el buscador al crear una publicación nueva', () => {
+    const { component, getPaquetesSubject } = setup(null);
+    getPaquetesSubject.next(paquetesBaseMock);
+    getPaquetesSubject.complete();
+
+    component.seleccionarPaquete(paquetesBaseMock[0]);
+
+    expect(component.nombre()).toBe('Paquete Base Genérico');
+  });
 });

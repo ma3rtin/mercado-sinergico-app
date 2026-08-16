@@ -300,8 +300,13 @@ export class PublicarPaqueteComponent implements OnInit {
     this.paqueteBaseSeleccionado.set(paquete.id_paquete_base);
     this.busqueda.set(paquete.nombre);
     // Autocompletar el nombre de la publicación con el nombre del PaqueteBase,
-    // solo si el admin todavía no escribió uno propio
-    if (!this.nombreEditadoManualmente()) this.nombre.set(paquete.nombre);
+    // solo si el admin todavía no escribió uno propio y no estamos
+    // editando/duplicando una publicación existente (ahí el nombre real ya
+    // lo cargó cargarDatosEdicion(); usar el buscador para revisar el
+    // paquete base asociado no debería pisarlo).
+    if (!this.nombreEditadoManualmente() && !this.isEditMode()) {
+      this.nombre.set(paquete.nombre);
+    }
     this.mostrandoResultados.set(false);
   }
 
