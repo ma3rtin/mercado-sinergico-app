@@ -9,18 +9,18 @@ export const gestionarVariantesGuard: CanDeactivateFn<GestionarVariantesComponen
     return Promise.resolve(true);
   }
 
-  // 1. Guardado en curso: advertir que salir puede cortar el proceso
+  // 1. Guardado en curso: bloquear la salida. Las requests están atadas al
+  // ciclo de vida del componente (takeUntilDestroyed), así que navegar ahora
+  // cancelaría el guardado a mitad de camino y dejaría el estado indefinido.
   if (component.isSaving()) {
-    return Swal.fire({
+    Swal.fire({
       title: 'Guardado en curso',
-      text: 'Hay un guardado en curso. ¿Seguro que querés salir? Podés perder cambios sin guardar.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: 'var(--error)',
-      cancelButtonColor: 'var(--text-muted)',
-      confirmButtonText: 'Sí, salir',
-      cancelButtonText: 'Quedarme',
-    }).then((result) => result.isConfirmed);
+      text: 'Esperá a que termine de guardar antes de salir de esta pantalla.',
+      icon: 'info',
+      confirmButtonColor: 'var(--brand-secondary)',
+      confirmButtonText: 'Entendido',
+    });
+    return Promise.resolve(false);
   }
 
   // 2. Cambios staged sin persistir

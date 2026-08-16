@@ -553,12 +553,20 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   /**
-   * Ejecutar el guardado bulk de cambios
+   * Ejecutar el guardado bulk de cambios.
+   * Si se pasa `soloIds`, se guardan únicamente esas variantes (aunque haya
+   * otras con hasChanges pendiente por fuera del subconjunto); si no, se
+   * guardan todas las que tengan cambios.
    */
-  private ejecutarGuardado(onTerminar?: (exitoTotal: boolean) => void): void {
+  private ejecutarGuardado(
+    onTerminar?: (exitoTotal: boolean) => void,
+    soloIds?: number[],
+  ): void {
     this.isSaving.set(true);
 
-    const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
+    const variantesConCambios = this.variantes().filter(
+      (v) => v.hasChanges && (!soloIds || soloIds.includes(v.id)),
+    );
     if (variantesConCambios.length === 0) {
       this.isSaving.set(false);
       return;
@@ -696,7 +704,11 @@ export class GestionarVariantesComponent implements OnInit {
 
     const detalle = variantesFalladas.length > 0
       ? variantesFalladas
-          .map((v) => `${this.getVarianteDescripcion(v)}${v.sku ? ` (${v.sku})` : ''}`)
+          .map((v) => {
+            const descripcion = this.escapeHtml(this.getVarianteDescripcion(v));
+            const sku = v.sku ? ` (${this.escapeHtml(v.sku)})` : '';
+            return `${descripcion}${sku}`;
+          })
           .join('<br/>')
       : 'No se pudieron identificar las variantes con error.';
 
@@ -1046,8 +1058,14 @@ export class GestionarVariantesComponent implements OnInit {
       ),
     );
 
-    if (this.variantes().some((v) => v.hasChanges)) {
-      this.ejecutarGuardado(onTerminar);
+    // Solo mira/guarda cambios dentro del subconjunto objetivo: así una edición
+    // pendiente en otra variante (fuera de la selección) no se cuela en este guardado.
+    const cambiosEnObjetivo = this.variantes().filter(
+      (v) => idsObjetivo.includes(v.id) && v.hasChanges,
+    );
+
+    if (cambiosEnObjetivo.length > 0) {
+      this.ejecutarGuardado(onTerminar, ids ?? undefined);
     } else {
       const texto = ids
         ? `Las variantes seleccionadas ya están ${activo ? 'activadas' : 'desactivadas'}`
@@ -1066,6 +1084,19 @@ export class GestionarVariantesComponent implements OnInit {
    */
   getVarianteDescripcion(variante: ProductoVariante): string {
     return this.varianteService.getVarianteDescripcion(variante);
+  }
+
+  /**
+   * Escapa caracteres especiales de HTML antes de interpolar texto dentro de
+   * un Swal.fire({ html }), que no escapa automáticamente (a diferencia de `text`).
+   */
+  private escapeHtml(valor: string): string {
+    return valor
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   /**
