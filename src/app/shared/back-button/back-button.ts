@@ -23,6 +23,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 export class BackButtonComponent {
   label = input<string>('Volver');
   route = input<string | null>(null);
+  disabled = input<boolean>(false);
   
   // Indica si la acción de volver se delega completamente al componente padre
   customHandler = input<boolean>(false);
@@ -34,6 +35,8 @@ export class BackButtonComponent {
   private router = inject(Router);
 
   goBack(): void {
+    if (this.disabled()) return;
+
     if (this.customHandler()) {
       this.backClick.emit();
       return;
