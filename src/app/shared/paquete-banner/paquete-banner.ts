@@ -30,9 +30,9 @@ export class PaqueteBannerComponent {
     );
   });
 
-  // Nombre del paquete
+  // Nombre del paquete (prioriza el nombre propio de la publicación)
   nombrePaquete = computed(() => {
-    return this.paquete()?.paqueteBase?.nombre || 'Paquete';
+    return this.paquete()?.nombre || this.paquete()?.paqueteBase?.nombre || 'Paquete';
   });
 
   // Descripción del paquete
