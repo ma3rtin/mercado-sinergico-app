@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, OnInit, signal } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { EstadoPaquetePublicado } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
@@ -12,6 +13,7 @@ import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-c
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-administrar-publicaciones',
@@ -25,6 +27,7 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     BackButtonComponent,
     PaginationComponent,
     LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './administrar-publicaciones.html',
 })
@@ -43,6 +46,11 @@ export class AdministrarPublicacionesComponent implements OnInit {
   currentPage = signal(1);
   itemsPerPage = signal(10);
   mostrarArchivadas = signal(false);
+
+  // ── Procesamiento de acciones (overlay bloqueante) ────────────
+  isProcesando = signal<boolean>(false);
+  overlayTitulo = signal<string>('Procesando...');
+  overlayMensajes = signal<string[]>([]);
 
   readonly estadosFiltro = ['todos', 'activo', 'completo', 'confirmado', 'entregado', 'cancelado'];
 
@@ -133,7 +141,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
+        this.isProcesando.set(true);
+        this.overlayTitulo.set('Confirmando compra...');
+        this.overlayMensajes.set(['Confirmando compra con fabricante...', 'Notificando compradores...']);
+        this.paqueteService.confirmarCompra(paquete.id_paquete_publicado!).pipe(
+          finalize(() => this.isProcesando.set(false))
+        ).subscribe({
           next: () => {
             this.toast.success(`"${paquete.paqueteBase?.nombre}" confirmado con el fabricante`, 'Compra confirmada');
             this.loadPaquetes();
@@ -159,7 +172,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
         cancelButtonText: 'No, volver'
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+        this.isProcesando.set(true);
+        this.overlayTitulo.set('Cancelando paquete...');
+        this.overlayMensajes.set(['Procesando reembolsos...', 'Enviando mails de reembolso...']);
+        this.paqueteService.cancelarPaquete(paquete.id_paquete_publicado!).pipe(
+          finalize(() => this.isProcesando.set(false))
+        ).subscribe({
           next: (updated: PaquetePublicado) => {
             this.toast.success(`"${paquete.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
             this._actualizarPaqueteEnLista(updated);
@@ -174,7 +192,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   /** Duplicar publicación */
   duplicarPaquete(paquete: PaquetePublicado) {
-    this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+    this.isProcesando.set(true);
+    this.overlayTitulo.set('Duplicando paquete...');
+    this.overlayMensajes.set(['Copiando datos del paquete...', 'Replicando productos...']);
+    this.paqueteService.duplicarPaquete(paquete.id_paquete_publicado!).pipe(
+      finalize(() => this.isProcesando.set(false))
+    ).subscribe({
       next: (nuevoPaquete) => {
         this.toast.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
         this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
@@ -197,7 +220,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
         cancelButtonText: 'Cancelar'
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.notificarCompradores(paquete.id_paquete_publicado!).subscribe({
+        this.isProcesando.set(true);
+        this.overlayTitulo.set('Notificando compradores...');
+        this.overlayMensajes.set(['Preparando notificaciones...', 'Enviando emails...']);
+        this.paqueteService.notificarCompradores(paquete.id_paquete_publicado!).pipe(
+          finalize(() => this.isProcesando.set(false))
+        ).subscribe({
           next: (res) => {
             this.toast.success(
               `Notificación enviada a ${res.notificados} comprador/es.`,
@@ -227,7 +255,12 @@ export class AdministrarPublicacionesComponent implements OnInit {
         confirmButtonColor: 'var(--brand-secondary)',
       }).then(result => {
         if (!result.isConfirmed) return;
-        this.paqueteService.archivarPaquete(paquete.id_paquete_publicado!, nuevoEstado).subscribe({
+        this.isProcesando.set(true);
+        this.overlayTitulo.set(`${nuevoEstado ? 'Archivando' : 'Desarchivando'} publicación...`);
+        this.overlayMensajes.set(['Actualizando estado...']);
+        this.paqueteService.archivarPaquete(paquete.id_paquete_publicado!, nuevoEstado).pipe(
+          finalize(() => this.isProcesando.set(false))
+        ).subscribe({
           next: () => {
             this.toast.success(`"${paquete.paqueteBase?.nombre || paquete.nombre}" ${nuevoEstado ? 'archivado' : 'desarchivado'} con éxito`);
             this.loadPaquetes();
