@@ -127,7 +127,7 @@ export class InputComponent implements ControlValueAccessor, OnInit {
       if (errors['email']) return 'Formato de email inválido';
       if (errors['minlength']) return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
       if (errors['maxlength']) return `Máximo ${errors['maxlength'].requiredLength} caracteres`;
-      if (errors['min']) return `El valor debe ser mayor o igual a ${errors['min'].min}`;
+      if (errors['min']) return errors['min'].min === 0 ? 'El valor debe ser mayor a 0' : `El valor debe ser mayor o igual a ${errors['min'].min}`;
       if (errors['max']) return `El valor debe ser menor o igual a ${errors['max'].max}`;
       if (errors['pattern']) return `${this.label() || 'Este campo'} tiene un formato inválido`;
     }

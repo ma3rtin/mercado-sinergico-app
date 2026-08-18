@@ -9,7 +9,7 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
 
@@ -22,7 +22,7 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     ButtonComponent,
     IconComponent,
     AdminPaqueteCard,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     PaginationComponent,
     LoaderComponent,
   ],
