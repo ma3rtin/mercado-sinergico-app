@@ -10,6 +10,9 @@ import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
 
+// Validators
+import { mayorQueCero } from '@app/shared/validators/mayor-que-cero.validator';
+
 // Services
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
@@ -29,6 +32,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
+import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
 
 import Swal from 'sweetalert2';
 
@@ -49,6 +53,7 @@ import Swal from 'sweetalert2';
     SelectCategoriaMarca,
     MapOptionsPipe,
     SubidorImagenes,
+    LoadingOverlay,
   ],
   templateUrl: './crear-producto.html',
 })
@@ -134,10 +139,10 @@ export class CrearProductoComponent implements OnInit {
       stock: [null, [Validators.min(0), Validators.max(1000000)]],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
-      altura: [null, [Validators.min(0), Validators.max(10000)]],
-      ancho: [null, [Validators.min(0), Validators.max(10000)]],
-      profundidad: [null, [Validators.min(0), Validators.max(10000)]],
-      peso: [null, [Validators.min(0), Validators.max(10000)]],
+      altura: [null, [mayorQueCero, Validators.max(10000)]],
+      ancho: [null, [mayorQueCero, Validators.max(10000)]],
+      profundidad: [null, [mayorQueCero, Validators.max(10000)]],
+      peso: [null, [mayorQueCero, Validators.max(10000)]],
       plantillaId: [null],
       tipo: [TipoPaquete.SINERGICO]
     });
@@ -450,7 +455,7 @@ export class CrearProductoComponent implements OnInit {
     if (errors['required']) return `${fieldLabel} es requerido`;
     if (errors['minlength']) return `${fieldLabel} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
     if (errors['maxlength']) return `${fieldLabel} no puede superar los ${errors['maxlength'].requiredLength} caracteres`;
-    if (errors['min']) return `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
+    if (errors['min']) return errors['min'].min === 0 ? `${fieldLabel} debe ser mayor a 0` : `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
     if (errors['max']) return `${fieldLabel} debe ser menor o igual a ${errors['max'].max}`;
     return '';
   }

@@ -1,0 +1,30 @@
+@if (renderizar()) {
+  <div
+    class="loading-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+    [class.saliendo]="saliendo()"
+    role="dialog"
+    aria-modal="true"
+    aria-busy="true"
+  >
+    <div class="w-full max-w-sm bg-bg-surface rounded-2xl shadow-xl p-6">
+      @if (titulo()) {
+        <h3 class="font-display text-lg text-text-primary text-center mb-5">
+          {{ titulo() }}
+        </h3>
+      }
+
+      <div class="h-3 w-full rounded-full bg-bg-raised overflow-hidden">
+        <div
+          class="h-full rounded-full bg-brand-cta"
+          [style.width.%]="progreso()"
+        ></div>
+      </div>
+
+      @if (mensajeActual()) {
+        <p class="mt-4 text-sm text-text-secondary text-center">
+          {{ mensajeActual() }}
+        </p>
+      }
+    </div>
+  </div>
+}
