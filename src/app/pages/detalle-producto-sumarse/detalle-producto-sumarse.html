@@ -94,7 +94,7 @@
             </div>
 
             <!-- Selector de Variantes -->
-            @if (producto() && productoTieneVariantes()) {
+            @if (producto() && requiereSeleccionDeVariante()) {
             <div class="mb-8">
                 <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
                     (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
@@ -179,6 +179,8 @@
                     
                     @if (!paqueteEstaActivo()) {
                     Paquete no disponible
+                    } @else if (requiereSeleccionDeVariante() && !hayVariantesFormables()) {
+                    Sin stock disponible
                     } @else if (productoTieneVariantes() && !variantesValidas()) {
                     Elegí las opciones
                     } @else {
