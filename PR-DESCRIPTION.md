@@ -1,43 +1,39 @@
-### 📦 PR - Mercado Sinérgico Frontend
+# 📦 PR - mercado-sinergico-app
 
-#### 🔗 Título Sugerido
-`fix(buscador): corregir conteo total de resultados y fixes menores en BuscadorComponent`
+## 🔗 Título Sugerido
+`refactor(admin): migra formulario de crear paquete a reactive forms y componentes compartidos`
 
-#### 📝 Tipo de Cambio
+## 📝 Tipo de Cambio
 - [ ] ✨ Feat (Nueva funcionalidad)
-- [x] 🐛 Fix (Corrección de error)
-- [ ] ♻️ Refactor (Refactorización de código existente)
+- [ ] 🐛 Fix (Corrección de error)
+- [x] ♻️ Refactor (Refactorización de código existente)
 - [ ] 🧹 Chore (Tareas de mantenimiento, dependencias, etc.)
 - [x] 🧪 Test (Pruebas unitarias o de integración)
 - [ ] 📝 Docs (Documentación)
 
-#### 📖 Descripción General
-`totalResultados()` en `BuscadorComponent` no reflejaba la cantidad real de matches porque contaba sobre arrays ya recortados a 6 (`.slice(0, 6)`). Esto causaba que el botón "Ver todos los resultados (n)" mostrara un número incorrecto cuando había más de 6 coincidencias. Se corrige guardando los conteos totales antes del slice y se aprovechan fixes menores: rutas de navegación correctas, display de marca con helper, limpieza de logs de debug y normalización de iconos.
+## 📖 Descripción General
+Refactorización integral del formulario de creación de paquetes (`/admin/crear-paquete`): se migra de template-driven forms (signals sueltos + `NgForm`) a **Reactive Forms** con validaciones declarativas, y se reemplazan los controles manuales por los componentes compartidos del proyecto (`app-input`, `app-button`, `SelectCategoriaMarca`, `SubidorImagenes`). Además se elimina la búsqueda incremental con IntersectionObserver (los productos ahora se cargan completos en un select buscable), se agrega alta/edición inline de marcas y categorías (misma UX que Crear Producto), y se suma una suite de 23 tests unitarios con Vitest.
 
-#### 🛠️ Cambios Principales
+## 🛠️ Cambios Principales
+- **[Modificación]** `src/app/pages/admin/components/crear-paquete/crear-paquete.ts`: migración a `FormBuilder`/`FormGroup` con validators (nombre 3-100, descripción 10-500, categoría requerida, marca opcional). Eliminados: manejo manual de imagen (límite 200 KB), IntersectionObserver/lazy-load y `NgAfterViewChecked`. Nuevos métodos para crear/editar marca y categoría inline, `aplicarTipo()` que sincroniza tipo + filtra productos incompatibles, reset determinístico del buscador (sin `setTimeout`), helpers de validación (`isFieldInvalid`, `getErrorMessage`, `scrollToFirstError`) y corrección del estado de loading al fallar el submit. Redirección post-creación: de `/admin/perfil` → `/admin/administrar-paquetes`.
+- **[Modificación]** `src/app/pages/admin/components/crear-paquete/crear-paquete.html`: formulario envuelto en `<form [formGroup]>` con `(ngSubmit)`; campos migrados a `app-input`, `app-select-categoria-marca` (con pipeline `mapOptions`) y textarea reactivo; imagen de portada delegada a `app-subidor-imagenes` (modo imagen única); mensajes de error por campo; botones de acción con `app-button` (`type="submit"`).
+- **[Modificación]** `src/app/subidor-imagenes/subidor-imagenes.ts`: nuevo input `titulo` (default `'Imágenes del Producto'`) para reutilizar el componente en otros contextos.
+- **[Modificación]** `src/app/subidor-imagenes/subidor-imagenes.html`: la descripción se adapta según `allowMultiple()` (texto de imagen única vs galería).
+- **[Nuevo]** `src/app/pages/admin/components/crear-paquete/crear-paquete.spec.ts`: 23 tests unitarios (Vitest) que cubren validaciones del formulario, cambio Enérgico/Sinérgico con confirmación SweetAlert, selección/eliminación de productos, construcción del `FormData` en el submit, manejo de errores del backend y reset del formulario.
 
-- **Modificado** `src/app/shared/buscador/buscador.ts`:
-  - Extended interface `ResultadoBusqueda` con `totalProductos` y `totalPaquetes` para almacenar el conteo real antes del `.slice(0, 6)`.
-  - `totalResultados()` ahora suma `totalProductos + totalPaquetes` en vez de `productos.length + paquetes.length`.
-  - Todos los `.set()` del signal `resultados` actualizados con los nuevos campos.
-  - Corregidas rutas de navegación: `verProducto()` → `/producto/:id`, `verPaquete()` → `/paquete/:id/productos`.
-  - Agregado helper `obtenerNombreMarca()` para manejar correctamente `marca` (string | objeto).
-  - Eliminados console.logs de debug (`tap`/`finalize`).
+## 🧪 Pasos para Verificar (Cómo Probar)
+1. Levantar el proyecto: `npm run dev` (frontend + backend).
+2. Ingresar como administrador e ir a `/admin/crear-paquete`.
+3. Validar que los campos muestran errores inline al enviar sin completar (nombre, descripción, categoría) y que el foco/scrollea al primer error.
+4. Crear una marca y una categoría nuevas desde los propios selects (creación inline) y verificar que quedan seleccionadas automáticamente.
+5. Subir una imagen de portada (ahora hasta 20 MB, sin límite de 200 KB) y verificar el preview.
+6. Agregar productos filtrados por tipo; cambiar el tipo con productos ya cargados y confirmar que se remueven los incompatibles previa confirmación de SweetAlert.
+7. Crear el paquete y verificar la redirección a `/admin/administrar-paquetes`.
+8. Correr los tests: `npx vitest run src/app/pages/admin/components/crear-paquete/crear-paquete.spec.ts` → **23/23 pasando ✅**
 
-- **Modificado** `src/app/shared/buscador/buscador.html`:
-  - Normalizado tamaño de iconos Box y Package a `w-6 h-6` (desktop).
-  - Reemplazado `producto.marca || 'Sin marca'` por `obtenerNombreMarca(producto)` en desktop y mobile.
-
-- **Creado** `src/app/shared/buscador/buscador.spec.ts`:
-  - 27 tests unitarios cubriendo: creación, búsqueda con debounce, filtrado por tipo, manejo de errores, navegación, matching por marca/categoría, `distinctUntilChanged`, límite de 6 resultados y el fix de `totalResultados`.
-
-#### 🧪 Pasos para Verificar
-1. Levantar el proyecto localmente (`npm start`).
-2. Buscar un término que tenga más de 6 productos o paquetes que matcheen.
-3. Verificar que el botón "Ver todos los resultados (n)" muestre el número real de coincidencias (no 6 o 12).
-4. Verificar que solo se rendericen 6 ítems por tipo en el dropdown.
-5. Navegar a un producto/paquete desde el buscador y confirmar que llega a la ruta correcta.
-6. Correr `npx vitest run src/app/shared/buscador/buscador.spec.ts` — todos los tests deben pasar.
-
-#### ⚠️ Notas Adicionales
-Ninguna.
+## ⚠️ Notas Adicionales
+- **Commits pendientes**: los cambios están solo en el working tree (la rama no tiene commits adelantados respecto a `origin/dev`); commitear antes de abrir el PR.
+- El límite de imagen pasa de 200 KB a 20 MB (validación ahora centralizada en `SubidorImagenes`); el backend debe tolerar ese tamaño antes de subirlo a Cloudinary.
+- Cambio de comportamiento: luego de crear un paquete se navega a `/admin/administrar-paquetes` (antes `/admin/perfil`).
+- Quedaron `console.log` de debug en `crear-paquete.ts` (`[CrearPaquete]...`); evaluar removerlos antes del merge.
+- Sin dependencias nuevas ni cambios de variables de entorno.

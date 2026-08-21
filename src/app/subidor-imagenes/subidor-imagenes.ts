@@ -21,6 +21,7 @@ export class SubidorImagenes {
   private toast = inject(ToastService);
 
   // Configuración
+  titulo = input<string>('Imágenes del Producto');
   allowMultiple = input<boolean>(true);
   maxSlots = input<number>(16);
   formSubmitted = input<boolean>(false);
