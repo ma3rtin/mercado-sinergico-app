@@ -21,6 +21,8 @@ export class AdministrarPlantillasComponent implements OnInit {
   sortOrder = signal<'asc' | 'desc'>('asc');
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   private plantillaService = inject(PlantillaService);
   private toast = inject(ToastService);
@@ -31,9 +33,9 @@ export class AdministrarPlantillasComponent implements OnInit {
     const order = this.sortOrder();
     const all = this.plantillas();
 
-    let filtered = all.filter(p => p.nombre.toLowerCase().includes(term));
+    let filtered = all.filter(p => p.nombre?.toLowerCase().includes(term));
 
-    filtered = filtered.sort((a, b) =>
+    filtered = [...filtered].sort((a, b) =>
       order === 'asc'
         ? a.nombre.localeCompare(b.nombre)
         : b.nombre.localeCompare(a.nombre)
@@ -43,10 +45,23 @@ export class AdministrarPlantillasComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loading.set(true);
+    this.error.set(null);
     this.plantillaService.getPlantillas().subscribe({
-      next: (plantillas) => this.plantillas.set(plantillas),
-      error: (err) => console.error('❌ Error cargando plantillas:', err),
+      next: (plantillas) => {
+        this.plantillas.set(plantillas);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('❌ Error cargando plantillas:', err);
+        this.error.set('No se pudieron cargar las plantillas.');
+        this.loading.set(false);
+      },
     });
+  }
+
+  recargar(): void {
+    this.ngOnInit();
   }
 
   // ==========================

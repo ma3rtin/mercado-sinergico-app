@@ -154,7 +154,7 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
   getStatusColor(): string {
     const e = this.estadoNombre.toLowerCase();
     if (e === 'activo') return 'text-status-active-text';
-    if (e === 'completo') return 'bg-primary/30 text-brand-secondary';
+    if (e === 'completo') return 'bg-brand-primary/30 text-brand-secondary';
     if (e === 'confirmado') return ' bg-brand-cta/20 text-brand-secondary';
     if (e === 'entregado') return 'text-success';
     if (e === 'cancelado') return 'text-error';
@@ -164,7 +164,7 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
   getStatusBgColor(): string {
     const e = this.estadoNombre.toLowerCase();
     if (e === 'activo') return 'bg-status-active-bg';
-    if (e === 'completo') return 'bg-cta/30';
+    if (e === 'completo') return 'bg-brand-cta/30';
     if (e === 'confirmado') return 'bg-cta/20';
     if (e === 'entregado') return 'bg-success-light';
     if (e === 'cancelado') return 'bg-error-light';

@@ -55,7 +55,7 @@ describe('PublicarPaqueteComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         importProvidersFrom(NgIconsModule.withIcons({})),
         { provide: PaquetePublicadoService, useValue: paquetePublicadoSpy },
         { provide: PaqueteBaseService, useValue: paqueteBaseSpy },
@@ -169,6 +169,39 @@ describe('PublicarPaqueteComponent', () => {
 
       expect(toastSpy.error).toHaveBeenCalled();
       expect(paquetePublicadoSpy.createPaquete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('publicarPaquete() — validación de cantidad', () => {
+    it('rechaza cantidades menores que uno', () => {
+      const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
+      comp.nombre.set('Test');
+      comp.paqueteBaseSeleccionado.set(1);
+      comp.zonaSeleccionada.set(1);
+      comp.estadoSeleccionado.set(2);
+      comp.fechaInicio.set('2026-08-01');
+      comp.fechaFin.set('2026-09-01');
+      comp.cantProductos.set(0);
+
+      comp.publicarPaquete();
+
+      expect(toastSpy.error).toHaveBeenCalledWith(expect.stringContaining('cantidad'), expect.any(String));
+      expect(paquetePublicadoSpy.createPaquete).not.toHaveBeenCalled();
+    });
+
+    it('rechaza cantidades decimales', () => {
+      const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
+      comp.nombre.set('Test');
+      comp.paqueteBaseSeleccionado.set(1);
+      comp.zonaSeleccionada.set(1);
+      comp.estadoSeleccionado.set(2);
+      comp.fechaInicio.set('2026-08-01');
+      comp.fechaFin.set('2026-09-01');
+      comp.cantProductos.set(2.5);
+
+      comp.publicarPaquete();
+
+      expect(toastSpy.error).toHaveBeenCalledWith(expect.stringContaining('cantidad'), expect.any(String));
     });
   });
 

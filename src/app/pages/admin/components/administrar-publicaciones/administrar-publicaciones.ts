@@ -302,12 +302,4 @@ export class AdministrarPublicacionesComponent implements OnInit {
     );
   }
 
-  private _mockearEstado(paquete: PaquetePublicado, nuevoEstado: string) {
-    this.paquetes.update(lista =>
-      lista.map(p => p.id_paquete_publicado === paquete.id_paquete_publicado
-        ? { ...p, estado: { ...p.estado, nombre: nuevoEstado, id_estado: p.estado?.id_estado ?? 0 } }
-        : p
-      )
-    );
-  }
 }

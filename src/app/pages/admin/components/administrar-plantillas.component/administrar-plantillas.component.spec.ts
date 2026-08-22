@@ -6,7 +6,7 @@ import { NgIconsModule } from '@ng-icons/core';
 import { AdministrarPlantillasComponent } from './administrar-plantillas.component';
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { ToastService } from '@app/services/toast/toast.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -53,6 +53,16 @@ describe('AdministrarPlantillasComponent', () => {
   // ── Bug #2 y #3 — filteredPlantillas (búsqueda y orden) ─────────────────────
 
   describe('filteredPlantillas() — búsqueda y ordenamiento (bugs #2 y #3)', () => {
+    it('no muta el array original al ordenar', () => {
+      const comp = TestBed.createComponent(AdministrarPlantillasComponent).componentInstance;
+      const plantillas = [makePlantilla({ id: 1, nombre: 'Zeta' }), makePlantilla({ id: 2, nombre: 'Alfa' })];
+      comp.plantillas.set(plantillas);
+
+      comp.filteredPlantillas();
+
+      expect(comp.plantillas()).toBe(plantillas);
+      expect(comp.plantillas().map(p => p.nombre)).toEqual(['Zeta', 'Alfa']);
+    });
     it('devuelve todas las plantillas cuando el término de búsqueda está vacío', () => {
       const comp = TestBed.createComponent(AdministrarPlantillasComponent).componentInstance;
       comp.plantillas.set([
@@ -117,6 +127,19 @@ describe('AdministrarPlantillasComponent', () => {
       comp.sortOrder.set('desc');
       const nombres = comp.filteredPlantillas().map(p => p.nombre);
       expect(nombres).toEqual(['Aceite de Oliva', 'Aceite de Girasol']);
+    });
+  });
+
+  describe('carga', () => {
+    it('muestra error y permite identificar que terminó la carga si falla el servicio', () => {
+      (plantillaServiceSpy.getPlantillas as ReturnType<typeof vi.fn>)
+        .mockReturnValue(throwError(() => new Error('fallo')));
+
+      const comp = TestBed.createComponent(AdministrarPlantillasComponent).componentInstance;
+      comp.ngOnInit();
+
+      expect(comp.loading()).toBe(false);
+      expect(comp.error()).toBe('No se pudieron cargar las plantillas.');
     });
   });
 
