@@ -146,7 +146,7 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   volverAlPerfil(): void {
-    this.router.navigate(['/admin/perfil']);
+    this.router.navigate(['/admin/dashboard']);
   }
 
   // --- Helpers ---

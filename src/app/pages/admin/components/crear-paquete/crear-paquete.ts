@@ -273,7 +273,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
         next: () => {
           this.toast.success('¡Paquete creado con éxito!', 'Éxito');
           this.resetForm();
-          this.router.navigate(['admin/perfil']);
+          this.router.navigate(['/admin/dashboard']);
         },
         error: (err) => {
           this.toast.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');

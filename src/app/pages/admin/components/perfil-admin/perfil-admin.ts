@@ -9,6 +9,7 @@ import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
+import { shareReplay } from 'rxjs/operators';
 
 const ITEMS_POR_PAGINA = 5;
 
@@ -87,9 +88,16 @@ export class PerfilAdmin implements OnInit {
     this.loadingCompletos.set(true);
     this.errorCompletos.set(null);
 
-    this.paquetePublicadoService.getPaquetesCompletos().subscribe({
+    // Reutiliza el mismo observable (shareReplay evita doble request si se llama junto a loadPaquetesFinalizados)
+    const todos$ = this.paquetePublicadoService.getAllPaquetes().pipe(shareReplay(1));
+
+    todos$.subscribe({
       next: (paquetes) => {
-        this.paquetesCompletos.set(paquetes);
+        const completos = paquetes.filter(p => {
+          const nombre = p.estado?.nombre?.toLowerCase();
+          return (nombre === 'completo' || nombre === 'confirmado') && !p.archivado;
+        });
+        this.paquetesCompletos.set(completos);
         this.loadingCompletos.set(false);
       },
       error: (err) => {
@@ -105,9 +113,13 @@ export class PerfilAdmin implements OnInit {
     this.errorFinalizados.set(null);
     this.paginaActualFinalizados.set(1);
 
-    this.paquetePublicadoService.getPaquetesFinalizados().subscribe({
+    this.paquetePublicadoService.getAllPaquetes().subscribe({
       next: (paquetes) => {
-        this.paquetesFinalizados.set(paquetes);
+        const finalizados = paquetes.filter(p => {
+          const nombre = p.estado?.nombre?.toLowerCase();
+          return (nombre === 'recibido' || nombre === 'cancelado') && !p.archivado;
+        });
+        this.paquetesFinalizados.set(finalizados);
         this.loadingFinalizados.set(false);
       },
       error: (err) => {
@@ -249,9 +261,9 @@ export class PerfilAdmin implements OnInit {
 
   duplicarPaquete(paquete: PaquetePublicado) {
     this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
-      next: () => {
-        this.toastService.success('Publicación duplicada con éxito');
-        this.loadPaquetesCompletos();
+      next: (nuevoPaquete) => {
+        this.toastService.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
+        this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toastService.error('Error al duplicar la publicación'),
     });
