@@ -23,15 +23,17 @@ export class MainLayout implements OnInit {
 
   // 🎯 Signals reactivos
   esRutaPerfil = signal(false);
+  esRutaAdmin = signal(false);
 
-  // 📊 Computed: Mostrar banner si está logueado, perfil incompleto cargado y no está en la página /perfil
+  // 📊 Computed: Mostrar banner si está logueado, perfil incompleto cargado y no está en /perfil ni en /admin/*
   mostrarBannerPerfilIncompleto = computed(() => {
     const autenticado = this.authService.isAuthenticated();
     const perfilCargado = this.usuarioService.perfilUsuario() !== null;
     const completo = this.usuarioService.perfilCompleto();
     const enPerfil = this.esRutaPerfil();
+    const enAdmin = this.esRutaAdmin();
 
-    return autenticado && perfilCargado && !completo && !enPerfil;
+    return autenticado && perfilCargado && !completo && !enPerfil && !enAdmin;
   });
 
   constructor() {
@@ -46,14 +48,17 @@ export class MainLayout implements OnInit {
   }
 
   ngOnInit(): void {
-    // 🛰️ Detectar si estamos en la ruta /perfil para ocultar el banner preventivo
-    this.esRutaPerfil.set(this.router.url === '/perfil');
+    // 🛰️ Detectar si estamos en /perfil o /admin/* para ocultar el banner preventivo
+    const url = this.router.url;
+    this.esRutaPerfil.set(url === '/perfil' || url.startsWith('/perfil?'));
+    this.esRutaAdmin.set(url.startsWith('/admin'));
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
-      const url = event.urlAfterRedirects || event.url;
-      this.esRutaPerfil.set(url === '/perfil' || url.startsWith('/perfil?'));
+      const currentUrl = event.urlAfterRedirects || event.url;
+      this.esRutaPerfil.set(currentUrl === '/perfil' || currentUrl.startsWith('/perfil?'));
+      this.esRutaAdmin.set(currentUrl.startsWith('/admin'));
     });
   }
 }

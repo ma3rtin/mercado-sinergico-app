@@ -145,24 +145,9 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   confirmarCompra() {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
-    const faltan = (p.cant_productos || 0) - (p.cant_usuarios_registrados || 0);
-    faltan > 0
-      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
-      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
-
     Swal.fire({
       title: '¿Confirmar compra con fabricante?',
-      html: `
-        <p style="color:#374151; font-size:15px; line-height:1.6;">
-          Se confirmará la compra del paquete
-          <strong style="color:#2E608C;">${p.paqueteBase?.nombre ?? 'este paquete'}</strong>
-          con el proveedor.
-        </p>
-        <p style="color:#6b7280; font-size:13px; margin-top:8px;">
-          Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong>
-          y los compradores recibirán un email de confirmación.
-        </p>
-      `,
+      text: `Se confirmará la compra de "${p.paqueteBase?.nombre ?? 'este paquete'}" con el proveedor. Los pedidos pagados pasarán a preparación.`,
       icon: 'question',
       iconColor: '#2E608C',
       showCancelButton: true,
@@ -195,12 +180,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
 
     Swal.fire({
       title: '¿Completar pedido?',
-      html: `<p>Marcás <strong>${p.paqueteBase?.nombre}</strong> como <strong>Finalizado</strong>.</p>
-             <div class="mt-4 p-3 bg-info-light border border-brand-primary-light rounded text-sm text-brand-secondary text-left">
-               <p class="font-bold flex items-center gap-2"><span class="text-xl">✅</span> ¡Paquete lleno!</p>
-               <p class="mt-1">Al completar podrás <strong>descargar los partes de logística y de proveedor</strong>.</p>
-             </div>
-             <p class="text-sm text-gray-500 mt-4">Los compradores y el admin recibirán un mail notificando que se completó.</p>`,
+       text: `Se marcará "${p.paqueteBase?.nombre ?? 'este paquete'}" como entregado y podrás descargar los reportes.`,
       icon: 'success',
       showCancelButton: true,
       confirmButtonColor: '#2E608C',
@@ -231,7 +211,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p?.id_paquete_publicado) return;
     Swal.fire({
       title: '¿Cancelar y reembolsar?',
-      html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
+      text: 'Esto devolverá el dinero a todos los compradores. La acción es irreversible.',
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
@@ -296,20 +276,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     );
 
     const consolidado = new Map<string, { id: number; nombre: string; marca: string; precio: number; cantidad: number; variante: string }>();
-
-    p.paqueteBase?.productos?.forEach(pp => {
-      const prod = pp.producto;
-      if (!prod) return;
-      const key = `${prod.id_producto || prod.id}-`;
-      consolidado.set(key, {
-        id: (prod.id_producto || prod.id) as number,
-        nombre: prod.nombre,
-        marca: typeof prod.marca === 'string' ? prod.marca : (prod.marca?.nombre ?? 'N/A'),
-        precio: prod.precio,
-        cantidad: 0,
-        variante: '-'
-      });
-    });
 
     pedidosActivos.forEach(pedido => {
       pedido.pedidoProductos?.forEach(pp => {
@@ -412,7 +378,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 
-  private scrubForCsv(v: any): string {
+  private scrubForCsv(v: unknown): string {
     if (v === null || v === undefined) return 'N/A';
     return v.toString()
       .replace(/"/g, '""')

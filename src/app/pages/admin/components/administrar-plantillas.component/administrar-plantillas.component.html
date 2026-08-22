@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto">
     <!-- Botón Volver -->
     <div class="mb-4">
-        <app-back-button label="Volver al panel" route="/admin/perfil" />
+        <app-back-button label="Volver al panel" route="/admin/dashboard" />
     </div>
 
     <!-- Header con título y botón crear -->
@@ -35,19 +35,28 @@
                 <input type="text"
                     class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
                     placeholder="Buscar plantillas por nombre" [value]="searchTerm()"
-                    (input)="searchTerm.set($event.target.value)" />
+                    (input)="searchTerm.set($any($event.target).value)" />
             </div>
         </div>
         <div class="sm:w-64">
             <select
                 class="block w-full px-3 py-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary-hover focus:border-focus"
-                [value]="sortOrder()">
+                [value]="sortOrder()"
+                (change)="sortOrder.set($any($event.target).value)">
                 <option value="asc">Ordenar A-Z</option>
                 <option value="desc">Ordenar Z-A</option>
             </select>
         </div>
     </div>
 
+    @if (loading()) {
+    <div class="text-center py-12 text-text-secondary">Cargando plantillas...</div>
+    } @else if (error()) {
+    <div class="text-center py-12 bg-bg-surface rounded-2xl border border-border-default">
+        <p class="text-error font-medium">{{ error() }}</p>
+        <app-button variant="tertiary" size="sm" class="mt-4" (buttonClick)="recargar()">Reintentar</app-button>
+    </div>
+    } @else {
     <!-- Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
         @for (plantilla of filteredPlantillas(); track plantilla.id) {
@@ -92,6 +101,7 @@
         <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron plantillas</h3>
         <p class="text-gray-500">Intenta con otros términos de búsqueda o crea una nueva plantilla.</p>
     </div>
+    }
     }
   </div>
 </div>

@@ -70,8 +70,8 @@ export const routes: Routes = [
         path: 'admin',
         canActivate: [authGuard, adminGuard],
         children: [
-          { path: '', redirectTo: 'perfil', pathMatch: 'full' },
-          { path: 'perfil', component: PerfilAdmin },
+          { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+          { path: 'dashboard', component: PerfilAdmin },
           { path: 'crear-producto', component: CrearProductoComponent },
           { path: 'crear-paquete', component: CrearPaqueteComponent },
           { path: 'publicar-paquete', component: PublicarPaqueteComponent },
@@ -85,7 +85,6 @@ export const routes: Routes = [
           { path: 'administrar-publicaciones', component: AdministrarPublicacionesComponent },
           { path: 'administrar-publicacion/:id', component: AdministrarPublicacionDetalleComponent },
           { path: 'administrar-publicacion/:id/envios', loadComponent: () => import('./pages/admin/components/gestion-envios/gestion-envios').then(m => m.GestionEnviosComponent) },
-          { path: 'importar-productos', loadComponent: () => import('./pages/admin/components/importar-productos/importar-productos.component').then(m => m.ImportarProductosComponent) }
         ]
       }
 

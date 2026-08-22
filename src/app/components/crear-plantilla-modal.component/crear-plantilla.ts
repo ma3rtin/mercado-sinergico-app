@@ -86,7 +86,10 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
 
     // Verificar si hay cambios en el formulario
     const hasChanges = this.plantilla.nombre.trim() !== '' ||
-      this.plantilla.caracteristicas.length > 0;
+      this.plantilla.caracteristicas.some(caracteristica =>
+        caracteristica.nombre.trim() !== '' ||
+        caracteristica.opciones.some(opcion => opcion.nombre.trim() !== '')
+      );
 
     if (hasChanges) {
       Swal.fire({

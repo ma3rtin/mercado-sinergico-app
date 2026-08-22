@@ -115,9 +115,9 @@ export class AdministrarPublicacionesComponent implements OnInit {
 
   cerrarPaquete(paquete: PaquetePublicado) {
     const faltan = (paquete.cant_productos || 0) - (paquete.cant_usuarios_registrados || 0);
-    faltan > 0
-      ? `<p class="text-error font-bold mt-2">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
-      : '<p class="text-success font-bold mt-2">¡El paquete está lleno!</p>';
+    const cuposHtml = faltan > 0
+      ? `<p class="text-sm font-semibold mt-2 text-red-600">⚠️ Atención: Faltan ${faltan} cupos para llenarlo.</p>`
+      : '<p class="text-sm font-semibold mt-2 text-green-600">¡El paquete está lleno!</p>';
 
     import('sweetalert2').then(({ default: Swal }) => {
       Swal.fire({
@@ -125,7 +125,8 @@ export class AdministrarPublicacionesComponent implements OnInit {
         html: `<p>Confirmás la compra de <strong>${paquete.paqueteBase?.nombre}</strong> con el proveedor.</p>
                <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800 text-left">
                  <p class="mt-1">Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong> y los compradores recibirán un email de confirmación.</p>
-               </div>`,
+               </div>
+               ${cuposHtml}`,
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Sí, confirmar compra',
@@ -290,7 +291,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
   }
 
   volver() {
-    this.router.navigate(['/admin/perfil']);
+    this.router.navigate(['/admin/dashboard']);
   }
 
   // ── Helpers internos ──────────────────────────────────────────
@@ -301,12 +302,4 @@ export class AdministrarPublicacionesComponent implements OnInit {
     );
   }
 
-  private _mockearEstado(paquete: PaquetePublicado, nuevoEstado: string) {
-    this.paquetes.update(lista =>
-      lista.map(p => p.id_paquete_publicado === paquete.id_paquete_publicado
-        ? { ...p, estado: { ...p.estado, nombre: nuevoEstado, id_estado: p.estado?.id_estado ?? 0 } }
-        : p
-      )
-    );
-  }
 }

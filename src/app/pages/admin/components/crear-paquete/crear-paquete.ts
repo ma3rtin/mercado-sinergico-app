@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs/operators';
 
 import { Router } from '@angular/router';
 import { TipoPaquete } from '@app/models/Enums';
@@ -268,18 +269,20 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
     this.paqueteBaseService
       .createPaquete(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.creandoPaquete.set(false)),
+      )
       .subscribe({
         next: () => {
           this.toast.success('¡Paquete creado con éxito!', 'Éxito');
           this.resetForm();
-          this.router.navigate(['admin/perfil']);
+          this.router.navigate(['/admin/dashboard']);
         },
         error: (err) => {
           this.toast.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');
           console.error('Error del servidor al crear paquete:', err);
         },
-        complete: () => this.creandoPaquete.set(false),
       });
   }
 

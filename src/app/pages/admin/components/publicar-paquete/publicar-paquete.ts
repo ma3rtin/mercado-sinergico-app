@@ -393,6 +393,17 @@ export class PublicarPaqueteComponent implements OnInit {
       return;
     }
 
+    if (!Number.isFinite(dInicio.getTime()) || !Number.isFinite(dFin.getTime())) {
+      this.toast.error('Las fechas ingresadas no son válidas.', 'Error de validación');
+      return;
+    }
+
+    const cantidad = this.cantProductos();
+    if (cantidad !== null && (!Number.isInteger(Number(cantidad)) || Number(cantidad) < 1)) {
+      this.toast.error('La cantidad total debe ser un número entero mayor a 0.', 'Error de validación');
+      return;
+    }
+
     // Validar descuento
     const desc = this.descuento();
     if (desc !== null && (desc < 0 || desc > 100)) {
