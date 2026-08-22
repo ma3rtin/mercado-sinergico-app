@@ -17,7 +17,7 @@
     <div class="flex justify-between items-center mb-1 gap-2">
       <div class="flex items-center gap-2 min-w-0 flex-1">
         <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
-          {{ paquete.paqueteBase?.nombre }}
+          {{ paquete.nombre || paquete.paqueteBase?.nombre }}
         </h3>
         <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
       </div>
@@ -91,7 +91,7 @@
         <div>
           <div class="flex items-center gap-2.5">
             <h3 class="font-display text-xl text-text-primary font-bold">
-              {{ paquete.paqueteBase?.nombre }}
+              {{ paquete.nombre || paquete.paqueteBase?.nombre }}
             </h3>
             <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
           </div>
@@ -138,7 +138,7 @@
         <div class="min-w-0 font-body">
           <div class="flex items-center gap-2">
             <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
-              {{ paquete.paqueteBase?.nombre }}
+              {{ paquete.nombre || paquete.paqueteBase?.nombre }}
             </h3>
             <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
           </div>

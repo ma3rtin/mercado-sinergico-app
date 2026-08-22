@@ -172,7 +172,7 @@ export class ProductosDelPaquete implements OnInit {
     return {
       porcentaje,
       aplicado: false,
-      nombrePaquete: p.paqueteBase?.nombre || 'Paquete',
+      nombrePaquete: p.nombre || p.paqueteBase?.nombre || 'Paquete',
     };
   });
 

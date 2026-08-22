@@ -62,6 +62,8 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // 🆕 Nuevos campos
   nombre = signal<string>('');
+  // Una vez que el admin toca el campo a mano, el autocompletado deja de pisarlo.
+  private nombreEditadoManualmente = signal<boolean>(false);
   descuento = signal<number | null>(null);
   imagenSlot = signal<ImageSlot>({ file: null, preview: null });
 
@@ -141,7 +143,12 @@ export class PublicarPaqueteComponent implements OnInit {
       const duplicadoId = params['duplicadoId'];
 
       if (baseId) {
-        this.paqueteBaseSeleccionado.set(Number(baseId));
+        const baseIdNum = Number(baseId);
+        this.paqueteBaseSeleccionado.set(baseIdNum);
+        // Si la lista ya está cargada, autocompletar el nombre de la publicación
+        // (solo si el admin todavía no escribió uno propio)
+        const pre = this.paquetesBase().find(p => p.id_paquete_base === baseIdNum);
+        if (pre && !this.nombreEditadoManualmente() && !this.isEditMode()) this.nombre.set(pre.nombre);
       }
 
       if (duplicadoId) {
@@ -230,7 +237,18 @@ export class PublicarPaqueteComponent implements OnInit {
           // Si hay un paquete pre-seleccionado, buscar su nombre para el input
           if (this.paqueteBaseSeleccionado()) {
             const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
-            if (pre) this.busqueda.set(pre.nombre);
+            if (pre) {
+              this.busqueda.set(pre.nombre);
+              // Autocompletar el nombre de la publicación con el nombre del
+              // PaqueteBase, solo si el admin todavía no escribió uno propio y
+              // no estamos editando/duplicando una publicación existente (en
+              // ese caso el nombre real ya lo trae cargarDatosEdicion(), y esta
+              // request puede resolver antes o después de esa — no hay que
+              // pisarlo en ningún orden).
+              if (!this.nombreEditadoManualmente() && !this.isEditMode()) {
+                this.nombre.set(pre.nombre);
+              }
+            }
           }
 
           const primeros = data.slice(0, 10);
@@ -281,7 +299,21 @@ export class PublicarPaqueteComponent implements OnInit {
   seleccionarPaquete(paquete: any): void {
     this.paqueteBaseSeleccionado.set(paquete.id_paquete_base);
     this.busqueda.set(paquete.nombre);
+    // Autocompletar el nombre de la publicación con el nombre del PaqueteBase,
+    // solo si el admin todavía no escribió uno propio y no estamos
+    // editando/duplicando una publicación existente (ahí el nombre real ya
+    // lo cargó cargarDatosEdicion(); usar el buscador para revisar el
+    // paquete base asociado no debería pisarlo).
+    if (!this.nombreEditadoManualmente() && !this.isEditMode()) {
+      this.nombre.set(paquete.nombre);
+    }
     this.mostrandoResultados.set(false);
+  }
+
+  // --- El admin edita el nombre de la publicación a mano ---
+  onNombreChange(value: string): void {
+    this.nombre.set(value);
+    this.nombreEditadoManualmente.set(true);
   }
 
   // --- 🆕 Limpiar selección de paquete base ---
