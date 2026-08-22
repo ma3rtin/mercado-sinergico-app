@@ -19,7 +19,7 @@
         <h3 class="font-display text-base sm:text-lg text-text-primary truncate font-bold">
           {{ paquete.nombre || paquete.paqueteBase?.nombre }}
         </h3>
-        <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+        <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
       </div>
 
       <div class="flex items-center gap-1.5">
@@ -93,7 +93,7 @@
             <h3 class="font-display text-xl text-text-primary font-bold">
               {{ paquete.nombre || paquete.paqueteBase?.nombre }}
             </h3>
-            <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+            <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
           </div>
           <p class="text-xs text-text-secondary mt-1">Detalles de tu participación en este paquete</p>
         </div>
@@ -140,7 +140,7 @@
             <h3 class="font-display text-base text-text-primary font-bold truncate leading-tight">
               {{ paquete.nombre || paquete.paqueteBase?.nombre }}
             </h3>
-            <app-tipo-badge [tipo]="paquete.tipo" position="bottom-right"></app-tipo-badge>
+            <app-tipo-badge [tipo]="paquete.tipo" entityType="paquete" position="bottom-right"></app-tipo-badge>
           </div>
           <p class="text-xs text-text-muted font-bold uppercase tracking-wider">Detalle del Pedido</p>
         </div>

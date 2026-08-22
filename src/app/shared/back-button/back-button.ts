@@ -24,7 +24,7 @@ export class BackButtonComponent {
   label = input<string>('Volver');
   route = input<string | null>(null);
   disabled = input<boolean>(false);
-  
+
   // Indica si la acción de volver se delega completamente al componente padre
   customHandler = input<boolean>(false);
   

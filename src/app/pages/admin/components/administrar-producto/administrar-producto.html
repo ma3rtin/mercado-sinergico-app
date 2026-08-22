@@ -11,11 +11,16 @@
         <h1 class="text-3xl md:text-4xl lg:text-4xl font-display">
           Administrar productos
         </h1>
-        <button (click)="mostrarGuiaSimbolos()"
-          class="w-10 h-10 flex items-center justify-center bg-brand-primary text-white rounded-full shadow-xl hover:scale-110 transition-all active:scale-95 shrink-0 border-2 border-white"
-          title="Guía de símbolos">
-          <app-icon name="helpCircle" size="22" />
-        </button>
+        <app-info-tooltip
+          [customTrigger]="true"
+          tooltipTitle="Guía de símbolos"
+          description="Ver explicación de los símbolos e íconos de estado de productos"
+          position="bottom-left">
+          <button (click)="mostrarGuiaSimbolos()"
+            class="w-10 h-10 flex items-center justify-center bg-brand-primary text-white rounded-full shadow-xl hover:scale-110 transition-all active:scale-95 shrink-0 border-2 border-white">
+            <app-icon name="helpCircle" size="22" />
+          </button>
+        </app-info-tooltip>
       </div>
       <app-button variant="primary" (click)="navigateToCreate()">
         Crear producto
@@ -135,7 +140,7 @@
               </span>
 
               <!-- Tipo de Producto Badge -->
-              <app-tipo-badge [tipo]="producto.tipo" class="mr-1" />
+              <app-tipo-badge [tipo]="producto.tipo" class="mr-1" [showTooltip]="false" />
 
               <!-- Archivado Badge -->
               @if (producto.archivado) {

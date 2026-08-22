@@ -69,7 +69,7 @@
                 </span>
                 <span class="w-1 h-1 rounded-full bg-border-default hidden sm:block"></span>
                 @if (isEnergico || isSinergico) {
-                <app-tipo-badge [tipo]="paquete.tipo" mode="icon" />
+                <app-tipo-badge [tipo]="paquete.tipo" mode="icon" [showTooltip]="false" />
                 }
             </div>
             <h3
