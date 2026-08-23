@@ -9,10 +9,9 @@
     <div class="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-md">
         <app-icon name="AlertCircle" class="w-20 h-20 text-error mb-4" />
         <h3 class="text-xl font-bold text-gray-800 mb-2">{{ errorMessage() }}</h3>
-        <button (click)="goBack()"
-            class="mt-4 bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-medium transition-colors">
-            Volver
-        </button>
+        <div class="mt-4">
+            <app-back-button [label]="labelVolver()" [customHandler]="true" (backClick)="goBack()" />
+        </div>
     </div>
 </div>
 }
@@ -22,6 +21,11 @@
 
 <!-- Main Content -->
 <div class="container mx-auto px-4 py-8 lg:py-12 bg-gray-50 min-h-screen font-body max-w-7xl">
+    
+    <!-- 🔙 Botón Volver -->
+    <div class="mb-4">
+        <app-back-button [label]="labelVolver()" [customHandler]="true" (backClick)="goBack()" />
+    </div>
     
     <!-- 🌟 GRAN CARD PRINCIPAL 🌟 -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col lg:flex-row">
@@ -57,7 +61,7 @@
                 }
                 <!-- Badge Tipo Paquete -->
                 @if (tipoPaquete()) {
-                <app-tipo-badge [tipo]="tipoPaquete()" mode="icon" />
+                    <app-tipo-badge [tipo]="tipoPaquete()" mode="icon" entityType="paquete" />
                 }
             </div>
 
@@ -90,7 +94,7 @@
             </div>
 
             <!-- Selector de Variantes -->
-            @if (producto() && productoTieneVariantes()) {
+            @if (producto() && requiereSeleccionDeVariante()) {
             <div class="mb-8">
                 <app-selector-variantes [producto]="producto()!" [habilitado]="paqueteEstaActivo()"
                     (variantesChange)="onVariantesChange($event)" (valido)="onVariantesValidoChange($event)"
@@ -175,6 +179,8 @@
                     
                     @if (!paqueteEstaActivo()) {
                     Paquete no disponible
+                    } @else if (requiereSeleccionDeVariante() && !hayVariantesFormables()) {
+                    Sin stock disponible
                     } @else if (productoTieneVariantes() && !variantesValidas()) {
                     Elegí las opciones
                     } @else {

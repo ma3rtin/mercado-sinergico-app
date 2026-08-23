@@ -14,10 +14,11 @@ import { ProductosService } from '@app/services/producto/producto.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-administrar-productos',
@@ -26,10 +27,11 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     CommonModule,
     ButtonComponent,
     IconComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     PaginationComponent,
     TipoBadgeComponent,
     LoaderComponent,
+    InfoTooltipComponent,
   ],
   templateUrl: './administrar-producto.html',
 })

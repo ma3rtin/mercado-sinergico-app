@@ -1,0 +1,6 @@
+<button type="button" [disabled]="disabled()" (click)="goBack()"
+  [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
+  class="flex items-center gap-2 text-brand-primary font-bold text-xs uppercase tracking-widest active:scale-95 transition-all w-fit group cursor-pointer">
+  <app-icon name="arrowLeft" size="16" class="group-hover:-translate-x-1 transition-transform" />
+  {{ label() }}
+</button>

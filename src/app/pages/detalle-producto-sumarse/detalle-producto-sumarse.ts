@@ -19,6 +19,7 @@ import { PaqueteCard } from '@app/shared/paquete-card/paquete-card';
 import { SelectorVariantesComponent, VariantesSeleccionadas } from '@app/shared/selector-variantes/selector-variantes';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 // Models
 import { Producto } from '@models/ProductosInterfaces/Producto';
@@ -26,6 +27,7 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
+import { VarianteService } from '@app/services/variantes/variante.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
@@ -45,7 +47,8 @@ import Swal from 'sweetalert2';
     SelectorVariantesComponent,
     ButtonComponent,
     TipoBadgeComponent,
-    LoaderComponent
+    LoaderComponent,
+    BackButtonComponent
   ],
   templateUrl: './detalle-producto-sumarse.html',
   standalone: true
@@ -62,6 +65,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
   private readonly usuarioService = inject(UsuarioService);
+  private readonly varianteService = inject(VarianteService);
 
   // ✅ igual que productos-del-paquete
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -88,6 +92,10 @@ export class DetalleProductoSumarse implements OnInit {
   // 🧩 Computed
   hasProducto = computed(() => !!this.producto());
   hasPaqueteSeleccionado = computed(() => !!this.paqueteSeleccionado());
+
+  // 🧭 Navegación dinámica
+  fromProducto = signal<boolean>(false);
+  labelVolver = computed(() => this.fromProducto() ? 'Volver al producto' : 'Volver al paquete');
 
   // --- LÓGICA DE STOCK Y DISPONIBILIDAD REFACTORIZADA ---
 
@@ -128,13 +136,36 @@ export class DetalleProductoSumarse implements OnInit {
 
   productoTieneVariantes = computed(() => {
     const variantes = this.producto()?.variantes || [];
-    return variantes.some(v => v.activo !== false);
+    // El producto tiene variantes definidas aunque todas estén inactivas:
+    // en ese caso debe bloquearse la compra (no hay variante seleccionable),
+    // no tratarse como si no tuviera variantes.
+    return variantes.length > 0;
+  });
+
+  // El producto tiene plantilla asignada pero puede no tener ninguna fila de
+  // ProductoVariante todavía (ej: falló la generación tras un cambio de
+  // plantilla). Se trata igual que "tiene variantes": requiere selección y
+  // no se puede comprar directo.
+  productoTienePlantilla = computed(() => !!this.producto()?.plantilla);
+
+  // El producto requiere pasar por el selector de variantes: o ya tiene
+  // variantes cargadas, o tiene una plantilla asignada (aunque todavía no
+  // se hayan generado sus variantes).
+  requiereSeleccionDeVariante = computed(() =>
+    this.productoTieneVariantes() || this.productoTienePlantilla()
+  );
+
+  // Tiene variantes definidas, pero ninguna activa/con stock: distinto de
+  // "tiene variantes formables pero el usuario todavía no eligió opciones".
+  hayVariantesFormables = computed(() => {
+    const variantes = this.producto()?.variantes || [];
+    return this.varianteService.getVariantesDisponibles(variantes).length > 0;
   });
 
   puedeAgregarAlCarrito = computed(() => {
-    return this.paqueteEstaActivo() && 
-           this.disponibilidadRealParaUsuario() > 0 && 
-           (!this.productoTieneVariantes() || this.variantesValidas());
+    return this.paqueteEstaActivo() &&
+           this.disponibilidadRealParaUsuario() > 0 &&
+           (!this.requiereSeleccionDeVariante() || this.variantesValidas());
   });
 
   tipoPaquete = computed(() => this.paqueteSeleccionado()?.tipo || null);
@@ -207,6 +238,13 @@ export class DetalleProductoSumarse implements OnInit {
   ngOnInit(): void {
     // ✅ CLAVE: igual que productos-del-paquete que SÍ funciona
     if (!this.isBrowser) return;
+
+    // 🧭 Detectar origen de navegación (ej. si viene de la vista de producto)
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        this.fromProducto.set(queryParams.get('from') === 'producto');
+      });
 
     // ✅ paramMap observable, NO snapshot
     this.route.paramMap
@@ -435,17 +473,29 @@ export class DetalleProductoSumarse implements OnInit {
   }
 
   goBack(): void {
-    const productoId = this.currentProductoId();
-    if (productoId) {
+    if (this.fromProducto()) {
       const prod = this.producto();
+      const prodId = this.currentProductoId();
       if (prod) {
         const slugUrl = getProductSlugUrl(prod);
         this.router.navigate(['/producto', slugUrl]);
+      } else if (prodId) {
+        this.router.navigate(['/producto', prodId]);
       } else {
-        this.router.navigate(['/producto', productoId]);
+        this.router.navigate(['/productos']);
       }
     } else {
-      this.router.navigate(['/paquetes']);
+      const paquete = this.paqueteSeleccionado();
+      const paqueteId = this.currentPaqueteId();
+
+      if (paquete) {
+        const slugUrl = getPaqueteSlugUrl(paquete);
+        this.router.navigate(['/paquete', slugUrl, 'productos']);
+      } else if (paqueteId) {
+        this.router.navigate(['/paquete', paqueteId, 'productos']);
+      } else {
+        this.router.navigate(['/paquetes']);
+      }
     }
   }
 

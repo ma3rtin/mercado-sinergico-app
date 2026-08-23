@@ -31,6 +31,8 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
 
 import Swal from 'sweetalert2';
 
@@ -58,6 +60,8 @@ interface VarianteExtendida extends ProductoVariante {
     IconComponent,
     PaginationComponent,
     LoaderComponent,
+    BackButtonComponent,
+    LoadingOverlay,
   ],
   templateUrl: './gestionar-variantes.html',
 })
@@ -223,6 +227,7 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   onPageChange(page: number): void {
+    if (this.isSaving()) return;
     this.currentPage.set(page);
   }
 
@@ -343,6 +348,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Toggle selección de una variante con soporte para Shift
    */
   toggleSeleccion(varianteId: number, event: MouseEvent): void {
+    if (this.isSaving()) return;
     const variantesPaginadas = this.paginatedVariantes();
     const indiceActual = variantesPaginadas.findIndex(v => v.id === varianteId);
     if (indiceActual === -1) return;
@@ -380,6 +386,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Seleccionar/Deseleccionar todas las variantes filtradas
    */
   toggleTodasLasSelecciones(): void {
+    if (this.isSaving()) return;
     const todasSeleccionadas = this.todasSeleccionadas();
     const filtradas = this.variantesFiltradas();
 
@@ -396,6 +403,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Deseleccionar todas
    */
   deseleccionarTodas(): void {
+    if (this.isSaving()) return;
     this.variantes.update((current) =>
       current.map((v) => ({ ...v, seleccionada: false })),
     );
@@ -410,6 +418,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Aplicar stock a todas las seleccionadas
    */
   aplicarStockASeleccionadas(): void {
+    if (this.isSaving()) return;
     const seleccionadas = this.variantesSeleccionadas();
 
     if (seleccionadas.length === 0) {
@@ -466,6 +475,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Actualizar stock de una variante
    */
   onStockChange(varianteId: number, nuevoStock: number): void {
+    if (this.isSaving()) return;
     if (nuevoStock < 0) {
       nuevoStock = 0;
     }
@@ -485,6 +495,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Toggle activo/inactivo de una variante
    */
   toggleVarianteActiva(varianteId: number): void {
+    if (this.isSaving()) return;
     this.variantes.update((current) =>
       current.map((v) => {
         if (v.id === varianteId) {
@@ -517,6 +528,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Guardar todos los cambios usando un único llamado bulk
    */
   guardarCambios(): void {
+    if (this.isSaving()) return;
     const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
 
     if (variantesConCambios.length === 0) {
@@ -541,12 +553,20 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   /**
-   * Ejecutar el guardado bulk de cambios
+   * Ejecutar el guardado bulk de cambios.
+   * Si se pasa `soloIds`, se guardan únicamente esas variantes (aunque haya
+   * otras con hasChanges pendiente por fuera del subconjunto); si no, se
+   * guardan todas las que tengan cambios.
    */
-  private ejecutarGuardado(): void {
+  private ejecutarGuardado(
+    onTerminar?: (exitoTotal: boolean) => void,
+    soloIds?: number[],
+  ): void {
     this.isSaving.set(true);
 
-    const variantesConCambios = this.variantes().filter((v) => v.hasChanges);
+    const variantesConCambios = this.variantes().filter(
+      (v) => v.hasChanges && (!soloIds || soloIds.includes(v.id)),
+    );
     if (variantesConCambios.length === 0) {
       this.isSaving.set(false);
       return;
@@ -559,6 +579,7 @@ export class GestionarVariantesComponent implements OnInit {
     let completadas = 0;
     let guardadas = 0;
     let errores = 0;
+    let variantesFalladas: VarianteExtendida[] = [];
 
     const alCompletarOperacion = (exito: boolean, cant: number) => {
       completadas++;
@@ -569,7 +590,8 @@ export class GestionarVariantesComponent implements OnInit {
       }
 
       if (completadas === totalOperaciones) {
-        this.finalizarGuardado(guardadas, errores);
+        this.finalizarGuardado(guardadas, errores, variantesFalladas);
+        onTerminar?.(errores === 0);
       }
     };
 
@@ -607,6 +629,7 @@ export class GestionarVariantesComponent implements OnInit {
           },
           error: (err) => {
             console.error('❌ Error guardando variante:', err);
+            variantesFalladas.push(variante);
             alCompletarOperacion(false, 1);
           },
         });
@@ -651,13 +674,18 @@ export class GestionarVariantesComponent implements OnInit {
           },
           error: (err) => {
             console.error('❌ Error guardando variantes en bulk:', err);
+            variantesFalladas.push(...sinImagen);
             alCompletarOperacion(false, sinImagen.length);
           },
         });
     }
   }
 
-  private finalizarGuardado(guardadas: number, errores: number): void {
+  private finalizarGuardado(
+    guardadas: number,
+    errores: number,
+    variantesFalladas: VarianteExtendida[],
+  ): void {
     this.isSaving.set(false);
 
     if (errores === 0) {
@@ -665,17 +693,44 @@ export class GestionarVariantesComponent implements OnInit {
         ? '1 variante actualizada con éxito'
         : `${guardadas} variantes actualizadas con éxito`;
       this.toastr.success(msg);
-    } else if (guardadas > 0) {
+      return;
+    }
+
+    if (guardadas > 0) {
       this.toastr.warning(`${guardadas} guardadas, ${errores} con errores`);
     } else {
       this.toastr.error('Error al guardar las variantes');
     }
+
+    const detalle = variantesFalladas.length > 0
+      ? variantesFalladas
+          .map((v) => {
+            const descripcion = this.escapeHtml(this.getVarianteDescripcion(v));
+            const sku = v.sku ? ` (${this.escapeHtml(v.sku)})` : '';
+            return `${descripcion}${sku}`;
+          })
+          .join('<br/>')
+      : 'No se pudieron identificar las variantes con error.';
+
+    Swal.fire({
+      title: 'Guardado con errores',
+      html: `
+        <p>${errores} variante(s) no se pudieron guardar:</p>
+        <div style="margin-top:12px;padding:12px 16px;background:#fef2f2;border:1px solid #fee2e2;border-radius:12px;text-align:left;font-size:13px;font-weight:600;color:#7f1d1d;max-height:220px;overflow-y:auto;">
+          ${detalle}
+        </div>
+      `,
+      icon: 'warning',
+      confirmButtonText: 'Entendido',
+      confirmButtonColor: 'var(--brand-secondary)',
+    });
   }
 
   /**
    * Resetear todos los cambios
    */
   resetearCambios(): void {
+    if (this.isSaving()) return;
     Swal.fire({
       title: '¿Descartar cambios?',
       text: 'Se perderán todos los cambios no guardados',
@@ -708,6 +763,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Eliminar una variante
    */
   eliminarVariante(varianteId: number): void {
+    if (this.isSaving()) return;
     const variante = this.variantes().find(v => v.id === varianteId);
     if (!variante) return;
 
@@ -749,6 +805,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Aplicar el mismo stock a todas las variantes activas
    */
   aplicarStockATodas(): void {
+    if (this.isSaving()) return;
     Swal.fire({
       title: 'Aplicar stock a todas',
       input: 'number',
@@ -791,6 +848,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Activar todas las variantes
    */
   activarTodas(): void {
+    if (this.isSaving()) return;
     Swal.fire({
       title: '¿Activar todas las variantes?',
       text: 'Todas las variantes quedarán disponibles',
@@ -802,14 +860,7 @@ export class GestionarVariantesComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.variantes.update((current) =>
-          current.map((v) => ({
-            ...v,
-            activo: true,
-            hasChanges: this.hasVarianteChanges({ ...v, activo: true }),
-          })),
-        );
-        this.toastr.success('Todas las variantes activadas');
+        this.aplicarEstadoMasivo(true);
       }
     });
   }
@@ -818,6 +869,7 @@ export class GestionarVariantesComponent implements OnInit {
    * Desactivar todas las variantes
    */
   desactivarTodas(): void {
+    if (this.isSaving()) return;
     Swal.fire({
       title: '¿Desactivar todas las variantes?',
       text: 'Las variantes quedarán pausadas (no eliminadas)',
@@ -829,16 +881,198 @@ export class GestionarVariantesComponent implements OnInit {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        this.variantes.update((current) =>
-          current.map((v) => ({
-            ...v,
-            activo: false,
-            hasChanges: this.hasVarianteChanges({ ...v, activo: false }),
-          })),
-        );
-        this.toastr.warning('Todas las variantes desactivadas');
+        this.aplicarEstadoMasivo(false);
       }
     });
+  }
+
+  /**
+   * Activar las variantes seleccionadas (solo el subconjunto tildado)
+   */
+  activarSeleccionadas(): void {
+    if (this.isSaving()) return;
+    const seleccionadas = this.variantesSeleccionadas();
+
+    if (seleccionadas.length === 0) {
+      this.toastr.warning('No hay variantes seleccionadas');
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Activar variantes seleccionadas?',
+      html: `Se activarán <strong>${seleccionadas.length}</strong> variante(s)`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--success)',
+      cancelButtonColor: 'var(--text-muted)',
+      confirmButtonText: 'Sí, activar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.aplicarEstadoMasivo(
+          true,
+          seleccionadas.map((v) => v.id),
+          (exito) => {
+            if (exito) this.deseleccionarTodas();
+          },
+        );
+      }
+    });
+  }
+
+  /**
+   * Desactivar las variantes seleccionadas (solo el subconjunto tildado)
+   */
+  desactivarSeleccionadas(): void {
+    if (this.isSaving()) return;
+    const seleccionadas = this.variantesSeleccionadas();
+
+    if (seleccionadas.length === 0) {
+      this.toastr.warning('No hay variantes seleccionadas');
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Desactivar variantes seleccionadas?',
+      html: `Se desactivarán <strong>${seleccionadas.length}</strong> variante(s)`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--warning)',
+      cancelButtonColor: 'var(--text-muted)',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.aplicarEstadoMasivo(
+          false,
+          seleccionadas.map((v) => v.id),
+          (exito) => {
+            if (exito) this.deseleccionarTodas();
+          },
+        );
+      }
+    });
+  }
+
+  /**
+   * Eliminar las variantes seleccionadas (solo el subconjunto tildado)
+   */
+  eliminarSeleccionadas(): void {
+    if (this.isSaving()) return;
+    const seleccionadas = this.variantesSeleccionadas();
+
+    if (seleccionadas.length === 0) {
+      this.toastr.warning('No hay variantes seleccionadas');
+      return;
+    }
+
+    Swal.fire({
+      title: '¿Eliminar variantes seleccionadas?',
+      html: `Se eliminarán permanentemente <strong>${seleccionadas.length}</strong> variante(s)<br/><br/>Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--error)',
+      cancelButtonColor: 'var(--text-muted)',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ejecutarEliminacionSeleccionadas(seleccionadas);
+      }
+    });
+  }
+
+  /**
+   * Ejecutar la eliminación de las variantes seleccionadas.
+   * Las que fallan se conservan en la selección para poder reintentar.
+   */
+  private ejecutarEliminacionSeleccionadas(seleccionadas: VarianteExtendida[]): void {
+    this.isSaving.set(true);
+
+    const ids = seleccionadas.map((v) => v.id);
+    let eliminadas = 0;
+    let errores = 0;
+    let completadas = 0;
+
+    const alTerminar = () => {
+      if (completadas < ids.length) return;
+
+      this.isSaving.set(false);
+      this.lastSelectedId.set(null);
+
+      if (errores === 0) {
+        this.toastr.success(
+          eliminadas === 1
+            ? '1 variante eliminada con éxito'
+            : `${eliminadas} variantes eliminadas con éxito`,
+        );
+      } else if (eliminadas > 0) {
+        this.toastr.warning(`${eliminadas} eliminadas, ${errores} con errores`);
+      } else {
+        this.toastr.error('Error al eliminar las variantes seleccionadas');
+      }
+    };
+
+    seleccionadas.forEach((variante) => {
+      this.varianteService
+        .eliminarVariante(variante.id!)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.variantes.update((current) =>
+              current.filter((v) => v.id !== variante.id),
+            );
+            eliminadas++;
+            completadas++;
+            alTerminar();
+          },
+          error: (err) => {
+            console.error('❌ Error eliminando variante:', err);
+            errores++;
+            completadas++;
+            alTerminar();
+          },
+        });
+    });
+  }
+
+  /**
+   * Aplicar el estado (activar/desactivar) a las variantes indicadas y
+   * persistirlo automáticamente contra el backend.
+   * Si no se reciben ids, se aplica a todas las variantes.
+   * La confirmación ya fue dada por el SweetAlert2, por lo que el guardado
+   * no vuelve a pedir confirmación manual.
+   */
+  private aplicarEstadoMasivo(
+    activo: boolean,
+    ids: number[] | null = null,
+    onTerminar?: (exitoTotal: boolean) => void,
+  ): void {
+    const idsObjetivo = ids ?? this.variantes().map((v) => v.id);
+
+    this.variantes.update((current) =>
+      current.map((v) =>
+        idsObjetivo.includes(v.id)
+          ? { ...v, activo, hasChanges: this.hasVarianteChanges({ ...v, activo }) }
+          : v,
+      ),
+    );
+
+    // Solo mira/guarda cambios dentro del subconjunto objetivo: así una edición
+    // pendiente en otra variante (fuera de la selección) no se cuela en este guardado.
+    const cambiosEnObjetivo = this.variantes().filter(
+      (v) => idsObjetivo.includes(v.id) && v.hasChanges,
+    );
+
+    if (cambiosEnObjetivo.length > 0) {
+      this.ejecutarGuardado(onTerminar, ids ?? undefined);
+    } else {
+      const texto = ids
+        ? `Las variantes seleccionadas ya están ${activo ? 'activadas' : 'desactivadas'}`
+        : `Todas las variantes ya están ${activo ? 'activadas' : 'desactivadas'}`;
+      this.toastr.info(texto);
+      onTerminar?.(true);
+    }
   }
 
   // ============================================
@@ -853,26 +1087,24 @@ export class GestionarVariantesComponent implements OnInit {
   }
 
   /**
+   * Escapa caracteres especiales de HTML antes de interpolar texto dentro de
+   * un Swal.fire({ html }), que no escapa automáticamente (a diferencia de `text`).
+   */
+  private escapeHtml(valor: string): string {
+    return valor
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /**
    * Volver a la lista de productos
+   * La confirmación de "¿Salir sin guardar?" la cubre el CanDeactivate guard
    */
   volver(): void {
-    if (this.hasChanges()) {
-      Swal.fire({
-        title: '¿Salir sin guardar?',
-        text: 'Hay cambios sin guardar que se perderán',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: 'var(--error)',
-        cancelButtonColor: 'var(--text-muted)',
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.router.navigate(['/admin/administrar-productos']);
-        }
-      });
-    } else {
-      this.router.navigate(['/admin/administrar-productos']);
-    }
+    if (this.isSaving()) return;
+    this.router.navigate(['/admin/administrar-productos']);
   }
 }

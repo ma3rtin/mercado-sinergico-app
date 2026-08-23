@@ -17,7 +17,7 @@ import {
   SelectorTipoCardComponent,
   SelectorTipoCardContenido
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
-import { AdminBackButtonComponent } from '@app/shared/admin-back-button/admin-back-button';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { IconComponent } from '@app/shared/icono/icono';
 import { InputComponent } from '@app/shared/input/input-component';
@@ -34,7 +34,7 @@ import Swal from 'sweetalert2';
     ReactiveFormsModule,
     AdminCreateWrapperComponent,
     SelectorTipoCardComponent,
-    AdminBackButtonComponent,
+    BackButtonComponent,
     SelectComponent,
     IconComponent,
     InputComponent,

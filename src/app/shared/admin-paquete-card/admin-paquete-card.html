@@ -69,7 +69,7 @@
                 </span>
                 <span class="w-1 h-1 rounded-full bg-border-default hidden sm:block"></span>
                 @if (isEnergico || isSinergico) {
-                <app-tipo-badge [tipo]="paquete.tipo" mode="icon" />
+                <app-tipo-badge [tipo]="paquete.tipo" mode="icon" [showTooltip]="false" />
                 }
             </div>
             <h3
@@ -121,12 +121,14 @@
             <!-- Solo duplicar y archivar: estados terminales -->
             @if (esEntregado || esCancelado) {
             <div class="flex items-center justify-end gap-2 flex-wrap">
-                <button (click)="onDuplicate($event)"
+                <button (click)="onDuplicate($event)" [disabled]="disabled()"
+                    [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                     class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-success-dark hover:bg-success-light rounded-lg transition-colors border border-border-default">
                     <app-icon name="copy" size="15" />
                     Duplicar publicación
                 </button>
-                <button (click)="onArchive($event)"
+                <button (click)="onArchive($event)" [disabled]="disabled()"
+                    [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                     class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-brand-primary hover:bg-brand-primary/5 rounded-lg transition-colors border border-border-default">
                     <app-icon [name]="paquete.archivado ? 'rotateCcw' : 'archive'" size="15" />
                     {{ paquete.archivado ? 'Desarchivar' : 'Archivar' }}
@@ -141,6 +143,9 @@
                 <!-- Trigger del dropdown -->
                 <button
                     (click)="toggleMenu($event)"
+                    [disabled]="disabled()"
+                    [class.opacity-50]="disabled()"
+                    [class.cursor-not-allowed]="disabled()"
                     class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border transition-all"
                     [class]="menuAbierto
                         ? 'bg-gray-100 text-gray-900 border-gray-300'
@@ -162,7 +167,8 @@
                     <div class="px-2 pt-2">
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">
                             Comunicación</p>
-                        <button (click)="onNotify($event)"
+                        <button (click)="onNotify($event)" [disabled]="disabled()"
+                            [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-warning-light hover:text-warning transition-colors">
                             <app-icon name="bell" size="16" class="text-warning flex-shrink-0" />
                             <div class="text-left">
@@ -179,7 +185,8 @@
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">Gestión</p>
 
                         <!-- Duplicar — siempre disponible -->
-                        <button (click)="onDuplicate($event)"
+                        <button (click)="onDuplicate($event)" [disabled]="disabled()"
+                            [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success-dark transition-colors">
                             <app-icon name="copy" size="16" class="text-success flex-shrink-0" />
                             <div class="text-left">
@@ -190,7 +197,8 @@
                         </button>
 
                         <!-- Archivar / Desarchivar — siempre disponible -->
-                        <button (click)="onArchive($event)"
+                        <button (click)="onArchive($event)" [disabled]="disabled()"
+                            [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-brand-primary/10 hover:text-brand-primary transition-colors">
                             <app-icon [name]="paquete.archivado ? 'rotateCcw' : 'archive'" size="16" class="text-brand-primary flex-shrink-0" />
                             <div class="text-left">
@@ -201,7 +209,8 @@
 
                         <!-- Confirmar con fabricante (Completo → Confirmado) -->
                         @if (canConfirm) {
-                        <button (click)="onConfirm($event)"
+                        <button (click)="onConfirm($event)" [disabled]="disabled()"
+                            [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-success-light hover:text-success transition-colors">
                             <app-icon name="checkCircle" size="16" class="text-success flex-shrink-0" />
                             <div class="text-left">
@@ -218,7 +227,8 @@
                     <div class="px-2 pb-2">
                         <p class="text-[10px] font-bold uppercase tracking-widest text-error/60 px-2 pb-1">Zona de
                             riesgo</p>
-                        <button (click)="onRefund($event)"
+                        <button (click)="onRefund($event)" [disabled]="disabled()"
+                            [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
                             <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
                             <div class="text-left">

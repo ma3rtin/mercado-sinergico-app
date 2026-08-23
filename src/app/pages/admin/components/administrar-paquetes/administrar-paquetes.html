@@ -1,23 +1,23 @@
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-body">
+<div class="min-h-screen bg-bg-raised px-4 py-6 md:px-8 md:py-10 lg:px-16 font-body">
   <div class="max-w-7xl mx-auto">
 
-    <!-- Encabezado -->
-    <div class="mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-3xl font-display text-gray-900 mb-1">Paquetes Base</h1>
-          <p class="text-gray-500">Administrá los moldes de paquetes. Desde acá los publicás.</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <app-admin-back-button label="Volver a perfil admin" route="/admin/perfil" />
-          <app-button
-            variant="primary"
-            size="md"
-            (buttonClick)="crearPaqueteBase()">
-            <app-icon name="package" size="18" class="mt-1" /> Nuevo Paquete
-          </app-button>
-        </div>
+    <!-- Botón Volver -->
+    <div class="mb-4">
+      <app-back-button label="Volver al panel" route="/admin/perfil" />
+    </div>
+
+    <!-- Header con título y botón crear -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl md:text-4xl lg:text-4xl font-display text-text-primary">
+          Paquetes Base
+        </h1>
       </div>
+      <app-button
+        variant="primary"
+        (buttonClick)="crearPaqueteBase()">
+        <app-icon name="package" size="18" class="mr-2 inline" /> Nuevo Paquete
+      </app-button>
     </div>
 
     <!-- Buscador y Mostrar Archivados -->
@@ -56,7 +56,7 @@
               <div class="absolute bottom-3 left-4 text-white">
                 <div class="flex items-center gap-2 mb-0.5">
                   <span class="text-xs uppercase tracking-wider font-medium opacity-80">{{ paquete.categoria?.nombre || 'General' }}</span>
-                  <app-tipo-badge [tipo]="paquete.tipo" size="xs" mode="icon" />
+                  <app-tipo-badge [tipo]="paquete.tipo" size="xs" mode="icon" [showTooltip]="false" />
                   @if (paquete.archivado) {
                     <span class="px-2 py-0.5 bg-gray-700/80 text-white rounded text-[10px] font-bold uppercase tracking-wider">
                       Archivado

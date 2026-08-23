@@ -1,10 +1,8 @@
 <!-- crear-producto.html -->
 <app-admin-create-wrapper [titulo]="'Crear producto'">
+  <app-back-button label="Volver a productos" route="/admin/administrar-productos" />
+
   <div class="relative">
-    <!-- Botón Volver -->
-    <div class="mb-4">
-      <app-admin-back-button label="Volver a productos" route="/admin/administrar-productos" />
-    </div>
 
     <!-- 🎯 Tipo de Producto -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -52,7 +50,7 @@
       </div>
     </div>
 
-    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" [class.pointer-events-none]="isLoading()" class="space-y-6">
       <!-- Información básica -->
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -186,6 +184,7 @@
             [placeholderValue]="'10'"
             [suffixValue]="'CM'"
             [minValue]="0"
+            [stepValue]="0.01"
           />
 
           <app-input
@@ -195,6 +194,7 @@
             [placeholderValue]="'10'"
             [suffixValue]="'CM'"
             [minValue]="0"
+            [stepValue]="0.01"
           />
 
           <app-input
@@ -204,6 +204,7 @@
             [placeholderValue]="'12'"
             [suffixValue]="'CM'"
             [minValue]="0"
+            [stepValue]="0.01"
           />
 
           <app-input
@@ -213,7 +214,7 @@
             [placeholderValue]="'5'"
             [suffixValue]="'KG'"
             [minValue]="0"
-            [stepValue]="0.1"
+            [stepValue]="0.01"
           />
         </div>
       </div>
@@ -321,5 +322,8 @@
       (close)="closeCreateModal()"
       (plantillaCreated)="onPlantillaCreated($event)"
     />
+
+    <!-- Overlay de progreso del submit -->
+    <app-loading-overlay [visible]="isLoading()" [titulo]="'Creando producto'" />
   </div>
 </app-admin-create-wrapper>

@@ -36,6 +36,7 @@ import { ProductoCard } from '@app/shared/producto-card/producto-card';
 import { PaqueteBannerComponent } from '@app/shared/paquete-banner/paquete-banner';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion'; // ✅ IMPORTAR
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { BackButtonComponent } from '@app/shared/back-button/back-button';
 
 @Component({
   selector: 'app-productos-del-paquete',
@@ -46,7 +47,8 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     ProductoCard,
     PaqueteBannerComponent,
     PaginationComponent, // ✅ AGREGAR AQUÍ
-    LoaderComponent
+    LoaderComponent,
+    BackButtonComponent
   ],
   templateUrl: './productos-del-paquete.html',
   styleUrl: './productos-del-paquete.css',
@@ -170,7 +172,7 @@ export class ProductosDelPaquete implements OnInit {
     return {
       porcentaje,
       aplicado: false,
-      nombrePaquete: p.paqueteBase?.nombre || 'Paquete',
+      nombrePaquete: p.nombre || p.paqueteBase?.nombre || 'Paquete',
     };
   });
 
