@@ -9,7 +9,7 @@ import { Component, DestroyRef, computed, effect, inject, input, signal } from '
 export class LoadingOverlay {
   visible = input(false);
   titulo = input('Procesando...');
-  mensajes = input<string[]>(['Subiendo imágenes...', 'Creando producto...', 'Generando variantes...']);
+  mensajes = input<string[]>([]);
   duracionMs = input(15000);
   maximo = input(90);
 
@@ -21,7 +21,7 @@ export class LoadingOverlay {
 
   protected mensajeActual = computed(() => {
     const msgs = this.mensajes();
-    if (msgs.length === 0) return '';
+    if (msgs.length === 0) return this.titulo();
     const pct = this.progreso() / 100;
     const idx = Math.min(msgs.length - 1, Math.floor(pct * msgs.length));
     return msgs[idx];
