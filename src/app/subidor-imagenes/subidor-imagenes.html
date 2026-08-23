@@ -1,10 +1,14 @@
 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
   <div class="mb-4">
     <h3 class="text-lg font-medium text-gray-900 mb-2">
-      Imágenes del Producto <span class="text-error">*</span>
+      {{ titulo() }} <span class="text-error">*</span>
     </h3>
     <p class="text-sm text-gray-600">
-      Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">{{ maxSlots() }}</strong> fotos en total). Límite de tamaño: 20MB por archivo.
+      @if (allowMultiple()) {
+        Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">{{ maxSlots() }}</strong> fotos en total). Límite de tamaño: 20MB por archivo.
+      } @else {
+        Subí la imagen principal. Límite de tamaño: 20MB por archivo.
+      }
     </p>
     @if (formSubmitted() && !hasMainImage()) {
       <p class="mt-2 text-sm text-error font-medium">⚠️ La imagen principal es obligatoria</p>

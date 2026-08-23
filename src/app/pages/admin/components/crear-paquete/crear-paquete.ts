@@ -1,14 +1,5 @@
-import {
-  Component,
-  ElementRef,
-  OnInit,
-  AfterViewChecked,
-  ViewChild,
-  DestroyRef,
-  signal,
-  inject,
-} from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { Component, DestroyRef, OnInit, inject, signal, computed, viewChild } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Router } from '@angular/router';
@@ -28,25 +19,33 @@ import {
 } from '@app/shared/selector-tipo-card/selector-tipo-card';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
-import { computed } from '@angular/core';
 import { IconComponent } from '@app/shared/icono/icono';
+import { InputComponent } from '@app/shared/input/input-component';
+import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
+import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
 import Swal from 'sweetalert2';
-
 
 @Component({
   selector: 'app-crear-paquete',
   standalone: true,
   imports: [
-    FormsModule, 
-    AdminCreateWrapperComponent, 
-    SelectorTipoCardComponent, 
-    BackButtonComponent, 
+    ReactiveFormsModule,
+    AdminCreateWrapperComponent,
+    SelectorTipoCardComponent,
+    BackButtonComponent,
     SelectComponent,
-    IconComponent
+    IconComponent,
+    InputComponent,
+    SelectCategoriaMarca,
+    MapOptionsPipe,
+    ButtonComponent,
+    SubidorImagenes
   ],
   templateUrl: './crear-paquete.html',
 })
-export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
+export class CrearPaqueteComponent implements OnInit {
   readonly TipoPaquete = TipoPaquete;
   readonly tipoCardContenido: SelectorTipoCardContenido = {
     energico: {
@@ -77,82 +76,189 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     [TipoPaquete.ENERGICO]: 'ENERGICO',
   };
 
-  // 🧠 Signals principales
-  nombre = signal<string>('');
-  descripcion = signal<string>('');
+  // 🧩 Inyecciones
+  private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
+  private toast = inject(ToastService);
+  private paqueteBaseService = inject(PaqueteBaseService);
+  private marcaService = inject(MarcaService);
+  private categoriaService = inject(CategoriaService);
+  private productoService = inject(ProductosService);
+  private router = inject(Router);
+
+  // 🧩 ViewChildren (APIs públicas de componentes compartidos)
+  private subidorImagenes = viewChild(SubidorImagenes);
+  private marcaSelector = viewChild<SelectCategoriaMarca>('marcaSelector');
+  private categoriaSelector = viewChild<SelectCategoriaMarca>('categoriaSelector');
+
+  // 🧠 Estado del formulario
+  paqueteForm!: FormGroup;
+  productoBuscado = new FormControl<number | null>(null);
+
+  formSubmitted = signal<boolean>(false);
+  creandoPaquete = signal<boolean>(false);
+  creandoMarca = signal<boolean>(false);
+  creandoCategoria = signal<boolean>(false);
+
   tipoPaquete = signal<TipoPaquete>(TipoPaquete.SINERGICO);
-  marcaSeleccionada = signal<number | null>(null);
-  categoriaSeleccionada = signal<number | null>(null);
+
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
-
-  imagenSeleccionada = signal<File | null>(null);
-  imagenError = signal<string | null>(null);
-
-  busquedaProducto = signal<string>('');
-  resultadosBusqueda = signal<Producto[]>([]);
+  todosLosProductos = signal<Producto[]>([]);
   productosSeleccionados = signal<Producto[]>([]);
-  creandoPaquete = signal<boolean>(false);
 
-  selectedProductoId = signal<number | null>(null);
+  // 🎯 Computed
+  tipoLabel = computed(() =>
+    this.tipoPaquete() === TipoPaquete.SINERGICO ? 'Sinérgico' : 'Enérgico'
+  );
+
+  hasMainImage = computed(() => this.subidorImagenes()?.hasMainImage() ?? false);
+
+  productosInvalid = computed(
+    () => this.formSubmitted() && this.productosSeleccionados().length === 0
+  );
+
   productosOptions = computed<SelectOption[]>(() => {
     const seleccionadosIds = new Set(this.productosSeleccionados().map((p) => p.id_producto));
     const tipoActual = this.tipoPaquete();
 
-    return this.resultadosBusqueda()
-      .filter(p => !seleccionadosIds.has(p.id_producto) && p.tipo === tipoActual)
-      .map(p => ({
-        value: p.id_producto,
+    return this.todosLosProductos()
+      .filter((p) => !seleccionadosIds.has(p.id_producto) && p.tipo === tipoActual)
+      .map((p) => ({
+        value: p.id_producto!,
         label: `${p.nombre} - $${p.precio}`
       }));
   });
 
-  // 🧩 ViewChilds
-  @ViewChild('sentinel', { static: false }) sentinel?: ElementRef<HTMLDivElement>;
-  @ViewChild('scrollContainer', { static: false }) scrollContainer?: ElementRef<HTMLElement>;
-  @ViewChild('inputBusqueda', { static: false }) inputBusqueda?: ElementRef<HTMLInputElement>;
-  @ViewChild('paqueteForm') paqueteForm!: NgForm;
-
-  private observer?: IntersectionObserver;
-  private lazyInitialized = false;
-  private toast = inject(ToastService);
-
-  constructor(
-    private paqueteBaseService: PaqueteBaseService,
-    private marcaService: MarcaService,
-    private categoriaService: CategoriaService,
-    private productoService: ProductosService,
-    private destroyRef: DestroyRef,
-    private router: Router
-  ) { }
-
   ngOnInit(): void {
+    this.initializeForm();
     this.cargarMarcas();
     this.cargarCategorias();
     this.cargarTodosLosProductos();
   }
 
-  ngAfterViewChecked(): void { }
+  private initializeForm(): void {
+    this.paqueteForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      marca_id: [null as number | null],
+      categoria_id: [null as number | null, Validators.required],
+      tipo: [TipoPaquete.SINERGICO as TipoPaquete]
+    });
+  }
 
   // 🔄 Cargar datos base
   private cargarMarcas(): void {
     this.marcaService.getMarcas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.marcas.set(data),
-      error: (err) => console.error('Error al obtener marcas:', err),
+      error: () => this.toast.error('Error cargando marcas'),
     });
   }
 
+  private cargarCategorias(): void {
+    this.categoriaService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => this.categorias.set(data),
+      error: () => this.toast.error('Error cargando categorías'),
+    });
+  }
+
+  private cargarTodosLosProductos(): void {
+    this.productoService.getProductos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => {
+        this.todosLosProductos.set(data);
+        const compatibles = data.filter((p) => p.tipo === this.tipoPaquete()).length;
+        console.log(`[CrearPaquete][Productos] Productos recibidos: ${data.length} | Tipo actual: ${this.tipoPaquete()} | Compatibles: ${compatibles}`);
+      },
+      error: () => this.toast.error('Error cargando productos'),
+    });
+  }
+
+  // 🏷️ Marca / Categoría (misma interacción que Crear Producto)
+  crearMarca(nombre: string): void {
+    this.creandoMarca.set(true);
+    this.marcaService.createMarca(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Marca) => {
+          this.marcas.update((prev) => [...prev, nueva]);
+          this.paqueteForm.patchValue({ marca_id: nueva.id_marca });
+          this.toast.success(`Marca "${nombre}" creada exitosamente`);
+          this.creandoMarca.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la marca');
+          this.creandoMarca.set(false);
+        }
+      });
+  }
+
+  editarMarca(event: { id: number; nombre: string }): void {
+    this.marcaService.updateMarca(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Marca) => {
+          this.marcas.update((prev) => prev.map((m) => (m.id_marca === event.id ? actualizada : m)));
+          this.toast.success(`Marca actualizada a "${event.nombre}"`);
+          this.marcaSelector()?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al actualizar la marca');
+          this.marcaSelector()?.finishEditError();
+        }
+      });
+  }
+
+  crearCategoria(nombre: string): void {
+    this.creandoCategoria.set(true);
+    this.categoriaService.createCategoria(nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (nueva: Categoria) => {
+          this.categorias.update((prev) => [...prev, nueva]);
+          this.paqueteForm.patchValue({ categoria_id: nueva.id_categoria });
+          this.toast.success(`Categoría "${nombre}" creada exitosamente`);
+          this.creandoCategoria.set(false);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al crear la categoría');
+          this.creandoCategoria.set(false);
+        }
+      });
+  }
+
+  editarCategoria(event: { id: number; nombre: string }): void {
+    this.categoriaService.updateCategoria(event.id, event.nombre)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (actualizada: Categoria) => {
+          const id = actualizada.id_categoria || event.id;
+          this.categorias.update((prev) => prev.map((c) => (c.id_categoria === id ? actualizada : c)));
+          if (this.paqueteForm.get('categoria_id')?.value === id) {
+            this.paqueteForm.patchValue({ categoria_id: id });
+          }
+          this.toast.success(`Categoría actualizada a "${actualizada.nombre}"`);
+          this.categoriaSelector()?.finishEditSuccess(actualizada.nombre);
+        },
+        error: (err) => {
+          this.toast.error(err.error?.message || 'Error al editar la categoría');
+          this.categoriaSelector()?.finishEditError();
+        }
+      });
+  }
+
+  // 🎯 Cambio de tipo Enérgico/Sinérgico
   onTipoPaqueteChange(nuevoTipo: TipoPaquete): void {
+    const tipoAnterior = this.tipoPaquete();
     const productosActuales = this.productosSeleccionados();
 
-    // Si no hay productos, cambiamos el tipo directamente
+    console.log(`[CrearPaquete][Tipo] Cambio solicitado: ${tipoAnterior} -> ${nuevoTipo} | Productos seleccionados: ${productosActuales.length}`);
+
     if (productosActuales.length === 0) {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
       return;
     }
 
-    // Verificar si hay productos incompatibles
-    const productosIncompatibles = productosActuales.filter(p => p.tipo !== nuevoTipo);
+    const productosIncompatibles = productosActuales.filter((p) => p.tipo !== nuevoTipo);
 
     if (productosIncompatibles.length > 0) {
       Swal.fire({
@@ -169,102 +275,106 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
         reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
-          this.tipoPaquete.set(nuevoTipo);
-          this.productosSeleccionados.set(productosActuales.filter(p => p.tipo === nuevoTipo));
+          console.log(`[CrearPaquete][Tipo] Productos incompatibles removidos: [${productosIncompatibles.map((p) => p.id_producto).join(', ')}]`);
+          this.aplicarTipo(nuevoTipo);
           this.toast.info('Se han removido los productos incompatibles.');
         }
       });
     } else {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
     }
   }
 
-  private cargarCategorias(): void {
-    this.categoriaService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.categorias.set(data),
-      error: (err) => console.error('Error al obtener categorías:', err),
-    });
+  private aplicarTipo(nuevoTipo: TipoPaquete): void {
+    this.tipoPaquete.set(nuevoTipo);
+    this.paqueteForm.patchValue({ tipo: nuevoTipo });
+    this.productosSeleccionados.update((prev) => prev.filter((p) => p.tipo === nuevoTipo));
   }
 
-  // 📸 Manejo de imagen
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    const maxSize = 200 * 1024;
-
-    if (!file.type.startsWith('image/')) {
-      this.imagenError.set('Solo se permiten archivos de imagen.');
-      this.imagenSeleccionada.set(null);
-      return;
-    }
-    if (file.size > maxSize) {
-      this.imagenError.set('La imagen debe pesar menos de 200 KB.');
-      this.imagenSeleccionada.set(null);
-      return;
-    }
-
-    this.imagenError.set(null);
-    this.imagenSeleccionada.set(file);
-  }
-
-  private cargarTodosLosProductos(): void {
-    this.productoService.getProductos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.resultadosBusqueda.set(data),
-      error: (err) => console.error('Error al obtener productos:', err),
-    });
-  }
-
+  // 🛒 Selección de productos
   onSelectProducto(id: number | null): void {
     if (!id) return;
-    const prod = this.resultadosBusqueda().find(p => p.id_producto === id);
-    if (prod) {
-      this.productosSeleccionados.set([...this.productosSeleccionados(), prod]);
+
+    console.log(`[CrearPaquete][Productos] ID seleccionado: ${id}`);
+
+    const prod = this.todosLosProductos().find((p) => p.id_producto === id);
+    if (!prod) return;
+
+    if (prod.tipo !== this.tipoPaquete()) {
+      console.log(`[CrearPaquete][Productos] Producto ${id} incompatible con tipo ${this.tipoPaquete()}, ignorado`);
+      this.limpiarBuscador();
+      return;
     }
-    // Limpiar selección para permitir agregar otro
-    setTimeout(() => this.selectedProductoId.set(null), 50);
+
+    if (this.productosSeleccionados().some((p) => p.id_producto === id)) {
+      console.log(`[CrearPaquete][Productos] Producto ${id} ya estaba seleccionado, ignorado`);
+      this.limpiarBuscador();
+      return;
+    }
+
+    this.productosSeleccionados.update((prev) => [...prev, prod]);
+    console.log(`[CrearPaquete][Productos] Total seleccionados: ${this.productosSeleccionados().length}`);
+    this.limpiarBuscador();
   }
 
   eliminarProducto(index: number): void {
-    const actual = [...this.productosSeleccionados()];
-    actual.splice(index, 1);
-    this.productosSeleccionados.set(actual);
+    this.productosSeleccionados.update((prev) => prev.filter((_, i) => i !== index));
+    console.log(`[CrearPaquete][Productos] Producto eliminado. Total: ${this.productosSeleccionados().length}`);
+  }
+
+  /** Reset determinístico del buscador (sin setTimeout). */
+  private limpiarBuscador(): void {
+    this.productoBuscado.reset();
   }
 
   // 🧾 Crear paquete
   crearPaquete(): void {
-    if (!this.nombre() || this.nombre().trim().length < 3) {
-      this.toast.error('El nombre debe tener al menos 3 caracteres.', 'Error de Validación');
+    this.formSubmitted.set(true);
+    this.paqueteForm.markAllAsTouched();
+
+    if (this.paqueteForm.invalid) {
+      this.toast.error('Por favor completá todos los campos requeridos', 'Error de Validación');
+      this.scrollToFirstError();
       return;
     }
-    if (!this.descripcion() || this.descripcion().trim().length === 0) {
-      this.toast.error('La descripción es obligatoria.', 'Error de Validación');
-      return;
-    }
-    if (!this.categoriaSeleccionada()) {
-      this.toast.error('Debés seleccionar una categoría.', 'Error de Validación');
-      return;
-    }
+
     if (this.productosSeleccionados().length === 0) {
       this.toast.error('Debés agregar al menos un producto al paquete.', 'Error de Validación');
       return;
     }
-    if (!this.imagenSeleccionada()) {
+
+    const slotPrincipal = this.subidorImagenes()?.getSlots()[0];
+    const imagenFile = slotPrincipal?.file ?? null;
+
+    if (!this.hasMainImage() || !imagenFile) {
       this.toast.error('La imagen de portada es obligatoria.', 'Error de Validación');
       return;
     }
 
+    // Nota: no existe compresión de imágenes en el frontend; SubidorImagenes valida
+    // tipo y tamaño (<=20MB) y envía el archivo original.
+    console.log(`[CrearPaquete][Imagen] Archivo original: ${imagenFile.name} | tipo: ${imagenFile.type} | tamaño: ${imagenFile.size} bytes`);
+
+    const formValue = this.paqueteForm.value;
+    console.log(
+      `[CrearPaquete][Submit] nombre="${formValue.nombre}" | descripcion.length=${(formValue.descripcion ?? '').length}` +
+      ` | categoria_id=${formValue.categoria_id} | marca_id=${formValue.marca_id ?? 'sin marca'}` +
+      ` | tipo=${this.tipoMap[this.tipoPaquete()]}` +
+      ` | productos=${this.productosSeleccionados().length} [${this.productosSeleccionados().map((p) => p.id_producto).join(', ')}]` +
+      ` | imagen presente (${imagenFile.size} bytes)`
+    );
+
     this.creandoPaquete.set(true);
     const formData = new FormData();
-    formData.append('nombre', this.nombre());
-    formData.append('descripcion', this.descripcion());
-    formData.append('categoria_id', this.categoriaSeleccionada()!.toString());
+    formData.append('nombre', (formValue.nombre ?? '').trim());
+    formData.append('descripcion', (formValue.descripcion ?? '').trim());
+    formData.append('categoria_id', String(formValue.categoria_id));
     formData.append('tipo', this.tipoMap[this.tipoPaquete()]);
-    if (this.marcaSeleccionada()) {
-      formData.append('marcaId', this.marcaSeleccionada()!.toString());
+    if (formValue.marca_id) {
+      formData.append('marcaId', String(formValue.marca_id));
     }
-    this.productosSeleccionados().forEach((p) => formData.append('productos', p.id_producto!.toString()));
-    formData.append('imagen', this.imagenSeleccionada()!);
+    this.productosSeleccionados().forEach((p) => formData.append('productos', String(p.id_producto)));
+    formData.append('imagen', imagenFile);
 
     this.paqueteBaseService
       .createPaquete(formData)
@@ -273,11 +383,12 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
         next: () => {
           this.toast.success('¡Paquete creado con éxito!', 'Éxito');
           this.resetForm();
-          this.router.navigate(['admin/perfil']);
+          this.router.navigate(['/admin/administrar-paquetes']);
         },
         error: (err) => {
+          console.error(`[CrearPaquete][API][ERROR] status=${err.status} | message=${err.error?.message ?? err.message}${err.error?.error ? ` | error=${err.error.error}` : ''}`);
           this.toast.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');
-          console.error('Error del servidor al crear paquete:', err);
+          this.creandoPaquete.set(false);
         },
         complete: () => this.creandoPaquete.set(false),
       });
@@ -285,17 +396,50 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
   // 🔄 Reset formulario
   public resetForm(): void {
-    this.paqueteForm?.resetForm({
-      nombre: '',
-      descripcion: '',
-      marcaSeleccionada: null,
-      categoriaSeleccionada: null,
-      busquedaProducto: '',
-    });
+    this.paqueteForm.reset();
+    this.paqueteForm.patchValue({ tipo: TipoPaquete.SINERGICO });
+    this.tipoPaquete.set(TipoPaquete.SINERGICO);
 
     this.productosSeleccionados.set([]);
-    this.imagenSeleccionada.set(null);
-    const inputElement = document.querySelector('input[type="file"]') as HTMLInputElement;
-    if (inputElement) inputElement.value = '';
+    this.limpiarBuscador();
+    this.subidorImagenes()?.reset();
+
+    this.formSubmitted.set(false);
+    this.creandoPaquete.set(false);
+  }
+
+  // ⚠️ Helpers de validación (mismo patrón que Crear Producto)
+  isFieldInvalid(fieldName: string): boolean {
+    const control = this.paqueteForm.get(fieldName);
+    return !!(control && control.invalid && (control.touched || this.formSubmitted()));
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const control = this.paqueteForm.get(fieldName);
+    if (!control?.errors) return '';
+    const errors = control.errors;
+    const fieldLabel = this.getFieldLabel(fieldName);
+    if (errors['required']) return `${fieldLabel} es requerido`;
+    if (errors['minlength']) return `${fieldLabel} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
+    if (errors['maxlength']) return `${fieldLabel} no puede superar los ${errors['maxlength'].requiredLength} caracteres`;
+    return '';
+  }
+
+  private getFieldLabel(fieldName: string): string {
+    const labels: { [key: string]: string } = {
+      nombre: 'El nombre',
+      descripcion: 'La descripción',
+      categoria_id: 'La categoría',
+      marca_id: 'La marca',
+      tipo: 'El tipo'
+    };
+    return labels[fieldName] || fieldName;
+  }
+
+  private scrollToFirstError(): void {
+    setTimeout(() => {
+      const firstError = document.querySelector('.border-error, .text-error');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   }
 }
