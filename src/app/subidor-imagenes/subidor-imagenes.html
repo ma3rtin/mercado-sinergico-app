@@ -5,9 +5,9 @@
     </h3>
     <p class="text-sm text-gray-600">
       @if (allowMultiple()) {
-        Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">{{ maxSlots() }}</strong> fotos en total). Límite de tamaño: 20MB por archivo.
+        Subí la imagen principal y hasta {{ maxSlots() - 1 }} imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">{{ maxSlots() }}</strong> fotos en total). Límite de tamaño: 5MB por archivo.
       } @else {
-        Subí la imagen principal. Límite de tamaño: 20MB por archivo.
+        Subí la imagen principal. Límite de tamaño: 5MB por archivo.
       }
     </p>
     @if (formSubmitted() && !hasMainImage()) {

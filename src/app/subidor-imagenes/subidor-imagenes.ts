@@ -23,7 +23,7 @@ export class SubidorImagenes {
   // Configuración
   titulo = input<string>('Imágenes del Producto');
   allowMultiple = input<boolean>(true);
-  maxSlots = input<number>(16);
+  maxSlots = input<number>(8);
   formSubmitted = input<boolean>(false);
   labelPrincipal = input<string>('Imagen Principal (Obligatoria)');
   labelAdicionales = input<string>('Imágenes Adicionales (Carga Masiva)');
@@ -95,8 +95,8 @@ effect(() => {
         this.toast.error('Solo se permiten archivos de imagen');
         return;
       }
-      if (file.size > 20 * 1024 * 1024) {
-        this.toast.error('La imagen no puede superar los 20MB');
+      if (file.size > 5 * 1024 * 1024) {
+        this.toast.error('La imagen no puede superar los 5MB');
         return;
       }
 
@@ -123,7 +123,8 @@ effect(() => {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
-      const freeSlots = this._slots().map((s, i) => s.preview ? -1 : i).filter(i => i > 0);
+      const max = this.maxSlots();
+      const freeSlots = this._slots().map((s, i) => s.preview ? -1 : i).filter(i => i > 0 && i < max);
 
       if (freeSlots.length === 0) {
         this.toast.error('Límite de imágenes adicionales alcanzado.');
@@ -131,7 +132,7 @@ effect(() => {
       }
 
       files.slice(0, freeSlots.length).forEach((file, idx) => {
-        if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) return;
+        if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return;
         
         const targetIndex = freeSlots[idx];
         this._slots.update(prev => {
