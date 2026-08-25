@@ -23,7 +23,7 @@ export class SubidorImagenes {
   // Configuración
   titulo = input<string>('Imágenes del Producto');
   allowMultiple = input<boolean>(true);
-  maxSlots = input<number>(8);
+  maxSlots = input<number>(16);
   formSubmitted = input<boolean>(false);
   labelPrincipal = input<string>('Imagen Principal (Obligatoria)');
   labelAdicionales = input<string>('Imágenes Adicionales (Carga Masiva)');
