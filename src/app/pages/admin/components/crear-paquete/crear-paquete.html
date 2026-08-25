@@ -7,6 +7,7 @@
     </div>
   } @else {
   <div class="space-y-6">
+    <!-- 🎯 Tipo de paquete -->
     <div class="bg-white rounded-lg shadow-sm p-6">
       <div class="mb-4">
         <h3 class="text-lg font-medium text-gray-900 mb-2">Tipo de paquete</h3>
@@ -22,156 +23,163 @@
       />
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="lg:col-span-2">
-          <label class="block text-lg font-medium text-black mb-2">
-            Nombre <span class="text-error">*</span>
-          </label>
-          <input
-            [(ngModel)]="nombre"
-            type="text"
-            placeholder="Ingresá el nombre del paquete"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus placeholder-gray-500"
-          />
-        </div>
+    <form [formGroup]="paqueteForm" (ngSubmit)="crearPaquete()" class="space-y-6">
+      <!-- Información básica -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="lg:col-span-2">
+            <app-input
+              formControlName="nombre"
+              [labelValue]="'Nombre'"
+              [placeholderValue]="'Ingresá el nombre del paquete'"
+              [requiredValue]="true"
+              [clearableValue]="true"
+              [sizeValue]="'md'"
+              [helperTextValue]="'Entre 3 y 100 caracteres'"
+            />
+          </div>
 
-        <div class="lg:col-span-2">
-          <label class="block text-lg font-medium text-black mb-2">
-            Descripción <span class="text-error">*</span>
-          </label>
-          <textarea
-            [(ngModel)]="descripcion"
-            rows="4"
-            placeholder="Ingresá una breve descripción"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus resize-vertical placeholder-gray-500"
-          ></textarea>
-        </div>
-
-        <div>
-          <label class="block text-lg font-medium text-black mb-2">Marca</label>
-          <select
-            [(ngModel)]="marcaSeleccionada"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus bg-white placeholder-gray-500"
-          >
-            <option value="">Elegí una marca</option>
-            @for (marca of marcas(); track marca.id_marca) {
-              <option [value]="marca.id_marca">{{ marca.nombre }}</option>
+          <!-- Marca (opcional) -->
+          <div>
+            <app-select-categoria-marca
+              #marcaSelector
+              formControlName="marca_id"
+              [options]="marcas() | mapOptions:'id_marca'"
+              [label]="'Marca'"
+              [placeholderCreate]="'Nueva marca...'"
+              [loading]="creandoMarca()"
+              (createRequest)="crearMarca($event)"
+              (editRequest)="editarMarca($event)"
+            />
+            @if (isFieldInvalid('marca_id')) {
+              <p class="mt-1 text-sm text-error">{{ getErrorMessage('marca_id') }}</p>
             }
-          </select>
-        </div>
+          </div>
 
-        <div>
-          <label class="block text-lg font-medium text-black mb-2">
-            Categoría <span class="text-error">*</span>
-          </label>
-          <select
-            [(ngModel)]="categoriaSeleccionada"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus bg-white placeholder-gray-500"
-          >
-            <option value="">Elegí una categoría</option>
-            @for (categoria of categorias(); track categoria.id_categoria) {
-              <option [value]="categoria.id_categoria">{{ categoria.nombre }}</option>
+          <!-- Categoría -->
+          <div>
+            <app-select-categoria-marca
+              #categoriaSelector
+              formControlName="categoria_id"
+              [options]="categorias() | mapOptions:'id_categoria'"
+              [label]="'Categoría'"
+              [placeholderCreate]="'Nueva categoría...'"
+              [loading]="creandoCategoria()"
+              (createRequest)="crearCategoria($event)"
+              (editRequest)="editarCategoria($event)"
+            />
+            @if (isFieldInvalid('categoria_id')) {
+              <p class="mt-1 text-sm text-error">{{ getErrorMessage('categoria_id') }}</p>
             }
-          </select>
+          </div>
+
+          <!-- Descripción -->
+          <div class="lg:col-span-2">
+            <label class="block text-lg font-medium text-black mb-2">
+              Descripción <span class="text-error">*</span>
+            </label>
+            <textarea
+              formControlName="descripcion"
+              rows="4"
+              placeholder="Ingresá una breve descripción"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary-hover focus:border-focus resize-vertical placeholder-gray-500"
+            ></textarea>
+            @if (isFieldInvalid('descripcion')) {
+              <p class="mt-1 text-sm text-error">{{ getErrorMessage('descripcion') }}</p>
+            }
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <div class="mb-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Imagen de portada <span class="text-error">*</span>
-        </h3>
-        <p class="text-sm text-gray-600">Subí una imagen (máx. 200 KB).</p>
-      </div>
-
-      <input
-        type="file"
-        accept="image/*"
-        (change)="onFileSelected($event)"
-        class="w-full px-4 py-3 border border-dashed border-gray-400 rounded-lg hover:border-focus cursor-pointer"
+      <!-- 📸 Imagen de portada -->
+      <app-subidor-imagenes
+        [titulo]="'Imagen de portada'"
+        [labelPrincipal]="'Imagen principal (Obligatoria)'"
+        [allowMultiple]="false"
+        [initialSlots]="[]"
+        [formSubmitted]="formSubmitted()"
       />
 
-      @if (imagenError()) {
-        <p class="mt-2 text-sm text-error">{{ imagenError() }}</p>
-      }
-    </div>
+      <!-- 🛒 Productos del paquete -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Agregar productos al paquete <span class="text-error">*</span></h3>
+          <p class="text-sm text-gray-600">Buscá y seleccioná los productos que van a formar parte del paquete.</p>
+        </div>
 
-    <div class="bg-white rounded-lg shadow-sm p-6" #buscadorContainer>
-      <div class="mb-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Agregar productos al paquete</h3>
-        <p class="text-sm text-gray-600">Buscá y seleccioná los productos que van a formar parte del paquete.</p>
-      </div>
-
-      <div class="mb-4 relative z-30">
-        <app-select 
-          [labelValue]="'Buscar y agregar productos'" 
-          [placeholderValue]="'Buscar...'" 
-          [optionsValue]="productosOptions()"
-          [searchableValue]="true"
-          [clearableValue]="true"
-          [ngModel]="selectedProductoId()"
-          [emptyMessageValue]="'No hay mas productos aqui'"
-          (valueChange)="onSelectProducto($event)" />
-        <p class="text-[11px] text-gray-500 mt-1 italic flex items-center gap-1">
-          <app-icon name="info" size="14" class="text-info" />
-          Solo se muestran productos de tipo <b>{{ tipoPaquete() }}</b>.
-        </p>
-      </div>
-
-      <div class="border border-gray-200 rounded-lg p-4">
-        @if (productosSeleccionados().length > 0) {
-          @for (p of productosSeleccionados(); track p.id_producto; let i = $index) {
-            <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-none">
-              <div class="flex items-center gap-3">
-                <img
-                  [src]="p.imagen_url || '/assets/imgs/default-product.jpg'"
-                  alt="producto"
-                  class="w-10 h-10 object-cover rounded-md"
-                />
-                <span class="text-gray-700">{{ p.nombre }}</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="font-semibold text-gray-800">${{ p.precio }}</span>
-                <button
-                  (click)="eliminarProducto(i)"
-                  class="text-error hover:text-error transition"
-                  title="Eliminar producto"
-                >
-                  <app-icon name="x" size="20" />
-                </button>
-              </div>
-            </div>
+        <div class="mb-4 relative z-30">
+          <app-select
+            [labelValue]="'Buscar y agregar productos'"
+            [placeholderValue]="'Seleccioná un producto'"
+            [optionsValue]="productosOptions()"
+            [searchableValue]="true"
+            [clearableValue]="true"
+            [formControl]="productoBuscado"
+            [emptyMessageValue]="'No hay más productos disponibles para este tipo'"
+            (valueChange)="onSelectProducto($event)" />
+          <p class="text-[11px] text-gray-500 mt-1 italic flex items-center gap-1">
+            <app-icon name="info" size="14" class="text-info" />
+            Solo se muestran productos de tipo <b>{{ tipoLabel() }}</b>.
+          </p>
+          @if (productosInvalid()) {
+            <p class="mt-1 text-sm text-error">Debés agregar al menos un producto al paquete</p>
           }
-        } @else {
-          <p class="text-gray-500 text-sm text-center py-4">No hay productos agregados.</p>
-        }
-      </div>
-    </div>
+        </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 justify-end">
-      <button
-        type="button"
-        (click)="resetForm()"
-        class="w-full sm:w-auto px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 transition"
-      >
-        Cancelar
-      </button>
-      <button
-        type="button"
-        (click)="crearPaquete()"
-        [disabled]="creandoPaquete()"
-        class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold transition bg-secondary text-white hover:bg-secondary-dark disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        @if (creandoPaquete()) {
-          <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-          Creando...
-        } @else {
-          Crear paquete base
-        }
-      </button>
-    </div>
+        <div class="border border-gray-200 rounded-lg p-4">
+          @if (productosSeleccionados().length > 0) {
+            @for (p of productosSeleccionados(); track p.id_producto; let i = $index) {
+              <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-none">
+                <div class="flex items-center gap-3">
+                  <img
+                    [src]="p.imagen_url || '/assets/images/placeholder-product.png'"
+                    alt="producto"
+                    class="w-10 h-10 object-cover rounded-md"
+                  />
+                  <span class="text-gray-700">{{ p.nombre }}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-semibold text-gray-800">${{ p.precio }}</span>
+                  <button
+                    type="button"
+                    (click)="eliminarProducto(i)"
+                    class="text-error hover:text-error transition"
+                    title="Eliminar producto"
+                  >
+                    <app-icon name="x" size="20" />
+                  </button>
+                </div>
+              </div>
+            }
+          } @else {
+            <p class="text-gray-500 text-sm text-center py-4">No hay productos agregados.</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-end">
+        <button
+          type="button"
+          (click)="resetForm()"
+          class="w-full sm:w-auto px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 transition"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="crearPaquete()"
+          [disabled]="creandoPaquete()"
+          class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold transition bg-secondary text-white hover:bg-secondary-dark disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          @if (creandoPaquete()) {
+            <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+            Creando...
+          } @else {
+            Crear paquete base
+          }
+        </button>
+      </div>
+    </form>
   </div>
   }
 </app-admin-create-wrapper>

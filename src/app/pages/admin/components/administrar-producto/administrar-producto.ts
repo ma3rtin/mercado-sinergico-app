@@ -165,7 +165,7 @@ export class AdministrarProductosComponent {
         <img src="${this.getImagenUrl(producto)}"
         alt="${producto.nombre}"
         class="w-full h-48 object-cover rounded-lg mb-4"
-        onerror="this.src='/assets/placeholder.png'">
+        onerror="this.src='/assets/images/placeholder-product.png'">
         <p><strong>Descripción:</strong> ${producto.descripcion || 'Sin descripción'}</p>
         <p><strong>Precio:</strong> $${producto.precio.toFixed(2)}</p>
         <p><strong>Marca:</strong> ${this.getMarcaNombre(producto)}</p>
@@ -307,7 +307,7 @@ export class AdministrarProductosComponent {
   }
 
   public getImagenUrl(producto: Producto): string {
-    return producto.imagen_url || producto.imagen || '/assets/placeholder.png';
+    return producto.imagen_url || producto.imagen || '/assets/images/placeholder-product.png';
   }
 
   mostrarGuiaSimbolos(): void {
