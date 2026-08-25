@@ -61,6 +61,9 @@ export class ProductosService extends ApiService {
           params.precioMax = filtros.rangoPrecio.max.toString();
         }
       }
+      if (filtros.ordenamiento) {
+        params.orden = filtros.ordenamiento;
+      }
     }
 
     return this.http

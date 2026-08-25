@@ -100,6 +100,62 @@
 <ng-template #filterContentTemplate>
   <div class="space-y-6">
 
+    <!-- 📍 ZONAS -->
+    @if (mostrarFiltro('mostrarZona')) {
+      <div class="filter-group bg-white rounded-2xl">
+        <button (click)="toggleSection('Zona')" class="w-full flex items-center justify-between py-2 group outline-none">
+          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
+            {{ obtenerTitulo('Zona') }}
+          </label>
+          <div class="flex items-center gap-2">
+            @if (zonasSeleccionadas().length > 0) {
+              <span class="w-5 h-5 flex items-center justify-center bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-full">
+                {{ zonasSeleccionadas().length }}
+              </span>
+            }
+            <app-icon [name]="isSectionExpanded('Zona') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
+          </div>
+        </button>
+
+        @if (isSectionExpanded('Zona')) {
+          <div class="pt-4 animate-fade-in">
+            <!-- Buscador interno -->
+            <div class="relative mb-4">
+              <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
+              <input type="text"
+                     [value]="searchZona()"
+                     (input)="searchZona.set($any($event.target).value)"
+                     placeholder="Buscar zona..."
+                     class="w-full pl-9 pr-3 py-2 bg-gray-50 border-transparent rounded-xl text-xs focus:bg-white focus:border-brand-primary/20 focus:ring-0 transition-all outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              @for (zona of filteredZonas(); track zona.id) {
+                <label
+                  class="flex items-center justify-between group cursor-pointer p-2.5 rounded-xl border-2 transition-all duration-200"
+                  [class]="esZonaSeleccionada(zona.id) ? 'border-brand-primary/20 bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      [checked]="esZonaSeleccionada(zona.id)"
+                      (change)="toggleZona(zona.id)"
+                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-0 cursor-pointer">
+                    <span [class]="'text-sm transition-colors ' + (esZonaSeleccionada(zona.id) ? 'text-brand-primary font-bold' : 'text-gray-600 font-medium')">
+                      {{ zona.nombre }}
+                    </span>
+                  </div>
+                </label>
+              }
+              @if (filteredZonas().length === 0) {
+                <p class="text-[10px] text-gray-400 text-center py-4">No se encontraron resultados</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="h-px bg-gray-100 w-full"></div>
+    }
+
     <!-- 📂 CATEGORÍAS -->
     @if (mostrarFiltro('mostrarCategoria')) {
       <div class="filter-group bg-white rounded-2xl">
@@ -203,62 +259,6 @@
                 </label>
               }
               @if (filteredMarcas().length === 0) {
-                <p class="text-[10px] text-gray-400 text-center py-4">No se encontraron resultados</p>
-              }
-            </div>
-          </div>
-        }
-      </div>
-      <div class="h-px bg-gray-100 w-full"></div>
-    }
-
-    <!-- 📍 ZONAS -->
-    @if (mostrarFiltro('mostrarZona')) {
-      <div class="filter-group bg-white rounded-2xl">
-        <button (click)="toggleSection('Zona')" class="w-full flex items-center justify-between py-2 group outline-none">
-          <label class="block text-xs font-bold text-brand-primary uppercase tracking-widest cursor-pointer group-hover:text-brand-primary-hover transition-colors">
-            {{ obtenerTitulo('Zona') }}
-          </label>
-          <div class="flex items-center gap-2">
-            @if (zonasSeleccionadas().length > 0) {
-              <span class="w-5 h-5 flex items-center justify-center bg-brand-primary/10 text-brand-primary text-[10px] font-bold rounded-full">
-                {{ zonasSeleccionadas().length }}
-              </span>
-            }
-            <app-icon [name]="isSectionExpanded('Zona') ? 'ChevronUp' : 'ChevronDown'" size="16" class="text-gray-300 group-hover:text-brand-primary transition-colors"></app-icon>
-          </div>
-        </button>
-
-        @if (isSectionExpanded('Zona')) {
-          <div class="pt-4 animate-fade-in">
-            <!-- Buscador interno -->
-            <div class="relative mb-4">
-              <app-icon name="Search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></app-icon>
-              <input type="text"
-                     [value]="searchZona()"
-                     (input)="searchZona.set($any($event.target).value)"
-                     placeholder="Buscar zona..."
-                     class="w-full pl-9 pr-3 py-2 bg-gray-50 border-transparent rounded-xl text-xs focus:bg-white focus:border-brand-primary/20 focus:ring-0 transition-all outline-none">
-            </div>
-
-            <div class="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-              @for (zona of filteredZonas(); track zona.id) {
-                <label
-                  class="flex items-center justify-between group cursor-pointer p-2.5 rounded-xl border-2 transition-all duration-200"
-                  [class]="esZonaSeleccionada(zona.id) ? 'border-brand-primary/20 bg-brand-primary/5' : 'border-transparent hover:bg-gray-50'">
-                  <div class="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      [checked]="esZonaSeleccionada(zona.id)"
-                      (change)="toggleZona(zona.id)"
-                      class="w-4 h-4 text-brand-primary border-gray-300 rounded focus:ring-0 cursor-pointer">
-                    <span [class]="'text-sm transition-colors ' + (esZonaSeleccionada(zona.id) ? 'text-brand-primary font-bold' : 'text-gray-600 font-medium')">
-                      {{ zona.nombre }}
-                    </span>
-                  </div>
-                </label>
-              }
-              @if (filteredZonas().length === 0) {
                 <p class="text-[10px] text-gray-400 text-center py-4">No se encontraron resultados</p>
               }
             </div>

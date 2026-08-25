@@ -98,7 +98,7 @@ export class ProductosComponent implements OnInit {
   paginaActual = signal<number>(1);
   itemsPorPagina = signal<number>(12); // 12 productos por página (óptimo)
 
-  // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario
+  // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario (zona propia preseleccionada)
   valoresFiltrosIniciales = computed<Partial<FiltrosAplicados>>(() => {
     const perfil = this.usuarioService.perfilUsuario();
     const zonas = perfil?.direccion?.localidad?.zonas || [];
@@ -108,15 +108,6 @@ export class ProductosComponent implements OnInit {
       };
     }
     return {};
-  });
-
-  // 📊 COMPUTED: Zonas seleccionadas activas
-  zonasSeleccionadasActivas = computed(() => {
-    const filtros = this.filtrosActuales();
-    if (filtros?.zonas) {
-      return filtros.zonas;
-    }
-    return this.valoresFiltrosIniciales().zonas || [];
   });
 
   // 📊 COMPUTED: Productos filtrados reactivamente (ahora filtrados en backend)
