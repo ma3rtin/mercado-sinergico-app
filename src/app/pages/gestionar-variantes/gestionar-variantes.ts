@@ -32,7 +32,7 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
-import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 import Swal from 'sweetalert2';
 

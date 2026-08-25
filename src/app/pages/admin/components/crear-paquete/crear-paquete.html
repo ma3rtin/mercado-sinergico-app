@@ -1,6 +1,11 @@
 <app-admin-create-wrapper [titulo]="'Crear paquete'">
   <app-back-button label="Volver a paquetes base" route="/admin/administrar-paquetes" />
 
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-20">
+      <app-loader mensaje="Cargando datos del formulario..." padding="py-0" />
+    </div>
+  } @else {
   <div class="space-y-6">
     <div class="bg-white rounded-lg shadow-sm p-6">
       <div class="mb-4">
@@ -157,9 +162,10 @@
         type="button"
         (click)="crearPaquete()"
         [disabled]="creandoPaquete()"
-        class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold transition bg-secondary text-white hover:bg-secondary-dark disabled:opacity-70 disabled:cursor-not-allowed"
+        class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold transition bg-secondary text-white hover:bg-secondary-dark disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         @if (creandoPaquete()) {
+          <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
           Creando...
         } @else {
           Crear paquete base
@@ -167,4 +173,12 @@
       </button>
     </div>
   </div>
+  }
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="creandoPaquete()"
+  titulo="Creando paquete..."
+  [mensajes]="['Subiendo imagen...', 'Creando paquete base...', 'Asociando productos...']"
+  [duracionMs]="15000"
+/>

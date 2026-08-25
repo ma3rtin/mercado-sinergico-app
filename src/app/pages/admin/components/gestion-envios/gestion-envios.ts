@@ -9,11 +9,12 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-gestion-envios',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, BackButtonComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent, BackButtonComponent, PaginationComponent, LoaderComponent],
   templateUrl: './gestion-envios.html',
 })
 export class GestionEnviosComponent implements OnInit {

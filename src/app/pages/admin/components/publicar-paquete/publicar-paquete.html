@@ -6,6 +6,11 @@
     <app-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
     }
 
+    @if (cargando()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <app-loader mensaje="Cargando datos del formulario..." padding="py-0" />
+      </div>
+    } @else {
     <div class="space-y-6">
         <!-- 📦 TARJETA 1: SELECCIÓN DEL PAQUETE -->
         <div class="bg-white rounded-lg shadow-sm p-6">
@@ -226,4 +231,12 @@
                 [loading]="cargando()" [disabled]="cargando()" (buttonClick)="publicarPaquete()" />
         </div>
     </div>
+    }
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="cargando()"
+  [titulo]="isEditMode() ? 'Guardando cambios...' : 'Publicando paquete...'"
+  [mensajes]="['Procesando...', 'Guardando datos...', 'Validando información...']"
+  [duracionMs]="20000"
+/>

@@ -104,12 +104,29 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   duplicarPaqueteBase(paquete: PaqueteBase): void {
-    this.baseService.duplicarPaquete(paquete.id_paquete_base!).subscribe({
-      next: () => {
+    Swal.fire({
+      title: '¿Duplicar molde?',
+      text: `Se creará una copia de "${paquete.nombre}".`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Duplicar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af',
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        return this.baseService.duplicarPaquete(paquete.id_paquete_base!).toPromise()
+          .then(() => true)
+          .catch(() => {
+            Swal.showValidationMessage('Error al duplicar el molde');
+            return false;
+          });
+      }
+    }).then(result => {
+      if (result.isConfirmed) {
         this.toast.success('Molde duplicado con éxito');
         this.loadData();
-      },
-      error: () => this.toast.error('Error al duplicar el molde')
+      }
     });
   }
 
@@ -124,19 +141,20 @@ export class AdministrarPaquetesComponent implements OnInit {
       confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#9ca3af'
+      cancelButtonColor: '#9ca3af',
+      showLoaderOnConfirm: true,
+      preConfirm: () => {
+        return this.baseService.archivarPaquete(paquete.id_paquete_base!, nuevoEstado).toPromise()
+          .then(() => true)
+          .catch(() => {
+            Swal.showValidationMessage(`No se pudo ${accion} el paquete base`);
+            return false;
+          });
+      }
     }).then(result => {
       if (result.isConfirmed) {
-        this.baseService.archivarPaquete(paquete.id_paquete_base!, nuevoEstado).subscribe({
-          next: () => {
-            this.toast.success(`Paquete base ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
-            this.loadData();
-          },
-          error: (error) => {
-            console.error(`Error al ${accion} paquete base:`, error);
-            this.toast.error(`No se pudo ${accion} el paquete base`);
-          }
-        });
+        this.toast.success(`Paquete base ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
+        this.loadData();
       }
     });
   }

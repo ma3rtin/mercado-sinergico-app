@@ -13,7 +13,7 @@ import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-c
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { LoaderComponent } from '@app/shared/loader/loader';
-import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-administrar-publicaciones',

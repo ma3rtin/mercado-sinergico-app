@@ -742,3 +742,10 @@
 
   </div>
 </div>
+
+<app-loading-overlay
+  [visible]="isProcesando()"
+  [titulo]="overlayTitulo()"
+  [mensajes]="overlayMensajes()"
+  [duracionMs]="30000"
+/>

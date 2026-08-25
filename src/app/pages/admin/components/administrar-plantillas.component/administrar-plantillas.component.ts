@@ -7,16 +7,17 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { LoaderComponent } from '@app/shared/loader/loader';
 
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
   styleUrls: ['./administrar-plantillas.component.css'],
-  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, BackButtonComponent],
+  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, BackButtonComponent, LoaderComponent],
 })
 export class AdministrarPlantillasComponent implements OnInit {
-  // ✅ signals
   plantillas = signal<Plantilla[]>([]);
+  loading = signal<boolean>(true);
   searchTerm = signal('');
   sortOrder = signal<'asc' | 'desc'>('asc');
   isCreateModalOpen = signal(false);
@@ -25,7 +26,6 @@ export class AdministrarPlantillasComponent implements OnInit {
   private plantillaService = inject(PlantillaService);
   private toast = inject(ToastService);
 
-  // ✅ computed: filtra y ordena automáticamente
   filteredPlantillas = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const order = this.sortOrder();
@@ -43,9 +43,16 @@ export class AdministrarPlantillasComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.loading.set(true);
     this.plantillaService.getPlantillas().subscribe({
-      next: (plantillas) => this.plantillas.set(plantillas),
-      error: (err) => console.error('❌ Error cargando plantillas:', err),
+      next: (plantillas) => {
+        this.plantillas.set(plantillas);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando plantillas:', err);
+        this.loading.set(false);
+      },
     });
   }
 

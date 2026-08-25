@@ -23,6 +23,8 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 interface ImageSlot {
   file: File | null;
@@ -43,6 +45,8 @@ interface ImageSlot {
     AdminCreateWrapperComponent,
     IconComponent,
     BackButtonComponent,
+    LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './publicar-paquete.html',
 })

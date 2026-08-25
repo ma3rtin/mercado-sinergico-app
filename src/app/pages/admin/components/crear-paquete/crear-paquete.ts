@@ -30,6 +30,8 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { computed } from '@angular/core';
 import { IconComponent } from '@app/shared/icono/icono';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 import Swal from 'sweetalert2';
 
 
@@ -42,7 +44,9 @@ import Swal from 'sweetalert2';
     SelectorTipoCardComponent, 
     BackButtonComponent, 
     SelectComponent,
-    IconComponent
+    IconComponent,
+    LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './crear-paquete.html',
 })
@@ -71,13 +75,11 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
     }
   };
 
-  // Mapeo para asegurar consistencia con el backend
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
     [TipoPaquete.ENERGICO]: 'ENERGICO',
   };
 
-  // 🧠 Signals principales
   nombre = signal<string>('');
   descripcion = signal<string>('');
   tipoPaquete = signal<TipoPaquete>(TipoPaquete.SINERGICO);
@@ -92,6 +94,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   busquedaProducto = signal<string>('');
   resultadosBusqueda = signal<Producto[]>([]);
   productosSeleccionados = signal<Producto[]>([]);
+  isLoading = signal<boolean>(false);
   creandoPaquete = signal<boolean>(false);
 
   selectedProductoId = signal<number | null>(null);
@@ -127,6 +130,7 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   ) { }
 
   ngOnInit(): void {
+    this.isLoading.set(true);
     this.cargarMarcas();
     this.cargarCategorias();
     this.cargarTodosLosProductos();
@@ -137,8 +141,14 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
   // 🔄 Cargar datos base
   private cargarMarcas(): void {
     this.marcaService.getMarcas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.marcas.set(data),
-      error: (err) => console.error('Error al obtener marcas:', err),
+      next: (data) => {
+        this.marcas.set(data);
+        this.checkInitialLoad();
+      },
+      error: (err) => {
+        console.error('Error al obtener marcas:', err);
+        this.checkInitialLoad();
+      },
     });
   }
 
@@ -181,8 +191,14 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
   private cargarCategorias(): void {
     this.categoriaService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.categorias.set(data),
-      error: (err) => console.error('Error al obtener categorías:', err),
+      next: (data) => {
+        this.categorias.set(data);
+        this.checkInitialLoad();
+      },
+      error: (err) => {
+        console.error('Error al obtener categorías:', err);
+        this.checkInitialLoad();
+      },
     });
   }
 
@@ -210,9 +226,21 @@ export class CrearPaqueteComponent implements OnInit, AfterViewChecked {
 
   private cargarTodosLosProductos(): void {
     this.productoService.getProductos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.resultadosBusqueda.set(data),
-      error: (err) => console.error('Error al obtener productos:', err),
+      next: (data) => {
+        this.resultadosBusqueda.set(data);
+        this.checkInitialLoad();
+      },
+      error: (err) => {
+        console.error('Error al obtener productos:', err);
+        this.checkInitialLoad();
+      },
     });
+  }
+
+  private checkInitialLoad(): void {
+    if (this.marcas().length > 0 || this.categorias().length > 0 || this.resultadosBusqueda().length > 0) {
+      this.isLoading.set(false);
+    }
   }
 
   onSelectProducto(id: number | null): void {
