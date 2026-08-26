@@ -45,7 +45,7 @@
             <p class="text-[9px] text-gray-400 mt-0.5 leading-none">Haga clic o arrastre</p>
           </div>
         }
-        <input type="file" accept="image/*" (change)="onFileSelected($event, 0)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
+        <input type="file" [accept]="tiposAceptados" (change)="onFileSelected($event, 0)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
       </div>
     </div>
 
@@ -69,7 +69,7 @@
             </p>
           </div>
           @if (getCantidadImagenesCargadas() < maxSlots()) {
-            <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp" (change)="onMultipleFilesSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
+            <input type="file" multiple [accept]="tiposAceptados" (change)="onMultipleFilesSelected($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
           }
         </div>
       </div>
@@ -87,7 +87,7 @@
               <img [src]="slot.preview" alt="Imagen {{ $index + 1 }}" class="w-full h-full object-cover rounded-lg" />
               <button type="button" (click)="removeImage($index, $event)" class="absolute top-1 right-1 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-error z-10 text-xs font-bold transition-colors shadow-sm pointer-events-auto">×</button>
               <div class="absolute bottom-1 right-1 bg-gray-800 bg-opacity-50 text-white px-1 py-0.1 rounded z-10"><app-icon name="edit" size="14"></app-icon></div>
-              <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" (change)="onFileSelected($event, $index)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
+              <input type="file" [accept]="tiposAceptados" (change)="onFileSelected($event, $index)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-0" />
             </div>
           }
         }
