@@ -1,11 +1,6 @@
 <app-admin-create-wrapper [titulo]="'Crear paquete'">
   <app-back-button label="Volver a paquetes base" route="/admin/administrar-paquetes" />
 
-  @if (isLoading()) {
-    <div class="flex flex-col items-center justify-center py-20">
-      <app-loader mensaje="Cargando datos del formulario..." padding="py-0" />
-    </div>
-  } @else {
   <div class="space-y-6">
     <!-- 🎯 Tipo de paquete -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -157,36 +152,32 @@
         </div>
       </div>
 
+      <!-- Botones de acción -->
       <div class="flex flex-col sm:flex-row gap-4 justify-end">
-        <button
-          type="button"
-          (click)="resetForm()"
-          class="w-full sm:w-auto px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 transition"
-        >
-          Cancelar
-        </button>
-        <button
-          type="button"
-          (click)="crearPaquete()"
+        <app-button
+          [type]="'button'"
+          [variant]="'tertiary'"
+          [size]="'lg'"
+          [label]="'Cancelar'"
+          (buttonClick)="resetForm()"
+          class="w-full sm:w-auto"
+        />
+
+        <app-button
+          [type]="'submit'"
+          [variant]="'primary'"
+          [size]="'lg'"
           [disabled]="creandoPaquete()"
-          class="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold transition bg-secondary text-white hover:bg-secondary-dark disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          [loading]="creandoPaquete()"
+          class="w-full sm:w-auto"
         >
           @if (creandoPaquete()) {
-            <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
             Creando...
           } @else {
             Crear paquete base
           }
-        </button>
+        </app-button>
       </div>
     </form>
   </div>
-  }
 </app-admin-create-wrapper>
-
-<app-loading-overlay
-  [visible]="creandoPaquete()"
-  titulo="Creando paquete..."
-  [mensajes]="['Subiendo imagen...', 'Creando paquete base...', 'Asociando productos...']"
-  [duracionMs]="15000"
-/>

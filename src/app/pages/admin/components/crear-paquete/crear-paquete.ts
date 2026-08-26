@@ -1,8 +1,6 @@
 import { Component, DestroyRef, OnInit, inject, signal, computed, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, of } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
 
 import { Router } from '@angular/router';
 import { TipoPaquete } from '@app/models/Enums';
@@ -22,11 +20,10 @@ import {
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { IconComponent } from '@app/shared/icono/icono';
-import { LoaderComponent } from '@app/shared/loader/loader';
-import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
+import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
 import Swal from 'sweetalert2';
 
@@ -40,12 +37,11 @@ import Swal from 'sweetalert2';
     BackButtonComponent,
     SelectComponent,
     IconComponent,
-    LoaderComponent,
-    LoadingOverlay,
     InputComponent,
     SelectCategoriaMarca,
     MapOptionsPipe,
-    SubidorImagenes,
+    ButtonComponent,
+    SubidorImagenes
   ],
   templateUrl: './crear-paquete.html',
 })
@@ -74,6 +70,7 @@ export class CrearPaqueteComponent implements OnInit {
     }
   };
 
+  // Mapeo para asegurar consistencia con el backend
   readonly tipoMap: Record<TipoPaquete, string> = {
     [TipoPaquete.SINERGICO]: 'SINERGICO',
     [TipoPaquete.ENERGICO]: 'ENERGICO',
@@ -102,7 +99,6 @@ export class CrearPaqueteComponent implements OnInit {
   creandoPaquete = signal<boolean>(false);
   creandoMarca = signal<boolean>(false);
   creandoCategoria = signal<boolean>(false);
-  isLoading = signal<boolean>(false);
 
   tipoPaquete = signal<TipoPaquete>(TipoPaquete.SINERGICO);
 
@@ -136,7 +132,9 @@ export class CrearPaqueteComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.cargarDatosIniciales();
+    this.cargarMarcas();
+    this.cargarCategorias();
+    this.cargarTodosLosProductos();
   }
 
   private initializeForm(): void {
@@ -150,45 +148,29 @@ export class CrearPaqueteComponent implements OnInit {
   }
 
   // 🔄 Cargar datos base
-  private cargarDatosIniciales(): void {
-    this.isLoading.set(true);
+  private cargarMarcas(): void {
+    this.marcaService.getMarcas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => this.marcas.set(data),
+      error: () => this.toast.error('Error cargando marcas'),
+    });
+  }
 
-    forkJoin({
-      marcas: this.marcaService.getMarcas().pipe(
-        catchError((err) => {
-          console.error('Error al obtener marcas:', err);
-          this.toast.error('Error cargando marcas');
-          return of([] as Marca[]);
-        })
-      ),
-      categorias: this.categoriaService.getCategorias().pipe(
-        catchError((err) => {
-          console.error('Error al obtener categorías:', err);
-          this.toast.error('Error cargando categorías');
-          return of([] as Categoria[]);
-        })
-      ),
-      productos: this.productoService.getProductos().pipe(
-        catchError((err) => {
-          console.error('Error al obtener productos:', err);
-          this.toast.error('Error cargando productos');
-          return of([] as Producto[]);
-        })
-      ),
-    })
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.isLoading.set(false))
-      )
-      .subscribe(({ marcas, categorias, productos }) => {
-        this.marcas.set(marcas);
-        this.categorias.set(categorias);
-        this.todosLosProductos.set(productos);
-        const compatibles = productos.filter((p) => p.tipo === this.tipoPaquete()).length;
-        console.log(
-          `[CrearPaquete][Productos] Productos recibidos: ${productos.length} | Tipo actual: ${this.tipoPaquete()} | Compatibles: ${compatibles}`
-        );
-      });
+  private cargarCategorias(): void {
+    this.categoriaService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => this.categorias.set(data),
+      error: () => this.toast.error('Error cargando categorías'),
+    });
+  }
+
+  private cargarTodosLosProductos(): void {
+    this.productoService.getProductos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data) => {
+        this.todosLosProductos.set(data);
+        const compatibles = data.filter((p) => p.tipo === this.tipoPaquete()).length;
+        console.log(`[CrearPaquete][Productos] Productos recibidos: ${data.length} | Tipo actual: ${this.tipoPaquete()} | Compatibles: ${compatibles}`);
+      },
+      error: () => this.toast.error('Error cargando productos'),
+    });
   }
 
   // 🏷️ Marca / Categoría (misma interacción que Crear Producto)
