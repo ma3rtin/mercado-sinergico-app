@@ -352,7 +352,7 @@ export class CrearPaqueteComponent implements OnInit {
     }
 
     // Nota: no existe compresión de imágenes en el frontend; SubidorImagenes valida
-    // tipo y tamaño (<=20MB) y envía el archivo original.
+    // tipo y tamaño (<=5MB) y envía el archivo original.
     console.log(`[CrearPaquete][Imagen] Archivo original: ${imagenFile.name} | tipo: ${imagenFile.type} | tamaño: ${imagenFile.size} bytes`);
 
     const formValue = this.paqueteForm.value;
