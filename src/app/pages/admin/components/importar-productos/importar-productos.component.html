@@ -1,6 +1,11 @@
 <app-admin-create-wrapper [titulo]="'Importar / Exportar Productos'">
   <app-back-button label="Volver al panel" route="/admin/perfil" />
 
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-20">
+      <app-loader mensaje="Cargando importar productos..." padding="py-0" />
+    </div>
+  } @else {
   <div class="space-y-6">
 
     <!-- Sección: Descargar Plantilla -->
@@ -189,4 +194,12 @@
     </div>
 
   </div>
+
+  <app-loading-overlay
+    [visible]="isUploading()"
+    titulo="Importando productos..."
+    [mensajes]="['Subiendo archivo...', 'Procesando registros...', 'Validando datos...']"
+    [duracionMs]="35000"
+  />
+  }
 </app-admin-create-wrapper>

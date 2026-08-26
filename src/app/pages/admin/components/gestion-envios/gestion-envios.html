@@ -238,3 +238,9 @@
 
   </div>
 </div>
+
+<app-loading-overlay
+  [visible]="enviando()"
+  titulo="Actualizando envío..."
+  [mensajes]="['Actualizando estado...', 'Notificando cambios...']"
+/>

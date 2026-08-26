@@ -72,7 +72,8 @@ export class PublicarPaqueteComponent implements OnInit {
   imagenSlot = signal<ImageSlot>({ file: null, preview: null });
 
   // Estados y control
-  cargando = signal<boolean>(false);
+  cargandoVista = signal<boolean>(false);
+  guardando = signal<boolean>(false);
   mostrandoResultados = signal<boolean>(false);
   busqueda = signal<string>('');
 
@@ -176,7 +177,7 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // --- Cargar datos para edición ---
   cargarDatosEdicion(id: number): void {
-    this.cargando.set(true);
+    this.cargandoVista.set(true);
     this.paquetePublicadoService.getPaqueteById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (paquete) => {
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
@@ -217,19 +218,19 @@ export class PublicarPaqueteComponent implements OnInit {
         }
 
         this.cantProductos.set(paquete.cant_productos ?? null);
-        this.cargando.set(false);
+        this.cargandoVista.set(false);
       },
       error: (err) => {
         console.error('Error cargando paquete para edición:', err);
         this.toast.error('No se pudo cargar la publicación a editar');
-        this.cargando.set(false);
+        this.cargandoVista.set(false);
       }
     });
   }
 
   // --- Cargar primeros 10 paquetes base ---
   cargarPaquetesIniciales(): void {
-    this.cargando.set(true);
+    this.cargandoVista.set(true);
 
     this.paqueteBaseService
       .getPaquetes()
@@ -257,12 +258,12 @@ export class PublicarPaqueteComponent implements OnInit {
 
           const primeros = data.slice(0, 10);
           this.resultadosBusqueda.set(primeros);
-          this.cargando.set(false);
+          this.cargandoVista.set(false);
         },
         error: (err) => {
           console.error('❌ Error al obtener paquetes base:', err);
           this.toast.error('Error al cargar los paquetes base.', 'Error');
-          this.cargando.set(false);
+          this.cargandoVista.set(false);
         },
       });
   }
@@ -472,12 +473,12 @@ export class PublicarPaqueteComponent implements OnInit {
       ? this.paquetePublicadoService.updatePaquete(payload)
       : this.paquetePublicadoService.createPaquete(payload);
 
-    this.cargando.set(true);
+    this.guardando.set(true);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result: any) => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.success(
             this.isEditMode() ? 'Publicación actualizada correctamente 🎉' : 'Paquete publicado correctamente 🎉',
             'Éxito'
@@ -492,7 +493,7 @@ export class PublicarPaqueteComponent implements OnInit {
           });
         },
         error: (err) => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           console.error('Error al publicar/actualizar paquete:', err);
           const msg = err.error?.message || 'Ocurrió un error al procesar el paquete.';
           this.toast.error(msg, 'Fallo');
@@ -517,17 +518,17 @@ export class PublicarPaqueteComponent implements OnInit {
       this.router.navigate(['/admin/administrar-publicaciones']);
       return;
     }
-    this.cargando.set(true);
+    this.guardando.set(true);
     this.paquetePublicadoService.descartarDuplicado(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.info('Duplicación descartada.', 'Cancelado');
           this.router.navigate(['/admin/administrar-publicaciones']);
         },
         error: () => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.error('No se pudo descartar la duplicación.');
           this.router.navigate(['/admin/administrar-publicaciones']);
         }

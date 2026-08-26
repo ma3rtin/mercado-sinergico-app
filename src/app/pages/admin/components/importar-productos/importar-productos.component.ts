@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpEventType, HttpClientModule } from '@angular/common/http';
 import { toast } from 'ngx-sonner';
@@ -7,6 +7,8 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 interface ImportResult {
     success: boolean;
@@ -24,11 +26,15 @@ interface ImportResult {
 @Component({
     selector: 'app-importar-productos',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent, BackButtonComponent, AdminCreateWrapperComponent],
+    imports: [CommonModule, HttpClientModule, IconComponent, ButtonComponent, BackButtonComponent, AdminCreateWrapperComponent, LoaderComponent, LoadingOverlay],
     templateUrl: './importar-productos.component.html',
     styleUrls: ['./importar-productos.component.css'],
 })
-export class ImportarProductosComponent {
+export class ImportarProductosComponent implements AfterViewInit {
+    private readonly http = inject(HttpClient);
+
+    isLoading = signal(true);
+
     // Signals
     selectedFile = signal<File | null>(null);
     isUploading = signal(false);
@@ -45,7 +51,9 @@ export class ImportarProductosComponent {
 
     private readonly apiUrl = `${environment.apiUrl}/productos/excel`;
 
-    constructor(private readonly http: HttpClient) { }
+    ngAfterViewInit(): void {
+        setTimeout(() => this.isLoading.set(false), 300);
+    }
 
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;

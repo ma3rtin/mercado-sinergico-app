@@ -30,6 +30,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { InputComponent } from '@app/shared/input/input-component';
 import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -45,6 +46,7 @@ import Swal from 'sweetalert2';
     SelectComponent,
     SelectorTipoCardComponent,
     LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './editar-paquete-base.html',
 })

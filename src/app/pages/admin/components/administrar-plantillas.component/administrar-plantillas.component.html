@@ -101,3 +101,9 @@
     }
   </div>
 </div>
+
+<app-loading-overlay
+  [visible]="isProcesando()"
+  [titulo]="overlayTitulo()"
+  [mensajes]="overlayMensajes()"
+/>
