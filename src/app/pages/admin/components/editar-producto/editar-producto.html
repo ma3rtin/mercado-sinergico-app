@@ -312,11 +312,11 @@
             [type]="'submit'"
             [variant]="'primary'"
             [size]="'lg'"
-            [disabled]="isLoading()"
-            [loading]="isLoading()"
+            [disabled]="isGuardando()"
+            [loading]="isGuardando()"
             class="w-full sm:w-auto"
           >
-            @if (isLoading()) {
+            @if (isGuardando()) {
               <span class="flex items-center gap-2">
               <app-icon name="Loader" size="24" class="animate-spin"></app-icon>
                 Actualizando...
@@ -338,3 +338,9 @@
     }
   </div>
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="isGuardando()"
+  titulo="Guardando cambios..."
+  [mensajes]="['Actualizando producto...', 'Guardando imágenes...']"
+/>

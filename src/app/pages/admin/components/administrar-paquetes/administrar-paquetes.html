@@ -90,7 +90,7 @@
         } @empty {
           <div class="col-span-full py-20 text-center">
             <app-icon name="package" size="64" class="text-gray-200 mx-auto mb-4" />
-            <p class="text-gray-500 font-medium">No se encontraron moldes de paquetes</p>
+            <p class="text-gray-500 font-medium">No se encontraron paquetes base</p>
             <p class="text-gray-400 text-sm">Creá uno nuevo para empezar a vender</p>
           </div>
         }
@@ -110,4 +110,16 @@
     }
 
   </div>
+
+  <app-loading-overlay
+    [visible]="isDuplicando()"
+    titulo="Duplicando paquete base..."
+    [mensajes]="['Copiando paquete base...', 'Guardando copia...']"
+  />
+
+  <app-loading-overlay
+    [visible]="isArchivando()"
+    titulo="Cambiando estado..."
+    [mensajes]="['Actualizando paquete...', 'Guardando cambios...']"
+  />
 </div>

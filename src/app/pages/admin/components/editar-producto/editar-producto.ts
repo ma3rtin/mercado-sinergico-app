@@ -46,6 +46,7 @@ import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes, ImageSlot } from '@app/subidor-imagenes/subidor-imagenes';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 // Validators
 import { mayorQueCero } from '@app/shared/validators/mayor-que-cero.validator';
@@ -71,6 +72,7 @@ import Swal from 'sweetalert2';
     MapOptionsPipe,
     SubidorImagenes,
     LoaderComponent,
+    LoadingOverlay,
   ],
   standalone: true,
 })
@@ -155,6 +157,7 @@ export class EditarProductoComponent implements OnInit {
 
   // Signals - Estado UI
   isLoading = signal(false);
+  isGuardando = signal(false);
   formSubmitted = signal(false);
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
@@ -659,7 +662,7 @@ esTipoBloqueado = computed(() => {
 
   private ejecutarSubmit(id: number): void {
     const slotsParaEnviar = this.subidorImagenes()?.getSlots() ?? [];
-    this.isLoading.set(true);
+    this.isGuardando.set(true);
     const formData = this.buildFormData(slotsParaEnviar);
 
     // Agregar tipo de producto
@@ -692,13 +695,13 @@ esTipoBloqueado = computed(() => {
         if (generaVariantes) {
           this.generarVariantesDelProducto(id);
         } else {
-          this.isLoading.set(false);
+          this.isGuardando.set(false);
           this.toast.success('Producto actualizado correctamente 🚀');
           this.router.navigate(['/admin/administrar-productos']);
         }
       },
       error: (err) => {
-        this.isLoading.set(false);
+        this.isGuardando.set(false);
         console.error('Error actualizando producto', err);
         this.toast.error(err.error?.message || 'Error actualizando producto');
       },
@@ -819,7 +822,7 @@ esTipoBloqueado = computed(() => {
 
     // Validar que haya atributos
     if (Object.keys(atributosParaBackend).length === 0) {
-      this.isLoading.set(false);
+      this.isGuardando.set(false);
 
       this.toast.error('No se encontraron atributos para generar variantes');
       return;
@@ -834,7 +837,7 @@ esTipoBloqueado = computed(() => {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          this.isLoading.set(false);
+          this.isGuardando.set(false);
           console.log('✅ Variantes generadas:', response);
 
           // Mostrar confirmación con SweetAlert
@@ -862,7 +865,7 @@ esTipoBloqueado = computed(() => {
           });
         },
         error: (err) => {
-          this.isLoading.set(false);
+          this.isGuardando.set(false);
           console.error('❌ Error generando variantes:', err);
           console.error('❌ Error COMPLETO:', err);
           console.error('❌ Error message:', err.error?.message);

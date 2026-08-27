@@ -9,7 +9,7 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { NgIconsModule } from '@ng-icons/core';
 import Swal from 'sweetalert2';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { TipoPaquete } from '@app/models/Enums';
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 
@@ -303,6 +303,62 @@ describe('CrearPaqueteComponent', () => {
 
       expect(toastMock.error).toHaveBeenCalledWith('El nombre ya existe', 'Fallo');
       expect(component.creandoPaquete()).toBe(false);
+    });
+  });
+
+  describe('carga inicial', () => {
+    const montarCon = async (
+      marcas$: Observable<any>,
+      categorias$: Observable<any>,
+      productos$: Observable<any>
+    ): Promise<CrearPaqueteComponent> => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [CrearPaqueteComponent, NgIconsModule.withIcons({})],
+        providers: [
+          { provide: Router, useValue: { navigate: vi.fn() } },
+          { provide: MarcaService, useValue: { getMarcas: () => marcas$ } },
+          { provide: CategoriaService, useValue: { getCategorias: () => categorias$ } },
+          { provide: ProductosService, useValue: { getProductos: () => productos$ } },
+          { provide: PaqueteBaseService, useValue: { createPaquete: vi.fn() } },
+          { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn() } },
+        ],
+      }).compileComponents();
+
+      const fixture = TestBed.createComponent(CrearPaqueteComponent);
+      fixture.detectChanges();
+      return fixture.componentInstance;
+    };
+
+    it('mantiene el loader hasta que responden las tres cargas', async () => {
+      const marcas$ = new Subject<any>();
+      const categorias$ = new Subject<any>();
+      const productos$ = new Subject<any>();
+      const comp = await montarCon(marcas$, categorias$, productos$);
+
+      expect(comp.isLoading()).toBe(true);
+
+      marcas$.next([{ id_marca: 1, nombre: 'Marca' }]);
+      expect(comp.isLoading()).toBe(true);
+
+      categorias$.next([{ id_categoria: 1, nombre: 'Categoría' }]);
+      expect(comp.isLoading()).toBe(true);
+
+      productos$.next([productoSinergico1]);
+      expect(comp.isLoading()).toBe(false);
+    });
+
+    it('libera el loader aunque las tres respuestas vengan vacías', async () => {
+      const comp = await montarCon(of([]), of([]), of([]));
+
+      expect(comp.isLoading()).toBe(false);
+    });
+
+    it('libera el loader aunque las tres cargas fallen', async () => {
+      const falla = () => throwError(() => new Error('network'));
+      const comp = await montarCon(falla(), falla(), falla());
+
+      expect(comp.isLoading()).toBe(false);
     });
   });
 

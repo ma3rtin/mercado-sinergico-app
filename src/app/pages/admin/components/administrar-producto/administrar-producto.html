@@ -224,6 +224,12 @@
     }
   </div>
 
+  <app-loading-overlay
+    [visible]="isDuplicating() !== null || isArchiving() !== null"
+    [titulo]="overlayTitulo()"
+    [mensajes]="overlayMensajes()"
+  />
+
   <ng-template #guiaSimbolosTemplate>
     <div class="text-left py-2 space-y-5">
       <!-- Sección: Acciones Rápidas -->
