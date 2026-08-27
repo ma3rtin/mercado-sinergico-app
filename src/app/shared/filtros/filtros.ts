@@ -155,6 +155,26 @@ export class FiltrosComponent {
     this.tieneOrdenamiento()
   );
 
+  // 📌 Estado por defecto: valores del perfil del usuario (zona, etc.) normalizados
+  private estadoInicial = computed<FiltrosAplicados>(() => {
+    const init = this.valoresIniciales();
+    return {
+      categorias: init?.categorias ?? [],
+      marcas: init?.marcas ?? [],
+      tiposPaquete: init?.tiposPaquete ?? [],
+      ordenamiento: init?.ordenamiento ?? '',
+      rangoPrecio: init?.rangoPrecio ?? { min: null, max: null },
+      estados: init?.estados ?? [],
+      zonas: init?.zonas ?? [],
+    };
+  });
+
+  // 🔄 Sólo hay algo que reiniciar si el estado difiere del inicial.
+  // Sin esto, con la zona del perfil tildada el botón aparece y no hace nada.
+  puedeReiniciar = computed(() =>
+    this.serializar(this.filtrosActuales()) !== this.serializar(this.estadoInicial())
+  );
+
   contadorFiltrosActivos = computed(() => {
     let count = 0;
     if (this.tieneCategoriasSeleccionadas()) count++;
@@ -380,6 +400,20 @@ export class FiltrosComponent {
 
   isSectionExpanded(section: string): boolean {
     return this.expandedSections()[section] ?? false;
+  }
+
+  // Compara filtros sin que el orden de selección cuente como diferencia
+  private serializar(f: FiltrosAplicados): string {
+    const orden = (xs: (string | number)[]) => [...xs].map(String).sort();
+    return JSON.stringify({
+      categorias: orden(f.categorias),
+      marcas: orden(f.marcas),
+      tiposPaquete: orden(f.tiposPaquete),
+      estados: orden(f.estados),
+      zonas: orden(f.zonas),
+      ordenamiento: f.ordenamiento,
+      rangoPrecio: f.rangoPrecio,
+    });
   }
 
   // 🧹 LIMPIAR FILTROS

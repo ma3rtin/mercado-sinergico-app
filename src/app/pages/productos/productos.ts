@@ -98,7 +98,7 @@ export class ProductosComponent implements OnInit {
   paginaActual = signal<number>(1);
   itemsPorPagina = signal<number>(12); // 12 productos por página (óptimo)
 
-  // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario
+  // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario (zona propia preseleccionada)
   valoresFiltrosIniciales = computed<Partial<FiltrosAplicados>>(() => {
     const perfil = this.usuarioService.perfilUsuario();
     const zonas = perfil?.direccion?.localidad?.zonas || [];
@@ -108,15 +108,6 @@ export class ProductosComponent implements OnInit {
       };
     }
     return {};
-  });
-
-  // 📊 COMPUTED: Zonas seleccionadas activas
-  zonasSeleccionadasActivas = computed(() => {
-    const filtros = this.filtrosActuales();
-    if (filtros?.zonas) {
-      return filtros.zonas;
-    }
-    return this.valoresFiltrosIniciales().zonas || [];
   });
 
   // 📊 COMPUTED: Productos filtrados reactivamente (ahora filtrados en backend)
@@ -482,22 +473,6 @@ export class ProductosComponent implements OnInit {
     const orden = (event.target as HTMLSelectElement).value;
     this.ordenSeleccionado.set(orden);
     this.actualizarUrl(1);
-  }
-
-  private ordenarProductos(productos: Producto[], orden: string): Producto[] {
-    switch (orden) {
-      case 'a-z':
-        return [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre));
-      case 'z-a':
-        return [...productos].sort((a, b) => b.nombre.localeCompare(a.nombre));
-      case 'precio-asc':
-        return [...productos].sort((a, b) => a.precio - b.precio);
-      case 'precio-desc':
-        return [...productos].sort((a, b) => b.precio - a.precio);
-      case 'recientes':
-      default:
-        return productos;
-    }
   }
 
   limpiarFiltros(): void {

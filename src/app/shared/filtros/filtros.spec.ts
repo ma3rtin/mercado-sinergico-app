@@ -139,4 +139,54 @@ describe('FiltrosComponent', () => {
     component.cambiarPrecioMax(null);
     expect(component.tieneRangoPrecio()).toBe(false);
   });
+
+  describe('puedeReiniciar', () => {
+    it('es false cuando no hay ningún filtro tocado', () => {
+      expect(component.puedeReiniciar()).toBe(false);
+    });
+
+    it('es false cuando lo único tildado es la zona por defecto del perfil', () => {
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7] });
+      fixture.detectChanges();
+      expect(component.tieneFiltrosActivos()).toBe(true);
+      expect(component.puedeReiniciar()).toBe(false);
+    });
+
+    it('es true al agregar un filtro sobre la zona por defecto', () => {
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7] });
+      fixture.detectChanges();
+      component.toggleCategoria(1);
+      fixture.detectChanges();
+      expect(component.puedeReiniciar()).toBe(true);
+    });
+
+    it('es true al destildar la zona por defecto', () => {
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7] });
+      fixture.detectChanges();
+      component.toggleZona(7);
+      fixture.detectChanges();
+      expect(component.puedeReiniciar()).toBe(true);
+    });
+
+    it('vuelve a false después de limpiarFiltros()', () => {
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7] });
+      fixture.detectChanges();
+      component.toggleCategoria(1);
+      fixture.detectChanges();
+      component.limpiarFiltros();
+      fixture.detectChanges();
+      expect(component.puedeReiniciar()).toBe(false);
+      expect(component.zonasSeleccionadas()).toEqual([7]);
+    });
+
+    it('ignora el orden de selección al comparar contra el estado inicial', () => {
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7, 9] });
+      fixture.detectChanges();
+      component.toggleZona(7);
+      component.toggleZona(7);
+      fixture.detectChanges();
+      expect(component.zonasSeleccionadas()).toEqual([9, 7]);
+      expect(component.puedeReiniciar()).toBe(false);
+    });
+  });
 });

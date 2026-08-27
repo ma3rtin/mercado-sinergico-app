@@ -45,7 +45,7 @@ describe('ProductosComponent', () => {
         { provide: ProductosService, useValue: mockProductosService },
         { provide: CategoriaService, useValue: { getCategorias: () => of([{ id_categoria: 1, nombre: 'Lácteos' }]) } },
         { provide: MarcaService, useValue: { getMarcas: () => of([{ id_marca: 1, nombre: 'Arcor' }]) } },
-        { provide: ZonaService, useValue: { getZonas: () => of([{ id_zona: 1, nombre: 'Zona Norte' }]) } },
+        { provide: ZonaService, useValue: { getZonas: () => of([{ id_zona: 1, nombre: 'Zona Norte' }, { id_zona: 2, nombre: 'Zona Sur' }]) } },
         { provide: UsuarioService, useValue: mockUsuarioService },
         {
           provide: PaquetePublicadoService,
@@ -107,6 +107,16 @@ describe('ProductosComponent', () => {
       rangoPrecio: { min: null, max: null },
       estados: [],
     });
+  });
+
+  it('debería preseleccionar la zona del usuario como valor inicial de filtros', () => {
+    mockUsuarioService.perfilUsuario.set({
+      direccion: { localidad: { nombre: 'Palermo', zonas: [{ id_zona: 7 }] } },
+    });
+    component['isBrowser'] = true;
+    fixture.detectChanges();
+
+    expect(component.valoresFiltrosIniciales().zonas).toEqual([7]);
   });
 
   it('debería navegar con nuevos queryParams al cambiar la página', () => {
