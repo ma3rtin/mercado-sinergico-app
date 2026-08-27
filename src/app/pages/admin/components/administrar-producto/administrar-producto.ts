@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, signal, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 
 // Models
@@ -53,6 +52,8 @@ export class AdministrarProductosComponent {
   isDuplicating = signal<number | null>(null);
   isArchiving = signal<number | null>(null);
   mostrarArchivados = signal(false);
+  overlayTitulo = signal('Procesando...');
+  overlayMensajes = signal<string[]>([]);
 
 
   filteredProductos = computed(() => {
@@ -200,6 +201,8 @@ export class AdministrarProductosComponent {
     }).then((result) => {
       if (result.isConfirmed) {
         this.isDuplicating.set(producto.id_producto!);
+        this.overlayTitulo.set('Duplicando producto...');
+        this.overlayMensajes.set(['Copiando producto...', 'Guardando copia...']);
         this.productosService.duplicateProduct(producto.id_producto!).subscribe({
           next: (response) => {
             this.productos.update((prev) => [...prev, response]);
@@ -230,25 +233,21 @@ export class AdministrarProductosComponent {
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
       cancelButtonColor: '#9ca3af',
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          this.isArchiving.set(producto.id_producto!);
-          await firstValueFrom(this.productosService.archivarProducto(producto.id_producto!, nuevoEstado));
-          return true;
-        } catch (error: any) {
-          console.error(`Error al ${accion} producto:`, error);
-          Swal.showValidationMessage(`No se pudo ${accion} el producto: ${error.error?.message || error.message || 'Error desconocido'}`);
-          throw error;
-        } finally {
-          this.isArchiving.set(null);
-        }
-      },
-      allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
       if (result.isConfirmed) {
-        this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
-        this.loadProductos();
+        this.isArchiving.set(producto.id_producto!);
+        this.overlayTitulo.set(`${nuevoEstado ? 'Archivando' : 'Desarchivando'} producto...`);
+        this.overlayMensajes.set(['Actualizando estado...']);
+        this.productosService.archivarProducto(producto.id_producto!, nuevoEstado).subscribe({
+          next: () => {
+            this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
+            this.loadProductos();
+          },
+          error: (error) => {
+            console.error(`Error al ${accion} producto:`, error);
+            this.toast.error(error.error?.message || `No se pudo ${accion} el producto`);
+          },
+        }).add(() => this.isArchiving.set(null));
       }
     });
   }

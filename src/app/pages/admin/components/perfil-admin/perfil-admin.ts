@@ -285,10 +285,10 @@ export class PerfilAdmin implements OnInit {
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
         title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} paquete?`,
-        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" se ocultará de esta lista.`,
+        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" ${nuevoEstado ? 'se ocultará de' : 'volverá a'} esta lista.`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Sí, archivar',
+        confirmButtonText: nuevoEstado ? 'Sí, archivar' : 'Sí, desarchivar',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: 'var(--brand-secondary)',
       }).then((result) => {
@@ -301,10 +301,11 @@ export class PerfilAdmin implements OnInit {
             takeUntilDestroyed(this.destroyRef)
           ).subscribe({
             next: () => {
-              this.toastService.success('Paquete archivado con éxito');
+              this.toastService.success(`Paquete ${nuevoEstado ? 'archivado' : 'desarchivado'} con éxito`);
               this.loadPaquetesFinalizados();
             },
-            error: () => this.toastService.error('Error al archivar el paquete'),
+            error: () =>
+              this.toastService.error(`Error al ${nuevoEstado ? 'archivar' : 'desarchivar'} el paquete`),
           });
         }
       });

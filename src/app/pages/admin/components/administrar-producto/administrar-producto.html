@@ -225,9 +225,9 @@
   </div>
 
   <app-loading-overlay
-    [visible]="isDuplicating() !== null"
-    titulo="Duplicando producto..."
-    [mensajes]="['Copiando producto...', 'Guardando copia...']"
+    [visible]="isDuplicating() !== null || isArchiving() !== null"
+    [titulo]="overlayTitulo()"
+    [mensajes]="overlayMensajes()"
   />
 
   <ng-template #guiaSimbolosTemplate>
