@@ -138,10 +138,22 @@ export class PaqueteCard implements OnInit {
     return 'text-text-muted';
   }
 
+  /**
+   * Etiqueta completa del timer. Se arma acá y no en el template porque
+   * getTiempoRestante() puede devolver un estado ('Finalizado', 'N/A') en vez
+   * de una duración, y anteponerle "Finaliza en" daba "Finaliza en Finalizado".
+   */
+  getEtiquetaTiempo(): string {
+    if (!this.paquete.fecha_fin) return 'Sin fecha de cierre';
+    if (this.getHoursRemaining() <= 0) return 'Finalizado';
+    return `Finaliza en ${this.getTiempoRestante(this.paquete.fecha_fin)}`;
+  }
+
   /** Accessible tooltip for the timer */
   getTimerTooltip(): string {
-    const remaining = this.getTiempoRestante(this.paquete.fecha_fin);
-    return `Cierra en ${remaining}`;
+    if (!this.paquete.fecha_fin) return 'Este paquete no tiene fecha de cierre';
+    if (this.getHoursRemaining() <= 0) return 'Este paquete ya finalizó';
+    return `Cierra en ${this.getTiempoRestante(this.paquete.fecha_fin)}`;
   }
 
   /** Tiempo restante formateado */
