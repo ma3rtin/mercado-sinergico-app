@@ -198,8 +198,10 @@ export class CrearPaqueteComponent implements OnInit {
     });
   }
 
+  private cargasPendientes = 3;
+
   private checkInitialLoad(): void {
-    if (this.marcas().length > 0 || this.categorias().length > 0 || this.todosLosProductos().length > 0) {
+    if (--this.cargasPendientes === 0) {
       this.isLoading.set(false);
     }
   }
