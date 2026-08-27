@@ -117,7 +117,7 @@
               Imágenes del Producto <span class="text-error">*</span>
             </h3>
             <p class="text-sm text-gray-600">
-              Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">16</strong> fotos en total). Límite de tamaño: 20MB por archivo.
+              Subí la imagen principal y hasta 15 imágenes adicionales (máximo <strong class="bg-brand-secondary-light text-brand-secondary px-1.5 py-0.5 rounded font-bold">16</strong> fotos en total). Límite de tamaño: 5MB por archivo.
             </p>
           </div>
           <app-subidor-imagenes
@@ -312,11 +312,11 @@
             [type]="'submit'"
             [variant]="'primary'"
             [size]="'lg'"
-            [disabled]="isLoading()"
-            [loading]="isLoading()"
+            [disabled]="isGuardando()"
+            [loading]="isGuardando()"
             class="w-full sm:w-auto"
           >
-            @if (isLoading()) {
+            @if (isGuardando()) {
               <span class="flex items-center gap-2">
               <app-icon name="Loader" size="24" class="animate-spin"></app-icon>
                 Actualizando...
@@ -338,3 +338,9 @@
     }
   </div>
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="isGuardando()"
+  titulo="Guardando cambios..."
+  [mensajes]="['Actualizando producto...', 'Guardando imágenes...']"
+/>

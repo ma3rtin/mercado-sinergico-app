@@ -25,6 +25,8 @@ import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -41,7 +43,9 @@ import Swal from 'sweetalert2';
     SelectCategoriaMarca,
     MapOptionsPipe,
     ButtonComponent,
-    SubidorImagenes
+    SubidorImagenes,
+    LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './crear-paquete.html',
 })
@@ -96,9 +100,13 @@ export class CrearPaqueteComponent implements OnInit {
   productoBuscado = new FormControl<number | null>(null);
 
   formSubmitted = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
   creandoPaquete = signal<boolean>(false);
   creandoMarca = signal<boolean>(false);
   creandoCategoria = signal<boolean>(false);
+
+  overlayTitulo = signal<string>('');
+  overlayMensajes = signal<string[]>([]);
 
   tipoPaquete = signal<TipoPaquete>(TipoPaquete.SINERGICO);
 
@@ -132,6 +140,7 @@ export class CrearPaqueteComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
+    this.isLoading.set(true);
     this.cargarMarcas();
     this.cargarCategorias();
     this.cargarTodosLosProductos();
@@ -150,15 +159,27 @@ export class CrearPaqueteComponent implements OnInit {
   // 🔄 Cargar datos base
   private cargarMarcas(): void {
     this.marcaService.getMarcas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.marcas.set(data),
-      error: () => this.toast.error('Error cargando marcas'),
+      next: (data) => {
+        this.marcas.set(data);
+        this.checkInitialLoad();
+      },
+      error: () => {
+        this.toast.error('Error cargando marcas');
+        this.checkInitialLoad();
+      },
     });
   }
 
   private cargarCategorias(): void {
     this.categoriaService.getCategorias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.categorias.set(data),
-      error: () => this.toast.error('Error cargando categorías'),
+      next: (data) => {
+        this.categorias.set(data);
+        this.checkInitialLoad();
+      },
+      error: () => {
+        this.toast.error('Error cargando categorías');
+        this.checkInitialLoad();
+      },
     });
   }
 
@@ -168,9 +189,21 @@ export class CrearPaqueteComponent implements OnInit {
         this.todosLosProductos.set(data);
         const compatibles = data.filter((p) => p.tipo === this.tipoPaquete()).length;
         console.log(`[CrearPaquete][Productos] Productos recibidos: ${data.length} | Tipo actual: ${this.tipoPaquete()} | Compatibles: ${compatibles}`);
+        this.checkInitialLoad();
       },
-      error: () => this.toast.error('Error cargando productos'),
+      error: () => {
+        this.toast.error('Error cargando productos');
+        this.checkInitialLoad();
+      },
     });
+  }
+
+  private cargasPendientes = 3;
+
+  private checkInitialLoad(): void {
+    if (--this.cargasPendientes === 0) {
+      this.isLoading.set(false);
+    }
   }
 
   // 🏷️ Marca / Categoría (misma interacción que Crear Producto)
@@ -352,7 +385,7 @@ export class CrearPaqueteComponent implements OnInit {
     }
 
     // Nota: no existe compresión de imágenes en el frontend; SubidorImagenes valida
-    // tipo y tamaño (<=20MB) y envía el archivo original.
+    // tipo y tamaño (<=5MB) y envía el archivo original.
     console.log(`[CrearPaquete][Imagen] Archivo original: ${imagenFile.name} | tipo: ${imagenFile.type} | tamaño: ${imagenFile.size} bytes`);
 
     const formValue = this.paqueteForm.value;
@@ -365,6 +398,8 @@ export class CrearPaqueteComponent implements OnInit {
     );
 
     this.creandoPaquete.set(true);
+    this.overlayTitulo.set('Creando paquete...');
+    this.overlayMensajes.set(['Subiendo imagen...', 'Creando paquete base...', 'Asociando productos...']);
     const formData = new FormData();
     formData.append('nombre', (formValue.nombre ?? '').trim());
     formData.append('descripcion', (formValue.descripcion ?? '').trim());

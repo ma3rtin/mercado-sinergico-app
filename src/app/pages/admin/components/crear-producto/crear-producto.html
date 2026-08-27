@@ -324,6 +324,10 @@
     />
 
     <!-- Overlay de progreso del submit -->
-    <app-loading-overlay [visible]="isLoading()" [titulo]="'Creando producto'" />
+    <app-loading-overlay
+      [visible]="isLoading()"
+      [titulo]="'Creando producto'"
+      [mensajes]="['Subiendo imágenes...', 'Creando producto...', 'Generando variantes...']"
+    />
   </div>
 </app-admin-create-wrapper>

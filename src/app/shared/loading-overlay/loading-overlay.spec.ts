@@ -34,6 +34,10 @@ describe('LoadingOverlay', () => {
   });
 
   it('se muestra con el título y la primera etapa al activarse', () => {
+    fixture.componentRef.setInput(
+      'mensajes',
+      ['Subiendo imágenes...', 'Creando producto...', 'Generando variantes...']
+    );
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
 
@@ -45,6 +49,19 @@ describe('LoadingOverlay', () => {
 
     const mensaje = fixture.nativeElement.querySelector('p').textContent.trim();
     expect(mensaje).toBe('Subiendo imágenes...');
+  });
+
+  it('sin mensajes explícitos muestra solo el título como fallback', () => {
+    fixture.componentRef.setInput('visible', true);
+    fixture.detectChanges();
+
+    const overlay = fixture.nativeElement.querySelector('.loading-overlay');
+    expect(overlay).not.toBeNull();
+
+    const titulo = fixture.nativeElement.querySelector('h3');
+    expect(titulo.textContent.trim()).toBe('Procesando...');
+
+    expect(fixture.nativeElement.querySelector('p')).toBeNull();
   });
 
   it('avanza hasta ~90% al cumplirse la duración estimada', () => {
@@ -59,6 +76,10 @@ describe('LoadingOverlay', () => {
   });
 
   it('cambia el texto de etapa conforme avanza el progreso', () => {
+    fixture.componentRef.setInput(
+      'mensajes',
+      ['Subiendo imágenes...', 'Creando producto...', 'Generando variantes...']
+    );
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
 
