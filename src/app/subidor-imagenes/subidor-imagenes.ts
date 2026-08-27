@@ -154,7 +154,14 @@ effect(() => {
         );
       }
 
-      validos.slice(0, freeSlots.length).forEach((file, idx) => {
+      const aCargar = validos.slice(0, freeSlots.length);
+      if (aCargar.length < validos.length) {
+        this.toast.warning(
+          `Solo quedaban ${aCargar.length} espacios: se ignoraron ${validos.length - aCargar.length} imágenes.`
+        );
+      }
+
+      aCargar.forEach((file, idx) => {
         const targetIndex = freeSlots[idx];
         this._slots.update(prev => {
           const s = [...prev];
