@@ -120,8 +120,7 @@
             <!-- Loading -->
             @if (loadingCompletos()) {
             <div class="flex flex-col items-center justify-center py-12">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-warning mb-4"></div>
-                <p class="text-gray-500">Verificando paquetes pendientes...</p>
+                <app-loader mensaje="Verificando paquetes pendientes..." padding="py-0" />
             </div>
 
             <!-- Error -->
@@ -174,8 +173,7 @@
             <!-- Loading -->
             @if (loadingFinalizados()) {
             <div class="flex flex-col items-center justify-center py-12">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-                <p class="text-gray-500">Cargando historial de paquetes...</p>
+                <app-loader mensaje="Cargando historial de paquetes..." padding="py-0" />
             </div>
 
             <!-- Error -->
@@ -300,3 +298,10 @@
 
     </div>
 </div>
+
+<app-loading-overlay
+  [visible]="isProcesando()"
+  [titulo]="overlayTitulo()"
+  [mensajes]="overlayMensajes()"
+  [duracionMs]="30000"
+/>

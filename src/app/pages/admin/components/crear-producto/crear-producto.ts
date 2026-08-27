@@ -31,7 +31,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
-import { LoadingOverlay } from '@app/loading-overlay/loading-overlay';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 import Swal from 'sweetalert2';
 

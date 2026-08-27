@@ -1,6 +1,11 @@
 <app-admin-create-wrapper [titulo]="'Crear paquete'">
   <app-back-button label="Volver a paquetes base" route="/admin/administrar-paquetes" />
 
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-20">
+      <app-loader mensaje="Cargando crear paquete..." padding="py-0" />
+    </div>
+  } @else {
   <div class="space-y-6">
     <!-- 🎯 Tipo de paquete -->
     <div class="bg-white rounded-lg shadow-sm p-6">
@@ -180,4 +185,12 @@
       </div>
     </form>
   </div>
+  }
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="creandoPaquete()"
+  [titulo]="overlayTitulo()"
+  [mensajes]="overlayMensajes()"
+  [duracionMs]="20000"
+/>

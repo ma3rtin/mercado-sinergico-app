@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, OnDestroy, inject, Inject, DOCUMENT } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, OnDestroy, inject, Inject, DOCUMENT, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
@@ -14,11 +14,12 @@ import { ToastService } from '@app/services/toast/toast.service'; // ✅ NUEVO
 
 // Components
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-crear-plantilla-modal',
   templateUrl: './crear-plantilla-modal.component.html',
-  imports: [FormsModule, ButtonComponent],
+  imports: [FormsModule, ButtonComponent, LoadingOverlay],
   standalone: true,
 })
 export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestroy {
@@ -43,6 +44,8 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
 
   maxOptions = 10;
   maxCaracteristicas = 10;
+  isGuardando = signal(false);
+  overlayTitulo = signal('Guardando...');
 
   constructor(
     private plantillaService: PlantillaService,
@@ -212,33 +215,35 @@ export class CrearPlantillaModalComponent implements OnInit, OnChanges, OnDestro
 
     // ✅ Crear o actualizar con loading
     if (this.isEditMode && plantillaFinal.id) {
-      const loading = this.toast.loading('Actualizando plantilla...');
+      this.overlayTitulo.set('Actualizando plantilla...');
+      this.isGuardando.set(true);
 
       this.plantillaService.actualizarPlantilla(plantillaFinal).subscribe({
         next: (actualizada) => {
-          this.toast.dismiss(loading);
+          this.isGuardando.set(false);
           this.toast.success(`Plantilla "${plantillaFinal.nombre}" actualizada exitosamente 🎉`);
           this.plantillaCreated.emit(actualizada);
           this.closeModal(true);
         },
         error: (err) => {
-          this.toast.dismiss(loading);
+          this.isGuardando.set(false);
           console.error('Error al actualizar plantilla:', err);
           this.toast.error('Error al actualizar la plantilla. Intenta nuevamente.');
         }
       });
     } else {
-      const loading = this.toast.loading('Creando plantilla...');
+      this.overlayTitulo.set('Creando plantilla...');
+      this.isGuardando.set(true);
 
       this.plantillaService.crearPlantilla(plantillaFinal).subscribe({
         next: (nueva) => {
-          this.toast.dismiss(loading);
+          this.isGuardando.set(false);
           this.toast.success(`Plantilla "${plantillaFinal.nombre}" creada exitosamente 🎉`);
           this.plantillaCreated.emit(nueva);
           this.closeModal(true);
         },
         error: (err) => {
-          this.toast.dismiss(loading);
+          this.isGuardando.set(false);
           console.error('Error al crear plantilla:', err);
 
           // Manejo de error más específico
