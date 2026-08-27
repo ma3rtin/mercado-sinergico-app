@@ -45,6 +45,9 @@ export class PaquetePublicadoService extends ApiService {
             if (filtros.estados && filtros.estados.length > 0) {
                 params.estados = filtros.estados.join(',');
             }
+            if (filtros.ordenamiento) {
+                params.orden = filtros.ordenamiento;
+            }
         }
 
         return this.http

@@ -475,22 +475,6 @@ export class ProductosComponent implements OnInit {
     this.actualizarUrl(1);
   }
 
-  private ordenarProductos(productos: Producto[], orden: string): Producto[] {
-    switch (orden) {
-      case 'a-z':
-        return [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre));
-      case 'z-a':
-        return [...productos].sort((a, b) => b.nombre.localeCompare(a.nombre));
-      case 'precio-asc':
-        return [...productos].sort((a, b) => a.precio - b.precio);
-      case 'precio-desc':
-        return [...productos].sort((a, b) => b.precio - a.precio);
-      case 'recientes':
-      default:
-        return productos;
-    }
-  }
-
   limpiarFiltros(): void {
     this.filtrosActuales.set(null);
     this.actualizarUrl(1);
