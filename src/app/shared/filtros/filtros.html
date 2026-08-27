@@ -58,6 +58,7 @@
     variant="tertiary"
     class="flex-1"
     (buttonClick)="limpiarFiltros()"
+    [disabled]="!puedeReiniciar()"
     label="Limpiar">
   </app-button>
   <app-button
@@ -77,8 +78,8 @@
     <div class="p-8">
       <div class="flex items-center justify-between mb-8">
         <h2 class="font-display text-xl font-bold text-gray-900">{{ titulo() }}</h2>
-        @if (tieneFiltrosActivos()) {
-          <button (click)="limpiarFiltros()" class="text-xs text-brand-primary hover:underline font-bold tracking-tight uppercase">Reiniciar</button>
+        @if (puedeReiniciar()) {
+          <button (click)="limpiarFiltros()" class="text-xs text-brand-primary hover:underline font-bold tracking-tight uppercase cursor-pointer">Reiniciar</button>
         }
       </div>
 
