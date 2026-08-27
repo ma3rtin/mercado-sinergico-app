@@ -139,9 +139,16 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   cargarDatos(): void {
     this.isLoading.set(true);
     // Simulado hasta tener getPaqueteById en baseService
-    this.baseService.getPaquetes().subscribe(paquetes => {
-      const p = paquetes.find(x => x.id_paquete_base === this.idPaquete());
-      if (p) {
+    this.baseService.getPaquetes().subscribe({
+      next: paquetes => {
+        const p = paquetes.find(x => x.id_paquete_base === this.idPaquete());
+        if (!p) {
+          this.isLoading.set(false);
+          this.toast.error('No encontramos ese paquete. Puede que lo hayan eliminado.');
+          this.router.navigate(['/admin/administrar-paquetes']);
+          return;
+        }
+
         this.nombre.set(p.nombre);
         this.descripcion.set(p.descripcion);
         this.categoriaSeleccionada.set(p.categoria_id);
@@ -150,10 +157,22 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         this.tipoPaquete.set(p.tipo || TipoPaquete.SINERGICO);
 
         // Cargar productos del paquete
-        this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe(prods => {
-          this.productosSeleccionados.set(prods);
-          this.isLoading.set(false);
+        this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe({
+          next: prods => {
+            this.productosSeleccionados.set(prods);
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('❌ Error al cargar productos del paquete:', err);
+            this.isLoading.set(false);
+            this.toast.error('No pudimos cargar los productos del paquete. Recargá la página.');
+          }
         });
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar paquetes:', err);
+        this.isLoading.set(false);
+        this.toast.error('No pudimos cargar el paquete. Recargá la página.');
       }
     });
   }
