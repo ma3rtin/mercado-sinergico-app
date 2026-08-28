@@ -115,10 +115,15 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
-    /** Admin: obtiene TODOS los paquetes publicados */
+    /**
+     * Admin: obtiene TODOS los paquetes publicados.
+     * incluirCerrados es necesario porque el listado público esconde los que
+     * ya no admiten sumarse (Completo, Confirmado, Entregado, Cancelado).
+     */
     getAllPaquetes(includeArchived = false): Observable<PaquetePublicado[]> {
-        const url = includeArchived ? `${this.apiUrl}?includeArchived=true` : this.apiUrl;
-        return this.get<PaquetePublicado[]>(url);
+        const params = new URLSearchParams({ incluirCerrados: 'true' });
+        if (includeArchived) params.set('includeArchived', 'true');
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}?${params.toString()}`);
     }
 
     /** Admin: obtiene paquetes en estado Completo o Confirmado (requieren acción del admin) */

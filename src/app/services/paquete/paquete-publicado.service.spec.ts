@@ -39,14 +39,6 @@ describe('PaquetePublicadoService', () => {
       req.flush([]);
     });
 
-    it('getPaquetesCerrados pega a /paquetes-publicados/cerrados', () => {
-      service.getPaquetesCerrados().subscribe();
-
-      const req = httpMock.expectOne(`${base}/paquetes-publicados/cerrados`);
-      expect(req.request.method).toBe('GET');
-      req.flush([]);
-    });
-
     it('getPaqueteById incluye el id en la ruta', () => {
       service.getPaqueteById(7).subscribe();
 
@@ -67,14 +59,20 @@ describe('PaquetePublicadoService', () => {
       httpMock.expectOne(`${base}/paquetes-publicados/producto/42`).flush([]);
     });
 
+    it('getAllPaquetes siempre pide los cerrados, porque es la vista de admin', () => {
+      service.getAllPaquetes().subscribe();
+
+      httpMock
+        .expectOne(`${base}/paquetes-publicados?incluirCerrados=true`)
+        .flush([]);
+    });
+
     it('getAllPaquetes agrega includeArchived sólo cuando se pide', () => {
       service.getAllPaquetes(true).subscribe();
-      httpMock
-        .expectOne(`${base}/paquetes-publicados?includeArchived=true`)
-        .flush([]);
 
-      service.getAllPaquetes().subscribe();
-      httpMock.expectOne(`${base}/paquetes-publicados`).flush([]);
+      httpMock
+        .expectOne(`${base}/paquetes-publicados?incluirCerrados=true&includeArchived=true`)
+        .flush([]);
     });
 
     it.each([
@@ -191,7 +189,9 @@ describe('PaquetePublicadoService', () => {
       let resultado: PaquetePublicado[] = [];
       service.getPaquetesCompletos().subscribe((r) => (resultado = r));
 
-      httpMock.expectOne(`${base}/paquetes-publicados`).flush(paquetes);
+      httpMock
+        .expectOne(`${base}/paquetes-publicados?incluirCerrados=true`)
+        .flush(paquetes);
 
       expect(resultado.map((p) => p.estado?.nombre)).toEqual(['Completo']);
     });
@@ -200,7 +200,9 @@ describe('PaquetePublicadoService', () => {
       let resultado: PaquetePublicado[] = [];
       service.getPaquetesFinalizados().subscribe((r) => (resultado = r));
 
-      httpMock.expectOne(`${base}/paquetes-publicados`).flush(paquetes);
+      httpMock
+        .expectOne(`${base}/paquetes-publicados?incluirCerrados=true`)
+        .flush(paquetes);
 
       expect(resultado.map((p) => p.estado?.nombre)).toEqual(['Cancelado']);
     });
@@ -210,7 +212,7 @@ describe('PaquetePublicadoService', () => {
       service.getPaquetesCompletos(true).subscribe((r) => (resultado = r));
 
       httpMock
-        .expectOne(`${base}/paquetes-publicados?includeArchived=true`)
+        .expectOne(`${base}/paquetes-publicados?incluirCerrados=true&includeArchived=true`)
         .flush(paquetes);
 
       expect(resultado.map((p) => p.estado?.nombre)).toEqual([
