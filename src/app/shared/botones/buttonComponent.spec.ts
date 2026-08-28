@@ -87,13 +87,19 @@ describe('ButtonComponent', () => {
       await montar({ label: 'Guardar', loading: true });
 
       expect(boton().textContent).not.toContain('Guardar');
-      expect(boton().querySelector('.animate-spin')).toBeTruthy();
+      expect(component.shouldShowLoadingSpinner()).toBe(true);
     });
 
     it('no muestra spinner cuando no está cargando', async () => {
       await montar({ label: 'Guardar' });
 
-      expect(boton().querySelector('.animate-spin')).toBeFalsy();
+      expect(component.shouldShowLoadingSpinner()).toBe(false);
+    });
+
+    it('no muestra spinner en un botón de sólo ícono, aunque esté cargando', async () => {
+      await montar({ iconStart: 'save', iconOnly: true, loading: true });
+
+      expect(component.shouldShowLoadingSpinner()).toBe(false);
     });
   });
 

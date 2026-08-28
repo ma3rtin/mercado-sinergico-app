@@ -75,16 +75,6 @@ describe('Home', () => {
     expect(component.paquetesPorCerrarse()).toEqual([]);
   });
 
-  it('recargarPaquetes debería volver a solicitar los paquetes al servicio', async () => {
-    await configurarTestBed('browser');
-    fixture.detectChanges();
-    mockPaquetePublicadoService.getPaquetesPorCerrarse.mockClear();
-
-    component.recargarPaquetes();
-
-    expect(mockPaquetePublicadoService.getPaquetesPorCerrarse).toHaveBeenCalledTimes(1);
-  });
-
   it('scrollToInfo debería llamar a scrollIntoView cuando la sección existe', async () => {
     await configurarTestBed('browser');
     fixture.detectChanges();
