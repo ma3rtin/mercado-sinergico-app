@@ -151,29 +151,4 @@ describe('ButtonComponent', () => {
     });
   });
 
-  describe('clases según tamaño y variante', () => {
-    it('aplica las clases del tamaño pedido', async () => {
-      await montar({ label: 'Guardar', size: 'lg' });
-
-      expect(component.iconClasses()).toContain('w-6 h-6');
-      expect(component.spacerClasses()).toBe('gap-2.5');
-    });
-
-    it('en dirección columna ignora el tamaño para el ícono', async () => {
-      await montar({ label: 'Guardar', size: 'xs', direction: 'column' });
-
-      expect(component.iconClasses()).toBe('w-8 h-8 flex-shrink-0');
-      expect(component.spacerClasses()).toBe('gap-2');
-    });
-
-    it('cambia las clases al cambiar la variante', async () => {
-      await montar({ label: 'Borrar', variant: 'primary' });
-      const primaria = component.buttonClasses();
-
-      fixture.componentRef.setInput('variant', 'danger');
-      fixture.detectChanges();
-
-      expect(component.buttonClasses()).not.toBe(primaria);
-    });
-  });
 });

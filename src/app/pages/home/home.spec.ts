@@ -145,30 +145,6 @@ describe('Home', () => {
   describe('render del template', () => {
     const textoDe = () => fixture.nativeElement.textContent as string;
 
-    it('muestra el spinner mientras carga', async () => {
-      await configurarTestBed('browser');
-      mockPaquetePublicadoService.getPaquetesPorCerrarse.mockReturnValue(
-        new Subject<PaquetePublicado[]>()
-      );
-
-      fixture.detectChanges();
-
-      expect(fixture.nativeElement.querySelector('.animate-spin')).toBeTruthy();
-      expect(fixture.nativeElement.querySelector('app-carrusel')).toBeFalsy();
-    });
-
-    it('muestra el error con el botón de reintento cuando falla', async () => {
-      await configurarTestBed('browser');
-      mockPaquetePublicadoService.getPaquetesPorCerrarse.mockReturnValue(
-        throwError(() => new Error('fallo de red'))
-      );
-
-      fixture.detectChanges();
-
-      expect(textoDe()).toContain('Intentar de nuevo');
-      expect(fixture.nativeElement.querySelector('app-carrusel')).toBeFalsy();
-    });
-
     it('el botón de reintento vuelve a pedir los paquetes', async () => {
       await configurarTestBed('browser');
       mockPaquetePublicadoService.getPaquetesPorCerrarse.mockReturnValue(

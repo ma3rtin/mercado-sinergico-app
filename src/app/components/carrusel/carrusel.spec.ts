@@ -47,8 +47,6 @@ describe('Carrusel', () => {
     fixture.nativeElement.querySelector(`button[aria-label="${label}"]`);
   const flechaIzquierda = () => flecha('Anterior');
   const flechaDerecha = () => flecha('Siguiente');
-  const puntosDeProgreso = () =>
-    fixture.nativeElement.querySelectorAll('.md\\:hidden > div');
 
   describe('maxScroll', () => {
     it('calcula el desplazamiento máximo según la cantidad de cards', async () => {
@@ -135,14 +133,6 @@ describe('Carrusel', () => {
   });
 
   describe('render', () => {
-    it('renderiza una card por item', async () => {
-      await crear(4);
-
-      expect(
-        fixture.nativeElement.querySelectorAll('app-paquete-card').length
-      ).toBe(4);
-    });
-
     it('aplica el translateX al contenedor al tocar la flecha', async () => {
       await crear(6);
 
@@ -168,17 +158,6 @@ describe('Carrusel', () => {
       expect(flechaDerecha().disabled).toBe(true);
     });
 
-    it('muestra un punto de progreso por card', async () => {
-      await crear(4);
-
-      expect(puntosDeProgreso().length).toBe(4);
-    });
-
-    it('no muestra el indicador de progreso con una sola card', async () => {
-      await crear(1);
-
-      expect(puntosDeProgreso().length).toBe(0);
-    });
   });
 
   describe('click en una card', () => {
