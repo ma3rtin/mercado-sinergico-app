@@ -50,7 +50,6 @@ export class Carrusel implements AfterViewInit {
       this.maxScroll = -(
         (totalCards - this.visibleCards) * (this.cardWidth + this.gap)
       );
-      console.log('📊 Carrusel actualizado:', { totalCards, maxScroll: this.maxScroll });
     });
   }
 
@@ -90,7 +89,6 @@ export class Carrusel implements AfterViewInit {
   onPaqueteClick(item: PaquetePublicado): void {
     const id = item.id_paquete_publicado;
     if (!id) return;
-    console.log('🔗 Paquete clickeado:', id);
     this.paqueteSelected.emit(id);
     const slugUrl = getPaqueteSlugUrl(item);
     this.router.navigate(['/paquete', slugUrl, 'productos']);
