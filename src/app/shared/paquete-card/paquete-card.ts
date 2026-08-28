@@ -1,7 +1,7 @@
 // ============================================
 // PAQUETE CARD COMPONENT - TypeScript
 // ============================================
-import { Component, Input, OnInit, Output, EventEmitter, computed } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
@@ -24,19 +24,20 @@ export class PaqueteCard implements OnInit {
   // 📤 Output: Emitir click de la card
   @Output() cardClick = new EventEmitter<number>();
 
-  // 📊 Computed
-  stockDisponible = computed(() => {
+  // Métodos y no computed(): paquete es un @Input comun, no una señal, asi que
+  // un computed cachearia el primer valor y nunca se actualizaria al cambiar.
+  stockDisponible(): number {
     const total = this.paquete.cant_productos || 0;
     const reservado = this.paquete.cant_productos_reservados || 0;
     return Math.max(0, total - reservado);
-  });
+  }
 
-  porcentajeReservado = computed(() => {
+  porcentajeReservado(): number {
     const total = this.paquete.cant_productos || 0;
     const reservados = this.paquete.cant_productos_reservados || 0;
     if (total === 0) return 0;
     return (reservados / total) * 100;
-  });
+  }
 
   constructor(private router: Router) { }
 
