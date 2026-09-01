@@ -9,7 +9,8 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import { switchMap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -159,7 +160,19 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         // Cargar productos del paquete
         this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe({
           next: prods => {
-            this.productosSeleccionados.set(prods);
+            const tipoActual = this.tipoPaquete();
+            const incompatibles = prods.filter(prod => prod.tipo !== tipoActual);
+            const compatibles = prods.filter(prod => prod.tipo === tipoActual);
+
+            this.productosSeleccionados.set(compatibles);
+
+            if (incompatibles.length > 0) {
+              const nombres = incompatibles.map(prod => prod.nombre).join(', ');
+              this.toast.warning(
+                `Se quitaron ${incompatibles.length} producto(s) por no ser compatibles con el tipo de este paquete: ${nombres}`
+              );
+            }
+
             this.isLoading.set(false);
           },
           error: (err) => {
@@ -263,16 +276,37 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
       .map(p => p.id_producto)
       .filter((pid): pid is number => pid !== undefined);
 
-    this.baseService.updatePaquete(paqueteActualizado).pipe(
-      switchMap(() => this.baseService.agregarProductos(id, productosIds))
+    console.log('PAYLOAD PUT:', JSON.stringify(paqueteActualizado));
+    console.log('PRODUCTOS IDS:', JSON.stringify(productosIds));
+
+    this.baseService.agregarProductos(id, productosIds).pipe(
+      switchMap(() =>
+        this.baseService.updatePaquete(paqueteActualizado).pipe(
+          catchError((err) => {
+            (err as Record<string, unknown>)['paso'] = 'update';
+            return throwError(() => err);
+          })
+        )
+      )
     ).subscribe({
       next: () => {
         this.toast.success('Paquete y productos actualizados. Los cambios ya se reflejan en la publicación activa.');
         this.router.navigate(['/admin/administrar-paquetes']);
       },
       error: (err) => {
-        console.error('❌ Error al actualizar paquete:', err);
-        this.toast.error('Error al actualizar. Verificá los datos e intentá de nuevo.');
+        const esUpdate = (err as { paso?: string })?.paso === 'update';
+        console.error(
+          esUpdate
+            ? '❌ Error al actualizar datos del paquete:'
+            : '❌ Error al sincronizar productos del paquete:',
+          err
+        );
+        console.error('BODY DEL ERROR:', JSON.stringify(err?.error ?? err, null, 2));
+        this.toast.error(
+          esUpdate
+            ? 'No pudimos actualizar los datos del paquete. Verificá los campos e intentá de nuevo.'
+            : 'No pudimos actualizar la lista de productos del paquete. Verificá que no haya productos incompatibles.'
+        );
         this.guardando.set(false);
       }
     });
