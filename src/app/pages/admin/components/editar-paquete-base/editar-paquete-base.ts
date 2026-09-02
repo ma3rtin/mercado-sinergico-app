@@ -196,7 +196,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     const productosActuales = this.productosSeleccionados();
 
     if (productosActuales.length === 0) {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
       return;
     }
 
@@ -217,15 +217,28 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
-          this.tipoPaquete.set(nuevoTipo);
           this.productosSeleccionados.set(productosActuales.filter(p => p.tipo === nuevoTipo));
+          this.aplicarTipo(nuevoTipo);
           this.toast.info('Se han removido los productos incompatibles.');
         }
         // El componente selector mantendrá visualmente el estado anterior si no se hace el .set()
       });
     } else {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
     }
+  }
+
+  // Los que se descartaron al cargar vuelven si el tipo nuevo los hace compatibles:
+  // sólo se habían sacado por no coincidir con el tipo anterior.
+  private aplicarTipo(nuevoTipo: TipoPaquete): void {
+    const recuperables = this.productosQuitadosPorTipo().filter(p => p.tipo === nuevoTipo);
+
+    if (recuperables.length > 0) {
+      this.productosQuitadosPorTipo.update(prods => prods.filter(p => p.tipo !== nuevoTipo));
+      this.productosSeleccionados.update(prods => [...prods, ...recuperables]);
+    }
+
+    this.tipoPaquete.set(nuevoTipo);
   }
 
   agregarProducto(p: Producto): void {

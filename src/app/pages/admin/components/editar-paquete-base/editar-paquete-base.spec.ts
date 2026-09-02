@@ -149,6 +149,32 @@ describe('EditarPaqueteBaseComponent — carga inicial', () => {
     expect(component.productosSeleccionados().map(p => p.id_producto)).toEqual([10]);
     expect(toast.warning).not.toHaveBeenCalled();
   });
+
+  it('recupera los productos descartados al cargar si el tipo nuevo los hace compatibles', () => {
+    const energico: Producto = {
+      id_producto: 11,
+      nombre: 'Samsung Galaxy S23',
+      descripcion: 'd',
+      precio: 200,
+      marca_id: 1,
+      categoria_id: 1,
+      tipo: TipoPaquete.ENERGICO,
+      imagenes: [],
+    };
+
+    const component = montar({
+      getPaquetes: () => of([paquete]),
+      getProductosByPaqueteBase: () => of([energico]),
+    } as Partial<PaqueteBaseService>);
+
+    expect(component.productosSeleccionados()).toEqual([]);
+    expect(component.productosQuitadosPorTipo().map(p => p.id_producto)).toEqual([11]);
+
+    component.onTipoPaqueteChange(TipoPaquete.ENERGICO);
+
+    expect(component.productosSeleccionados().map(p => p.id_producto)).toEqual([11]);
+    expect(component.productosQuitadosPorTipo()).toEqual([]);
+  });
 });
 
 describe('EditarPaqueteBaseComponent — guardar()', () => {
