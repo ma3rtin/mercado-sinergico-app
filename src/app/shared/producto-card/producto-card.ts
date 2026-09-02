@@ -146,6 +146,10 @@ imagenUrl = computed(() => {
   textoBoton = computed(() => {
     const ctx = this.contexto();
 
+    if (ctx === 'productos' && this.sinPaquetes()) {
+      return 'Próximamente disponible';
+    }
+
     const textos: Record<ProductoCardContexto, string> = {
       'productos': 'Ver paquetes',
       'paquete-detalle': 'Ver detalles',
@@ -153,6 +157,11 @@ imagenUrl = computed(() => {
     };
 
     return textos[ctx] || 'Ver más';
+  });
+
+  // Sin paquetes activos (solo aplica a la vista general de productos)
+  sinPaquetes = computed(() => {
+    return this.contexto() === 'productos' && (this.producto()?.cantPaquetes ?? 0) === 0;
   });
 
   // Tiene stock disponible
@@ -195,6 +204,12 @@ imagenUrl = computed(() => {
     }
 
     this.cardClick.emit(productoId);
+
+    // Producto sin paquetes activos: no hay detalle accionable, no navegar.
+    // (El detalle /producto/:slug sigue manejando el caso vacío por otras vías.)
+    if (this.sinPaquetes()) {
+      return;
+    }
 
     const nav = this.navegacion();
 
