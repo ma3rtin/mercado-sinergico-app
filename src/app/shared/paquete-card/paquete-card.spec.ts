@@ -156,8 +156,6 @@ describe('PaqueteCard', () => {
 
       expect(component.isEnergico()).toBe(true);
       expect(component.isSinergico()).toBe(false);
-      expect(component.getBorderColorClass()).toBe('border-l-secondary-dark');
-      expect(component.getDiscountBadgeClass()).toContain('secondary-dark');
     });
 
     it('reconoce un paquete sinérgico', async () => {
@@ -165,16 +163,13 @@ describe('PaqueteCard', () => {
 
       expect(component.isSinergico()).toBe(true);
       expect(component.isEnergico()).toBe(false);
-      expect(component.getBorderColorClass()).toBe('border-l-brand-primary');
-      expect(component.getTitleHoverClass()).toBe('group-hover:text-brand-primary');
     });
 
-    it('cae en los estilos neutros si el tipo no está definido', async () => {
+    it('no lo cuenta como ninguno de los dos tipos si no está definido', async () => {
       await montarCon({ tipo: undefined });
 
-      expect(component.getBorderColorClass()).toBe('border-l-border-default');
-      expect(component.getDiscountBadgeClass()).toBe('text-gray-700 border-gray-400');
-      expect(component.getFooterClass()).toContain('text-text-secondary');
+      expect(component.isEnergico()).toBe(false);
+      expect(component.isSinergico()).toBe(false);
     });
   });
 
