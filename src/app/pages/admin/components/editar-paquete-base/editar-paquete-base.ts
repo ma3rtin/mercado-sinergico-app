@@ -9,7 +9,8 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import { switchMap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -91,6 +92,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   marcas = signal<Marca[]>([]);
   categorias = signal<Categoria[]>([]);
   productosSeleccionados = signal<Producto[]>([]);
+  productosQuitadosPorTipo = signal<Producto[]>([]);
 
   imagenUrl = signal<string | null>(null);
   imagenSeleccionada = signal<File | null>(null);
@@ -139,9 +141,16 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
   cargarDatos(): void {
     this.isLoading.set(true);
     // Simulado hasta tener getPaqueteById en baseService
-    this.baseService.getPaquetes().subscribe(paquetes => {
-      const p = paquetes.find(x => x.id_paquete_base === this.idPaquete());
-      if (p) {
+    this.baseService.getPaquetes().subscribe({
+      next: paquetes => {
+        const p = paquetes.find(x => x.id_paquete_base === this.idPaquete());
+        if (!p) {
+          this.isLoading.set(false);
+          this.toast.error('No encontramos ese paquete. Puede que lo hayan eliminado.');
+          this.router.navigate(['/admin/administrar-paquetes']);
+          return;
+        }
+
         this.nombre.set(p.nombre);
         this.descripcion.set(p.descripcion);
         this.categoriaSeleccionada.set(p.categoria_id);
@@ -150,10 +159,35 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         this.tipoPaquete.set(p.tipo || TipoPaquete.SINERGICO);
 
         // Cargar productos del paquete
-        this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe(prods => {
-          this.productosSeleccionados.set(prods);
-          this.isLoading.set(false);
+        this.baseService.getProductosByPaqueteBase(p.id_paquete_base!).subscribe({
+          next: prods => {
+            const tipoActual = this.tipoPaquete();
+            const incompatibles = prods.filter(prod => prod.tipo !== tipoActual);
+            const compatibles = prods.filter(prod => prod.tipo === tipoActual);
+
+            this.productosSeleccionados.set(compatibles);
+            this.productosQuitadosPorTipo.set(incompatibles);
+
+            if (incompatibles.length > 0) {
+              const nombres = incompatibles.map(prod => prod.nombre).join(', ');
+              this.toast.warning(
+                `Este paquete tiene ${incompatibles.length} producto(s) que no son compatibles con su tipo y se quitarán cuando guardes: ${nombres}`
+              );
+            }
+
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('❌ Error al cargar productos del paquete:', err);
+            this.isLoading.set(false);
+            this.toast.error('No pudimos cargar los productos del paquete. Recargá la página.');
+          }
         });
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar paquetes:', err);
+        this.isLoading.set(false);
+        this.toast.error('No pudimos cargar el paquete. Recargá la página.');
       }
     });
   }
@@ -162,7 +196,7 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
     const productosActuales = this.productosSeleccionados();
 
     if (productosActuales.length === 0) {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
       return;
     }
 
@@ -183,15 +217,28 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
         reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
-          this.tipoPaquete.set(nuevoTipo);
           this.productosSeleccionados.set(productosActuales.filter(p => p.tipo === nuevoTipo));
+          this.aplicarTipo(nuevoTipo);
           this.toast.info('Se han removido los productos incompatibles.');
         }
         // El componente selector mantendrá visualmente el estado anterior si no se hace el .set()
       });
     } else {
-      this.tipoPaquete.set(nuevoTipo);
+      this.aplicarTipo(nuevoTipo);
     }
+  }
+
+  // Los que se descartaron al cargar vuelven si el tipo nuevo los hace compatibles:
+  // sólo se habían sacado por no coincidir con el tipo anterior.
+  private aplicarTipo(nuevoTipo: TipoPaquete): void {
+    const recuperables = this.productosQuitadosPorTipo().filter(p => p.tipo === nuevoTipo);
+
+    if (recuperables.length > 0) {
+      this.productosQuitadosPorTipo.update(prods => prods.filter(p => p.tipo !== nuevoTipo));
+      this.productosSeleccionados.update(prods => [...prods, ...recuperables]);
+    }
+
+    this.tipoPaquete.set(nuevoTipo);
   }
 
   agregarProducto(p: Producto): void {
@@ -228,6 +275,31 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
       return;
     }
 
+    const aQuitar = this.productosQuitadosPorTipo();
+    if (aQuitar.length === 0) {
+      this.guardarPaquete(id);
+      return;
+    }
+
+    const nombres = aQuitar.map(p => p.nombre).join(', ');
+    Swal.fire({
+      title: '¿Guardar y quitar productos?',
+      html: `
+        <p class="mb-4 text-sm text-gray-600">Se quitarán del paquete <b>${aQuitar.length}</b> producto(s) incompatibles con su tipo: <b>${nombres}</b>.</p>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: 'var(--brand-secondary)',
+      cancelButtonColor: 'var(--text-muted)',
+      confirmButtonText: 'Sí, guardar y quitar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) this.guardarPaquete(id);
+    });
+  }
+
+  private guardarPaquete(id: number): void {
     this.guardando.set(true);
 
     const paqueteActualizado = {
@@ -244,16 +316,35 @@ export class EditarPaqueteBaseComponent implements OnInit, AfterViewChecked {
       .map(p => p.id_producto)
       .filter((pid): pid is number => pid !== undefined);
 
-    this.baseService.updatePaquete(paqueteActualizado).pipe(
-      switchMap(() => this.baseService.agregarProductos(id, productosIds))
+    // Los productos van primero: el back valida el tipo del paquete contra los
+    // productos ya vinculados, así que actualizar los datos antes deja el update
+    // rebotando contra la lista vieja.
+    this.baseService.agregarProductos(id, productosIds).pipe(
+      catchError(err => throwError(() => ({ paso: 'productos' as const, err }))),
+      switchMap(() =>
+        this.baseService.updatePaquete(paqueteActualizado).pipe(
+          catchError(err => throwError(() => ({ paso: 'update' as const, err })))
+        )
+      )
     ).subscribe({
       next: () => {
+        this.productosQuitadosPorTipo.set([]);
         this.toast.success('Paquete y productos actualizados. Los cambios ya se reflejan en la publicación activa.');
         this.router.navigate(['/admin/administrar-paquetes']);
       },
-      error: (err) => {
-        console.error('❌ Error al actualizar paquete:', err);
-        this.toast.error('Error al actualizar. Verificá los datos e intentá de nuevo.');
+      error: ({ paso, err }: { paso: 'productos' | 'update'; err: unknown }) => {
+        const esUpdate = paso === 'update';
+        console.error(
+          esUpdate
+            ? '❌ Error al actualizar datos del paquete:'
+            : '❌ Error al sincronizar productos del paquete:',
+          err
+        );
+        this.toast.error(
+          esUpdate
+            ? 'Actualizamos los productos, pero no pudimos guardar los datos del paquete. Revisá los campos e intentá de nuevo.'
+            : 'No pudimos actualizar la lista de productos del paquete. Verificá que no haya productos incompatibles.'
+        );
         this.guardando.set(false);
       }
     });
