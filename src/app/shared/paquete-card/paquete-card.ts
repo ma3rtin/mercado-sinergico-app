@@ -1,7 +1,7 @@
 // ============================================
 // PAQUETE CARD COMPONENT - TypeScript
 // ============================================
-import { Component, Input, OnInit, Output, EventEmitter, computed } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
@@ -24,19 +24,20 @@ export class PaqueteCard implements OnInit {
   // 📤 Output: Emitir click de la card
   @Output() cardClick = new EventEmitter<number>();
 
-  // 📊 Computed
-  stockDisponible = computed(() => {
+  // Métodos y no computed(): paquete es un @Input comun, no una señal, asi que
+  // un computed cachearia el primer valor y nunca se actualizaria al cambiar.
+  stockDisponible(): number {
     const total = this.paquete.cant_productos || 0;
     const reservado = this.paquete.cant_productos_reservados || 0;
     return Math.max(0, total - reservado);
-  });
+  }
 
-  porcentajeReservado = computed(() => {
+  porcentajeReservado(): number {
     const total = this.paquete.cant_productos || 0;
     const reservados = this.paquete.cant_productos_reservados || 0;
     if (total === 0) return 0;
     return (reservados / total) * 100;
-  });
+  }
 
   constructor(private router: Router) { }
 
@@ -138,10 +139,22 @@ export class PaqueteCard implements OnInit {
     return 'text-text-muted';
   }
 
+  /**
+   * Etiqueta completa del timer. Se arma acá y no en el template porque
+   * getTiempoRestante() puede devolver un estado ('Finalizado', 'N/A') en vez
+   * de una duración, y anteponerle "Finaliza en" daba "Finaliza en Finalizado".
+   */
+  getEtiquetaTiempo(): string {
+    if (!this.paquete.fecha_fin) return 'Sin fecha de cierre';
+    if (this.getHoursRemaining() <= 0) return 'Finalizado';
+    return `Finaliza en ${this.getTiempoRestante(this.paquete.fecha_fin)}`;
+  }
+
   /** Accessible tooltip for the timer */
   getTimerTooltip(): string {
-    const remaining = this.getTiempoRestante(this.paquete.fecha_fin);
-    return `Cierra en ${remaining}`;
+    if (!this.paquete.fecha_fin) return 'Este paquete no tiene fecha de cierre';
+    if (this.getHoursRemaining() <= 0) return 'Este paquete ya finalizó';
+    return `Cierra en ${this.getTiempoRestante(this.paquete.fecha_fin)}`;
   }
 
   /** Tiempo restante formateado */
