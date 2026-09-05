@@ -51,7 +51,6 @@ export class Home implements OnInit {
 
   // 🔍 Obtener datos del backend
   private cargarPaquetesPorCerrarse(): void {
-    console.log('🔍 cargarPaquetesPorCerrarse() llamado');
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -60,26 +59,13 @@ export class Home implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         // ✅ NO mapeamos, pasamos directo los datos de PaquetePublicado
-        catchError((err) => {
-          console.error('❌ Error al obtener paquetes:', err);
+        catchError(() => {
           this.errorMessage.set('Error al cargar paquetes. Intenta de nuevo más tarde.');
           this.isLoading.set(false);
           return of([] as PaquetePublicado[]);
         })
       )
       .subscribe((paquetes) => {
-        console.log('📦 Paquetes recibidos:', paquetes);
-        console.log('📊 Cantidad:', paquetes.length);
-
-        // Debug: mostrar primer paquete
-        if (paquetes.length > 0) {
-          console.log('🔍 Primer paquete:', paquetes[0]);
-          console.log('  - Nombre:', paquetes[0].paqueteBase?.nombre);
-          console.log('  - Marca:', paquetes[0].paqueteBase?.marca?.nombre);
-          console.log('  - Categoría:', paquetes[0].paqueteBase?.categoria?.nombre);
-          console.log('  - Imagen:', paquetes[0].imagen_url);
-        }
-
         this.paquetesPorCerrarse.set(paquetes);
         this.isLoading.set(false);
       });
