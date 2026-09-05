@@ -251,6 +251,7 @@ export class ProductosService extends ApiService {
       imagenes,
       marca,
       categoria,
+      cantPaquetes: producto.cantPaquetes ?? 0,
 
       // Normalizar categoria_id: extraer del objeto categoria si no viene como campo directo
       categoria_id:
