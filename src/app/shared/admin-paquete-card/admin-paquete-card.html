@@ -100,15 +100,15 @@
                     <span class="text-[10px]">Compradores</span>
                 </div>
                 <!-- Reservados -->
-                <div class="flex items-center gap-2 text-text-secondary">
-                    <app-icon name="package" size="16" class="text-brand-secondary" />
-                    <span class="font-medium text-text-primary text-xs">{{ paquete.cant_productos_reservados ?? 0 }}/{{
-                        paquete.cant_productos ?? 0 }}</span>
-                    <span class="text-[10px]">Reservados</span>
-                    <div class="w-16 bg-bg-raised rounded-full h-1.5 overflow-hidden">
-                        <div class="h-1.5 rounded-full bg-brand-primary transition-all"
-                            [style.width]="getStockPercentage() + '%'"></div>
-                    </div>
+                <div class="flex items-center text-text-secondary">
+                    <app-barra-stock [total]="paquete.cant_productos" [consumido]="paquete.cant_productos_reservados"
+                        colorScheme="fijo" anchoFijo="4rem" [mostrarPorcentaje]="false">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="font-medium text-text-primary text-xs">{{ paquete.cant_productos_reservados ?? 0 }}/{{
+                                paquete.cant_productos ?? 0 }}</span>
+                            <span class="text-[10px]">Reservados</span>
+                        </div>
+                    </app-barra-stock>
                 </div>
             </div>
         </div>

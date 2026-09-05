@@ -118,17 +118,16 @@
             <div class="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center flex-shrink-0">
               <app-icon name="package" size="20" class="text-brand-primary mt-[2px]" />
             </div>
-            <div>
+            <div class="flex-1 min-w-0">
               <p class="text-xs text-text-secondary">Cantidad de productos reservados</p>
-              <p class="text-xl font-bold text-text-primary">
-                {{ paquete()?.cant_productos_reservados ?? 0 }}/{{ paquete()?.cant_productos ?? 0 }}
-              </p>
+              <app-barra-stock [total]="paquete()?.cant_productos" [consumido]="paquete()?.cant_productos_reservados"
+                colorScheme="fijo" altura="md">
+                <p class="text-xl font-bold text-text-primary">
+                  {{ paquete()?.cant_productos_reservados ?? 0 }}/{{ paquete()?.cant_productos ?? 0 }}
+                </p>
+              </app-barra-stock>
             </div>
           </div>
-          <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden shadow-inner border border-border-default">
-            <div class="bg-brand-primary h-2 rounded-full transition-all" [style.width]="stockPct() + '%'"></div>
-          </div>
-          <p class="text-xs text-text-muted mt-1 text-right">{{ stockPct() }}% reservado</p>
         </div>
 
         <!-- Compradores -->

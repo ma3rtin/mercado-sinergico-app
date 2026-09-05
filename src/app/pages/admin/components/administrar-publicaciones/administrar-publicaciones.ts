@@ -292,18 +292,6 @@ export class AdministrarPublicacionesComponent implements OnInit {
     return this.highlightedId() !== null && paquete.id_paquete_publicado === this.highlightedId();
   }
 
-  getStockPct(p: PaquetePublicado): number {
-    if (!p.cant_productos) return 0;
-    return Math.min(100, Math.round(((p.cant_productos_reservados ?? 0) / p.cant_productos) * 100));
-  }
-
-  getStockBarColor(pct: number): string {
-    if (pct >= 100) return 'bg-success';
-    if (pct >= 75) return 'bg-brand-primary';
-    if (pct >= 50) return 'bg-brand-cta';
-    return 'bg-border-default';
-  }
-
   getDiasRestantes(fechaFin?: Date): number {
     if (!fechaFin) return 0;
     return Math.ceil((new Date(fechaFin).getTime() - Date.now()) / 86400000);

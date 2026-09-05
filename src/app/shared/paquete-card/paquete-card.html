@@ -67,8 +67,8 @@
     </div>
 
     <!-- Vendidos de Total + Barra de progreso -->
-    <div class="mt-auto space-y-1.5 mb-2">
-      <div class="flex items-center justify-between text-sm">
+    <div class="mt-auto mb-2">
+      <app-barra-stock [total]="paquete.cant_productos" [consumido]="paquete.cant_productos_reservados">
         <span class="text-text-secondary">
           <strong class="text-text-primary">{{ paquete.cant_productos_reservados || 0 }}</strong>
           @if (isEnergico()) {
@@ -78,15 +78,7 @@
           }
           <strong class="text-text-primary">{{ paquete.cant_productos || 0 }}</strong>
         </span>
-        <span class="font-semibold" [ngClass]="getPercentageTextClass()">
-          {{ porcentajeReservado().toFixed(0) }}%
-        </span>
-      </div>
-
-      <div class="w-full bg-bg-raised rounded-full h-1.5 overflow-hidden">
-        <div class="h-full rounded-full transition-all duration-500" [style.width.%]="porcentajeReservado()"
-          [ngClass]="obtenerColorBarra()"></div>
-      </div>
+      </app-barra-stock>
     </div>
 
     <!-- Compradores (solo número) -->

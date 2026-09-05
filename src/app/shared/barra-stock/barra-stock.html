@@ -1,0 +1,10 @@
+<div class="flex items-center justify-between gap-2 text-sm">
+  <div class="min-w-0"><ng-content /></div>
+  @if (mostrarPorcentaje()) {
+  <span class="font-semibold whitespace-nowrap {{ colorTexto() }}">{{ porcentaje() }}%</span>
+  }
+</div>
+<div [style.width]="anchoTrack()" class="{{ trackClass() }}">
+  <div class="{{ (altura() === 'md' ? 'h-2 ' : 'h-1.5 ') + 'rounded-full transition-all duration-500 ' + colorBarra() }}"
+    [style.width.%]="porcentaje()"></div>
+</div>

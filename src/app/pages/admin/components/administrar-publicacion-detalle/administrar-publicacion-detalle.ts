@@ -13,12 +13,13 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import { LoaderComponent } from '@app/shared/loader/loader';
 import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
+import { BarraStock } from '@app/shared/barra-stock/barra-stock';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-administrar-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, BackButtonComponent, LoaderComponent, LoadingOverlay],
+  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, BackButtonComponent, LoaderComponent, LoadingOverlay, BarraStock],
   templateUrl: './administrar-publicacion-detalle.html',
 })
 export class AdministrarPublicacionDetalleComponent implements OnInit {
@@ -42,12 +43,6 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   pedidoSeleccionado = signal<Pedido | null>(null);
 
   // ── Señas Computadas ──────────────────────────────────────────
-
-  stockPct = computed(() => {
-    const p = this.paquete();
-    if (!p?.cant_productos) return 0;
-    return Math.min(100, Math.round(((p.cant_productos_reservados ?? 0) / p.cant_productos) * 100));
-  });
 
   diasRestantes = computed(() => {
     const fechaFin = this.paquete()?.fecha_fin;

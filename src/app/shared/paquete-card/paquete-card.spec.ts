@@ -96,7 +96,7 @@ describe('PaqueteCard', () => {
     });
   });
 
-  describe('stock y progreso', () => {
+  describe('stock', () => {
     it('calcula el stock disponible restando lo reservado', async () => {
       await montar(enHoras(51));
 
@@ -109,22 +109,9 @@ describe('PaqueteCard', () => {
       expect(component.stockDisponible()).toBe(0);
     });
 
-    it('calcula el porcentaje reservado', async () => {
-      await montarCon({ cant_productos: 8, cant_productos_reservados: 2 });
-
-      expect(component.porcentajeReservado()).toBe(25);
-    });
-
-    it('devuelve 0% en vez de dividir por cero cuando no hay productos', async () => {
-      await montarCon({ cant_productos: 0, cant_productos_reservados: 0 });
-
-      expect(component.porcentajeReservado()).toBe(0);
-    });
-
-    it('recalcula al cambiar el paquete y no se queda con el valor viejo', async () => {
+    it('recalcula el stock al cambiar el paquete y no se queda con el valor viejo', async () => {
       await montar(enHoras(51));
       expect(component.stockDisponible()).toBe(8);
-      expect(component.porcentajeReservado()).toBe(20);
 
       component.paquete = {
         ...component.paquete,
@@ -134,19 +121,6 @@ describe('PaqueteCard', () => {
       fixture.detectChanges();
 
       expect(component.stockDisponible()).toBe(1);
-      expect(component.porcentajeReservado()).toBe(75);
-    });
-
-    it.each([
-      [10, 'text-success', 'bg-success'],
-      [40, 'text-attention-dark', 'bg-attention'],
-      [70, 'text-warning', 'bg-warning'],
-      [90, 'text-error', 'bg-error'],
-    ])('con %i%% reservado usa los colores de ese tramo', async (pct, texto, barra) => {
-      await montarCon({ cant_productos: 100, cant_productos_reservados: pct });
-
-      expect(component.getPercentageTextClass()).toBe(texto);
-      expect(component.obtenerColorBarra()).toBe(barra);
     });
   });
 

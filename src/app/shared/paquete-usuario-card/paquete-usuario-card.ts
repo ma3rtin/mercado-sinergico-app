@@ -10,11 +10,12 @@ import { Router } from '@angular/router';
 import { getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
 import {TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { BarraStock, calcularPorcentajeStock } from '@app/shared/barra-stock/barra-stock';
 
 @Component({
   selector: 'app-paquete-usuario-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent, TipoBadgeComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, InfoTooltipComponent, TipoBadgeComponent, BarraStock],
   templateUrl: './paquete-usuario-card.html',
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
@@ -85,10 +86,10 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   get porcentajeReservado(): number {
-    const total = this.paquete?.cant_productos ?? 0;
-    const reservados = this.paquete?.cant_productos_reservados ?? 0;
-    if (total === 0) return 0;
-    return Math.max(0, Math.min(100, Math.round((reservados / total) * 100)));
+    return calcularPorcentajeStock(
+      this.paquete?.cant_productos,
+      this.paquete?.cant_productos_reservados
+    );
   }
 
   get cantidadProductosUsuario(): number {

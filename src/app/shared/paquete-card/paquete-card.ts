@@ -9,11 +9,12 @@ import { TipoPaquete } from '@app/models/Enums';
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
 import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
+import { BarraStock } from '@app/shared/barra-stock/barra-stock';
 
 @Component({
   selector: 'app-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent, BarraStock],
   templateUrl: './paquete-card.html',
   styleUrl: './paquete-card.css',
 })
@@ -30,13 +31,6 @@ export class PaqueteCard implements OnInit {
     const total = this.paquete.cant_productos || 0;
     const reservado = this.paquete.cant_productos_reservados || 0;
     return Math.max(0, total - reservado);
-  }
-
-  porcentajeReservado(): number {
-    const total = this.paquete.cant_productos || 0;
-    const reservados = this.paquete.cant_productos_reservados || 0;
-    if (total === 0) return 0;
-    return (reservados / total) * 100;
   }
 
   constructor(private router: Router) { }
@@ -95,26 +89,6 @@ export class PaqueteCard implements OnInit {
       return 'text-brand-secondary bg-blue-50/60 group-hover:bg-blue-100/80 group-hover:text-blue-900';
     }
     return 'text-text-secondary bg-bg-app group-hover:bg-bg-raised';
-  }
-
-  // ──── Progress bar ────
-
-  /** Texto del porcentaje de progreso */
-  getPercentageTextClass(): string {
-    const p = this.porcentajeReservado();
-    if (p >= 86) return 'text-error';
-    if (p >= 61) return 'text-warning';
-    if (p >= 31) return 'text-attention-dark';
-    return 'text-success';
-  }
-
-  /** Color de la barra de progreso */
-  obtenerColorBarra(): string {
-    const p = this.porcentajeReservado();
-    if (p >= 86) return 'bg-error';
-    if (p >= 61) return 'bg-warning';
-    if (p >= 31) return 'bg-attention';
-    return 'bg-success';
   }
 
   // ──── Timer (urgency-colored) ────

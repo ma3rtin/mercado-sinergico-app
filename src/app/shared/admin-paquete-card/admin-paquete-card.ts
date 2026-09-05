@@ -6,11 +6,12 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { TipoPaquete } from '@app/models/Enums';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { BarraStock } from '@app/shared/barra-stock/barra-stock';
 
 @Component({
   selector: 'app-admin-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, TipoBadgeComponent],
+  imports: [CommonModule, IconComponent, TipoBadgeComponent, BarraStock],
   templateUrl: './admin-paquete-card.html',
 })
 export class AdminPaqueteCard implements OnInit, OnDestroy {
@@ -146,12 +147,6 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
     format += `${s}s`;
 
     this.tiempoRestante.set(format.trim());
-  }
-
-  getStockPercentage(): number {
-    if (!this.paquete?.cant_productos) return 0;
-    const pct = ((this.paquete.cant_productos_reservados ?? 0) / this.paquete.cant_productos) * 100;
-    return isNaN(pct) ? 0 : Math.min(100, pct);
   }
 
   getStatusColor(): string {

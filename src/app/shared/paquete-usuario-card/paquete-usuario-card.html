@@ -42,29 +42,17 @@
     <!-- PROGRESO + META -->
     <div class="mt-2 text-xs">
       <!-- Texto -->
-      <div class="flex justify-between items-end mb-1.5 px-0.5">
-        <div class="flex flex-col">
-          <span class="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Progreso del paquete</span>
-          <span class="text-xs text-text-secondary">
-            <strong class="text-text-primary">{{ paquete?.cant_productos_reservados ?? 0 }}</strong>
-            / {{ paquete?.cant_productos ?? 0 }} prod.
-          </span>
-        </div>
-        <span class="font-bold text-sm text-brand-primary">
-          {{ porcentajeReservado }}%
-        </span>
+      <div class="flex flex-col mb-1.5 px-0.5">
+        <span class="text-[10px] text-text-muted uppercase font-bold tracking-tighter">Progreso del paquete</span>
       </div>
 
-      <!-- Barra -->
-      <div class="w-full bg-bg-app rounded-full h-2 overflow-hidden border border-border-default shadow-inner">
-        <div class="h-2 rounded-full transition-all duration-500" [ngClass]="{
-        'bg-success': porcentajeReservado < 50,
-        'bg-brand-pta': porcentajeReservado >= 50 && porcentajeReservado < 80,
-        'bg-brand-primary': porcentajeReservado >= 80 && porcentajeReservado < 100,
-        'bg-error': porcentajeReservado >= 100
-      }" [style.width.%]="porcentajeReservado">
-        </div>
-      </div>
+      <app-barra-stock [total]="paquete?.cant_productos" [consumido]="paquete?.cant_productos_reservados"
+        altura="md">
+        <span class="text-xs text-text-secondary">
+          <strong class="text-text-primary">{{ paquete?.cant_productos_reservados ?? 0 }}</strong>
+          / {{ paquete?.cant_productos ?? 0 }} prod.
+        </span>
+      </app-barra-stock>
     </div>
   </div>
 </div>
