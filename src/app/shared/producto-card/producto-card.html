@@ -1,6 +1,9 @@
 <!-- Producto Card -->
 <article (click)="onCardClick()"
-  class="group bg-bg-surface rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border border-border-default hover:border-brand-primary cursor-pointer transform hover:scale-[1.02] active:scale-[0.98] flex flex-col h-full relative hover:z-30">
+  class="group bg-bg-surface rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border border-border-default flex flex-col h-full relative hover:z-30"
+  [ngClass]="sinPaquetes()
+    ? 'opacity-90 cursor-default border-dotted hover:border-border-default hover:shadow-md'
+    : 'hover:border-brand-primary cursor-pointer hover:scale-[1.02] active:scale-[0.98] transform'">
 
   <!-- 🖼️ IMAGEN -->
   <div class="relative w-full aspect-square bg-bg-app rounded-t-xl">
@@ -64,6 +67,15 @@
       {{ producto().nombre }}
     </h3>
 
+    <!-- ⏳ BADGE DE PROXIMAMENTE (sin paquetes activos) -->
+    @if (sinPaquetes()) {
+    <span
+      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-text-muted bg-bg-raised border border-border-default mb-2">
+      <app-icon name="Clock" size="13"></app-icon>
+      Próximamente disponible
+    </span>
+    }
+
     <!-- Spacer para empujar el contenido inferior hacia abajo -->
     <div class="flex-grow"></div>
 
@@ -109,13 +121,15 @@
 
     <!-- 🔗 CTA BUTTON -->
     <div class="pt-3 border-t border-border-default">
-      <app-button [variant]="'primary'" [type]="'button'" class="w-full">
+      <app-button [variant]="sinPaquetes() ? 'ghost' : 'primary'" [type]="'button'" [disabled]="sinPaquetes()" class="w-full">
         <span class="flex items-center justify-center gap-2 text-sm font-medium">
           {{ textoBoton() }}
+          @if (!sinPaquetes()) {
           <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
+          }
         </span>
       </app-button>
     </div>

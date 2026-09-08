@@ -14,7 +14,7 @@
   }
 
   <!-- Tooltip Content -->
-  <div class="tooltip-content absolute w-48 sm:w-56 bg-gray-900/95 backdrop-blur-md text-white rounded-xl p-3 shadow-xl border border-gray-700 pointer-events-none z-50"
+  <div class="tooltip-content absolute w-44 sm:w-52 max-w-[calc(100vw-1.5rem)] break-words bg-gray-900/95 backdrop-blur-md text-white rounded-xl p-3 shadow-xl border border-gray-700 pointer-events-none z-50"
        [ngClass]="getContentPositionClass()">
     @if (activeTitle) {
       <strong class="block text-xs sm:text-sm font-bold mb-1 tracking-wide" [ngClass]="titleClass">

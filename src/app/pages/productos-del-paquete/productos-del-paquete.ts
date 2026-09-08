@@ -21,7 +21,6 @@ import {
   FiltrosAplicados,
   OpcionFiltro,
 } from '@app/shared/filtros/filtros';
-import { TipoPaquete } from '@app/models/Enums';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -160,17 +159,13 @@ export class ProductosDelPaquete implements OnInit {
     return this.productosFiltrados().length;
   });
 
-  // 📊 Computed: Descuento según tipo de paquete
+  // 📊 Computed: Descuento real del paquete publicado
   descuentoPaquete = computed(() => {
     const p = this.paquete();
     if (!p) return null;
 
-    let porcentaje = 0;
-    if (p.tipo === TipoPaquete.SINERGICO) porcentaje = 3;
-    if (p.tipo === TipoPaquete.ENERGICO) porcentaje = 8;
-
     return {
-      porcentaje,
+      porcentaje: p.descuento || 0,
       aplicado: false,
       nombrePaquete: p.nombre || p.paqueteBase?.nombre || 'Paquete',
     };
