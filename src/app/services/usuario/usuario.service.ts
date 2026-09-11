@@ -111,10 +111,24 @@ export class UsuarioService extends ApiService {
     );
   }
 
+  verificarEmail(token: string): Observable<{ message: string }> {
+    return this.post<{ message: string }>('usuarios/verificar-email', { token }).pipe(
+      timeout(30000),
+      catchError(this.handleError('verificarEmail'))
+    );
+  }
+
+  reenviarVerificacion(email: string): Observable<{ message: string }> {
+    return this.post<{ message: string }>('usuarios/reenviar-verificacion', { email }).pipe(
+      timeout(30000),
+      catchError(this.handleError('reenviarVerificacion'))
+    );
+  }
+
   private handleError(operation = 'operación') {
     return (error: any) => {
       console.error(`Error en UsuarioService.${operation}:`, error);
-      return throwError(() => new Error(`Error en ${operation}: ${error.message}`));
+      return throwError(() => error);
     };
   }
 }
