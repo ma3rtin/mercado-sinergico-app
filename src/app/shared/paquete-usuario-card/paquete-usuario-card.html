@@ -261,14 +261,14 @@
         </section>
 
         <!-- RESUMEN DE PAGO (Tarjeta con jerarquía Clara) -->
-        @if (pedido.precioSubtotal !== undefined) {
+        @if (pedido.subtotal !== undefined) {
         <section class="bg-brand-secondary text-white rounded-[32px] p-6 shadow-lg relative overflow-hidden">
           <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
-          
+
           <div class="relative z-10 flex justify-between items-center">
             <div class="space-y-1">
               <p class="text-xs font-bold text-white/50 uppercase tracking-widest leading-none">Total estimado</p>
-              <h2 class="text-2xl font-display font-bold leading-none">{{ formatPrice(pedido.precioFinal || pedido.precioSubtotal) }}</h2>
+              <h2 class="text-2xl font-display font-bold leading-none">{{ formatPrice(pedido.total || pedido.subtotal) }}</h2>
             </div>
             
             <div class="flex items-center gap-3">

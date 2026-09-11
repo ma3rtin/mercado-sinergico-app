@@ -1,4 +1,5 @@
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
+import { VariantePedidoDetalle } from '@app/models/PedidosInterfaces/VariantePedidoDetalle';
 
 export interface PedidoDetalle {
     id: number;
@@ -7,6 +8,6 @@ export interface PedidoDetalle {
     cantidad: number;
     precio_unitario: number;
     subtotal: number;
-    variante?: string;
+    variante?: VariantePedidoDetalle | null;
     producto: Producto;
 }

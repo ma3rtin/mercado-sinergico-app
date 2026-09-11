@@ -19,6 +19,8 @@ import {TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 })
 export class PaqueteUsuarioCardComponent implements OnInit {
 
+  // Tipar esto como PedidoDelUsuario expone ~14 errores de null-safety preexistentes
+  // en este template, sin relación con el tipo de variante. Queda pendiente aparte.
   @Input() pedido!: any;
 
   @Input() marcas: any[] = [];
