@@ -1,3 +1,5 @@
+import { VariantePedidoDetalle } from '@app/models/PedidosInterfaces/VariantePedidoDetalle';
+
 export interface ProductoEnPedido {
     id_detalle: number;
     id_producto: number;
@@ -6,5 +8,5 @@ export interface ProductoEnPedido {
     precioConDescuento?: number;
     imagen_url?: string;
     cantidad: number;
-    variante?: string | null;
+    variante?: VariantePedidoDetalle | null;
 }
