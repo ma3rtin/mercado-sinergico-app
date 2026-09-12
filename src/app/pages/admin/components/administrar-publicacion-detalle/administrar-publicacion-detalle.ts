@@ -13,12 +13,13 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { ToastService } from '@app/services/toast/toast.service';
 import { LoaderComponent } from '@app/shared/loader/loader';
 import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-administrar-publicacion-detalle',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, BackButtonComponent, LoaderComponent, LoadingOverlay],
+  imports: [CommonModule, ButtonComponent, IconComponent, FormsModule, BackButtonComponent, LoaderComponent, LoadingOverlay, InfoTooltipComponent],
   templateUrl: './administrar-publicacion-detalle.html',
 })
 export class AdministrarPublicacionDetalleComponent implements OnInit {
