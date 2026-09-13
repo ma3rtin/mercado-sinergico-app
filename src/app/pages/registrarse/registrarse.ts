@@ -38,6 +38,9 @@ export class RegistrarseComponent implements OnInit {
   submitted = signal(false);
   showPassword = signal(false);
   showConfirmPassword = signal(false);
+  registroExitoso = signal(false);
+  emailRegistrado = signal('');
+  reenviando = signal(false);
 
   // 👁️ Cambiar visibilidad de las contraseñas
   togglePassword() {
@@ -145,20 +148,35 @@ export class RegistrarseComponent implements OnInit {
     this.usuarioService.register(datos).subscribe({
       next: (response: any) => {
         this.loading.set(false);
-
-        // ✅ Si el backend devuelve un token al registrarse
-        if (response?.token) {
-          this.authService.setJwtToken(response.token);
-        }
-
-        this.mostrarExito('Registro exitoso');
-        this.router.navigate(['/login']);
+        this.emailRegistrado.set(datos.email);
+        this.registroExitoso.set(true);
+        this.mostrarExito(response?.message || 'Registro exitoso. Revisá tu correo para activar tu cuenta.');
       },
       error: (error) => {
         this.loading.set(false);
         console.error('❌ Error en registro:', error);
         this.mostrarError(
-          error?.error?.message || 'Error al registrarte. Intentá nuevamente.'
+          error?.error?.error || error?.error?.message || error?.message || 'Error al registrarte. Intentá nuevamente.'
+        );
+      },
+    });
+  }
+
+  // ✉️ Reenviar verificación desde la pantalla de éxito
+  reenviarVerificacion(): void {
+    const email = this.emailRegistrado();
+    if (!email) return;
+
+    this.reenviando.set(true);
+    this.usuarioService.reenviarVerificacion(email).subscribe({
+      next: (response) => {
+        this.reenviando.set(false);
+        this.mostrarExito(response?.message || 'Si la cuenta está pendiente, enviamos un nuevo correo.');
+      },
+      error: (error) => {
+        this.reenviando.set(false);
+        this.mostrarError(
+          error?.error?.error || error?.error?.message || 'No pudimos reenviar el correo. Intentá en unos minutos.'
         );
       },
     });

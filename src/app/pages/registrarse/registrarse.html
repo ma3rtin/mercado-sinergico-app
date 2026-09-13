@@ -3,6 +3,7 @@
     <div class="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white shadow-md">
         <div class="w-full max-w-2xl">
 
+            @if (!registroExitoso()) {
             <!-- Título -->
             <h1 class="font-display text-4xl lg:text-4xl text-gray-900 mb-2">
                 Registrarse
@@ -166,9 +167,19 @@
                 </p>
 
                 <!-- Botón de envío -->
-                <div class="mt-4">
-                    <app-button type="submit" variant="primary" label="Registrarse"
-                        class="w-full font-body"></app-button>
+                <div class="mt-6 flex justify-center">
+                    <div class="w-56 max-w-full">
+                        <app-button
+                            type="submit"
+                            variant="primary"
+                            [label]="loading() ? 'Registrando...' : 'Registrarse'"
+                            [disabled]="loading()"
+                            [loading]="loading()"
+                            [fullWidth]="true"
+                            width="full"
+                            class="w-full font-body"
+                        ></app-button>
+                    </div>
                 </div>
 
                 <!-- Link a login -->
@@ -181,6 +192,42 @@
                 </p>
 
             </form>
+            } @else {
+            <div class="text-center py-6">
+                <h1 class="font-display text-4xl lg:text-5xl text-gray-900 mb-4">
+                    Revisá tu correo
+                </h1>
+                <p class="text-gray-700 font-body text-lg font-medium mb-8 leading-relaxed max-w-xl mx-auto text-balance">
+                    Te enviamos un enlace de activación a <strong class="text-gray-900 font-bold">{{ emailRegistrado() }}</strong>. Confirmalo para activar tu cuenta e iniciar sesión (el enlace vence en 24 horas).
+                </p>
+
+                <div class="space-y-4">
+                    <div class="flex justify-center">
+                        <a routerLink="/login" class="w-56 max-w-full block">
+                            <app-button
+                                variant="primary"
+                                label="Ir a Iniciar Sesión"
+                                [fullWidth]="true"
+                                width="full"
+                                class="w-full font-body"
+                            ></app-button>
+                        </a>
+                    </div>
+
+                    <p class="text-sm text-gray-600 font-body text-center pt-2">
+                        ¿No te llegó el correo?
+                        <button type="button" (click)="reenviarVerificacion()" [disabled]="reenviando()"
+                            class="text-secondary font-semibold hover:text-secondary-dark hover:underline transition-colors ml-1 cursor-pointer disabled:opacity-50">
+                            @if (reenviando()) {
+                                Reenviando...
+                            } @else {
+                                Reenviar enlace
+                            }
+                        </button>
+                    </p>
+                </div>
+            </div>
+            }
         </div>
     </div>
 

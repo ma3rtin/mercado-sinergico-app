@@ -45,6 +45,13 @@ export const routes: Routes = [
       // 🔐 Auth
       { path: 'login', component: LoginComponent },
       { path: 'registrarse', component: RegistrarseComponent },
+      {
+        path: 'verificar-email',
+        loadComponent: () =>
+          import('./pages/verificar-email/verificar-email').then(
+            (m) => m.VerificarEmailComponent
+          ),
+      },
 
       // 🛍️ Público
       { path: 'productos', component: ProductosComponent },

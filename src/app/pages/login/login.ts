@@ -28,6 +28,8 @@ export class LoginComponent {
   showPassword = signal(false);
   mensaje = signal<string | undefined>(undefined);
   loading = signal(false);
+  cuentaNoVerificada = signal(false);
+  reenviando = signal(false);
 
   // 👁️ Cambiar visibilidad de la contraseña
   togglePassword() {
@@ -38,6 +40,7 @@ export class LoginComponent {
   onSubmit() {
     this.loading.set(true);
     this.mensaje.set(undefined);
+    this.cuentaNoVerificada.set(false);
 
     const credenciales = {
       email: this.email(),
@@ -52,8 +55,38 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('❌ Error al iniciar sesión:', err);
-        this.mensaje.set('El mail o la contraseña son incorrectos');
         this.loading.set(false);
+        if (err?.error?.code === 'EMAIL_NO_VERIFICADO') {
+          this.cuentaNoVerificada.set(true);
+          this.mensaje.set(
+            err?.error?.message || 'Confirmá tu correo electrónico antes de iniciar sesión.'
+          );
+        } else {
+          this.mensaje.set(
+            err?.error?.error || err?.error?.message || 'El mail o la contraseña son incorrectos'
+          );
+        }
+      },
+    });
+  }
+
+  // ✉️ Reenviar enlace de activación si la cuenta no está verificada
+  reenviarActivacion() {
+    const email = this.email().trim();
+    if (!email) {
+      this.toast.error('Ingresá tu correo en el formulario para reenviar la activación', 'Atención');
+      return;
+    }
+
+    this.reenviando.set(true);
+    this.usuarioService.reenviarVerificacion(email).subscribe({
+      next: (res) => {
+        this.reenviando.set(false);
+        this.toast.success(res?.message || 'Si la cuenta está pendiente, enviamos un nuevo correo.', 'Éxito');
+      },
+      error: (err) => {
+        this.reenviando.set(false);
+        this.toast.error(err?.error?.error || err?.error?.message || 'No se pudo reenviar el correo', 'Error');
       },
     });
   }
@@ -63,6 +96,7 @@ export class LoginComponent {
     try {
       this.loading.set(true);
       this.mensaje.set(undefined);
+      this.cuentaNoVerificada.set(false);
 
       await this.authService.signInWithGoogle();
 
@@ -77,12 +111,22 @@ export class LoginComponent {
         },
         error: (err) => {
           console.error('❌ Error al sincronizar usuario:', err);
-          this.mensaje.set('Error al sincronizar la cuenta con el servidor');
+          this.authService.signOut();
+          if (err?.error?.code === 'EMAIL_NO_VERIFICADO') {
+            this.mensaje.set(
+              err?.error?.message || 'Google no confirmó este correo electrónico. Verificalo en tu cuenta Google.'
+            );
+          } else {
+            this.mensaje.set(
+              err?.error?.error || err?.error?.message || 'Error al sincronizar la cuenta con el servidor'
+            );
+          }
           this.loading.set(false);
         },
       });
     } catch (error) {
       console.error('❌ Error al iniciar sesión con Google:', error);
+      this.authService.signOut();
       this.mensaje.set('Error al iniciar sesión con Google');
       this.loading.set(false);
     }
