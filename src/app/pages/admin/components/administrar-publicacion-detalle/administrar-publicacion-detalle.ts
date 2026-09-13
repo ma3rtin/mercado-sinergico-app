@@ -292,9 +292,24 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   notificarCompradores() {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
+    const nombrePaquete = p.paqueteBase?.nombre ?? 'este paquete';
+    const ultimaNotificacion = p.ultimaNotificacion ? new Date(p.ultimaNotificacion) : null;
+    const avisoReenvio = ultimaNotificacion
+      ? `
+      <p style="color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:8px 12px; font-size:13px; margin-top:10px; text-align:left;">
+        ⚠️ Este paquete ya fue notificado el ${ultimaNotificacion.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}.
+        Esta acción <strong>reenvía</strong> el email a los compradores.
+      </p>`
+      : '';
+    const html = `
+      <p style="color:#374151; font-size:15px; line-height:1.6;">
+        Se enviará un recordatorio de cierre a todos los compradores activos de
+        <strong style="color:#2E608C;">${nombrePaquete}</strong>.
+      </p>${avisoReenvio}
+    `;
     Swal.fire({
       title: '¿Enviar notificación a compradores?',
-      text: `Se enviará un recordatorio de cierre a todos los compradores activos de "${p.paqueteBase?.nombre}".`,
+      html,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#2E608C',
@@ -310,7 +325,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
         finalize(() => this.isProcesando.set(false))
       ).subscribe({
         next: (res) => this.toast.success(`Notificación enviada a ${res.notificados} comprador/es.`, '¡Aviso enviado!'),
-        error: () => this.toast.error('Error al enviar la notificación.', 'Error')
+        error: (err) => this.toast.error(err?.error?.message ?? 'Error al enviar la notificación.', 'Error')
       });
     });
   }
