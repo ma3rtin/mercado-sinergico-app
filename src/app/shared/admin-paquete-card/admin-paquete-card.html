@@ -167,15 +167,19 @@
                     <div class="px-2 pt-2">
                         <p class="text-[10px] font-bold uppercase tracking-widest text-text-muted px-2 pb-1">
                             Comunicación</p>
-                        <button (click)="onNotify($event)" [disabled]="disabled()"
+                        <app-info-tooltip [customTrigger]="true"
+                          description="Envía un email recordatorio a los compradores de que el paquete está por cerrarse"
+                          position="bottom-center">
+                          <button (click)="onNotify($event)" [disabled]="disabled()"
                             [class.opacity-50]="disabled()" [class.cursor-not-allowed]="disabled()"
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-text-secondary hover:bg-warning-light hover:text-warning transition-colors">
                             <app-icon name="bell" size="16" class="text-warning flex-shrink-0" />
                             <div class="text-left">
-                                <p class="font-medium text-xs leading-tight">Notificar compradores</p>
-                                <p class="text-[10px] text-text-muted leading-tight">Enviar email de aviso de cierre</p>
+                              <p class="font-medium text-xs leading-tight">Notificar compradores</p>
+                              <p class="text-[10px] text-text-muted leading-tight">Enviar email de aviso de cierre</p>
                             </div>
-                        </button>
+                          </button>
+                        </app-info-tooltip>
                     </div>
                     <div class="my-1 mx-2 border-t border-border-default"></div>
                     }
