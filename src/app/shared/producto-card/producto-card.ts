@@ -146,10 +146,6 @@ imagenUrl = computed(() => {
   textoBoton = computed(() => {
     const ctx = this.contexto();
 
-    if (ctx === 'productos' && this.sinPaquetes()) {
-      return 'Próximamente disponible';
-    }
-
     const textos: Record<ProductoCardContexto, string> = {
       'productos': 'Ver paquetes',
       'paquete-detalle': 'Ver detalles',
