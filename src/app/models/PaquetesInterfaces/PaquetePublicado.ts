@@ -20,6 +20,7 @@ export interface PaquetePublicado {
   imagen_url?: string;
   tipo?: TipoPaquete;
   archivado?: boolean;
+  ultimaNotificacion?: Date;   // llega como ISO string desde el backend
 
   // Relaciones
   paqueteBase?: PaqueteBase;

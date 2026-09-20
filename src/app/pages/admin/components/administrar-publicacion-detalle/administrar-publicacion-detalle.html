@@ -296,10 +296,16 @@
 
             <!-- ZONA 3: Acciones secundarias -->
             <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
-              <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell"
-                (buttonClick)="notificarCompradores()">
-                Notificar compradores
-              </app-button>
+              @if (puedeNotificar()) {
+              <app-info-tooltip [customTrigger]="true"
+                  description="Envía un email recordatorio a los compradores de que el paquete está por cerrarse"
+                  position="top-center">
+                  <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell"
+                    (buttonClick)="notificarCompradores()">
+                    Notificar compradores
+                  </app-button>
+                </app-info-tooltip>
+              }
               <app-button variant="tertiary" [fullWidth]="true" size="sm" iconStart="copy"
                 (buttonClick)="duplicarPaquete()">
                 Duplicar publicación
@@ -391,10 +397,16 @@
 
             <!-- ZONA 3: Acciones secundarias -->
             <div class="border-t border-gray-200 pt-4 mt-4 flex flex-col gap-2">
-              <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell"
-                (buttonClick)="notificarCompradores()">
-                Notificar compradores
-              </app-button>
+              @if (puedeNotificar()) {
+              <app-info-tooltip [customTrigger]="true"
+                  description="Envía un email recordatorio a los compradores de que el paquete está por cerrarse"
+                  position="top-center">
+                  <app-button variant="secondary" [fullWidth]="true" size="sm" iconStart="bell"
+                    (buttonClick)="notificarCompradores()">
+                    Notificar compradores
+                  </app-button>
+                </app-info-tooltip>
+              }
               <app-button variant="success-outline" [fullWidth]="true" size="sm" iconStart="fileText"
                 (buttonClick)="descargarParteProveedor()">
                 Reporte para proveedor
