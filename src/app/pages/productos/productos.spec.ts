@@ -133,13 +133,4 @@ describe('ProductosComponent', () => {
     }));
   });
 
-  it('debería navegar limpiando filtros al llamar a limpiarFiltros', () => {
-    component['isBrowser'] = true;
-    fixture.detectChanges();
-
-    component.limpiarFiltros();
-
-    expect(component.filtrosActuales()).toBeNull();
-    expect(mockRouter.navigate).toHaveBeenCalled();
-  });
 });

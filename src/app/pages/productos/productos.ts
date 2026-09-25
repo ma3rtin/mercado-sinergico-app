@@ -20,7 +20,6 @@ import { CategoriaService } from '@app/services/producto/categoria.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { ZonaService } from '@app/services/zona/zona.service';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
-import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -30,7 +29,6 @@ import {
   OpcionFiltro,
 } from '@app/shared/filtros/filtros';
 import { Zona } from '@app/models/ZonasInterfaces/Zona';
-import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 // Components
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
@@ -64,7 +62,6 @@ export class ProductosComponent implements OnInit {
   private readonly marcaService = inject(MarcaService);
   private readonly zonaService = inject(ZonaService);
   private readonly usuarioService = inject(UsuarioService);
-  private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
@@ -76,7 +73,6 @@ export class ProductosComponent implements OnInit {
 
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
-  productoSeleccionado = signal<Producto | null>(null);
   todasLasCategorias = signal<any[]>([]);
   todasLasMarcas = signal<any[]>([]);
   totalProductos = signal<number>(0);
@@ -84,19 +80,14 @@ export class ProductosComponent implements OnInit {
   // Estados de carga individuales
   isLoadingProductos = signal(true);
   isLoadingZonas = signal(true);
-  isLoadingPaquetes = signal(true);
 
   // isLoading computado reactivo
   isLoading = computed(
-    () =>
-      this.isLoadingProductos() ||
-      this.isLoadingZonas() ||
-      this.isLoadingPaquetes(),
+    () => this.isLoadingProductos() || this.isLoadingZonas(),
   );
 
   errorMessage = signal('');
   todasLasZonas = signal<Zona[]>([]);
-  paquetesActivos = signal<PaquetePublicado[]>([]);
   filtrosActuales = signal<FiltrosAplicados | null>(null);
 
   // 📄 SIGNALS DE PAGINACIÓN
@@ -115,78 +106,37 @@ export class ProductosComponent implements OnInit {
     return {};
   });
 
-  // 📊 COMPUTED: Productos filtrados reactivamente (ahora filtrados en backend)
-  productosFiltrados = computed(() => {
-    return this.productosOriginales();
-  });
-
-  // 📊 COMPUTED: Productos paginados (ahora paginados en backend)
-  productosPaginados = computed(() => {
-    const seleccionado = this.productoSeleccionado();
-    if (seleccionado) {
-      return [seleccionado];
-    }
-    return this.productosOriginales();
-  });
-
-  // 📊 COMPUTED: Total de items para la paginación (del total del backend)
-  totalItemsPaginacion = computed(() => {
-    const seleccionado = this.productoSeleccionado();
-    if (seleccionado) return 1;
-    return this.totalProductos();
-  });
-
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  // 🧩 Computed signals
-  hasProductos = computed(() => this.productosOriginales().length > 0);
+  // 🎯 Catálogos ya cargados por esta página, en el formato que espera
+  // app-filtros: evita que vuelva a pedirlos por su cuenta.
+  opcionesCategorias = computed<OpcionFiltro[]>(() =>
+    this.todasLasCategorias().map((cat) => ({
+      id: cat.id_categoria,
+      nombre: cat.nombre,
+      valor: cat.id_categoria,
+    })),
+  );
+
+  opcionesMarcas = computed<OpcionFiltro[]>(() =>
+    this.todasLasMarcas().map((marca) => ({
+      id: marca.id_marca,
+      nombre: marca.nombre,
+      valor: marca.id_marca,
+    })),
+  );
+
+  opcionesZonas = computed<OpcionFiltro[]>(() =>
+    this.todasLasZonas().map((zona) => ({
+      id: zona.id_zona,
+      nombre: zona.nombre,
+      valor: zona.id_zona,
+    })),
+  );
 
   // 🎯 CONFIGURACIÓN DE FILTROS PARA PRODUCTOS
   configFiltrosProductos = computed<ConfigFiltros>(() => ({
-    // 📊 Servicios para obtener datos
-    obtenerCategorias: () =>
-      this.categoriaService.getCategorias().pipe(
-        map((categorias) =>
-          categorias.map(
-            (cat) =>
-              ({
-                id: cat.id_categoria,
-                nombre: cat.nombre,
-                valor: cat.id_categoria,
-              }) as OpcionFiltro,
-          ),
-        ),
-      ),
-
-    obtenerMarcas: () =>
-      this.marcaService.getMarcas().pipe(
-        map((marcas) =>
-          marcas.map(
-            (marca) =>
-              ({
-                id: marca.id_marca,
-                nombre: marca.nombre,
-                valor: marca.id_marca,
-              }) as OpcionFiltro,
-          ),
-        ),
-      ),
-
-    obtenerZonas: () =>
-      this.zonaService.getZonas().pipe(
-        map((zonas) =>
-          zonas.map(
-            (zona) =>
-              ({
-                id: zona.id_zona,
-                nombre: zona.nombre,
-                valor: zona.id_zona,
-              }) as OpcionFiltro,
-          ),
-        ),
-      ),
-
     // 🎨 Filtros a mostrar (solo para productos)
     mostrarCategoria: true,
     mostrarMarca: true,
@@ -203,7 +153,6 @@ export class ProductosComponent implements OnInit {
       { id: 3, nombre: 'Z-A', valor: 'z-a' },
       { id: 4, nombre: 'Precio: Menor a Mayor', valor: 'precio-asc' },
       { id: 5, nombre: 'Precio: Mayor a Menor', valor: 'precio-desc' },
-      { id: 6, nombre: 'Más stock', valor: 'mas-stock' },
     ],
 
     // 🎯 Textos personalizados
@@ -225,7 +174,6 @@ export class ProductosComponent implements OnInit {
   private cargarCatalogosYProductos(): void {
     this.isLoadingProductos.set(true);
     this.isLoadingZonas.set(true);
-    this.isLoadingPaquetes.set(true);
     this.errorMessage.set('');
 
     // Cargar catálogos iniciales en paralelo, marcando cuáles fallaron: un
@@ -243,13 +191,6 @@ export class ProductosComponent implements OnInit {
         map(r => ({ ok: true as const, r })),
         catchError(() => of({ ok: false as const, r: [] as any[] })),
       ),
-      paquetes: this.paquetePublicadoService.getPaquetes().pipe(
-        switchMap(paquetes => {
-          const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
-          return of(activos);
-        }),
-        catchError(() => of([]))
-      )
     }).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
@@ -257,10 +198,8 @@ export class ProductosComponent implements OnInit {
         this.todasLasCategorias.set(res.categorias.r);
         this.todasLasMarcas.set(res.marcas.r);
         this.todasLasZonas.set(res.zonas.r);
-        this.paquetesActivos.set(res.paquetes);
 
         this.isLoadingZonas.set(false);
-        this.isLoadingPaquetes.set(false);
 
         const params = this.route.snapshot.queryParams;
         const faltaUnCatalogoQueLaUrlNecesita =
@@ -282,7 +221,6 @@ export class ProductosComponent implements OnInit {
         this.errorMessage.set('Error al inicializar la tienda.');
         this.isLoadingProductos.set(false);
         this.isLoadingZonas.set(false);
-        this.isLoadingPaquetes.set(false);
       }
     });
   }
@@ -454,65 +392,6 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  private loadZonas(): void {
-    this.isLoadingZonas.set(true);
-    this.zonaService
-      .getZonas()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (zonas) => {
-          this.todasLasZonas.set(zonas);
-          this.isLoadingZonas.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando zonas:', error);
-          this.isLoadingZonas.set(false);
-        },
-      });
-  }
-
-  private loadPaquetesActivos(): void {
-    this.isLoadingPaquetes.set(true);
-    this.paquetePublicadoService
-      .getPaquetes()
-      .pipe(
-        switchMap((paquetes) => {
-          const activos = paquetes.filter(
-            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
-          );
-          if (activos.length === 0) return of([]);
-
-          const todosConProductos = activos.every(
-            (p) =>
-              p.paqueteBase?.productos && p.paqueteBase.productos.length > 0,
-          );
-          if (todosConProductos) return of(activos);
-
-          return forkJoin(
-            activos.map((p) =>
-              this.paquetePublicadoService
-                .getPaqueteById(p.id_paquete_publicado!)
-                .pipe(catchError(() => of(p))),
-            ),
-          ).pipe(catchError(() => of(activos)));
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (paquetes) => {
-          const activos = paquetes.filter(
-            (p) => p.estado?.nombre?.toLowerCase() === 'activo',
-          );
-          this.paquetesActivos.set(activos);
-          this.isLoadingPaquetes.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando paquetes publicados:', error);
-          this.isLoadingPaquetes.set(false);
-        },
-      });
-  }
-
   ordenSeleccionado = signal<string>('recientes');
 
   // 🎯 APLICAR FILTROS
@@ -528,11 +407,6 @@ export class ProductosComponent implements OnInit {
     this.actualizarUrl(1);
   }
 
-  limpiarFiltros(): void {
-    this.filtrosActuales.set(null);
-    this.actualizarUrl(1);
-  }
-
   // 🔄 Recargar productos
   recargarProductos(): void {
     if (!this.catalogosListos) {
@@ -540,38 +414,6 @@ export class ProductosComponent implements OnInit {
       return;
     }
     this.recargar$.next();
-  }
-
-  // 🎨 HELPERS VISUALES
-  getCategoriaNombre(producto: Producto): string {
-    return typeof producto.categoria === 'string'
-      ? producto.categoria
-      : (producto.categoria?.nombre ?? 'Sin categoría');
-  }
-
-  // 🆕 NUEVO: Helper para obtener el nombre de la marca
-  getMarcaNombre(producto: Producto): string {
-    return typeof producto.marca === 'string'
-      ? producto.marca
-      : (producto.marca?.nombre ?? 'Sin marca');
-  }
-
-  formatPrice(price?: number): string {
-    if (!price) return '$0';
-
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  }
-
-  // 🖼️ MANEJO DE IMÁGENES
-  onImageError(event: Event): void {
-    const target = event.target as HTMLImageElement;
-    if (target.src.includes('placeholder')) return;
-    target.src = '/assets/images/placeholder-product.png';
   }
 
   // 📄 MÉTODOS DE PAGINACIÓN

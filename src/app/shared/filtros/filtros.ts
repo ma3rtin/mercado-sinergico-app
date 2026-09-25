@@ -85,6 +85,13 @@ export class FiltrosComponent {
   // *todo* el estado interno en cada cambio; valoresIniciales deja de tocarlo.
   valoresActuales = input<Partial<FiltrosAplicados>>();
 
+  // Catálogos ya cargados por el padre. Si se pasan, evitan que el filtro
+  // vuelva a pedirlos por su cuenta (ej: productos.ts ya los tiene para
+  // resolver los slugs de la URL).
+  categoriasCargadas = input<OpcionFiltro[]>();
+  marcasCargadas = input<OpcionFiltro[]>();
+  zonasCargadas = input<OpcionFiltro[]>();
+
   // 📤 OUTPUTS
   filtrosAplicados = output<FiltrosAplicados>();
   filtrosLimpiados = output<void>();
@@ -232,6 +239,21 @@ export class FiltrosComponent {
     });
 
     effect(() => {
+      const categorias = this.categoriasCargadas();
+      if (categorias) this.categorias.set(categorias);
+    });
+
+    effect(() => {
+      const marcas = this.marcasCargadas();
+      if (marcas) this.marcas.set(marcas);
+    });
+
+    effect(() => {
+      const zonas = this.zonasCargadas();
+      if (zonas) this.zonas.set(zonas);
+    });
+
+    effect(() => {
       const actuales = this.valoresActuales();
 
       if (actuales) {
@@ -289,7 +311,7 @@ export class FiltrosComponent {
     this.error.set(null);
 
     try {
-      if (cfg.obtenerCategorias && cfg.mostrarCategoria) {
+      if (this.categoriasCargadas() === undefined && cfg.obtenerCategorias && cfg.mostrarCategoria) {
         cfg.obtenerCategorias().subscribe({
           next: (categorias: OpcionFiltro[]) => {
             this.categorias.set(categorias);
@@ -300,7 +322,7 @@ export class FiltrosComponent {
         });
       }
 
-      if (cfg.obtenerMarcas && cfg.mostrarMarca) {
+      if (this.marcasCargadas() === undefined && cfg.obtenerMarcas && cfg.mostrarMarca) {
         cfg.obtenerMarcas().subscribe({
           next: (marcas: OpcionFiltro[]) => {
             this.marcas.set(marcas);
@@ -311,7 +333,7 @@ export class FiltrosComponent {
         });
       }
 
-      if (cfg.obtenerZonas && cfg.mostrarZona) {
+      if (this.zonasCargadas() === undefined && cfg.obtenerZonas && cfg.mostrarZona) {
         cfg.obtenerZonas().subscribe({
           next: (zonas: OpcionFiltro[]) => {
             this.zonas.set(zonas);

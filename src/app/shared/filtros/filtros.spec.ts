@@ -18,6 +18,7 @@ describe('FiltrosComponent', () => {
 
   beforeEach(async () => {
     emittedFilters = [];
+    vi.useFakeTimers();
 
     await TestBed.configureTestingModule({
       imports: [
@@ -34,7 +35,10 @@ describe('FiltrosComponent', () => {
     component.filtrosAplicados.subscribe(f => emittedFilters.push(f));
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Deja correr el debounce pendiente mientras el fixture sigue vivo: si se
+    // destruye antes, el emit tardío cae sobre un OutputRef ya destruido (NG0953).
+    await vi.runOnlyPendingTimersAsync();
     vi.useRealTimers();
     fixture.destroy();
   });

@@ -51,13 +51,11 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   // 📄 MÉTODOS DE PAGINACIÓN
   onPageChange(page: number): void {
     this.paginaActual.set(page);
-    console.log(`📄 Cambiando a página ${page}`);
   }
 
   onItemsPerPageChange(itemsPerPage: number): void {
     this.itemsPorPagina.set(itemsPerPage);
     this.paginaActual.set(1); // Resetear a página 1
-    console.log(`🔢 Mostrando ${itemsPerPage} items por página`);
   }
 
   // 🔧 Services
@@ -285,12 +283,6 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
     const slugProducto = getProductSlugUrl(producto);
     const slugPaquete = paquete ? getPaqueteSlugUrl(paquete) : String(paqueteId);
-
-    console.log('🧭 Navegando a sumarse:', {
-      productoId: producto.id_producto,
-      paqueteId,
-      url: `/paquete/${slugPaquete}/producto/${slugProducto}`
-    });
 
     this.router.navigate(['/paquete', slugPaquete, 'producto', slugProducto], {
       queryParams: { from: 'producto' }
