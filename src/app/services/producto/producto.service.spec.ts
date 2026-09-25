@@ -67,6 +67,53 @@ describe('ProductosService — parámetro de ordenamiento', () => {
   });
 });
 
+describe('ProductosService — contrato con la API', () => {
+  let service: ProductosService;
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ProductosService, provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(ProductosService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('parsea X-Total-Count como el total de la respuesta', () => {
+    let total: number | undefined;
+    service.getProductosPaginados(1, 12).subscribe((res) => (total = res.total));
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    req.flush([], { headers: { 'X-Total-Count': '37' } });
+
+    expect(total).toBe(37);
+  });
+
+  it('el listado público no manda includeArchived', () => {
+    service.getProductosPaginados(1, 12).subscribe();
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    expect(req.request.params.has('includeArchived')).toBe(false);
+    req.flush([], { headers: { 'X-Total-Count': '0' } });
+  });
+
+  it('normaliza id -> id_producto e imagen -> imagen_url, como los manda ProductoItemListaDTO', () => {
+    let productos: { id_producto?: number; imagen_url?: string }[] = [];
+    service.getProductosPaginados(1, 12).subscribe((res) => (productos = res.productos));
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    req.flush(
+      [{ id: 5, nombre: 'Producto', imagen: 'foto.jpg', precio: 100 }],
+      { headers: { 'X-Total-Count': '1' } }
+    );
+
+    expect(productos[0].id_producto).toBe(5);
+    expect(productos[0].imagen_url).toBe('foto.jpg');
+  });
+});
+
 describe('PaquetePublicadoService — parámetro de ordenamiento', () => {
   let service: PaquetePublicadoService;
   let httpMock: HttpTestingController;

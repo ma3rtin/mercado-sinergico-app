@@ -150,13 +150,14 @@ imagenUrl = computed(() => {
       return;
     }
 
-    this.cardClick.emit(productoId);
-
-    // Producto sin paquetes activos: no hay detalle accionable, no navegar.
-    // (El detalle /producto/:slug sigue manejando el caso vacío por otras vías.)
+    // Producto sin paquetes activos: no hay detalle accionable, no navegar
+    // ni avisar. (El detalle /producto/:slug sigue manejando el caso vacío
+    // por otras vías.)
     if (this.sinPaquetes()) {
       return;
     }
+
+    this.cardClick.emit(productoId);
 
     const nav = this.navegacion();
 

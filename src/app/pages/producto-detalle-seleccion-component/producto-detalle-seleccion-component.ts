@@ -155,12 +155,10 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
-    this.route.paramMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => this.onCambioDeRuta(params));
-
     // Producto y paquetes van en cadenas cancelables separadas: un cambio de
     // ruta (o un "Reintentar") descarta cualquier request anterior en vuelo.
+    // Se suscriben ANTES que paramMap: si no, su primera emisión (sincrónica)
+    // llega a productoIdCambio$ sin nadie escuchando y se pierde.
     merge(
       this.productoIdCambio$,
       this.recargarProducto$.pipe(map(() => this.productoIdActual())),
@@ -209,6 +207,10 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
         this.errorPaquetes.set(true);
       }
     });
+
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => this.onCambioDeRuta(params));
   }
 
   private onCambioDeRuta(params: ParamMap): void {
