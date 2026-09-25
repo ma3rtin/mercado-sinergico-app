@@ -59,6 +59,7 @@ describe('ProductosComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             queryParams: queryParamsSubject.asObservable(),
+            snapshot: { queryParams: {} },
           },
         },
       ],

@@ -8,8 +8,9 @@ import {
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge, Subject, filter, map, catchError, of, switchMap } from 'rxjs';
 import { decodeId, getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 
 // Services
@@ -68,6 +69,10 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly platformId = inject(PLATFORM_ID);
   productoIdActual = signal<number | null>(null);
 
+  private readonly productoIdCambio$ = new Subject<number>();
+  private readonly recargarProducto$ = new Subject<void>();
+  private readonly recargarPaquetes$ = new Subject<void>();
+
 
   // 🌐 Platform check
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -78,6 +83,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   isLoadingProducto = signal(true);
   isLoadingPaquetes = signal(true);
   errorMessage = signal('');
+  errorPaquetes = signal(false);
 
   // 📄 SIGNALS DE PAGINACIÓN
   paginaActual = signal<number>(1);
@@ -153,110 +159,99 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
 
     this.route.paramMap
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((params) => {
-        const rawId = params.get('id');
-        let productoId: number | null = null;
+      .subscribe((params) => this.onCambioDeRuta(params));
 
-        if (rawId) {
-          // Detectar patrón de slug con ID ofuscado al final (ej: "termo-stanley-p2y8")
-          const match = rawId.match(/-p([a-z0-9]+)$/);
-          if (match) {
-            productoId = decodeId(match[1]);
-          } else {
-            // Compatibilidad hacia atrás: intentar parsear como número directo
-            productoId = Number(rawId);
-          }
-        }
+    // Producto y paquetes van en cadenas cancelables separadas: un cambio de
+    // ruta (o un "Reintentar") descarta cualquier request anterior en vuelo.
+    merge(
+      this.productoIdCambio$,
+      this.recargarProducto$.pipe(map(() => this.productoIdActual())),
+    ).pipe(
+      filter((id): id is number => id !== null),
+      switchMap((id) => {
+        this.isLoadingProducto.set(true);
+        return this.productosService.getProductoById(id).pipe(
+          map((producto) => ({ ok: true as const, producto })),
+          catchError((error) => of({ ok: false as const, error })),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((resultado) => {
+      this.isLoadingProducto.set(false);
+      if (resultado.ok) {
+        this.productoSeleccionado.set(resultado.producto);
+        return;
+      }
+      let mensaje = 'Error al cargar el producto.';
+      if (resultado.error?.status === 404) mensaje = 'Producto no encontrado.';
+      else if (resultado.error?.status === 0) mensaje = 'No se pudo conectar con el servidor.';
+      this.errorMessage.set(mensaje);
+    });
 
-        console.log('🔄 Cambio de ruta detectado, producto ID original:', rawId, '-> decodificado:', productoId);
-
-        if (!productoId || isNaN(productoId)) {
-          this.errorMessage.set('ID de producto inválido');
-          this.isLoadingProducto.set(false);
-          this.isLoadingPaquetes.set(false);
-          return;
-        }
-        this.productoIdActual.set(productoId);
-        this.cargarDatos(productoId);
-      });
+    merge(
+      this.productoIdCambio$,
+      this.recargarPaquetes$.pipe(map(() => this.productoIdActual())),
+    ).pipe(
+      filter((id): id is number => id !== null),
+      switchMap((id) => {
+        this.isLoadingPaquetes.set(true);
+        return this.paquetePublicadoService.getByProductId(id).pipe(
+          map((paquetes) => ({ ok: true as const, paquetes })),
+          catchError(() => of({ ok: false as const })),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((resultado) => {
+      this.isLoadingPaquetes.set(false);
+      if (resultado.ok) {
+        this.todosLosPaquetes.set(resultado.paquetes);
+        this.errorPaquetes.set(false);
+      } else {
+        this.todosLosPaquetes.set([]);
+        this.errorPaquetes.set(true);
+      }
+    });
   }
 
-  // 📥 CARGA DE DATOS
-  private cargarDatos(productoId: number): void {
-    this.productoSeleccionado.set(null);
-    this.todosLosPaquetes.set([]);
-    console.log('🚀 Cargando datos para producto ID:', productoId);
+  private onCambioDeRuta(params: ParamMap): void {
+    const rawId = params.get('id');
+    let productoId: number | null = null;
+
+    if (rawId) {
+      // Detectar patrón de slug con ID ofuscado al final (ej: "termo-stanley-p2y8")
+      const match = rawId.match(/-p([a-z0-9]+)$/);
+      productoId = match ? decodeId(match[1]) : Number(rawId);
+    }
+
+    if (!productoId || isNaN(productoId)) {
+      this.errorMessage.set('ID de producto inválido');
+      this.isLoadingProducto.set(false);
+      this.isLoadingPaquetes.set(false);
+      return;
+    }
 
     this.errorMessage.set('');
+    this.errorPaquetes.set(false);
+    this.filtroTipoPaquete.set('TODOS');
+    this.paginaActual.set(1);
     this.productoSeleccionado.set(null);
-
-    this.cargarProducto(productoId);
-    this.cargarPaquetesDelProducto(productoId);
-  }
-
-  // 📦 Cargar producto por ID
-  private cargarProducto(id: number): void {
-    this.isLoadingProducto.set(true);
-
-    this.productosService
-      .getProductoById(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (producto) => {
-          console.log('✅ Producto cargado:', producto);
-          this.productoSeleccionado.set(producto);
-          this.isLoadingProducto.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando producto:', error);
-          this.isLoadingProducto.set(false);
-
-          let mensaje = 'Error al cargar el producto.';
-
-          if (error.status === 404) {
-            mensaje = 'Producto no encontrado.';
-          } else if (error.status === 0) {
-            mensaje = 'No se pudo conectar con el servidor.';
-          }
-
-          this.errorMessage.set(mensaje);
-        },
-      });
-  }
-
-  // 🎁 Cargar todos los paquetes
-  private cargarPaquetesDelProducto(productoId: number): void {
-    this.isLoadingPaquetes.set(true);
-
-    this.paquetePublicadoService
-      .getByProductId(productoId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (paquetes) => {
-          console.log('✅ Paquetes del producto:', paquetes.length);
-          this.todosLosPaquetes.set(paquetes);
-          this.isLoadingPaquetes.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando paquetes del producto:', error);
-          this.isLoadingPaquetes.set(false);
-          this.todosLosPaquetes.set([]);
-        },
-      });
+    this.todosLosPaquetes.set([]);
+    this.productoIdActual.set(productoId);
+    this.productoIdCambio$.next(productoId);
   }
 
   // 🔄 Recargar datos
   recargarDatos(): void {
-    const productoId = this.productoIdActual();
-
-    if (!productoId) {
-      console.error('❌ No hay productoId para recargar');
-      return;
-    }
-
-    console.log('🔄 Recargando datos para producto ID:', productoId);
+    if (!this.productoIdActual()) return;
     this.errorMessage.set('');
-    this.cargarDatos(productoId);
+    this.recargarProducto$.next();
+    this.recargarPaquetes$.next();
+  }
+
+  // 🔄 Reintentar sólo la carga de paquetes
+  recargarPaquetes(): void {
+    if (!this.productoIdActual()) return;
+    this.recargarPaquetes$.next();
   }
 
   // 🎯 Cambiar Filtro

@@ -10,8 +10,9 @@ import {
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
-import { getProductSlugUrl, slugify } from '@app/shared/utils/obfuscator';
-import { map, switchMap, of, forkJoin, catchError } from 'rxjs';
+import { slugify } from '@app/shared/utils/obfuscator';
+import { parseEnteroPositivo, parsePrecio } from '@app/shared/utils/numeros';
+import { map, switchMap, of, forkJoin, catchError, merge, Subject } from 'rxjs';
 
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
@@ -68,6 +69,10 @@ export class ProductosComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
+
+  private readonly recargar$ = new Subject<void>();
+  private ultimosQueryParams: any = {};
+  private primeraCarga = true;
 
   // 🚀 Signals
   productosOriginales = signal<Producto[]>([]);
@@ -209,61 +214,125 @@ export class ProductosComponent implements OnInit {
     tituloOrdenamiento: 'Ordenar por',
   }));
 
+  private catalogosListos = false;
+
   ngOnInit(): void {
     if (this.isBrowser) {
-      this.isLoadingProductos.set(true);
-      this.isLoadingZonas.set(true);
-      this.isLoadingPaquetes.set(true);
-
-      // Cargar catálogos iniciales en paralelo
-      forkJoin({
-        categorias: this.categoriaService.getCategorias().pipe(catchError(() => of([]))),
-        marcas: this.marcaService.getMarcas().pipe(catchError(() => of([]))),
-        zonas: this.zonaService.getZonas().pipe(catchError(() => of([]))),
-        paquetes: this.paquetePublicadoService.getPaquetes().pipe(
-          switchMap(paquetes => {
-            const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
-            return of(activos);
-          }),
-          catchError(() => of([]))
-        )
-      }).pipe(
-        takeUntilDestroyed(this.destroyRef)
-      ).subscribe({
-        next: (res) => {
-          this.todasLasCategorias.set(res.categorias);
-          this.todasLasMarcas.set(res.marcas);
-          this.todasLasZonas.set(res.zonas);
-          this.paquetesActivos.set(res.paquetes);
-
-          this.isLoadingZonas.set(false);
-          this.isLoadingPaquetes.set(false);
-
-          // Suscribirse a los queryParams una vez listos los catálogos
-          this.route.queryParams.pipe(
-            takeUntilDestroyed(this.destroyRef)
-          ).subscribe(params => {
-            this.procesarQueryParams(params);
-          });
-        },
-        error: (err) => {
-          console.error('❌ Error cargando catálogos iniciales:', err);
-          this.errorMessage.set('Error al inicializar la tienda.');
-          this.isLoadingProductos.set(false);
-          this.isLoadingZonas.set(false);
-          this.isLoadingPaquetes.set(false);
-        }
-      });
+      this.cargarCatalogosYProductos();
     }
   }
 
-  private procesarQueryParams(params: any): void {
-    let page = parseInt(params['page'], 10);
-    let limit = parseInt(params['limit'], 10);
+  private cargarCatalogosYProductos(): void {
+    this.isLoadingProductos.set(true);
+    this.isLoadingZonas.set(true);
+    this.isLoadingPaquetes.set(true);
+    this.errorMessage.set('');
 
-    // Validación del Frontend
-    if (isNaN(page) || page < 1) page = 1;
-    if (isNaN(limit) || limit < 1 || limit > 100) limit = 12;
+    // Cargar catálogos iniciales en paralelo, marcando cuáles fallaron: un
+    // catálogo caído no puede convertirse en silencio en "sin ese filtro".
+    forkJoin({
+      categorias: this.categoriaService.getCategorias().pipe(
+        map(r => ({ ok: true as const, r })),
+        catchError(() => of({ ok: false as const, r: [] as any[] })),
+      ),
+      marcas: this.marcaService.getMarcas().pipe(
+        map(r => ({ ok: true as const, r })),
+        catchError(() => of({ ok: false as const, r: [] as any[] })),
+      ),
+      zonas: this.zonaService.getZonas().pipe(
+        map(r => ({ ok: true as const, r })),
+        catchError(() => of({ ok: false as const, r: [] as any[] })),
+      ),
+      paquetes: this.paquetePublicadoService.getPaquetes().pipe(
+        switchMap(paquetes => {
+          const activos = paquetes.filter(p => p.estado?.nombre?.toLowerCase() === 'activo');
+          return of(activos);
+        }),
+        catchError(() => of([]))
+      )
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (res) => {
+        this.todasLasCategorias.set(res.categorias.r);
+        this.todasLasMarcas.set(res.marcas.r);
+        this.todasLasZonas.set(res.zonas.r);
+        this.paquetesActivos.set(res.paquetes);
+
+        this.isLoadingZonas.set(false);
+        this.isLoadingPaquetes.set(false);
+
+        const params = this.route.snapshot.queryParams;
+        const faltaUnCatalogoQueLaUrlNecesita =
+          (!res.categorias.ok && !!params['categorias']) ||
+          (!res.marcas.ok && !!params['marcas']) ||
+          (!res.zonas.ok && !!params['zonas']);
+
+        if (faltaUnCatalogoQueLaUrlNecesita) {
+          this.errorMessage.set('No pudimos cargar los filtros de tu enlace. Reintentá para no perderlos.');
+          this.isLoadingProductos.set(false);
+          return;
+        }
+
+        this.catalogosListos = true;
+        this.suscribirseAProductos();
+      },
+      error: (err) => {
+        console.error('❌ Error cargando catálogos iniciales:', err);
+        this.errorMessage.set('Error al inicializar la tienda.');
+        this.isLoadingProductos.set(false);
+        this.isLoadingZonas.set(false);
+        this.isLoadingPaquetes.set(false);
+      }
+    });
+  }
+
+  // Una sola cadena para queryParams y recargas manuales: switchMap
+  // garantiza que una respuesta vieja nunca pise a una más nueva.
+  private suscribirseAProductos(): void {
+    merge(
+      this.route.queryParams,
+      this.recargar$.pipe(map(() => this.ultimosQueryParams)),
+    ).pipe(
+      switchMap(params => {
+        this.ultimosQueryParams = params;
+        this.procesarQueryParams(params);
+        this.isLoadingProductos.set(true);
+        this.errorMessage.set('');
+
+        return this.productosService.getProductosPaginados(
+          this.paginaActual(),
+          this.itemsPorPagina(),
+          this.filtrosActuales(),
+          false,
+        ).pipe(
+          map(res => ({ ok: true as const, res })),
+          catchError(err => {
+            console.error('❌ Error cargando productos paginados:', err);
+            return of({ ok: false as const, err });
+          }),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(result => {
+      if (result.ok) {
+        this.productosOriginales.set(result.res.productos);
+        this.totalProductos.set(result.res.total);
+        this.isLoadingProductos.set(false);
+        this.corregirPaginaFueraDeRango(result.res.total);
+      } else {
+        this.isLoadingProductos.set(false);
+        this.errorMessage.set('Error al cargar productos.');
+        this.productosOriginales.set([]);
+        this.totalProductos.set(0);
+      }
+    });
+  }
+
+  private procesarQueryParams(params: any): void {
+    const page = parseEnteroPositivo(params['page']) ?? 1;
+    const limitParseado = parseEnteroPositivo(params['limit']) ?? 12;
+    const limit = limitParseado > 100 ? 12 : limitParseado;
 
     this.paginaActual.set(page);
     this.itemsPorPagina.set(limit);
@@ -276,8 +345,8 @@ export class ProductosComponent implements OnInit {
       tiposPaquete: [],
       ordenamiento: params['orden'] || 'recientes',
       rangoPrecio: {
-        min: params['precioMin'] ? parseFloat(params['precioMin']) : null,
-        max: params['precioMax'] ? parseFloat(params['precioMax']) : null
+        min: parsePrecio(params['precioMin']),
+        max: parsePrecio(params['precioMax'])
       },
       estados: []
     };
@@ -306,40 +375,24 @@ export class ProductosComponent implements OnInit {
       });
     }
 
-    this.filtrosActuales.set(filtros);
-
-    if (params['orden']) {
-      this.ordenSeleccionado.set(params['orden']);
+    // La zona del perfil sólo se aplica en la primerísima entrada sin zonas en
+    // la URL. Después, "sin zonas" significa que el usuario las destildó.
+    if (this.primeraCarga && filtros.zonas.length === 0) {
+      const zonaPerfil = this.valoresFiltrosIniciales().zonas;
+      if (zonaPerfil?.length) filtros.zonas = zonaPerfil;
     }
+    this.primeraCarga = false;
 
-    this.loadProductosPaginados();
+    this.filtrosActuales.set(filtros);
+    this.ordenSeleccionado.set(params['orden'] || 'recientes');
   }
 
-  private loadProductosPaginados(): void {
-    this.isLoadingProductos.set(true);
-    this.errorMessage.set('');
-
-    this.productosService.getProductosPaginados(
-      this.paginaActual(),
-      this.itemsPorPagina(),
-      this.filtrosActuales(),
-      false
-    ).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: (res) => {
-        this.productosOriginales.set(res.productos);
-        this.totalProductos.set(res.total);
-        this.isLoadingProductos.set(false);
-      },
-      error: (err) => {
-        console.error('❌ Error cargando productos paginados:', err);
-        this.isLoadingProductos.set(false);
-        this.errorMessage.set('Error al cargar productos.');
-        this.productosOriginales.set([]);
-        this.totalProductos.set(0);
-      }
-    });
+  private corregirPaginaFueraDeRango(total: number): void {
+    if (total === 0) return;
+    const totalPaginas = Math.ceil(total / this.itemsPorPagina());
+    if (this.paginaActual() > totalPaginas) {
+      this.actualizarUrl(totalPaginas);
+    }
   }
 
   private actualizarUrl(page: number): void {
@@ -482,24 +535,11 @@ export class ProductosComponent implements OnInit {
 
   // 🔄 Recargar productos
   recargarProductos(): void {
-    this.loadProductosPaginados();
-  }
-
-  // 🧭 NAVEGACIÓN
-  navegarAProducto(id: number): void {
-    if (!id) {
-      console.error('❌ ID de producto inválido');
+    if (!this.catalogosListos) {
+      this.cargarCatalogosYProductos();
       return;
     }
-    const producto = this.productosOriginales().find(
-      (p) => (p.id_producto ?? p.id) === id,
-    );
-    if (producto) {
-      const slugUrl = getProductSlugUrl(producto);
-      this.router.navigate(['producto', slugUrl]);
-    } else {
-      this.router.navigate(['producto', id]);
-    }
+    this.recargar$.next();
   }
 
   // 🎨 HELPERS VISUALES
@@ -541,6 +581,5 @@ export class ProductosComponent implements OnInit {
 
   onItemsPerPageChange(itemsPerPage: number): void {
     this.itemsPorPagina.set(itemsPerPage);
-    this.actualizarUrl(1);
   }
 }
