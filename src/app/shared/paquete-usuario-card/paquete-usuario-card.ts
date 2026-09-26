@@ -155,6 +155,11 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     return 'Por definir';
   }
 
+  get esEnergico(): boolean {
+    const t = String(this.paquete?.tipo || '').toUpperCase();
+    return t.includes('ENER');
+  }
+
   get puedeEditarCantidades(): boolean {
     const estado = this.pedido?.estado?.nombre?.toLowerCase();
     return estado === 'pendiente';
@@ -166,8 +171,10 @@ export class PaqueteUsuarioCardComponent implements OnInit {
 
     const estilos: Record<string, string> = {
       'pendiente': 'text-status-pending-text bg-status-pending-bg border-warning',
+      'reservado': 'text-amber-800 bg-amber-50 border-amber-300',
       'pagado': 'text-status-active-text bg-status-active-bg border-success',
       'reembolsado': 'text-text-secondary bg-status-neutral-bg border-border-default',
+      'cancelado': 'text-error bg-error/10 border-error/20',
       //un color distinto para cada estado dentro del styles.css:
       'en preparación': 'text-secondary-text bg-secondary-bg border-secondary-bg',
       'en camino': 'text-primary-bg bg-primary-bg border-primary-bg',
@@ -183,8 +190,10 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     const e = estado.toLowerCase();
 
     if (e === 'pendiente') return 'text-status-pending-bg';
+    if (e === 'reservado') return 'text-amber-400';
     if (e === 'pagado') return 'text-status-active-bg';
     if (e === 'reembolsado') return 'text-status-neutral-bg';
+    if (e === 'cancelado') return 'text-error';
     if (e === 'en preparación') return 'text-secondary-bg';
     if (e === 'en camino') return 'text-primary-bg';
     if (e === 'recibido') return 'text-success-bg';
@@ -196,6 +205,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     if (!estado) return 'Clock';
     const e = estado.toLowerCase();
 
+    if (e === 'reservado') return 'Bookmark';
     if (e === 'pagado') return 'CheckCircle';
     if (e === 'en preparación') return 'Package';
     if (e === 'en camino') return 'Truck';
@@ -209,14 +219,20 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   getDescripcionEstado(estado?: string): string {
     if (!estado) return 'Estado desconocido.';
     const e = estado.toLowerCase();
-    
-    if (e === 'pendiente') return 'Tu pedido está reservado. El paquete se procesará cuando se complete el cupo o finalice el tiempo.';
+
+    if (e === 'pendiente') {
+      return this.esEnergico
+        ? 'Tu pedido está en curso. Confirmá tu reserva para asegurar el stock (abonás al recibir).'
+        : 'Tu pedido está pendiente. El paquete se procesará cuando se complete el cupo o finalice el tiempo.';
+    }
+    if (e === 'reservado') return '¡Reserva confirmada! Tus productos están asegurados. Abonás al recibir tu pedido (pago contra entrega).';
     if (e === 'pagado') return '¡Pago confirmado! Estamos esperando que el paquete cierre para procesar el envío.';
     if (e === 'en preparación') return 'El paquete ha cerrado y estamos preparando los productos para el envío.';
     if (e === 'en camino') return 'Tu pedido está viajando hacia el punto de entrega.';
     if (e === 'recibido') return '¡El pedido ha sido entregado exitosamente!';
     if (e === 'reembolsado') return 'El dinero ha sido devuelto a tu cuenta.';
-    
+    if (e === 'cancelado') return this.esEnergico ? 'La reserva fue cancelada y el stock liberado.' : 'El pedido fue cancelado.';
+
     return 'Estado actual de tu pedido.';
   }
 
@@ -309,11 +325,27 @@ export class PaqueteUsuarioCardComponent implements OnInit {
     return estado === 'pendiente';
   }
 
-  /** El usuario puede solicitar reembolso solo si el pedido está Pagado y el paquete está Activo */
+  /** El usuario puede solicitar reembolso (SINERGICO en Pagado) o cancelar reserva (ENERGICO en Reservado) mientras el paquete esté Activo */
   get puedeReembolsar(): boolean {
     const estadoPedido = this.pedido?.estado?.nombre?.toLowerCase();
     const estadoPaquete = this.paquete?.estado?.nombre?.toLowerCase();
-    return estadoPedido === 'pagado' && estadoPaquete === 'activo';
+    if (estadoPaquete !== 'activo') return false;
+    if (this.esEnergico) {
+      return estadoPedido === 'reservado';
+    }
+    return estadoPedido === 'pagado';
+  }
+
+  get labelBotonAccion(): string {
+    return this.esEnergico ? 'Confirmar reserva' : 'Completar compra';
+  }
+
+  get labelBotonAccionMobile(): string {
+    return this.esEnergico ? 'Confirmar reserva' : 'Completar';
+  }
+
+  get labelBotonReembolso(): string {
+    return this.esEnergico ? 'Cancelar reserva' : 'Solicitar reembolso';
   }
 
   onSalirDelPaquete(): void {

@@ -16,4 +16,6 @@ export enum EstadoPedidoNombre {
     EnPreparacion = 'En preparación',
     EnCamino      = 'En camino',
     Recibido      = 'Recibido',
+    Reservado     = 'Reservado',
+    Cancelado     = 'Cancelado',
 }

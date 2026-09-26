@@ -166,7 +166,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
           con el proveedor.
         </p>
         <p style="color:#6b7280; font-size:13px; margin-top:8px;">
-          Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong>
+          Todos los pedidos <strong>Pagados</strong> o <strong>Reservados</strong> pasarán a <strong>En preparación</strong>
           y los compradores recibirán un email de confirmación.
         </p>
       `,
@@ -338,9 +338,9 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p) return;
 
-    // Pedidos Pagados (2), En preparación (4), En camino (5), Recibido (6)
+    // Pedidos Pagados (2), En preparación (4), En camino (5), Recibido (6), Reservados (7)
     const pedidosActivos = (p.pedidos ?? []).filter(ped =>
-      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+      ped.estadoId !== null && [2, 4, 5, 6, 7].includes(ped.estadoId!)
     );
 
     const consolidado = new Map<string, { id: number; nombre: string; marca: string; precio: number; cantidad: number; variante: string }>();
@@ -407,7 +407,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p) return;
 
     const pedidosActivos = (p.pedidos ?? []).filter(ped =>
-      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+      ped.estadoId !== null && [2, 4, 5, 6, 7].includes(ped.estadoId!)
     );
     const now = new Date().toLocaleString('es-AR');
     let totalRecaudado = 0;
@@ -489,6 +489,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       case 4: return 'bg-brand-primary-light text-brand-secondary border border-brand-primary/30 whitespace-nowrap'; // En preparación
       case 5: return 'bg-brand-primary/20 text-brand-primary-hover border border-brand-primary/30 whitespace-nowrap'; // En camino
       case 6: return 'bg-success-light text-success border border-success/30 whitespace-nowrap'; // Recibido
+      case 7: return 'bg-amber-100 text-amber-800 border border-amber-300 whitespace-nowrap'; // Reservado
+      case 8: return 'bg-error-light text-error border border-error/30 whitespace-nowrap'; // Cancelado
       default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
@@ -501,6 +503,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       case 4: return 'En preparación';
       case 5: return 'En camino';
       case 6: return 'Recibido';
+      case 7: return 'Reservado';
+      case 8: return 'Cancelado';
       default: return 'Desconocido';
     }
   }

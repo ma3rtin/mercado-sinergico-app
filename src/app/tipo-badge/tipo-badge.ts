@@ -100,13 +100,13 @@ export class TipoBadgeComponent {
     const isPaquete = this.entityType() === 'paquete';
     if (t === 'SINERGICO') {
       return isPaquete
-        ? 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.'
-        : 'Comprá este producto en conjunto con otros usuarios para obtener precios preferenciales por volumen.';
+        ? 'Compra comunitaria por volumen. Pagás vía Mercado Pago con reembolso automático si el paquete no completa su meta.'
+        : 'Comprá este producto en conjunto con otros usuarios mediante pago digital anticipado y precio mayorista por volumen.';
     }
     if (t === 'ENERGICO') {
       return isPaquete
-        ? 'Compra rápida individual con beneficios y envío prioritario.'
-        : 'Producto individual con disponibilidad inmediata y envío prioritario.';
+        ? 'Productos con stock físico. Reserva directa de tu cupo y pago contra entrega al recibir el pedido.'
+        : 'Producto con stock físico disponible y reserva directa con pago contra entrega.';
     }
     return 'Producto o paquete estándar.';
   });

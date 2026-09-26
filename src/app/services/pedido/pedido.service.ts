@@ -56,6 +56,14 @@ export class PedidoService extends ApiService {
     return this.post(`${this.apiUrl}/${pedidoId}/checkout`, {});
   }
 
+  /** Confirma la reserva de un pedido de paquete ENÉRGICO con pago contra entrega (sin Mercado Pago) */
+  confirmarReserva(pedidoId: number): Observable<{ ok: boolean; estado: string; mensaje: string; pedidoId: number }> {
+    return this.post<{ ok: boolean; estado: string; mensaje: string; pedidoId: number }>(
+      `${this.apiUrl}/${pedidoId}/confirmar-reserva`,
+      {}
+    );
+  }
+
   /** Solicita reembolso de un pedido Pagado (solo mientras el paquete está Activo) */
   solicitarReembolso(pedidoId: number): Observable<{ message: string; pedidoId: number }> {
     return this.post<{ message: string; pedidoId: number }>(
