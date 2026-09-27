@@ -53,7 +53,7 @@ describe('BuscadorComponent', () => {
       fecha_inicio: new Date(),
       fecha_fin: new Date(),
       estadoId: 1,
-      zonaId: 1,
+
       paqueteBase: {
         id_paquete_base: 10,
         nombre: 'Paquete de Ropa',
@@ -155,7 +155,7 @@ describe('BuscadorComponent', () => {
       fecha_inicio: new Date(),
       fecha_fin: new Date(),
       estadoId: 1,
-      zonaId: 1,
+
       paqueteBase: undefined // paqueteBase no definido
     };
 
@@ -166,7 +166,7 @@ describe('BuscadorComponent', () => {
       fecha_inicio: new Date(),
       fecha_fin: new Date(),
       estadoId: 1,
-      zonaId: 1,
+
       paqueteBase: {
         id_paquete_base: 12,
         nombre: 'Paquete de prueba',
@@ -462,7 +462,7 @@ describe('BuscadorComponent', () => {
         fecha_inicio: new Date(),
         fecha_fin: new Date(),
         estadoId: 1,
-        zonaId: 1,
+
         paqueteBase: {
           id_paquete_base: i + 100,
           nombre: `Paquete Beta ${i + 1}`,
@@ -590,7 +590,7 @@ describe('BuscadorComponent', () => {
         fecha_inicio: new Date(),
         fecha_fin: new Date(),
         estadoId: 1,
-        zonaId: 1,
+
         paqueteBase: {
           id_paquete_base: 50,
           nombre: 'Combo Especial',
@@ -622,7 +622,7 @@ describe('BuscadorComponent', () => {
         fecha_inicio: new Date(),
         fecha_fin: new Date(),
         estadoId: 1,
-        zonaId: 1,
+
         paqueteBase: {
           id_paquete_base: 60,
           nombre: 'Combo Limpieza',

@@ -17,8 +17,6 @@ import { map, switchMap, of, forkJoin, catchError } from 'rxjs';
 import { ProductosService } from '@app/services/producto/producto.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { MarcaService } from '@app/services/producto/marca.service';
-import { ZonaService } from '@app/services/zona/zona.service';
-import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 
 // Interfaces
@@ -28,7 +26,6 @@ import {
   FiltrosAplicados,
   OpcionFiltro,
 } from '@app/shared/filtros/filtros';
-import { Zona } from '@app/models/ZonasInterfaces/Zona';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 
 // Components
@@ -61,8 +58,6 @@ export class ProductosComponent implements OnInit {
   private readonly productosService = inject(ProductosService);
   private readonly categoriaService = inject(CategoriaService);
   private readonly marcaService = inject(MarcaService);
-  private readonly zonaService = inject(ZonaService);
-  private readonly usuarioService = inject(UsuarioService);
   private readonly paquetePublicadoService = inject(PaquetePublicadoService);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
@@ -74,19 +69,16 @@ export class ProductosComponent implements OnInit {
 
   // Estados de carga individuales
   isLoadingProductos = signal(true);
-  isLoadingZonas = signal(true);
   isLoadingPaquetes = signal(true);
 
   // isLoading computado reactivo
   isLoading = computed(
     () =>
       this.isLoadingProductos() ||
-      this.isLoadingZonas() ||
       this.isLoadingPaquetes(),
   );
 
   errorMessage = signal('');
-  todasLasZonas = signal<Zona[]>([]);
   paquetesActivos = signal<PaquetePublicado[]>([]);
   filtrosActuales = signal<FiltrosAplicados | null>(null);
 
@@ -94,46 +86,12 @@ export class ProductosComponent implements OnInit {
   paginaActual = signal<number>(1);
   itemsPorPagina = signal<number>(12); // 12 productos por página (óptimo)
 
-  // 📊 COMPUTED: Filtros iniciales basados en perfil del usuario
-  valoresFiltrosIniciales = computed<Partial<FiltrosAplicados>>(() => {
-    const perfil = this.usuarioService.perfilUsuario();
-    const zonas = perfil?.direccion?.localidad?.zonas || [];
-    if (zonas.length > 0 && zonas[0].id_zona) {
-      return {
-        zonas: [zonas[0].id_zona],
-      };
-    }
-    return {};
-  });
-
-  // 📊 COMPUTED: Zonas seleccionadas activas
-  zonasSeleccionadasActivas = computed(() => {
-    const filtros = this.filtrosActuales();
-    if (filtros?.zonas) {
-      return filtros.zonas;
-    }
-    return this.valoresFiltrosIniciales().zonas || [];
-  });
 
   // 📊 COMPUTED: Productos filtrados reactivamente
   productosFiltrados = computed(() => {
     let resultado = [...this.productosOriginales()];
     let filtros = this.filtrosActuales();
 
-    if (!filtros) {
-      const init = this.valoresFiltrosIniciales();
-      if (init && Object.keys(init).length > 0) {
-        filtros = {
-          categorias: init.categorias || [],
-          marcas: init.marcas || [],
-          tiposPaquete: init.tiposPaquete || [],
-          ordenamiento: init.ordenamiento || '',
-          rangoPrecio: init.rangoPrecio || { min: null, max: null },
-          estados: init.estados || [],
-          zonas: init.zonas || [],
-        };
-      }
-    }
 
     // 🔒 BASE FILTER: Always restrict to products in active packages (regardless of zone)
     const activePackages = this.paquetesActivos();
@@ -181,34 +139,7 @@ export class ProductosComponent implements OnInit {
         );
       }
 
-      // 🗺️ ZONE FILTER: Additional constraint within already-permitted products
-      const zonasParaFiltrar =
-        filtros.zonas?.length > 0
-          ? filtros.zonas
-          : this.valoresFiltrosIniciales().zonas || [];
 
-      if (zonasParaFiltrar.length > 0) {
-        const paquetesEnZonas = activePackages.filter((paq) =>
-          zonasParaFiltrar.includes(Number(paq.zonaId) || 0),
-        );
-
-        const zonaProductIds = new Set<number>();
-        paquetesEnZonas.forEach((paq) => {
-          const prods = paq.paqueteBase?.productos || [];
-          prods.forEach((bp) => {
-            const pid = Number(bp.productoId || 0);
-            if (pid > 0) zonaProductIds.add(pid);
-          });
-        });
-
-        if (zonaProductIds.size > 0) {
-          resultado = resultado.filter((p) =>
-            zonaProductIds.has(Number(p.id_producto || p.id || 0)),
-          );
-        } else {
-          return [];
-        }
-      }
     }
 
     // Ordenar con el orden seleccionado
@@ -283,24 +214,9 @@ export class ProductosComponent implements OnInit {
         ),
       ),
 
-    obtenerZonas: () =>
-      this.zonaService.getZonas().pipe(
-        map((zonas) =>
-          zonas.map(
-            (zona) =>
-              ({
-                id: zona.id_zona,
-                nombre: zona.nombre,
-                valor: zona.id_zona,
-              }) as OpcionFiltro,
-          ),
-        ),
-      ),
-
     // 🎨 Filtros a mostrar (solo para productos)
     mostrarCategoria: true,
     mostrarMarca: true,
-    mostrarZona: true,
     mostrarTipoPaquete: false, // No aplica para productos
     mostrarRangoPrecio: true, // SÍ para productos
     mostrarOrdenamiento: false, // Ahora está arriba a la derecha
@@ -319,7 +235,6 @@ export class ProductosComponent implements OnInit {
     // 🎯 Textos personalizados
     tituloCategoria: 'Categorías',
     tituloMarca: 'Marcas',
-    tituloZona: 'Zonas',
     tituloRangoPrecio: 'Rango de Precio',
     tituloOrdenamiento: 'Ordenar por',
   }));
@@ -327,7 +242,6 @@ export class ProductosComponent implements OnInit {
   ngOnInit(): void {
     if (this.isBrowser) {
       this.loadProductos();
-      this.loadZonas();
       this.loadPaquetesActivos();
     }
   }
@@ -373,23 +287,6 @@ export class ProductosComponent implements OnInit {
           }
 
           this.productosOriginales.set([]);
-        },
-      });
-  }
-
-  private loadZonas(): void {
-    this.isLoadingZonas.set(true);
-    this.zonaService
-      .getZonas()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (zonas) => {
-          this.todasLasZonas.set(zonas);
-          this.isLoadingZonas.set(false);
-        },
-        error: (error) => {
-          console.error('❌ Error cargando zonas:', error);
-          this.isLoadingZonas.set(false);
         },
       });
   }
@@ -467,20 +364,7 @@ export class ProductosComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
-    const init = this.valoresFiltrosIniciales();
-    if (init && Object.keys(init).length > 0) {
-      this.filtrosActuales.set({
-        categorias: init.categorias || [],
-        marcas: init.marcas || [],
-        tiposPaquete: init.tiposPaquete || [],
-        ordenamiento: init.ordenamiento || '',
-        rangoPrecio: init.rangoPrecio || { min: null, max: null },
-        estados: init.estados || [],
-        zonas: init.zonas || [],
-      });
-    } else {
-      this.filtrosActuales.set(null);
-    }
+    this.filtrosActuales.set(null);
   }
 
   // 🔄 Recargar productos

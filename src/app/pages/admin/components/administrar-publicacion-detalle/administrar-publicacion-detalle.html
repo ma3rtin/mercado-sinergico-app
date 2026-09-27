@@ -55,12 +55,6 @@
                       <app-icon name="hash" size="14" class="mt-[2px]" />
                       ID: {{ paquete()?.id_paquete_publicado }}
                     </span>
-                    @if (paquete()?.zona?.nombre) {
-                    <span class="flex items-center gap-1">
-                      <app-icon name="mapPin" size="14" class="mt-[2px]" />
-                      {{ paquete()?.zona?.nombre }}
-                    </span>
-                    }
                     @if (paquete()?.paqueteBase?.marca?.nombre) {
                     <span class="flex items-center gap-1">
                       <app-icon name="tag" size="14" class="mt-[2px]" />
@@ -715,10 +709,6 @@
               <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
                 <app-icon name="package" size="12" class="mt-[1px]" />
                 {{ paquete()?.paqueteBase?.nombre || '#' + paquete()?.id_paquete_publicado }}
-              </span>
-              <span class="flex items-center gap-1.5 bg-bg-app px-3 py-1.5 rounded-full border border-border-default">
-                <app-icon name="mapPin" size="12" class="mt-[1px]" />
-                {{ paquete()?.zona?.nombre || '–' }}
               </span>
             </div>
 

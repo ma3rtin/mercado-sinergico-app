@@ -95,7 +95,6 @@ describe('FiltrosComponent', () => {
 
     expect(component.categoriasSeleccionadas()).toEqual([]);
     expect(component.marcasSeleccionadas()).toEqual([]);
-    expect(component.zonasSeleccionadas()).toEqual([]);
     expect(component.precioMin()).toBeNull();
     expect(component.precioMax()).toBeNull();
     expect(component.ordenSeleccionado()).toBe('');
@@ -104,13 +103,13 @@ describe('FiltrosComponent', () => {
 
   it('valoresIniciales puebla el estado sin emitir filtrosAplicados de forma espuria antes de que el usuario interactúe', async () => {
     vi.useFakeTimers();
-    fixture.componentRef.setInput('valoresIniciales', { zonas: [1] });
+    fixture.componentRef.setInput('valoresIniciales', { categorias: [1] });
     fixture.detectChanges();
     await vi.advanceTimersByTimeAsync(300);
 
-    expect(component.zonasSeleccionadas()).toEqual([1]);
+    expect(component.categoriasSeleccionadas()).toEqual([1]);
     expect(emittedFilters.length).toBe(1);
-    expect(emittedFilters[0].zonas).toEqual([1]);
+    expect(emittedFilters[0].categorias).toEqual([1]);
   });
 
   it('rango de precio: cambiar min y max en el mismo ciclo de debounce emite un solo filtrosAplicados con ambos valores combinados', async () => {

@@ -59,16 +59,6 @@ export class Perfil implements OnInit {
       if (!this.inicializando) this.tieneCambios.set(true);
     });
 
-    this.form.get('localidad')?.valueChanges.subscribe(locationId => {
-      if (locationId) {
-        const locId = Number(locationId);
-        const loc = this.localidades().find(l => l.id_localidad === locId);
-        if (loc) {
-          this.form.patchValue({ cp: loc.codigo_postal }, { emitEvent: false });
-        }
-      }
-    });
-
     this.localidadService.getAll().subscribe({
       next: (locs) => this.localidades.set(locs),
       error: (err) => console.error('Error al obtener localidades:', err),
@@ -83,7 +73,7 @@ export class Perfil implements OnInit {
           telefono: u.telefono || '',
           fecha_nac: fechaFormateada,
           imagen_url: u.imagen_url || '',
-          localidad: u.direccion?.localidad?.id_localidad ?? null,
+          localidad: u.direccion?.localidad?.activa === false ? null : (u.direccion?.localidad?.id_localidad ?? null),
           cp: u.direccion?.codigo_postal || '',
           calle: u.direccion?.calle || '',
           numero: u.direccion?.numero || '',
