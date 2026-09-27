@@ -326,7 +326,7 @@
                 </p>
                 <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x"
                   (buttonClick)="cancelarPaquete()">
-                  Cancelar y reembolsar
+                  {{ isEnergico() ? 'Cancelar paquete' : 'Cancelar y reembolsar' }}
                 </app-button>
               </div>
             </div>
@@ -367,7 +367,7 @@
                 </p>
                 <app-button variant="danger" [fullWidth]="true" size="md" iconStart="x"
                   (buttonClick)="cancelarPaquete()">
-                  Cancelar y reembolsar
+                  {{ isEnergico() ? 'Cancelar paquete' : 'Cancelar y reembolsar' }}
                 </app-button>
               </div>
             </div>

@@ -113,6 +113,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     (this.paquete()?.pedidos ?? []).filter(p => p.estadoId === 4)
   );
 
+  isEnergico = computed(() => {
+    const p = this.paquete();
+    return p?.tipo === 'ENERGICO' || p?.paqueteBase?.tipo === 'ENERGICO';
+  });
+
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
@@ -247,24 +252,36 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   cancelarPaquete() {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
+
+    const esEnergico = this.isEnergico();
+    const titulo = esEnergico ? '¿Cancelar paquete?' : '¿Cancelar y reembolsar?';
+    const html = esEnergico
+      ? '<p><strong>Se cancelarán todas las reservas activas y se restituirá el stock físico.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Al ser pago contra entrega, no se realiza ningún cobro ni devolución de dinero.</p>'
+      : '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>';
+    const confirmBtn = esEnergico ? 'SÍ, CANCELAR PAQUETE' : 'SÍ, CANCELAR';
+    const overlayMsg = esEnergico
+      ? ['Cancelando reservas...', 'Restituyendo stock físico...', 'Notificando compradores...']
+      : ['Procesando reembolsos...', 'Enviando mails de reembolso...'];
+    const toastSubtitle = esEnergico ? 'Reservas canceladas y stock restituido' : 'Reembolso procesado';
+
     Swal.fire({
-      title: '¿Cancelar y reembolsar?',
-      html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
+      title: titulo,
+      html,
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      confirmButtonText: 'SÍ, CANCELAR',
+      confirmButtonText: confirmBtn,
       cancelButtonText: 'No, volver'
     }).then(result => {
       if (!result.isConfirmed) return;
       this.isProcesando.set(true);
       this.overlayTitulo.set('Cancelando paquete...');
-      this.overlayMensajes.set(['Procesando reembolsos...', 'Enviando mails de reembolso...']);
+      this.overlayMensajes.set(overlayMsg);
       this.paqueteService.cancelarPaquete(p.id_paquete_publicado!).pipe(
         finalize(() => this.isProcesando.set(false))
       ).subscribe({
         next: () => {
-          this.toast.success(`"${p.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
+          this.toast.success(`"${p.paqueteBase?.nombre}" cancelado`, toastSubtitle);
           this.loadPaquete(p.id_paquete_publicado!);
         },
         error: () => this.toast.error('Error al intentar cancelar el paquete.', 'Error')
