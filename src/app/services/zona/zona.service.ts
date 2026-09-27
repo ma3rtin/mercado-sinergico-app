@@ -62,14 +62,4 @@ export class ZonaService {
         );
     }
 
-    asignarZonaAProducto(zonaId: number, productoId: number): Observable<Zona> {
-        const url = `${this.apiUrl}/${zonaId}/productos/${productoId}`;
-        return this.http.put<Zona>(url, {}).pipe(
-            timeout(60000),
-            catchError((error: HttpErrorResponse) => {
-                console.error('Error en ZonaService.asignarZonaAProducto:', error);
-                return throwError(() => error);
-            })
-        );
-    }
 }
