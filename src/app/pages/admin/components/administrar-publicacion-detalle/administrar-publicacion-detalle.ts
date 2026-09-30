@@ -113,6 +113,11 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     (this.paquete()?.pedidos ?? []).filter(p => p.estadoId === 4)
   );
 
+  isEnergico = computed(() => {
+    const p = this.paquete();
+    return p?.tipo === 'ENERGICO' || p?.paqueteBase?.tipo === 'ENERGICO';
+  });
+
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) {
@@ -166,7 +171,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
           con el proveedor.
         </p>
         <p style="color:#6b7280; font-size:13px; margin-top:8px;">
-          Todos los pedidos <strong>Pagados</strong> pasarán a <strong>En preparación</strong>
+          Todos los pedidos <strong>Pagados</strong> o <strong>Reservados</strong> pasarán a <strong>En preparación</strong>
           y los compradores recibirán un email de confirmación.
         </p>
       `,
@@ -247,24 +252,36 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
   cancelarPaquete() {
     const p = this.paquete();
     if (!p?.id_paquete_publicado) return;
+
+    const esEnergico = this.isEnergico();
+    const titulo = esEnergico ? '¿Cancelar paquete?' : '¿Cancelar y reembolsar?';
+    const html = esEnergico
+      ? '<p><strong>Se cancelarán todas las reservas activas y se restituirá el stock físico.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Al ser pago contra entrega, no se realiza ningún cobro ni devolución de dinero.</p>'
+      : '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>';
+    const confirmBtn = esEnergico ? 'SÍ, CANCELAR PAQUETE' : 'SÍ, CANCELAR';
+    const overlayMsg = esEnergico
+      ? ['Cancelando reservas...', 'Restituyendo stock físico...', 'Notificando compradores...']
+      : ['Procesando reembolsos...', 'Enviando mails de reembolso...'];
+    const toastSubtitle = esEnergico ? 'Reservas canceladas y stock restituido' : 'Reembolso procesado';
+
     Swal.fire({
-      title: '¿Cancelar y reembolsar?',
-      html: '<p><strong>ESTO devolverá el dinero a todos los compradores.</strong></p><p class="text-sm text-gray-500 mt-2">Acción irreversible. Los compradores recibirán el mail de reembolso.</p>',
+      title: titulo,
+      html,
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#B92905',
-      confirmButtonText: 'SÍ, CANCELAR',
+      confirmButtonText: confirmBtn,
       cancelButtonText: 'No, volver'
     }).then(result => {
       if (!result.isConfirmed) return;
       this.isProcesando.set(true);
       this.overlayTitulo.set('Cancelando paquete...');
-      this.overlayMensajes.set(['Procesando reembolsos...', 'Enviando mails de reembolso...']);
+      this.overlayMensajes.set(overlayMsg);
       this.paqueteService.cancelarPaquete(p.id_paquete_publicado!).pipe(
         finalize(() => this.isProcesando.set(false))
       ).subscribe({
         next: () => {
-          this.toast.success(`"${p.paqueteBase?.nombre}" cancelado`, 'Reembolso procesado');
+          this.toast.success(`"${p.paqueteBase?.nombre}" cancelado`, toastSubtitle);
           this.loadPaquete(p.id_paquete_publicado!);
         },
         error: () => this.toast.error('Error al intentar cancelar el paquete.', 'Error')
@@ -338,9 +355,9 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     const p = this.paquete();
     if (!p) return;
 
-    // Pedidos Pagados (2), En preparación (4), En camino (5), Recibido (6)
+    // Pedidos Pagados (2), En preparación (4), En camino (5), Recibido (6), Reservados (7)
     const pedidosActivos = (p.pedidos ?? []).filter(ped =>
-      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+      ped.estadoId !== null && [2, 4, 5, 6, 7].includes(ped.estadoId!)
     );
 
     const consolidado = new Map<string, { id: number; nombre: string; marca: string; precio: number; cantidad: number; variante: string }>();
@@ -407,7 +424,7 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
     if (!p) return;
 
     const pedidosActivos = (p.pedidos ?? []).filter(ped =>
-      ped.estadoId !== null && [2, 4, 5, 6].includes(ped.estadoId!)
+      ped.estadoId !== null && [2, 4, 5, 6, 7].includes(ped.estadoId!)
     );
     const now = new Date().toLocaleString('es-AR');
     let totalRecaudado = 0;
@@ -489,6 +506,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       case 4: return 'bg-brand-primary-light text-brand-secondary border border-brand-primary/30 whitespace-nowrap'; // En preparación
       case 5: return 'bg-brand-primary/20 text-brand-primary-hover border border-brand-primary/30 whitespace-nowrap'; // En camino
       case 6: return 'bg-success-light text-success border border-success/30 whitespace-nowrap'; // Recibido
+      case 7: return 'bg-amber-100 text-amber-800 border border-amber-300 whitespace-nowrap'; // Reservado
+      case 8: return 'bg-error-light text-error border border-error/30 whitespace-nowrap'; // Cancelado
       default: return 'bg-status-neutral-bg text-status-neutral-text';
     }
   }
@@ -501,6 +520,8 @@ export class AdministrarPublicacionDetalleComponent implements OnInit {
       case 4: return 'En preparación';
       case 5: return 'En camino';
       case 6: return 'Recibido';
+      case 7: return 'Reservado';
+      case 8: return 'Cancelado';
       default: return 'Desconocido';
     }
   }

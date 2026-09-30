@@ -8,20 +8,30 @@
             <p>En Mercado Sinérgico, agrupamos a personas con la misma necesidad de compra. Publicamos un "paquete" con un mínimo de unidades reservadas requerido. Cuando se alcanza ese mínimo, el paquete "cierra" y aseguramos un <strong>precio mayorista para todos</strong>.</p>
         </app-faq-item>
 
+        <app-faq-item [pregunta]="'¿Qué diferencia hay entre Paquetes Sinérgicos y Paquetes Enérgicos?'">
+            <p class="mb-2"><strong>Paquetes Sinérgicos:</strong> Son compras comunitarias donde agrupamos compradores para obtener precios mayoristas por volumen. Se abonan de forma digital mediante Mercado Pago y, en caso de que no se alcance la meta mínima antes del cierre, el dinero se reembolsa automáticamente al 100%.</p>
+            <p><strong>Paquetes Enérgicos:</strong> Son productos que ya cuentan con stock físico inmediato. Podés confirmar tu reserva directamente asegurando tus unidades sin realizar ningún cobro online por adelantado. El pedido se abona <strong>contra entrega</strong> al momento de recibirlo.</p>
+        </app-faq-item>
+
         <app-faq-item [pregunta]="'¿Qué pasa si no se completa un paquete?'">
-            <p>Se cancela automáticamente <strong>sin compromiso y sin cobro alguno</strong>. No hay ningún tipo de penalidad ni costo oculto por participar.</p>
+            <p>En los paquetes <strong>Sinérgicos</strong>, se cancela automáticamente sin compromiso y se reembolsa el dinero por Mercado Pago. En los paquetes <strong>Enérgicos</strong>, como el stock físico ya está comprometido individualmente, tu reserva se mantiene vigente hasta la preparación y despacho.</p>
         </app-faq-item>
 
         <app-faq-item [pregunta]="'¿Cuándo y cómo pago mi pedido?'">
-            <p>Una vez que el paquete alcanza la <strong>cantidad mínima de productos</strong> y se confirma el <strong>cierre exitoso</strong> del mismo, desde <strong>"Mis pedidos"</strong> podrás abonar tu compra.</p>
+            <p class="mb-2">Depende de la modalidad del paquete:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Paquetes Sinérgicos:</strong> Una vez alcanzada la meta de participantes y cerrado el paquete, abonás online desde la sección <strong>"Mis pedidos"</strong> mediante Mercado Pago.</li>
+                <li><strong>Paquetes Enérgicos:</strong> No pagás nada por adelantado. Al confirmar tu reserva desde "Mis pedidos", tus productos quedan guardados y abonás el total <strong>contra entrega</strong> al recibir tu pedido.</li>
+            </ul>
         </app-faq-item>
 
         <app-faq-item [pregunta]="'¿Cuáles son los métodos de pago aceptados?'">
-            <p>Todos nuestros cobros se gestionan a través de la plataforma segura de <strong>Mercado Pago</strong>. Al momento de confirmar tu pedido, vas a acceder a un link de pago donde podrás abonar utilizando dinero en cuenta, o con tus tarjetas de crédito y débito.</p>
+            <p class="mb-2">Para compras en <strong>Paquetes Sinérgicos</strong>, todos los pagos digitales se procesan de manera segura a través de <strong>Mercado Pago</strong> (dinero en cuenta, tarjetas de débito o crédito).</p>
+            <p>Para pedidos de <strong>Paquetes Enérgicos</strong>, el cobro se realiza <strong>contra entrega</strong> al momento de la recepción o retiro de los productos.</p>
         </app-faq-item>
 
-        <app-faq-item [pregunta]="'¿Puedo cancelar mi reserva antes de que cierre el paquete?'">
-            <p>Sí, mientras el paquete siga abierto y no se haya llegado al objetivo, podés retirar tu reserva desde la sección <strong>"Mis pedidos"</strong>.</p>
+        <app-faq-item [pregunta]="'¿Puedo cancelar mi reserva antes de la entrega?'">
+            <p>Sí, desde la sección <strong>"Mis pedidos"</strong> podés gestionar tus pedidos. En paquetes <strong>Enérgicos</strong>, podés cancelar tu reserva liberando el stock sin ningún tipo de cargo. En paquetes <strong>Sinérgicos</strong>, podés retirarte mientras el paquete continúe abierto o solicitar reembolso si ya habías abonado.</p>
         </app-faq-item>
 
         <app-faq-item [pregunta]="'¿Cuánto tiempo tarda en llegar mi pedido una vez cerrado el paquete?'">

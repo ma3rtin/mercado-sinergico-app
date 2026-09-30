@@ -236,9 +236,12 @@
                             class="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg text-error hover:bg-error-light transition-colors">
                             <app-icon name="alertTriangle" size="16" class="flex-shrink-0" />
                             <div class="text-left">
-                                <p class="font-medium text-xs leading-tight">Cancelar y reembolsar</p>
-                                <p class="text-[10px] text-error/60 leading-tight">Devuelve el dinero a todos los
-                                    compradores</p>
+                                <p class="font-medium text-xs leading-tight">
+                                    {{ isEnergico ? 'Cancelar paquete' : 'Cancelar y reembolsar' }}
+                                </p>
+                                <p class="text-[10px] text-error/60 leading-tight">
+                                    {{ isEnergico ? 'Cancela las reservas y restituye el stock comprometido' : 'Devuelve el dinero a todos los compradores' }}
+                                </p>
                             </div>
                         </button>
                     </div>
