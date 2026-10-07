@@ -37,13 +37,11 @@ export interface FiltrosAplicados {
   ordenamiento: string;
   rangoPrecio: RangoPrecio;
   estados: string[];
-  zonas: (string | number)[];
 }
 
 export interface ConfigFiltros {
   obtenerCategorias?: () => Observable<OpcionFiltro[]>;
   obtenerMarcas?: () => Observable<OpcionFiltro[]>;
-  obtenerZonas?: () => Observable<OpcionFiltro[]>;
 
   mostrarCategoria?: boolean;
   mostrarMarca?: boolean;
@@ -51,12 +49,10 @@ export interface ConfigFiltros {
   mostrarRangoPrecio?: boolean;
   mostrarOrdenamiento?: boolean;
   mostrarEstados?: boolean;
-  mostrarZona?: boolean;
 
   opcionesTipoPaquete?: OpcionFiltro[];
   opcionesOrdenamiento?: OpcionFiltro[];
   opcionesEstados?: OpcionFiltro[];
-  opcionesZonas?: OpcionFiltro[];
 
   tituloCategoria?: string;
   tituloMarca?: string;
@@ -64,7 +60,6 @@ export interface ConfigFiltros {
   tituloRangoPrecio?: string;
   tituloOrdenamiento?: string;
   tituloEstados?: string;
-  tituloZona?: string;
 }
 
 @Component({
@@ -87,10 +82,8 @@ export class FiltrosComponent {
   // 🎨 ESTADO INTERNO
   categorias = signal<OpcionFiltro[]>([]);
   marcas = signal<OpcionFiltro[]>([]);
-  zonas = signal<OpcionFiltro[]>([]);
   categoriasSeleccionadas = signal<(string | number)[]>([]);
   marcasSeleccionadas = signal<(string | number)[]>([]);
-  zonasSeleccionadas = signal<(string | number)[]>([]);
   tiposPaqueteSeleccionados = signal<string[]>([]);
   estadosSeleccionados = signal<string[]>([]);
   ordenSeleccionado = signal<string>('');
@@ -105,7 +98,6 @@ export class FiltrosComponent {
   expandedSections = signal<Record<string, boolean>>({
     Categoria: true,
     Marca: true,
-    Zona: true,
     TipoPaquete: true,
     RangoPrecio: true,
     Ordenamiento: true,
@@ -115,7 +107,6 @@ export class FiltrosComponent {
   // 🔍 BUSCADORES INTERNOS
   searchCategoria = signal<string>('');
   searchMarca = signal<string>('');
-  searchZona = signal<string>('');
 
   // 📊 COMPUTED DE FILTRADO PARA LOS BUSCADORES
   filteredCategorias = computed(() => {
@@ -130,16 +121,10 @@ export class FiltrosComponent {
     return this.marcas().filter(m => m.nombre.toLowerCase().includes(query));
   });
 
-  filteredZonas = computed(() => {
-    const query = this.searchZona().toLowerCase().trim();
-    if (!query) return this.zonas();
-    return this.zonas().filter(z => z.nombre.toLowerCase().includes(query));
-  });
 
   // 📊 COMPUTED ESTADOS
   tieneCategoriasSeleccionadas = computed(() => this.categoriasSeleccionadas().length > 0);
   tieneMarcasSeleccionadas = computed(() => this.marcasSeleccionadas().length > 0);
-  tieneZonasSeleccionadas = computed(() => this.zonasSeleccionadas().length > 0);
   tieneTiposPaqueteSeleccionados = computed(() => this.tiposPaqueteSeleccionados().length > 0);
   tieneEstadosSeleccionados = computed(() => this.estadosSeleccionados().length > 0);
   tieneRangoPrecio = computed(() => this.precioMin() !== null || this.precioMax() !== null);
@@ -148,7 +133,6 @@ export class FiltrosComponent {
   tieneFiltrosActivos = computed(() =>
     this.tieneCategoriasSeleccionadas() ||
     this.tieneMarcasSeleccionadas() ||
-    this.tieneZonasSeleccionadas() ||
     this.tieneTiposPaqueteSeleccionados() ||
     this.tieneEstadosSeleccionados() ||
     this.tieneRangoPrecio() ||
@@ -159,7 +143,6 @@ export class FiltrosComponent {
     let count = 0;
     if (this.tieneCategoriasSeleccionadas()) count++;
     if (this.tieneMarcasSeleccionadas()) count++;
-    if (this.tieneZonasSeleccionadas()) count++;
     if (this.tieneTiposPaqueteSeleccionados()) count++;
     if (this.tieneEstadosSeleccionados()) count++;
     if (this.tieneRangoPrecio()) count++;
@@ -178,7 +161,6 @@ export class FiltrosComponent {
       max: this.precioMax(),
     },
     estados: this.estadosSeleccionados(),
-    zonas: this.zonasSeleccionadas(),
   }));
 
   // 🎯 EFFECTS - Cargar datos cuando cambia la config
@@ -191,7 +173,6 @@ export class FiltrosComponent {
       this.expandedSections.set({
         Categoria: false,
         Marca: false,
-        Zona: false,
         TipoPaquete: false,
         RangoPrecio: false,
         Ordenamiento: false,
@@ -211,7 +192,6 @@ export class FiltrosComponent {
       if (init) {
         if (init.categorias) this.categoriasSeleccionadas.set(init.categorias);
         if (init.marcas) this.marcasSeleccionadas.set(init.marcas);
-        if (init.zonas) this.zonasSeleccionadas.set(init.zonas);
         if (init.tiposPaquete) this.tiposPaqueteSeleccionados.set(init.tiposPaquete);
         if (init.estados) this.estadosSeleccionados.set(init.estados);
         if (init.ordenamiento) this.ordenSeleccionado.set(init.ordenamiento);
@@ -237,7 +217,6 @@ export class FiltrosComponent {
       });
   }
 
-  // 📥 Cargar datos de categorías, marcas y zonas
   private async cargarDatosFiltros(): Promise<void> {
     const cfg = this.config();
     if (!cfg) return;
@@ -268,16 +247,6 @@ export class FiltrosComponent {
         });
       }
 
-      if (cfg.obtenerZonas && cfg.mostrarZona) {
-        cfg.obtenerZonas().subscribe({
-          next: (zonas: OpcionFiltro[]) => {
-            this.zonas.set(zonas);
-          },
-          error: (err: any) => {
-            console.error('Error cargando zonas:', err);
-          }
-        });
-      }
 
       this.cargando.set(false);
     } catch (error) {
@@ -311,18 +280,6 @@ export class FiltrosComponent {
 
   esMarcaSeleccionada(marcaId: string | number): boolean {
     return this.marcasSeleccionadas().includes(marcaId);
-  }
-
-  toggleZona(zonaId: string | number): void {
-    const seleccionadas = [...this.zonasSeleccionadas()];
-    const index = seleccionadas.indexOf(zonaId);
-    if (index > -1) seleccionadas.splice(index, 1);
-    else seleccionadas.push(zonaId);
-    this.zonasSeleccionadas.set(seleccionadas);
-  }
-
-  esZonaSeleccionada(zonaId: string | number): boolean {
-    return this.zonasSeleccionadas().includes(zonaId);
   }
 
   toggleTipoPaquete(tipo: string): void {
@@ -388,18 +345,15 @@ export class FiltrosComponent {
   limpiarFiltros(): void {
     this.categoriasSeleccionadas.set([]);
     this.marcasSeleccionadas.set([]);
-    this.zonasSeleccionadas.set([]);
     this.tiposPaqueteSeleccionados.set([]);
     this.estadosSeleccionados.set([]);
     this.ordenSeleccionado.set('');
     this.precioMin.set(null);
     this.precioMax.set(null);
-    this.searchZona.set('');
 
-    // Re-aplicar valores iniciales (perfil del usuario: zona, etc.)
+    // Reaplicar valores iniciales configurados.
     const init = this.valoresIniciales();
     if (init) {
-      if (init.zonas) this.zonasSeleccionadas.set(init.zonas);
       if (init.categorias) this.categoriasSeleccionadas.set(init.categorias);
       if (init.marcas) this.marcasSeleccionadas.set(init.marcas);
       if (init.tiposPaquete) this.tiposPaqueteSeleccionados.set(init.tiposPaquete);

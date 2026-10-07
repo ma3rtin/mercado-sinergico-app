@@ -1,65 +1,35 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
-import { PLATFORM_ID } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
-import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 @Component({
   selector: 'app-registrarse',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    ButtonComponent,
-    IconComponent,
-  ],
+  imports: [FormsModule, ReactiveFormsModule, RouterModule, ButtonComponent, IconComponent],
   templateUrl: './registrarse.html',
   styleUrls: ['./registrarse.css'],
 })
-export class RegistrarseComponent implements OnInit {
-  // 🧠 Signals
+export class RegistrarseComponent {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private toast = inject(ToastService);
+  private analytics = inject(AnalyticsService);
+
   loading = signal(false);
   submitted = signal(false);
   showPassword = signal(false);
   showConfirmPassword = signal(false);
+  mensaje = signal('');
 
-  // 👁️ Cambiar visibilidad de las contraseñas
-  togglePassword() {
-    this.showPassword.update((v) => !v);
-  }
-
-  toggleConfirmPassword() {
-    this.showConfirmPassword.update((v) => !v);
-  }
-
-  // 🧱 Formulario
   form!: FormGroup;
 
-  // 🧩 Inyecciones
-  private fb = inject(FormBuilder);
-  private toast = inject(ToastService);
-  private platformId = inject(PLATFORM_ID);
-  private usuarioService = inject(UsuarioService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
-
-  ngOnInit(): void {
+  constructor() {
     this.form = this.fb.group(
       {
         nombre: [
@@ -79,97 +49,98 @@ export class RegistrarseComponent implements OnInit {
           ],
         ],
         email: ['', [Validators.required, Validators.email]],
-        fecha_nac: ['', Validators.required],
         telefono: [''],
+        fecha_nac: ['', Validators.required],
         password: [
           '',
           [
             Validators.required,
             Validators.minLength(8),
-            Validators.pattern(/^(?=.*[A-Z])(?=.*\d).+$/),
           ],
         ],
         confirmPassword: ['', Validators.required],
-        recaptcha: [''],
       },
       { validators: this.passwordsMatch }
     );
-
-    // ⚙️ Cargar script reCAPTCHA solo en navegador
-    if (isPlatformBrowser(this.platformId)) {
-      const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-      (window as any).onRecaptchaSuccess = (token: string) => {
-        this.form.get('recaptcha')?.setValue(token);
-      };
-    }
   }
 
-  // 🔍 Validador custom
+  togglePassword() {
+    this.showPassword.update((v) => !v);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update((v) => !v);
+  }
+
   passwordsMatch(group: AbstractControl): ValidationErrors | null {
     const pass = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
     return pass === confirm ? null : { mismatch: true };
   }
 
-  // 📄 Helper para el template
   get f() {
     return this.form.controls;
   }
 
-  // 🚀 Envío del formulario
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.submitted.set(true);
-    this.form.markAllAsTouched();
+    this.mensaje.set('');
 
     if (this.form.invalid) {
-      this.mostrarError('Por favor completá correctamente el formulario');
+      this.mensaje.set('Por favor completá correctamente el formulario');
       return;
     }
 
-    const datos: CrearUsuarioDTO = {
-      email: this.form.value.email!,
-      nombre: this.form.value.nombre!,
-      contraseña: this.form.value.password!,
-      telefono: this.form.value.telefono || '0000000000',
-      fecha_nac: this.form.value.fecha_nac!,
-      imagen_url: '',
-      rolId: 1,
-    };
+    const { nombre, apellido, email, password, fecha_nac, telefono } = this.form.value;
+    const displayName = `${nombre} ${apellido}`.trim();
 
     this.loading.set(true);
 
-    this.usuarioService.register(datos).subscribe({
-      next: (response: any) => {
-        this.loading.set(false);
+    try {
+      await this.authService.signUpWithEmailPassword(email!, password!, displayName);
 
-        // ✅ Si el backend devuelve un token al registrarse
-        if (response?.token) {
-          this.authService.setJwtToken(response.token);
-        }
+      this.analytics.trackSignUp('email');
+      this.toast.success('Registro exitoso. Bienvenido/a', 'Cuenta creada');
+      this.router.navigate(['/perfil']);
+    } catch (error: any) {
+      console.error('❌ Error en registro:', error);
+      this.mensaje.set(this.mapAuthError(error?.code ?? '', 'No se pudo crear la cuenta'));
+    } finally {
+      this.loading.set(false);
+    }
 
-        this.mostrarExito('Registro exitoso');
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        this.loading.set(false);
-        console.error('❌ Error en registro:', error);
-        this.mostrarError(
-          error?.error?.message || 'Error al registrarte. Intentá nuevamente.'
-        );
-      },
-    });
+    void fecha_nac;
+    void telefono;
   }
 
-  // 🧾 Toasts
-  mostrarExito(msg: string): void {
-    this.toast.success(msg, 'Éxito');
+  async signInWithGoogle(): Promise<void> {
+    this.loading.set(true);
+    this.mensaje.set('');
+    try {
+      await this.authService.signInWithGoogle();
+      this.analytics.trackSignUp('google');
+      this.toast.success('Registro con Google exitoso', 'Bienvenido/a');
+      this.router.navigate(['/perfil']);
+    } catch (error: any) {
+      this.mensaje.set(this.mapAuthError(error?.code ?? '', 'No se pudo registrar con Google'));
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  mostrarError(msg: string): void {
-    this.toast.error(msg, 'Error');
+  private mapAuthError(code: string, fallback: string): string {
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return 'Ya existe una cuenta con ese email';
+      case 'auth/invalid-email':
+        return 'El email no es válido';
+      case 'auth/weak-password':
+        return 'La contraseña es muy débil (mínimo 8 caracteres)';
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return '';
+      default:
+        return fallback;
+    }
   }
 }

@@ -28,6 +28,7 @@ import { of } from 'rxjs';
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 // Models
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -72,6 +73,7 @@ export class BuscadorComponent {
   private paquetesService = inject(PaquetePublicadoService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private analytics = inject(AnalyticsService);
 
   // 📌 ViewChild
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
@@ -234,6 +236,11 @@ export class BuscadorComponent {
           cargando: false,
           error: null,
         });
+
+        this.analytics.trackSearch(
+          this.searchTerm(),
+          productosFiltrados.length + paquetesFiltrados.length
+        );
       });
   }
 

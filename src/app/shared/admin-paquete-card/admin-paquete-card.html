@@ -62,11 +62,6 @@
                     Archivado
                 </span>
                 }
-                <span class="w-1 h-1 rounded-full bg-border-default"></span>
-                <span class="text-xs text-text-muted flex items-center gap-1">
-                    <app-icon name="mapPin" size="12" />
-                    {{ paquete.zona?.nombre || 'Sin zona' }}
-                </span>
                 <span class="w-1 h-1 rounded-full bg-border-default hidden sm:block"></span>
                 @if (isEnergico || isSinergico) {
                 <app-tipo-badge [tipo]="paquete.tipo" mode="icon" />

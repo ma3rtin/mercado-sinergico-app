@@ -39,13 +39,6 @@
             @if (paquete()?.paqueteBase?.nombre) {
             <p class="text-sm text-text-secondary mt-2 ml-[3.25rem]">
               {{ paquete()!.paqueteBase!.nombre }}
-              @if (paquete()?.zona?.nombre) {
-              <span class="mx-1.5 text-text-muted">·</span>
-              <span class="inline-flex items-center gap-1">
-                <app-icon name="mapPin" size="13" class="text-text-muted" />
-                {{ paquete()!.zona!.nombre }}
-              </span>
-              }
             </p>
             }
           </div>

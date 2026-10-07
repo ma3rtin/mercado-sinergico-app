@@ -5,28 +5,18 @@ import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 
 export const authGuard: CanActivateFn = async (): Promise<boolean | UrlTree> => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
-    const platformId = inject(PLATFORM_ID);
+  const authService = inject(AuthService);
+  const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
 
-    // 🕒 Esperar a que la sesión esté lista (garantiza que restoreSession terminó)
-    await authService.waitForSessionReady();
+  await authService.waitForSessionReady();
 
-    // ✅ Determinar autenticación
-    const token = authService.getJwtToken() ?? authService.getFirebaseToken();
-    const isAuthenticated = !!token;
+  const token = authService.getJwtToken();
+  const hasStoredToken = isPlatformBrowser(platformId) && !!localStorage.getItem('jwt_token');
 
-    // 🔍 Verificar si hay tokens en localStorage (backup)
-    const hasStoredToken =
-        isPlatformBrowser(platformId) &&
-        (!!localStorage.getItem('jwt_token') || !!localStorage.getItem('firebase_token'));
+  if (token || hasStoredToken) {
+    return true;
+  }
 
-    // 🔐 Permitir acceso si hay sesión activa o tokens guardados
-    if (isAuthenticated || hasStoredToken) {
-        return true;
-    }
-
-    // 🚫 Si no hay sesión, redirigir al login
-    console.warn('🛡️ AuthGuard - acceso denegado, redirigiendo al login');
-    return router.createUrlTree(['/login']);
+  return router.createUrlTree(['/login']);
 };

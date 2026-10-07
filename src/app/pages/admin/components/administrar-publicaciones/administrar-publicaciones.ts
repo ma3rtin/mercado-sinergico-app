@@ -52,8 +52,7 @@ export class AdministrarPublicacionesComponent implements OnInit {
     return this.paquetes().filter(p => {
       const matchTerm = !term ||
         p.nombre?.toLowerCase().includes(term) ||
-        p.paqueteBase?.nombre?.toLowerCase().includes(term) ||
-        p.zona?.nombre?.toLowerCase().includes(term);
+        p.paqueteBase?.nombre?.toLowerCase().includes(term);
       const matchEstado = estado === 'todos' ||
         p.estado?.nombre?.toLowerCase().trim() === estado;
       return matchTerm && matchEstado;

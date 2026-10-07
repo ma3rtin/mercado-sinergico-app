@@ -152,13 +152,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Zona de publicación -->
-                <div class="flex flex-col justify-start">
-                    <app-select [labelValue]="'Zona'" [placeholderValue]="'Elegí una zona'" [optionsValue]="zonasOptions()"
-                        [searchableValue]="true" [clearableValue]="true" [requiredValue]="true" [ngModel]="zonaSeleccionada()"
-                        (valueChange)="zonaSeleccionada.set($event)" />
-                </div>
             </div>
         </div>
 

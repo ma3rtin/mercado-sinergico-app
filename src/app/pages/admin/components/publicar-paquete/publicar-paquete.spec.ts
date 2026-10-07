@@ -7,7 +7,6 @@ import { NgIconsModule } from '@ng-icons/core';
 import { PublicarPaqueteComponent } from './publicar-paquete';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
-import { ZonaService } from '@app/services/zona/zona.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { of } from 'rxjs';
 import { TipoPaquete } from '@app/models/Enums';
@@ -17,7 +16,6 @@ import { TipoPaquete } from '@app/models/Enums';
 describe('PublicarPaqueteComponent', () => {
   let paquetePublicadoSpy: Partial<PaquetePublicadoService>;
   let paqueteBaseSpy: Partial<PaqueteBaseService>;
-  let zonaSpy: Partial<ZonaService>;
   let toastSpy: Partial<ToastService>;
 
   beforeEach(() => {
@@ -27,7 +25,7 @@ describe('PublicarPaqueteComponent', () => {
         nombre: 'Ronda Existente',
         paqueteBase: { id_paquete_base: 1, nombre: 'Base Test' },
         estado: { id_estado: 2, nombre: 'Activo' },
-        zonaId: 1,
+
       })),
       createPaquete: vi.fn().mockReturnValue(of({ id_paquete_publicado: 100 })),
       updatePaquete: vi.fn().mockReturnValue(of({ id_paquete_publicado: 1 })),
@@ -40,9 +38,6 @@ describe('PublicarPaqueteComponent', () => {
       ])),
     };
 
-    zonaSpy = {
-      getZonas: vi.fn().mockReturnValue(of([{ id_zona: 1, nombre: 'Zona Norte' }])),
-    };
 
     toastSpy = {
       success: vi.fn(),
@@ -59,7 +54,6 @@ describe('PublicarPaqueteComponent', () => {
         importProvidersFrom(NgIconsModule.withIcons({})),
         { provide: PaquetePublicadoService, useValue: paquetePublicadoSpy },
         { provide: PaqueteBaseService, useValue: paqueteBaseSpy },
-        { provide: ZonaService, useValue: zonaSpy },
         { provide: ToastService, useValue: toastSpy },
       ],
     });
@@ -72,7 +66,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -90,7 +83,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('   ');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -108,7 +100,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Ronda Agosto 2026');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -124,7 +115,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Mi Ronda Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -143,7 +133,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-09-01');
       comp.fechaFin.set('2026-08-01'); // anterior al inicio
@@ -160,7 +149,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('');
@@ -177,7 +165,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -193,7 +180,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -212,7 +198,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -230,7 +215,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -245,7 +229,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Test sin descuento');
       comp.paqueteBaseSeleccionado.set(1);
-      comp.zonaSeleccionada.set(1);
       comp.estadoSeleccionado.set(2);
       comp.fechaInicio.set('2026-08-01');
       comp.fechaFin.set('2026-09-01');
@@ -318,7 +301,6 @@ describe('PublicarPaqueteComponent', () => {
       const comp = TestBed.createComponent(PublicarPaqueteComponent).componentInstance;
       comp.nombre.set('Ronda que se borra');
       comp.paqueteBaseSeleccionado.set(5);
-      comp.zonaSeleccionada.set(2);
       comp.descuento.set(10);
       comp.cantProductos.set(50);
 
@@ -326,7 +308,6 @@ describe('PublicarPaqueteComponent', () => {
 
       expect(comp.nombre()).toBe('');
       expect(comp.paqueteBaseSeleccionado()).toBeNull();
-      expect(comp.zonaSeleccionada()).toBeNull();
       expect(comp.descuento()).toBeNull();
       expect(comp.cantProductos()).toBeNull();
       expect(comp.estadoSeleccionado()).toBe(2); // default Activo
