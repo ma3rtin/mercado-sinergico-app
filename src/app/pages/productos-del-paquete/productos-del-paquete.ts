@@ -29,6 +29,7 @@ import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 // Components
 import { FiltrosComponent } from '@app/shared/filtros/filtros';
@@ -189,6 +190,7 @@ export class ProductosDelPaquete implements OnInit {
     private categoriaService: CategoriaService,
     private marcaService: MarcaService,
     private paqueteBaseService: PaqueteBaseService,
+    private analytics: AnalyticsService,
     private destroyRef: DestroyRef,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
@@ -250,6 +252,14 @@ export class ProductosDelPaquete implements OnInit {
 
           this.paquete.set(encontrado);
           console.log('✅ Paquete cargado:', encontrado);
+
+          this.analytics.trackViewItem({
+            item_id: encontrado.id_paquete_publicado ?? id,
+            item_name: encontrado.paqueteBase?.nombre ?? `Paquete ${id}`,
+            item_category: 'Paquete Publicado',
+            price: encontrado.monto_total,
+            quantity: 1,
+          });
 
           this.cargarProductosDelPaquete();
         },

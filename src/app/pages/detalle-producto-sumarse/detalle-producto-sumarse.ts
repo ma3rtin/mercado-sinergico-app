@@ -32,6 +32,7 @@ import { PedidoService } from '@app/services/pedido/pedido.service';
 import { ToastService } from '@app/services/toast/toast.service';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { UsuarioService } from '@app/services/usuario/usuario.service';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 import { decodeId, getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/utils/obfuscator';
 import Swal from 'sweetalert2';
 
@@ -64,6 +65,7 @@ export class DetalleProductoSumarse implements OnInit {
   private readonly pedidoService = inject(PedidoService);
   private readonly toast = inject(ToastService);
   private readonly usuarioService = inject(UsuarioService);
+  private readonly analytics = inject(AnalyticsService);
 
   // ✅ igual que productos-del-paquete
   private readonly isBrowser = isPlatformBrowser(this.platformId);
@@ -288,6 +290,18 @@ export class DetalleProductoSumarse implements OnInit {
 
           this.productoCargado.set(true);
           this.finalizarCarga();
+
+          const p = response.producto;
+          const categoria = typeof p.categoria === 'string'
+            ? p.categoria
+            : p.categoria?.nombre;
+          this.analytics.trackViewItem({
+            item_id: p.id_producto ?? p.id ?? 0,
+            item_name: p.nombre,
+            item_category: categoria,
+            price: p.precio,
+            quantity: 1,
+          });
         },
         error: (error) => {
           console.error('❌ Error cargando producto:', error);

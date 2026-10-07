@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private analytics = inject(AnalyticsService);
 
   email = signal('');
   password = signal('');
@@ -41,6 +43,7 @@ export class LoginComponent {
 
     try {
       await this.authService.signInWithEmailPassword(this.email(), this.password());
+      this.analytics.trackLogin('email');
       this.toast.success('Sesión iniciada correctamente', 'Éxito');
       this.router.navigate(['/perfil']);
     } catch (error: any) {
@@ -57,6 +60,7 @@ export class LoginComponent {
     this.mensaje.set('');
     try {
       await this.authService.signInWithGoogle();
+      this.analytics.trackLogin('google');
       this.toast.success('Inicio de sesión con Google exitoso', 'Éxito');
       this.router.navigate(['/perfil']);
     } catch (error: any) {

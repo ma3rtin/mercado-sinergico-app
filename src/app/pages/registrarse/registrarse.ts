@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { ButtonComponent } from '../../shared/botones/buttonComponent';
 import { ToastService } from '@app/services/toast/toast.service';
 import { IconComponent } from '@app/shared/icono/icono';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 @Component({
   selector: 'app-registrarse',
@@ -18,6 +19,7 @@ export class RegistrarseComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private analytics = inject(AnalyticsService);
 
   loading = signal(false);
   submitted = signal(false);
@@ -97,6 +99,7 @@ export class RegistrarseComponent {
     try {
       await this.authService.signUpWithEmailPassword(email!, password!, displayName);
 
+      this.analytics.trackSignUp('email');
       this.toast.success('Registro exitoso. Bienvenido/a', 'Cuenta creada');
       this.router.navigate(['/perfil']);
     } catch (error: any) {
@@ -115,6 +118,7 @@ export class RegistrarseComponent {
     this.mensaje.set('');
     try {
       await this.authService.signInWithGoogle();
+      this.analytics.trackSignUp('google');
       this.toast.success('Registro con Google exitoso', 'Bienvenido/a');
       this.router.navigate(['/perfil']);
     } catch (error: any) {

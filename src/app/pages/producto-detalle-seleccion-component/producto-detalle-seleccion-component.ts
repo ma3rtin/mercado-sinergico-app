@@ -15,6 +15,7 @@ import { decodeId, getProductSlugUrl, getPaqueteSlugUrl } from '@app/shared/util
 // Services
 import { ProductosService } from '@app/services/producto/producto.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
+import { AnalyticsService } from '@app/services/analytics/analytics.service';
 
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
@@ -66,6 +67,7 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly analytics = inject(AnalyticsService);
   productoIdActual = signal<number | null>(null);
 
 
@@ -206,6 +208,17 @@ export class ProductoDetalleSeleccionComponent implements OnInit {
           console.log('✅ Producto cargado:', producto);
           this.productoSeleccionado.set(producto);
           this.isLoadingProducto.set(false);
+
+          const categoria = typeof producto.categoria === 'string'
+            ? producto.categoria
+            : producto.categoria?.nombre;
+          this.analytics.trackViewItem({
+            item_id: producto.id_producto ?? producto.id ?? 0,
+            item_name: producto.nombre,
+            item_category: categoria,
+            price: producto.precio,
+            quantity: 1,
+          });
         },
         error: (error) => {
           console.error('❌ Error cargando producto:', error);

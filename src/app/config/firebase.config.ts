@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getAnalytics } from 'firebase/analytics';
+import { getAnalytics, type Analytics } from 'firebase/analytics';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: 'AIzaSyCsG4fb6fg9S9Kau8gy8qrKbGe_hL8GHdI',
   authDomain: 'mercadosinergico.firebaseapp.com',
   projectId: 'mercadosinergico',
@@ -16,6 +16,7 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+export const analytics: Analytics | null =
+  typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export default app;
