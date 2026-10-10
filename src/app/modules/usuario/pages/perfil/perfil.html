@@ -74,6 +74,12 @@
               Dirección de entrega
             </h3>
             <div class="grid md:grid-cols-2 gap-6">
+              @if (usuario()?.direccion?.localidad?.activa === false) {
+                <p class="text-sm text-text-secondary col-span-full" role="status">
+                  Actualizamos las localidades. Tu dirección conserva la localidad anterior
+                  ({{ usuario()?.direccion?.localidad?.nombre }}); seleccioná la correspondiente del nuevo listado.
+                </p>
+              }
               <!-- Fila 1: Localidad y CP -->
               <app-select formControlName="localidad" labelValue="Localidad" [optionsValue]="opcionesLocalidades()"
                 [requiredValue]="true" [clearableValue]="false" placeholderValue="Seleccione localidad"

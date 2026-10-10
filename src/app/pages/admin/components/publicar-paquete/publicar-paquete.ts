@@ -14,11 +14,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PaqueteBaseService } from '@app/services/paquete/paquete-base.service';
-import { ZonaService } from '@app/services/zona/zona.service';
 import { PaquetePublicadoService } from '@app/services/paquete/paquete-publicado.service';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { InputComponent } from '@app/shared/input/input-component';
-import { SelectComponent, SelectOption } from '@app/shared/select/select-component';
+import { SelectOption } from '@app/shared/select/select-component';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
@@ -41,7 +40,6 @@ interface ImageSlot {
     FormsModule,
     ButtonComponent,
     InputComponent,
-    SelectComponent,
     AdminCreateWrapperComponent,
     IconComponent,
     BackButtonComponent,
@@ -53,12 +51,10 @@ interface ImageSlot {
 export class PublicarPaqueteComponent implements OnInit {
   // 🧠 Signals principales
   paquetesBase = signal<any[]>([]);
-  zonas = signal<any[]>([]);
   resultadosBusqueda = signal<any[]>([]);
 
   // Selecciones del formulario
   paqueteBaseSeleccionado = signal<number | null>(null);
-  zonaSeleccionada = signal<number | null>(null);
   estadoSeleccionado = signal<number | null>(null);
   fechaInicio = signal<string>('');
   fechaFin = signal<string>('');
@@ -91,11 +87,6 @@ export class PublicarPaqueteComponent implements OnInit {
     { id_estado: 3, nombre: 'Finalizado' },
   ];
 
-  // 🔄 Computed: opciones para app-select de zona
-  zonasOptions = computed<SelectOption[]>(() =>
-    this.zonas().map(z => ({ value: z.id_zona, label: z.nombre }))
-  );
-
   // 🔄 Computed: opciones para app-select de estado
   estadosOptions = computed<SelectOption[]>(() =>
     this.estados.map(e => ({ value: e.id_estado, label: e.nombre }))
@@ -127,7 +118,6 @@ export class PublicarPaqueteComponent implements OnInit {
 
   constructor(
     private paqueteBaseService: PaqueteBaseService,
-    private zonaService: ZonaService,
     private paquetePublicadoService: PaquetePublicadoService,
     private destroyRef: DestroyRef,
     private route: ActivatedRoute,
@@ -135,7 +125,6 @@ export class PublicarPaqueteComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.cargarZonas();
     this.cargarPaquetesIniciales();
     
     // Por defecto forzamos fecha de inicio a hoy y estado a Activo
@@ -182,7 +171,6 @@ export class PublicarPaqueteComponent implements OnInit {
       next: (paquete) => {
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
         this.busqueda.set(paquete.paqueteBase?.nombre ?? '');
-        this.zonaSeleccionada.set(paquete.zonaId ?? null);
         
         // El estado siempre será Activo (2) salvo que no se pueda, pero forzamos 2 como default general o el que ya tenga.
         // Como no se puede cambiar, mantenemos el que venga (si es edicion) o forzamos 2 si es duplicado.
@@ -264,20 +252,6 @@ export class PublicarPaqueteComponent implements OnInit {
           console.error('❌ Error al obtener paquetes base:', err);
           this.toast.error('Error al cargar los paquetes base.', 'Error');
           this.cargandoVista.set(false);
-        },
-      });
-  }
-
-  // --- Cargar zonas ---
-  cargarZonas(): void {
-    this.zonaService
-      .getZonas()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => this.zonas.set(data),
-        error: (err) => {
-          console.error('❌ Error al obtener zonas:', err);
-          this.toast.error('Error al cargar las zonas.', 'Error');
         },
       });
   }
@@ -409,10 +383,6 @@ export class PublicarPaqueteComponent implements OnInit {
       this.toast.error('Debés seleccionar un paquete base.', 'Error de validación');
       return;
     }
-    if (!this.zonaSeleccionada()) {
-      this.toast.error('Debés seleccionar una zona.', 'Error de validación');
-      return;
-    }
     if (!this.estadoSeleccionado()) {
       this.toast.error('Debés seleccionar un estado.', 'Error de validación');
       return;
@@ -430,6 +400,17 @@ export class PublicarPaqueteComponent implements OnInit {
       return;
     }
 
+    if (!Number.isFinite(dInicio.getTime()) || !Number.isFinite(dFin.getTime())) {
+      this.toast.error('Las fechas ingresadas no son válidas.', 'Error de validación');
+      return;
+    }
+
+    const cantidad = this.cantProductos();
+    if (cantidad !== null && (!Number.isInteger(Number(cantidad)) || Number(cantidad) < 1)) {
+      this.toast.error('La cantidad total debe ser un número entero mayor a 0.', 'Error de validación');
+      return;
+    }
+
     // Validar descuento
     const desc = this.descuento();
     if (desc !== null && (desc < 0 || desc > 100)) {
@@ -442,7 +423,6 @@ export class PublicarPaqueteComponent implements OnInit {
     const payload: any = {
       nombre: this.nombre().trim(),
       paqueteBaseId: Number(this.paqueteBaseSeleccionado()!),
-      zonaId: Number(this.zonaSeleccionada()!),
       fecha_inicio: this.argentinaDateToUTCIso(this.fechaInicio()),
       fecha_fin: this.argentinaDateToUTCIso(this.fechaFin()),
     };
@@ -560,7 +540,6 @@ export class PublicarPaqueteComponent implements OnInit {
   reiniciarFormulario(): void {
     this.busqueda.set('');
     this.paqueteBaseSeleccionado.set(null);
-    this.zonaSeleccionada.set(null);
     this.estadoSeleccionado.set(2);
     this.fechaInicio.set(this.getHoyString());
     this.fechaFin.set('');

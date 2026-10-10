@@ -12,7 +12,7 @@ import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-c
 import { LoaderComponent } from '@app/shared/loader/loader';
 import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { finalize } from 'rxjs';
+import { finalize, shareReplay } from 'rxjs';
 
 const ITEMS_POR_PAGINA = 5;
 
@@ -92,9 +92,16 @@ export class PerfilAdmin implements OnInit {
     this.loadingCompletos.set(true);
     this.errorCompletos.set(null);
 
-    this.paquetePublicadoService.getPaquetesCompletos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // Reutiliza el mismo observable (shareReplay evita doble request si se llama junto a loadPaquetesFinalizados)
+    const todos$ = this.paquetePublicadoService.getAllPaquetes().pipe(shareReplay(1));
+
+    todos$.subscribe({
       next: (paquetes) => {
-        this.paquetesCompletos.set(paquetes);
+        const completos = paquetes.filter(p => {
+          const nombre = p.estado?.nombre?.toLowerCase();
+          return (nombre === 'completo' || nombre === 'confirmado') && !p.archivado;
+        });
+        this.paquetesCompletos.set(completos);
         this.loadingCompletos.set(false);
       },
       error: (err) => {
@@ -110,9 +117,13 @@ export class PerfilAdmin implements OnInit {
     this.errorFinalizados.set(null);
     this.paginaActualFinalizados.set(1);
 
-    this.paquetePublicadoService.getPaquetesFinalizados().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.paquetePublicadoService.getAllPaquetes().subscribe({
       next: (paquetes) => {
-        this.paquetesFinalizados.set(paquetes);
+        const finalizados = paquetes.filter(p => {
+          const nombre = p.estado?.nombre?.toLowerCase();
+          return (nombre === 'recibido' || nombre === 'cancelado') && !p.archivado;
+        });
+        this.paquetesFinalizados.set(finalizados);
         this.loadingFinalizados.set(false);
       },
       error: (err) => {
@@ -265,16 +276,10 @@ export class PerfilAdmin implements OnInit {
   }
 
   duplicarPaquete(paquete: PaquetePublicado) {
-    this.isProcesando.set(true);
-    this.overlayTitulo.set('Duplicando paquete...');
-    this.overlayMensajes.set(['Copiando datos del paquete...', 'Replicando productos...']);
-    this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).pipe(
-      finalize(() => this.isProcesando.set(false)),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.toastService.success('Publicación duplicada con éxito');
-        this.loadPaquetesCompletos();
+    this.paquetePublicadoService.duplicarPaquete(paquete.id_paquete_publicado!).subscribe({
+      next: (nuevoPaquete) => {
+        this.toastService.info('Duplicación creada. Revisá y completá los datos antes de guardar.', '¡Revisión requerida!');
+        this.router.navigate(['/admin/publicar-paquete'], { queryParams: { duplicadoId: nuevoPaquete.id_paquete_publicado } });
       },
       error: () => this.toastService.error('Error al duplicar la publicación'),
     });

@@ -33,12 +33,18 @@
           @if (profileMenuOpen() && isLoggedIn()) {
           <div class="fixed right-2 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
             style="z-index: 9999 !important">
+            @if (isAdmin) {
+            <a (click)="navigateAndClose('/admin/dashboard')"
+              class="block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-secondary-dark border-b border-gray-200 flex items-center gap-2">
+              <app-icon name="Settings"></app-icon> Panel de Control
+            </a>
+            }
             <a (click)="navigateAndClose('/perfil')"
-              class="block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-gray-700 border-b border-gray-200">
+              [class]="'block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 font-medium text-gray-700 border-b border-gray-200 flex items-center gap-2 ' + (!isAdmin ? 'rounded-t-lg' : '')">
               <app-icon name="User" class="w-5 h-5"></app-icon> Mi perfil
             </a>
             <button (click)="signOut()" type="button"
-              class="w-full text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium">
+              class="w-full cursor-pointer text-left px-4 py-3 text-error hover:bg-error-light transition-colors duration-150 rounded-b-lg font-medium flex items-center gap-2">
               <app-icon name="Logout" class="w-5 h-5"></app-icon> Cerrar sesión
             </button>
           </div>
@@ -73,7 +79,7 @@
           <div class="absolute right-0 mt-2 w-48 bg-white text-black rounded-lg shadow-2xl border-2 border-gray-300"
             style="z-index: 9999 !important; position: absolute; top: 100%; right: 0;">
             @if (isAdmin) {
-            <a (click)="navigateAndClose('/admin/perfil')"
+            <a (click)="navigateAndClose('/admin/dashboard')"
               class="block cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 rounded-t-lg font-medium text-secondary-dark border-b border-gray-200 flex items-center gap-2">
               <app-icon name="Settings"></app-icon> Panel de Control
             </a>

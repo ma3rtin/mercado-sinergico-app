@@ -14,7 +14,7 @@ export const serverRoutes: ServerRoute[] = [
 
   // 🧑‍💻 Rutas de administrador (base + hijos)
   { path: 'admin', renderMode: RenderMode.Client },
-  { path: 'admin/perfil', renderMode: RenderMode.Client },
+  { path: 'admin/dashboard', renderMode: RenderMode.Client },
   { path: 'admin/crear-producto', renderMode: RenderMode.Client },
   { path: 'admin/crear-paquete', renderMode: RenderMode.Client },
   { path: 'admin/publicar-paquete', renderMode: RenderMode.Client },

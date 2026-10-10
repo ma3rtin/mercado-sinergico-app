@@ -5,11 +5,9 @@ import { Direccion } from '@app/models/ZonasInterfaces/Direccion';
 import { CrearUsuarioDTO } from '@app/models/DTOs/Usuario/crearUsuarioDTO';
 import { AuthService } from '../auth/auth.service';
 import { ApiService } from '../api.service';
-import { FirebaseLoginResponse, LoginResponse } from './types';
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService extends ApiService {
-  // 🧠 Signals reactivos de perfil
   perfilUsuario = signal<Usuario | null>(null);
 
   perfilCompleto = computed(() => {
@@ -18,7 +16,7 @@ export class UsuarioService extends ApiService {
 
     const tieneTelefono = !!usuario.telefono && usuario.telefono.trim().length >= 8;
     const tieneFechaNac = !!usuario.fecha_nac;
-    const tieneDireccion = !!usuario.direccion && 
+    const tieneDireccion = !!usuario.direccion &&
                            (!!usuario.direccion.localidadId || !!usuario.direccion.localidad?.id_localidad) &&
                            !!usuario.direccion.calle && usuario.direccion.calle.trim().length > 0 &&
                            !!usuario.direccion.numero;
@@ -29,7 +27,6 @@ export class UsuarioService extends ApiService {
   constructor(private authService: AuthService) {
     super();
 
-    // 🔄 Limpiar perfil reactivamente cuando el usuario cierra sesión
     effect(() => {
       if (!this.authService.isAuthenticated()) {
         this.perfilUsuario.set(null);
@@ -51,22 +48,6 @@ export class UsuarioService extends ApiService {
     );
   }
 
-  login(credenciales: { email: string; contraseña: string }): Observable<LoginResponse> {
-    return this.post<LoginResponse>('usuarios/login', credenciales).pipe(
-      tap(response => this.authService.setJwtToken(response.token)),
-      timeout(30000),
-      catchError(this.handleError('login'))
-    );
-  }
-
-  loginWithFirebase(firebaseToken: string): Observable<FirebaseLoginResponse> {
-    return this.post<FirebaseLoginResponse>('usuarios/login-firebase', { token: firebaseToken }).pipe(
-      tap(response => this.authService.setJwtToken(response.token)),
-      timeout(30000),
-      catchError(this.handleError('loginWithFirebase'))
-    );
-  }
-
   getPerfil(): Observable<Usuario> {
     return this.get<Usuario>('usuarios/me').pipe(
       timeout(60000),
@@ -85,7 +66,6 @@ export class UsuarioService extends ApiService {
       catchError(this.handleError('updatePerfil'))
     );
   }
-
 
   uploadImagenPerfil(file: File): Observable<Usuario> {
     const formData = new FormData();

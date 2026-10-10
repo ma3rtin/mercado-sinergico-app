@@ -34,7 +34,7 @@ export class Drawer implements OnInit {
   // 🔗 Links dinámicos
   profileLink = computed(() => {
     const role = this.authService.getUserRole();
-    return role?.toLowerCase() === 'administrador' ? '/admin/perfil' : '/perfil';
+    return role?.toLowerCase() === 'administrador' ? '/admin/dashboard' : '/perfil';
   });
 
   // 👮 Verificar si es admin

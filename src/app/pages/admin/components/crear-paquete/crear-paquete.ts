@@ -1,6 +1,7 @@
 import { Component, DestroyRef, OnInit, inject, signal, computed, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs/operators';
 
 import { Router } from '@angular/router';
 import { TipoPaquete } from '@app/models/Enums';
@@ -413,7 +414,10 @@ export class CrearPaqueteComponent implements OnInit {
 
     this.paqueteBaseService
       .createPaquete(formData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.creandoPaquete.set(false)),
+      )
       .subscribe({
         next: () => {
           this.toast.success('¡Paquete creado con éxito!', 'Éxito');
@@ -425,7 +429,6 @@ export class CrearPaqueteComponent implements OnInit {
           this.toast.error(err.error?.message || 'Error al crear el paquete.', 'Fallo');
           this.creandoPaquete.set(false);
         },
-        complete: () => this.creandoPaquete.set(false),
       });
   }
 

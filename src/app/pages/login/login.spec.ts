@@ -1,41 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NgIconsModule } from '@ng-icons/core';
 import { LoginComponent } from './login';
-import { UsuarioService } from '../../services/usuario/usuario.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { ToastService } from '@app/services/toast/toast.service';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let mockUsuarioService: {
-    login: ReturnType<typeof vi.fn>;
-    loginWithFirebase: ReturnType<typeof vi.fn>;
-    reenviarVerificacion: ReturnType<typeof vi.fn>;
-  };
   let mockAuthService: {
+    signInWithEmailPassword: ReturnType<typeof vi.fn>;
     signInWithGoogle: ReturnType<typeof vi.fn>;
-    getFirebaseToken: ReturnType<typeof vi.fn>;
-    signOut: ReturnType<typeof vi.fn>;
+    resetPassword: ReturnType<typeof vi.fn>;
   };
   let mockToastService: {
     success: ReturnType<typeof vi.fn>;
     error: ReturnType<typeof vi.fn>;
   };
+  let router: Router;
 
   beforeEach(() => {
-    mockUsuarioService = {
-      login: vi.fn(),
-      loginWithFirebase: vi.fn(),
-      reenviarVerificacion: vi.fn(),
-    };
     mockAuthService = {
-      signInWithGoogle: vi.fn(),
-      getFirebaseToken: vi.fn(),
-      signOut: vi.fn().mockResolvedValue(undefined),
+      signInWithEmailPassword: vi.fn().mockResolvedValue(undefined),
+      signInWithGoogle: vi.fn().mockResolvedValue(undefined),
+      resetPassword: vi.fn().mockResolvedValue(undefined),
     };
     mockToastService = {
       success: vi.fn(),
@@ -46,66 +35,59 @@ describe('LoginComponent', () => {
       imports: [LoginComponent, NgIconsModule.withIcons({})],
       providers: [
         provideRouter([]),
-        { provide: UsuarioService, useValue: mockUsuarioService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: ToastService, useValue: mockToastService },
       ],
     });
 
+    router = TestBed.inject(Router);
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
   });
 
-  it('debería marcar cuentaNoVerificada ante error EMAIL_NO_VERIFICADO al iniciar sesión', () => {
-    component.email.set('sinverificar@example.com');
-    component.password.set('Password123');
+  it('debería iniciar sesión correctamente con email y contraseña', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+    component.email.set('usuario@example.com');
+    component.password.set('password123');
 
-    mockUsuarioService.login.mockReturnValue(
-      throwError(() => ({
-        status: 403,
-        error: {
-          code: 'EMAIL_NO_VERIFICADO',
-          message: 'Confirmá tu correo electrónico antes de iniciar sesión.',
-        },
-      }))
-    );
+    await component.onSubmit();
 
-    component.onSubmit();
-
-    expect(component.cuentaNoVerificada()).toBe(true);
-    expect(component.mensaje()).toBe('Confirmá tu correo electrónico antes de iniciar sesión.');
+    expect(mockAuthService.signInWithEmailPassword).toHaveBeenCalledWith('usuario@example.com', 'password123');
+    expect(mockToastService.success).toHaveBeenCalledWith('Sesión iniciada correctamente', 'Éxito');
+    expect(navigateSpy).toHaveBeenCalledWith(['/perfil']);
   });
 
-  it('debería limpiar tokens y sesión Firebase ante rechazo del backend en login Google', async () => {
-    mockAuthService.signInWithGoogle.mockResolvedValue({} as any);
-    mockAuthService.getFirebaseToken.mockReturnValue('firebase-token-123');
+  it('debería mapear error de credenciales incorrectas en onSubmit', async () => {
+    component.email.set('usuario@example.com');
+    component.password.set('wrongpass');
+    mockAuthService.signInWithEmailPassword.mockRejectedValue({ code: 'auth/invalid-credential' });
 
-    mockUsuarioService.loginWithFirebase.mockReturnValue(
-      throwError(() => ({
-        status: 403,
-        error: {
-          code: 'EMAIL_NO_VERIFICADO',
-          message: 'Google no confirmó este correo electrónico',
-        },
-      }))
-    );
+    await component.onSubmit();
 
-    await component.signInWithGoogle();
-
-    expect(mockAuthService.signOut).toHaveBeenCalled();
-    expect(component.mensaje()).toBe('Google no confirmó este correo electrónico');
+    expect(component.mensaje()).toBe('El mail o la contraseña son incorrectos');
     expect(component.loading()).toBe(false);
   });
 
-  it('debería reenviar la activación para el correo ingresado en el login', () => {
-    component.email.set('usuario@example.com');
-    mockUsuarioService.reenviarVerificacion.mockReturnValue(
-      of({ message: 'Correo reenviado' })
+  it('debería iniciar sesión exitosamente con Google', async () => {
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    await component.signInWithGoogle();
+
+    expect(mockAuthService.signInWithGoogle).toHaveBeenCalled();
+    expect(mockToastService.success).toHaveBeenCalledWith('Inicio de sesión con Google exitoso', 'Éxito');
+    expect(navigateSpy).toHaveBeenCalledWith(['/perfil']);
+  });
+
+  it('debería enviar correo de reseteo de contraseña', async () => {
+    component.resetEmail.set('recuperar@example.com');
+
+    await component.sendResetEmail();
+
+    expect(mockAuthService.resetPassword).toHaveBeenCalledWith('recuperar@example.com');
+    expect(component.resetEmailSent()).toBe(true);
+    expect(mockToastService.success).toHaveBeenCalledWith(
+      'Te enviamos un email para restablecer tu contraseña',
+      'Revisá tu casilla'
     );
-
-    component.reenviarActivacion();
-
-    expect(mockUsuarioService.reenviarVerificacion).toHaveBeenCalledWith('usuario@example.com');
-    expect(mockToastService.success).toHaveBeenCalledWith('Correo reenviado', 'Éxito');
   });
 });
