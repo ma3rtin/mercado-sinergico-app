@@ -1,6 +1,7 @@
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { map, timeout, catchError } from 'rxjs/operators';
+import { HttpResponse } from '@angular/common/http';
 import { ApiService } from '@app/services/api.service';
 import { Injectable } from '@angular/core';
 
@@ -14,6 +15,59 @@ export class PaquetePublicadoService extends ApiService {
 
     getPaquetes(): Observable<PaquetePublicado[]> {
         return this.get<PaquetePublicado[]>(this.apiUrl);
+    }
+
+    getPaquetesPaginados(
+        page: number,
+        limit: number,
+        filtros?: any,
+        includeArchived = false
+    ): Observable<{ paquetes: PaquetePublicado[]; total: number }> {
+        const params: any = {
+            page: page.toString(),
+            limit: limit.toString(),
+        };
+        if (includeArchived) params.includeArchived = 'true';
+
+        if (filtros) {
+            if (filtros.categorias && filtros.categorias.length > 0) {
+                params.categorias = filtros.categorias.join(',');
+            }
+            if (filtros.marcas && filtros.marcas.length > 0) {
+                params.marcas = filtros.marcas.join(',');
+            }
+            if (filtros.zonas && filtros.zonas.length > 0) {
+                params.zonas = filtros.zonas.join(',');
+            }
+            if (filtros.tiposPaquete && filtros.tiposPaquete.length > 0) {
+                params.tiposPaquete = filtros.tiposPaquete.join(',');
+            }
+            if (filtros.estados && filtros.estados.length > 0) {
+                params.estados = filtros.estados.join(',');
+            }
+            if (filtros.ordenamiento) {
+                params.orden = filtros.ordenamiento;
+            }
+        }
+
+        return this.http
+            .get<PaquetePublicado[]>(this.buildUrl(this.apiUrl), {
+                observe: 'response',
+                params,
+            })
+            .pipe(
+                timeout(30000),
+                map((response: HttpResponse<PaquetePublicado[]>) => {
+                    const totalHeader = response.headers.get('X-Total-Count');
+                    const total = totalHeader ? parseInt(totalHeader, 10) : 0;
+                    const body = response.body || [];
+                    return { paquetes: body, total };
+                }),
+                catchError((err) => {
+                    console.error('❌ Error cargando paquetes paginados:', err);
+                    return throwError(() => err);
+                })
+            );
     }
 
     getPaqueteById(id: number): Observable<PaquetePublicado> {
@@ -61,10 +115,15 @@ export class PaquetePublicadoService extends ApiService {
         );
     }
 
-    /** Admin: obtiene TODOS los paquetes publicados */
+    /**
+     * Admin: obtiene TODOS los paquetes publicados.
+     * incluirCerrados es necesario porque el listado público esconde los que
+     * ya no admiten sumarse (Completo, Confirmado, Entregado, Cancelado).
+     */
     getAllPaquetes(includeArchived = false): Observable<PaquetePublicado[]> {
-        const url = includeArchived ? `${this.apiUrl}?includeArchived=true` : this.apiUrl;
-        return this.get<PaquetePublicado[]>(url);
+        const params = new URLSearchParams({ incluirCerrados: 'true' });
+        if (includeArchived) params.set('includeArchived', 'true');
+        return this.get<PaquetePublicado[]>(`${this.apiUrl}?${params.toString()}`);
     }
 
     /** Admin: obtiene paquetes en estado Completo o Confirmado (requieren acción del admin) */

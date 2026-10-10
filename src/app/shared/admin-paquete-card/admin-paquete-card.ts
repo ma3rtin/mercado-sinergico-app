@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, HostListener, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener, OnInit, OnDestroy, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
 import { EstadoPaqueteNombre } from '@app/models/PaquetesInterfaces/EstadoPaquetePublicado';
@@ -6,15 +6,19 @@ import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { TipoPaquete } from '@app/models/Enums';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-admin-paquete-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, TipoBadgeComponent],
+  imports: [CommonModule, IconComponent, TipoBadgeComponent, InfoTooltipComponent],
   templateUrl: './admin-paquete-card.html',
 })
 export class AdminPaqueteCard implements OnInit, OnDestroy {
   @Input({ required: true }) paquete!: PaquetePublicado;
+
+  /** Deshabilita todas las acciones mientras una operación está en curso */
+  disabled = input<boolean>(false);
 
   // 📤 Outputs para acciones
   @Output() confirm = new EventEmitter<PaquetePublicado>(); // Completo → Confirmado
@@ -198,36 +202,42 @@ export class AdminPaqueteCard implements OnInit, OnDestroy {
 
   onNotify(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.notify.emit(this.paquete);
   }
 
   onConfirm(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.confirm.emit(this.paquete);
   }
 
   onRefund(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.refund.emit(this.paquete);
   }
 
   onDuplicate(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.duplicate.emit(this.paquete);
   }
 
   onViewDetail(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.viewDetail.emit(this.paquete);
   }
 
   onArchive(event?: Event): void {
     event?.stopPropagation();
+    if (this.disabled()) return;
     this.cerrarMenu();
     this.archive.emit(this.paquete);
   }

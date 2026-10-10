@@ -18,6 +18,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-administrar-paquetes',
@@ -30,6 +31,7 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     PaginationComponent,
     TipoBadgeComponent,
     LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './administrar-paquetes.html',
 })
@@ -42,6 +44,8 @@ export class AdministrarPaquetesComponent implements OnInit {
   paquetesBase = signal<PaqueteBase[]>([]);
   searchTerm = signal('');
   isLoading = signal(true);
+  isDuplicando = signal(false);
+  isArchivando = signal(false);
   currentPage = signal(1);
   itemsPerPage = signal(10);
   mostrarArchivados = signal(false);
@@ -104,18 +108,35 @@ export class AdministrarPaquetesComponent implements OnInit {
   }
 
   duplicarPaqueteBase(paquete: PaqueteBase): void {
-    this.baseService.duplicarPaquete(paquete.id_paquete_base!).subscribe({
-      next: () => {
-        this.toast.success('Molde duplicado con éxito');
-        this.loadData();
-      },
-      error: () => this.toast.error('Error al duplicar el molde')
+    Swal.fire({
+      title: '¿Duplicar paquete base?',
+      text: `Se creará una copia de "${paquete.nombre}".`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Duplicar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#2E608C',
+      cancelButtonColor: '#9ca3af',
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.isDuplicando.set(true);
+        this.baseService.duplicarPaquete(paquete.id_paquete_base!).subscribe({
+          next: () => {
+            this.toast.success('Paquete base duplicado con éxito');
+            this.loadData();
+          },
+          error: () => {
+            this.toast.error('No se pudo duplicar el paquete base');
+          },
+        }).add(() => this.isDuplicando.set(false));
+      }
     });
   }
 
   archivarPaqueteBase(paquete: PaqueteBase): void {
     const nuevoEstado = !paquete.archivado;
     const accion = nuevoEstado ? 'archivar' : 'desarchivar';
+
     Swal.fire({
       title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} paquete base?`,
       text: `Se cambiará el estado de "${paquete.nombre}".`,
@@ -124,19 +145,19 @@ export class AdministrarPaquetesComponent implements OnInit {
       confirmButtonText: nuevoEstado ? 'Archivar' : 'Desarchivar',
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
-      cancelButtonColor: '#9ca3af'
+      cancelButtonColor: '#9ca3af',
     }).then(result => {
       if (result.isConfirmed) {
+        this.isArchivando.set(true);
         this.baseService.archivarPaquete(paquete.id_paquete_base!, nuevoEstado).subscribe({
           next: () => {
             this.toast.success(`Paquete base ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
             this.loadData();
           },
-          error: (error) => {
-            console.error(`Error al ${accion} paquete base:`, error);
+          error: () => {
             this.toast.error(`No se pudo ${accion} el paquete base`);
-          }
-        });
+          },
+        }).add(() => this.isArchivando.set(false));
       }
     });
   }

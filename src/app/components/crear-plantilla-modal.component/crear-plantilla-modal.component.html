@@ -109,4 +109,10 @@
         </div>
     </div>
 </div>
+
+<app-loading-overlay
+  [visible]="isGuardando()"
+  [titulo]="overlayTitulo()"
+  [mensajes]="['Guardando plantilla...', 'Configurando características...']"
+/>
 }

@@ -22,6 +22,7 @@ export interface Producto {
   categoria_id: number;
   tieneVariantes?: boolean;
   cantidadVariantes?: number;
+  cantPaquetes?: number;
   tipo: TipoPaquete;
   archivado?: boolean;
 

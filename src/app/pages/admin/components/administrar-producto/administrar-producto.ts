@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, signal, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 
 // Models
@@ -18,6 +17,8 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { PaginationComponent } from '@app/shared/paginacion/paginacion';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 import { LoaderComponent } from '@app/shared/loader/loader';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-administrar-productos',
@@ -30,6 +31,8 @@ import { LoaderComponent } from '@app/shared/loader/loader';
     PaginationComponent,
     TipoBadgeComponent,
     LoaderComponent,
+    InfoTooltipComponent,
+    LoadingOverlay,
   ],
   templateUrl: './administrar-producto.html',
 })
@@ -49,6 +52,8 @@ export class AdministrarProductosComponent {
   isDuplicating = signal<number | null>(null);
   isArchiving = signal<number | null>(null);
   mostrarArchivados = signal(false);
+  overlayTitulo = signal('Procesando...');
+  overlayMensajes = signal<string[]>([]);
 
 
   filteredProductos = computed(() => {
@@ -163,7 +168,7 @@ export class AdministrarProductosComponent {
         <img src="${this.getImagenUrl(producto)}"
         alt="${producto.nombre}"
         class="w-full h-48 object-cover rounded-lg mb-4"
-        onerror="this.src='/assets/placeholder.png'">
+        onerror="this.src='/assets/images/placeholder-product.png'">
         <p><strong>Descripción:</strong> ${producto.descripcion || 'Sin descripción'}</p>
         <p><strong>Precio:</strong> $${producto.precio.toFixed(2)}</p>
         <p><strong>Marca:</strong> ${this.getMarcaNombre(producto)}</p>
@@ -193,26 +198,22 @@ export class AdministrarProductosComponent {
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
       cancelButtonColor: '#9ca3af',
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          this.isDuplicating.set(producto.id_producto!);
-          const response = await firstValueFrom(this.productosService.duplicateProduct(producto.id_producto!));
-          return response;
-        } catch (error: any) {
-          console.error('Error duplicando producto:', error);
-          Swal.showValidationMessage(`No se pudo duplicar el producto: ${error.error?.message || error.message || 'Error desconocido'}`);
-          throw error;
-        } finally {
-          this.isDuplicating.set(null);
-        }
-      },
-      allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        this.productos.update((prev) => [...prev, result.value]);
-        this.toast.success('Producto duplicado correctamente');
-        this.loadProductos();
+      if (result.isConfirmed) {
+        this.isDuplicating.set(producto.id_producto!);
+        this.overlayTitulo.set('Duplicando producto...');
+        this.overlayMensajes.set(['Copiando producto...', 'Guardando copia...']);
+        this.productosService.duplicateProduct(producto.id_producto!).subscribe({
+          next: (response) => {
+            this.productos.update((prev) => [...prev, response]);
+            this.toast.success('Producto duplicado correctamente');
+            this.loadProductos();
+          },
+          error: (error) => {
+            console.error('Error duplicando producto:', error);
+            this.toast.error(error.error?.message || 'No se pudo duplicar el producto');
+          },
+        }).add(() => this.isDuplicating.set(null));
       }
     });
   }
@@ -232,25 +233,21 @@ export class AdministrarProductosComponent {
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#2E608C',
       cancelButtonColor: '#9ca3af',
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          this.isArchiving.set(producto.id_producto!);
-          await firstValueFrom(this.productosService.archivarProducto(producto.id_producto!, nuevoEstado));
-          return true;
-        } catch (error: any) {
-          console.error(`Error al ${accion} producto:`, error);
-          Swal.showValidationMessage(`No se pudo ${accion} el producto: ${error.error?.message || error.message || 'Error desconocido'}`);
-          throw error;
-        } finally {
-          this.isArchiving.set(null);
-        }
-      },
-      allowOutsideClick: () => !Swal.isLoading()
     }).then((result) => {
       if (result.isConfirmed) {
-        this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
-        this.loadProductos();
+        this.isArchiving.set(producto.id_producto!);
+        this.overlayTitulo.set(`${nuevoEstado ? 'Archivando' : 'Desarchivando'} producto...`);
+        this.overlayMensajes.set(['Actualizando estado...']);
+        this.productosService.archivarProducto(producto.id_producto!, nuevoEstado).subscribe({
+          next: () => {
+            this.toast.success(`Producto ${nuevoEstado ? 'archivado' : 'desarchivado'} correctamente`);
+            this.loadProductos();
+          },
+          error: (error) => {
+            console.error(`Error al ${accion} producto:`, error);
+            this.toast.error(error.error?.message || `No se pudo ${accion} el producto`);
+          },
+        }).add(() => this.isArchiving.set(null));
       }
     });
   }
@@ -305,7 +302,7 @@ export class AdministrarProductosComponent {
   }
 
   public getImagenUrl(producto: Producto): string {
-    return producto.imagen_url || producto.imagen || '/assets/placeholder.png';
+    return producto.imagen_url || producto.imagen || '/assets/images/placeholder-product.png';
   }
 
   mostrarGuiaSimbolos(): void {

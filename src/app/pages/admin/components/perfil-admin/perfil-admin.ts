@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicado';
@@ -9,40 +9,44 @@ import { UsuarioService } from '@app/services/usuario/usuario.service';
 import { Usuario } from '@app/models/UsuarioInterfaces/Usuario';
 import { ToastService } from '@app/services/toast/toast.service';
 import { AdminPaqueteCard } from '@app/shared/admin-paquete-card/admin-paquete-card';
-import { shareReplay } from 'rxjs/operators';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, shareReplay } from 'rxjs';
 
 const ITEMS_POR_PAGINA = 5;
 
 @Component({
   selector: 'app-perfil-admin',
   standalone: true,
-  imports: [CommonModule, RouterModule, ButtonComponent, IconComponent, AdminPaqueteCard],
+  imports: [CommonModule, RouterModule, ButtonComponent, IconComponent, AdminPaqueteCard, LoaderComponent, LoadingOverlay],
   templateUrl: './perfil-admin.html',
   styleUrl: './perfil-admin.css',
 })
 export class PerfilAdmin implements OnInit {
-  // 🔧 Servicios
+  // Servicios
   private paquetePublicadoService = inject(PaquetePublicadoService);
   private usuarioService = inject(UsuarioService);
   private router = inject(Router);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
-  // 📌 Referencia a la sección de finalizados para scroll
   @ViewChild('seccionFinalizados') seccionFinalizados?: ElementRef<HTMLElement>;
 
-  // 📊 Señales — Perfil
   usuario = signal<Usuario | null>(null);
 
-  // 📊 Señales — Sección 1: Completos (requieren atención)
   paquetesCompletos = signal<PaquetePublicado[]>([]);
   loadingCompletos = signal(true);
   errorCompletos = signal<string | null>(null);
 
-  // 📊 Señales — Sección 2: Finalizados (Recibido + Cancelado)
   paquetesFinalizados = signal<PaquetePublicado[]>([]);
   loadingFinalizados = signal(true);
   errorFinalizados = signal<string | null>(null);
   paginaActualFinalizados = signal(1);
+
+  isProcesando = signal<boolean>(false);
+  overlayTitulo = signal<string>('Procesando...');
+  overlayMensajes = signal<string[]>([]);
 
   // 📐 Computed — Paginación de finalizados
   readonly totalPaginasFinalizados = computed(() =>
@@ -78,7 +82,7 @@ export class PerfilAdmin implements OnInit {
   // ─────────────────────────────────────────────────────────────
 
   loadPerfil() {
-    this.usuarioService.getPerfil().subscribe({
+    this.usuarioService.getPerfil().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (usuario) => this.usuario.set(usuario),
       error: (err) => console.error('Error al cargar perfil:', err),
     });
@@ -165,7 +169,7 @@ export class PerfilAdmin implements OnInit {
 
   descargarPlanillaFabrica(id: number | undefined) {
     if (!id) return;
-    this.paquetePublicadoService.exportarFabrica(id).subscribe({
+    this.paquetePublicadoService.exportarFabrica(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -180,7 +184,7 @@ export class PerfilAdmin implements OnInit {
 
   descargarPlanillaLogistica(id: number | undefined) {
     if (!id) return;
-    this.paquetePublicadoService.exportarLogistica(id).subscribe({
+    this.paquetePublicadoService.exportarLogistica(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -221,7 +225,13 @@ export class PerfilAdmin implements OnInit {
         cancelButtonText: 'Cancelar',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.paquetePublicadoService.confirmarCompra(paquete.id_paquete_publicado!).subscribe({
+          this.isProcesando.set(true);
+          this.overlayTitulo.set('Confirmando compra...');
+          this.overlayMensajes.set(['Confirmando compra con fabricante...', 'Notificando compradores...']);
+          this.paquetePublicadoService.confirmarCompra(paquete.id_paquete_publicado!).pipe(
+            finalize(() => this.isProcesando.set(false)),
+            takeUntilDestroyed(this.destroyRef)
+          ).subscribe({
             next: () => {
               this.toastService.success('Compra confirmada con éxito');
               this.loadPaquetesCompletos();
@@ -246,7 +256,13 @@ export class PerfilAdmin implements OnInit {
         cancelButtonText: 'No, volver',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.paquetePublicadoService.cancelarPaquete(paquete.id_paquete_publicado!).subscribe({
+          this.isProcesando.set(true);
+          this.overlayTitulo.set('Cancelando paquete...');
+          this.overlayMensajes.set(['Procesando reembolsos...', 'Enviando mails de reembolso...']);
+          this.paquetePublicadoService.cancelarPaquete(paquete.id_paquete_publicado!).pipe(
+            finalize(() => this.isProcesando.set(false)),
+            takeUntilDestroyed(this.destroyRef)
+          ).subscribe({
             next: () => {
               this.toastService.success('Paquete cancelado y reembolsos procesados');
               this.loadPaquetesCompletos();
@@ -270,23 +286,31 @@ export class PerfilAdmin implements OnInit {
   }
 
   archivarPaquete(paquete: PaquetePublicado) {
+    const nuevoEstado = !paquete.archivado;
     import('sweetalert2').then((Swal) => {
       Swal.default.fire({
-        title: '¿Archivar paquete?',
-        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" se ocultará de esta lista.`,
+        title: `¿${nuevoEstado ? 'Archivar' : 'Desarchivar'} paquete?`,
+        text: `El paquete "${paquete.paqueteBase?.nombre || paquete.nombre}" ${nuevoEstado ? 'se ocultará de' : 'volverá a'} esta lista.`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Sí, archivar',
+        confirmButtonText: nuevoEstado ? 'Sí, archivar' : 'Sí, desarchivar',
         cancelButtonText: 'Cancelar',
         confirmButtonColor: 'var(--brand-secondary)',
       }).then((result) => {
         if (result.isConfirmed) {
-          this.paquetePublicadoService.archivarPaquete(paquete.id_paquete_publicado!, true).subscribe({
+          this.isProcesando.set(true);
+          this.overlayTitulo.set(`${nuevoEstado ? 'Archivando' : 'Desarchivando'} paquete...`);
+          this.overlayMensajes.set(['Actualizando estado...']);
+          this.paquetePublicadoService.archivarPaquete(paquete.id_paquete_publicado!, nuevoEstado).pipe(
+            finalize(() => this.isProcesando.set(false)),
+            takeUntilDestroyed(this.destroyRef)
+          ).subscribe({
             next: () => {
-              this.toastService.success('Paquete archivado con éxito');
+              this.toastService.success(`Paquete ${nuevoEstado ? 'archivado' : 'desarchivado'} con éxito`);
               this.loadPaquetesFinalizados();
             },
-            error: () => this.toastService.error('Error al archivar el paquete'),
+            error: () =>
+              this.toastService.error(`Error al ${nuevoEstado ? 'archivar' : 'desarchivar'} el paquete`),
           });
         }
       });

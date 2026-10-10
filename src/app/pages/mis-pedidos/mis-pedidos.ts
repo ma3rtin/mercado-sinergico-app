@@ -180,26 +180,19 @@ export class MisPedidosComponent implements OnInit {
     const productosSeleccionados: ProductoEnPedido[] =
       (p.detalles ?? [])
         .filter(x => x.producto)
-        .map(x => {
-          const precio = x.producto!.precio;
-          const descuento = p.paquetePublicado?.descuento ?? 0;
-          const precioConDescuento = precio - (precio * descuento / 100);
-
-          return {
-            id_detalle: x.id,
-            id_producto: x.productoId,
-            nombre: x.producto!.nombre,
-            precio,
-            precioConDescuento,
-            imagen_url: x.producto!.imagen_url,
-            cantidad: x.cantidad,
-            variante: x.variante ?? null
-          };
-        });
+        .map(x => ({
+          id_detalle: x.id,
+          id_producto: x.productoId,
+          nombre: x.producto!.nombre,
+          precio: x.precio_unitario,
+          imagen_url: x.producto!.imagen_url,
+          cantidad: x.cantidad,
+          variante: x.variante ?? null
+        }));
 
     const subtotal = this.calcularSubtotal(productosSeleccionados);
-    const descuento = p.paquetePublicado?.descuento ?? 0;
-    const total = subtotal - (subtotal * descuento / 100);
+    const descuento = p.descuento_aplicado ?? 0;
+    const total = p.monto_total ?? subtotal;
 
     return {
       ...p,
@@ -220,11 +213,8 @@ export class MisPedidosComponent implements OnInit {
   }
 
   private recalcularPedido(p: PedidoDelUsuario): void {
-    const subtotal = this.calcularSubtotal(p.productosSeleccionados);
-    const descuento = p.descuento ?? 0;
-
-    p.subtotal = subtotal;
-    p.total = subtotal - (subtotal * descuento / 100);
+    p.subtotal = this.calcularSubtotal(p.productosSeleccionados);
+    p.total = p.subtotal;
   }
 
 

@@ -21,6 +21,7 @@ export class SubidorImagenes {
   private toast = inject(ToastService);
 
   // Configuración
+  titulo = input<string>('Imágenes del Producto');
   allowMultiple = input<boolean>(true);
   maxSlots = input<number>(16);
   formSubmitted = input<boolean>(false);
@@ -36,6 +37,19 @@ export class SubidorImagenes {
   })));
 
   draggedIndex = signal<number | null>(null);
+
+  // Debe coincidir con TIPOS_PERMITIDOS del backend (uploadFiles.middleware.ts).
+  // Las extensiones sueltas cubren los navegadores que no reconocen HEIC y no
+  // mandan un mimetype de imagen.
+  readonly tiposAceptados =
+    'image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,image/avif,.heic,.heif';
+
+  // Firefox y algunos navegadores de escritorio no reconocen HEIC y reportan
+  // 'application/octet-stream' o vacío; sin este fallback el archivo se
+  // descartaba en silencio aunque el backend sí lo acepta.
+  private esImagenValida(file: File): boolean {
+    return file.type.startsWith('image/') || /\.(heic|heif)$/i.test(file.name);
+  }
 
   // Exponemos estados para el padre y el template
   hasMainImage = computed(() => !!this._slots()[0]?.preview);
@@ -90,12 +104,12 @@ effect(() => {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      if (!file.type.startsWith('image/')) {
+      if (!this.esImagenValida(file)) {
         this.toast.error('Solo se permiten archivos de imagen');
         return;
       }
-      if (file.size > 20 * 1024 * 1024) {
-        this.toast.error('La imagen no puede superar los 20MB');
+      if (file.size > 5 * 1024 * 1024) {
+        this.toast.error('La imagen no puede superar los 5MB');
         return;
       }
 
@@ -122,16 +136,32 @@ effect(() => {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
-      const freeSlots = this._slots().map((s, i) => s.preview ? -1 : i).filter(i => i > 0);
+      const max = this.maxSlots();
+      const freeSlots = this._slots().map((s, i) => s.preview ? -1 : i).filter(i => i > 0 && i < max);
 
       if (freeSlots.length === 0) {
         this.toast.error('Límite de imágenes adicionales alcanzado.');
         return;
       }
 
-      files.slice(0, freeSlots.length).forEach((file, idx) => {
-        if (!file.type.startsWith('image/') || file.size > 20 * 1024 * 1024) return;
-        
+      // Antes los archivos inválidos se descartaban en silencio: el usuario
+      // elegía 16 y aparecían 13 sin ninguna explicación.
+      const validos = files.filter(f => this.esImagenValida(f) && f.size <= 5 * 1024 * 1024);
+      const descartados = files.length - validos.length;
+      if (descartados > 0) {
+        this.toast.error(
+          `Se ${descartados === 1 ? 'omitió 1 archivo' : `omitieron ${descartados} archivos`}: deben ser imágenes de hasta 5MB.`
+        );
+      }
+
+      const aCargar = validos.slice(0, freeSlots.length);
+      if (aCargar.length < validos.length) {
+        this.toast.warning(
+          `Solo quedaban ${aCargar.length} espacios: se ignoraron ${validos.length - aCargar.length} imágenes.`
+        );
+      }
+
+      aCargar.forEach((file, idx) => {
         const targetIndex = freeSlots[idx];
         this._slots.update(prev => {
           const s = [...prev];

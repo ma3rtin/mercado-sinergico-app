@@ -15,6 +15,7 @@ import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '../icono/icono';
 import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
+import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 /**
  * Contexto de uso del ProductoCard
@@ -23,7 +24,7 @@ import { TipoBadgeComponent } from '@app/tipo-badge/tipo-badge';
 export type ProductoCardContexto =
   | 'productos'           // Vista de todos los productos
   | 'paquete-detalle'     // Productos dentro de un paquete específico
-  | 'seleccion';          // Selección de productos para armar paquete
+  | 'seleccion'          // Selección de productos para armar paquete
 
 /**
  * Tipo de navegación esperada
@@ -44,7 +45,7 @@ export interface DescuentoProducto {
 @Component({
   selector: 'app-producto-card',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, TipoBadgeComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent, TipoBadgeComponent, InfoTooltipComponent],
   templateUrl: './producto-card.html',
 })
 export class ProductoCard {
@@ -154,6 +155,11 @@ imagenUrl = computed(() => {
     return textos[ctx] || 'Ver más';
   });
 
+  // Sin paquetes activos (solo aplica a la vista general de productos)
+  sinPaquetes = computed(() => {
+    return this.contexto() === 'productos' && (this.producto()?.cantPaquetes ?? 0) === 0;
+  });
+
   // Tiene stock disponible
   tieneStock = computed(() => {
     const stock = this.producto().stock;
@@ -194,6 +200,12 @@ imagenUrl = computed(() => {
     }
 
     this.cardClick.emit(productoId);
+
+    // Producto sin paquetes activos: no hay detalle accionable, no navegar.
+    // (El detalle /producto/:slug sigue manejando el caso vacío por otras vías.)
+    if (this.sinPaquetes()) {
+      return;
+    }
 
     const nav = this.navegacion();
 

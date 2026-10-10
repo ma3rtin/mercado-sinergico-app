@@ -5,8 +5,8 @@
 
     <!-- 🎨 Filtros -->
     <app-filtros [config]="configFiltrosPaquetes()" [titulo]="'Filtrar Paquetes'"
-
-      (filtrosAplicados)="aplicarFiltros($event)" (filtrosLimpiados)="limpiarFiltros()" />
+      [valoresIniciales]="valoresFiltrosIniciales()"
+      (filtrosAplicados)="aplicarFiltros($event)" />
 
     <!-- 📦 Contenido -->
     <div class="flex-1 min-w-0 flex flex-col">
@@ -16,13 +16,16 @@
       <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
         <div class="text-sm text-gray-500 font-medium w-full text-left sm:w-auto flex flex-wrap items-center gap-1">
           Mostrando {{ paquetesPaginados().length }} paquetes de {{ paquetesFiltrados().length }}
+          @if (textoZonasFiltradas()) {
+            en <span class="text-brand-primary font-semibold">{{ textoZonasFiltradas() }}</span>
+          }
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <label for="sort-paquetes" class="text-sm font-medium text-gray-600 whitespace-nowrap">Ordenar por:</label>
           <div class="relative flex-1 sm:flex-none">
             <select id="sort-paquetes" [value]="ordenSeleccionado()" (change)="cambiarOrden($event)"
               class="appearance-none bg-white border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-3 pr-8 py-2 cursor-pointer font-semibold shadow-sm transition-all hover:bg-gray-50">
-              <option value="recientes">Más relevantes</option>
+              <option value="recientes">Más recientes</option>
               <option value="a-z">A-Z</option>
               <option value="z-a">Z-A</option>
               <option value="mas-participantes">Más participantes</option>

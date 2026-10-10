@@ -7,27 +7,30 @@ import { ButtonComponent } from '@app/shared/botones/buttonComponent';
 import { IconComponent } from '@app/shared/icono/icono';
 import { ToastService } from '@app/services/toast/toast.service';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 @Component({
   selector: 'app-administrar-plantillas',
   templateUrl: './administrar-plantillas.component.html',
   styleUrls: ['./administrar-plantillas.component.css'],
-  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, BackButtonComponent],
+  imports: [CrearPlantillaModalComponent, ButtonComponent, IconComponent, BackButtonComponent, LoaderComponent, LoadingOverlay],
 })
 export class AdministrarPlantillasComponent implements OnInit {
-  // ✅ signals
   plantillas = signal<Plantilla[]>([]);
+  loading = signal<boolean>(true);
+  error = signal<string | null>(null);
   searchTerm = signal('');
   sortOrder = signal<'asc' | 'desc'>('asc');
   isCreateModalOpen = signal(false);
   plantillaToEdit = signal<Plantilla | undefined>(undefined);
-  loading = signal(true);
-  error = signal<string | null>(null);
+  isProcesando = signal(false);
+  overlayTitulo = signal('Procesando...');
+  overlayMensajes = signal<string[]>([]);
 
   private plantillaService = inject(PlantillaService);
   private toast = inject(ToastService);
 
-  // ✅ computed: filtra y ordena automáticamente
   filteredPlantillas = computed(() => {
     const term = this.searchTerm().toLowerCase();
     const order = this.sortOrder();
@@ -110,6 +113,10 @@ export class AdministrarPlantillasComponent implements OnInit {
       confirmButtonColor: '#2E608C'
     }).then((result) => {
       if (result.isConfirmed) {
+        this.overlayTitulo.set('Duplicando plantilla...');
+        this.overlayMensajes.set(['Copiando estructura...', 'Guardando plantilla...']);
+        this.isProcesando.set(true);
+
         const copia: Plantilla = {
           ...plantilla,
           id: undefined,
@@ -125,7 +132,7 @@ export class AdministrarPlantillasComponent implements OnInit {
             console.error('Error duplicando plantilla:', error);
             this.toast.error('No se pudo duplicar la plantilla');
           }
-        });
+        }).add(() => this.isProcesando.set(false));
       }
     });
   }
@@ -142,6 +149,10 @@ export class AdministrarPlantillasComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
+        this.overlayTitulo.set('Eliminando plantilla...');
+        this.overlayMensajes.set(['Eliminando plantilla...']);
+        this.isProcesando.set(true);
+
         this.plantillaService.eliminarPlantilla(plantilla.id ?? 0).subscribe({
           next: () => {
             this.plantillas.update(prev =>
@@ -158,7 +169,7 @@ export class AdministrarPlantillasComponent implements OnInit {
               this.toast.error(message);
             }
           },
-        });
+        }).add(() => this.isProcesando.set(false));
       }
     });
   }

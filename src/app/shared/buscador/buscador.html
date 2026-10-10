@@ -139,7 +139,7 @@
                 <span class="text-xs text-gray-500">{{ paquete.estado?.nombre || 'Sin estado' }}</span>
               </div>
               <p class="text-sm font-medium text-gray-900 truncate group-hover:text-primary">
-                {{ paquete.paqueteBase?.nombre }}
+                {{ paquete.nombre || paquete.paqueteBase?.nombre }}
               </p>
               <p class="text-xs text-gray-500 flex items-center gap-1">
                 <app-icon name="Box" size="12" />
@@ -323,7 +323,7 @@
                   </span>
                 </div>
                 <p class="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
-                  {{ paquete.paqueteBase?.nombre }}
+                  {{ paquete.nombre || paquete.paqueteBase?.nombre }}
                 </p>
                 <p class="text-xs text-gray-500 flex items-center gap-1">
                   <app-icon name="Box" size="12" />

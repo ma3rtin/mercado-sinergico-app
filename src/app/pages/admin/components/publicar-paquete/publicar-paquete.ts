@@ -22,6 +22,8 @@ import { ToastService } from '@app/services/toast/toast.service';
 import { AdminCreateWrapperComponent } from '@app/shared/admin-create-wrapper/admin-create-wrapper';
 import { IconComponent } from '@app/shared/icono/icono';
 import { BackButtonComponent } from '@app/shared/back-button/back-button';
+import { LoaderComponent } from '@app/shared/loader/loader';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 interface ImageSlot {
   file: File | null;
@@ -41,6 +43,8 @@ interface ImageSlot {
     AdminCreateWrapperComponent,
     IconComponent,
     BackButtonComponent,
+    LoaderComponent,
+    LoadingOverlay,
   ],
   templateUrl: './publicar-paquete.html',
 })
@@ -58,11 +62,14 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // 🆕 Nuevos campos
   nombre = signal<string>('');
+  // Una vez que el admin toca el campo a mano, el autocompletado deja de pisarlo.
+  private nombreEditadoManualmente = signal<boolean>(false);
   descuento = signal<number | null>(null);
   imagenSlot = signal<ImageSlot>({ file: null, preview: null });
 
   // Estados y control
-  cargando = signal<boolean>(false);
+  cargandoVista = signal<boolean>(false);
+  guardando = signal<boolean>(false);
   mostrandoResultados = signal<boolean>(false);
   busqueda = signal<string>('');
 
@@ -130,7 +137,12 @@ export class PublicarPaqueteComponent implements OnInit {
       const duplicadoId = params['duplicadoId'];
 
       if (baseId) {
-        this.paqueteBaseSeleccionado.set(Number(baseId));
+        const baseIdNum = Number(baseId);
+        this.paqueteBaseSeleccionado.set(baseIdNum);
+        // Si la lista ya está cargada, autocompletar el nombre de la publicación
+        // (solo si el admin todavía no escribió uno propio)
+        const pre = this.paquetesBase().find(p => p.id_paquete_base === baseIdNum);
+        if (pre && !this.nombreEditadoManualmente() && !this.isEditMode()) this.nombre.set(pre.nombre);
       }
 
       if (duplicadoId) {
@@ -154,7 +166,7 @@ export class PublicarPaqueteComponent implements OnInit {
 
   // --- Cargar datos para edición ---
   cargarDatosEdicion(id: number): void {
-    this.cargando.set(true);
+    this.cargandoVista.set(true);
     this.paquetePublicadoService.getPaqueteById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (paquete) => {
         this.paqueteBaseSeleccionado.set(paquete.paqueteBase?.id_paquete_base ?? null);
@@ -194,19 +206,19 @@ export class PublicarPaqueteComponent implements OnInit {
         }
 
         this.cantProductos.set(paquete.cant_productos ?? null);
-        this.cargando.set(false);
+        this.cargandoVista.set(false);
       },
       error: (err) => {
         console.error('Error cargando paquete para edición:', err);
         this.toast.error('No se pudo cargar la publicación a editar');
-        this.cargando.set(false);
+        this.cargandoVista.set(false);
       }
     });
   }
 
   // --- Cargar primeros 10 paquetes base ---
   cargarPaquetesIniciales(): void {
-    this.cargando.set(true);
+    this.cargandoVista.set(true);
 
     this.paqueteBaseService
       .getPaquetes()
@@ -218,17 +230,28 @@ export class PublicarPaqueteComponent implements OnInit {
           // Si hay un paquete pre-seleccionado, buscar su nombre para el input
           if (this.paqueteBaseSeleccionado()) {
             const pre = data.find(p => p.id_paquete_base === this.paqueteBaseSeleccionado());
-            if (pre) this.busqueda.set(pre.nombre);
+            if (pre) {
+              this.busqueda.set(pre.nombre);
+              // Autocompletar el nombre de la publicación con el nombre del
+              // PaqueteBase, solo si el admin todavía no escribió uno propio y
+              // no estamos editando/duplicando una publicación existente (en
+              // ese caso el nombre real ya lo trae cargarDatosEdicion(), y esta
+              // request puede resolver antes o después de esa — no hay que
+              // pisarlo en ningún orden).
+              if (!this.nombreEditadoManualmente() && !this.isEditMode()) {
+                this.nombre.set(pre.nombre);
+              }
+            }
           }
 
           const primeros = data.slice(0, 10);
           this.resultadosBusqueda.set(primeros);
-          this.cargando.set(false);
+          this.cargandoVista.set(false);
         },
         error: (err) => {
           console.error('❌ Error al obtener paquetes base:', err);
           this.toast.error('Error al cargar los paquetes base.', 'Error');
-          this.cargando.set(false);
+          this.cargandoVista.set(false);
         },
       });
   }
@@ -255,7 +278,21 @@ export class PublicarPaqueteComponent implements OnInit {
   seleccionarPaquete(paquete: any): void {
     this.paqueteBaseSeleccionado.set(paquete.id_paquete_base);
     this.busqueda.set(paquete.nombre);
+    // Autocompletar el nombre de la publicación con el nombre del PaqueteBase,
+    // solo si el admin todavía no escribió uno propio y no estamos
+    // editando/duplicando una publicación existente (ahí el nombre real ya
+    // lo cargó cargarDatosEdicion(); usar el buscador para revisar el
+    // paquete base asociado no debería pisarlo).
+    if (!this.nombreEditadoManualmente() && !this.isEditMode()) {
+      this.nombre.set(paquete.nombre);
+    }
     this.mostrandoResultados.set(false);
+  }
+
+  // --- El admin edita el nombre de la publicación a mano ---
+  onNombreChange(value: string): void {
+    this.nombre.set(value);
+    this.nombreEditadoManualmente.set(true);
   }
 
   // --- 🆕 Limpiar selección de paquete base ---
@@ -416,12 +453,12 @@ export class PublicarPaqueteComponent implements OnInit {
       ? this.paquetePublicadoService.updatePaquete(payload)
       : this.paquetePublicadoService.createPaquete(payload);
 
-    this.cargando.set(true);
+    this.guardando.set(true);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result: any) => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.success(
             this.isEditMode() ? 'Publicación actualizada correctamente 🎉' : 'Paquete publicado correctamente 🎉',
             'Éxito'
@@ -436,7 +473,7 @@ export class PublicarPaqueteComponent implements OnInit {
           });
         },
         error: (err) => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           console.error('Error al publicar/actualizar paquete:', err);
           const msg = err.error?.message || 'Ocurrió un error al procesar el paquete.';
           this.toast.error(msg, 'Fallo');
@@ -461,17 +498,17 @@ export class PublicarPaqueteComponent implements OnInit {
       this.router.navigate(['/admin/administrar-publicaciones']);
       return;
     }
-    this.cargando.set(true);
+    this.guardando.set(true);
     this.paquetePublicadoService.descartarDuplicado(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.info('Duplicación descartada.', 'Cancelado');
           this.router.navigate(['/admin/administrar-publicaciones']);
         },
         error: () => {
-          this.cargando.set(false);
+          this.guardando.set(false);
           this.toast.error('No se pudo descartar la duplicación.');
           this.router.navigate(['/admin/administrar-publicaciones']);
         }

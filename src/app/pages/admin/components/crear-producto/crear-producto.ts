@@ -10,12 +10,14 @@ import { Plantilla } from '@app/models/PlantillaInterfaces/Plantilla';
 import { Marca } from '@app/models/Producto-Paquete/Marca';
 import { Categoria } from '@app/models/Producto-Paquete/Categoria';
 
+// Validators
+import { mayorQueCero } from '@app/shared/validators/mayor-que-cero.validator';
+
 // Services
 import { PlantillaService } from '@app/services/plantilla/plantilla.service';
 import { MarcaService } from '@app/services/producto/marca.service';
 import { CategoriaService } from '@app/services/producto/categoria.service';
 import { ProductosService } from '@app/services/producto/producto.service';
-import { VarianteService } from '@app/services/variantes/variante.service';
 import { ToastService } from '@app/services/toast/toast.service';
 
 // Components
@@ -29,6 +31,7 @@ import { BackButtonComponent } from '@app/shared/back-button/back-button';
 import { SelectCategoriaMarca } from '@app/shared/select-categoria-marca/select-categoria-marca';
 import { MapOptionsPipe } from '@app/shared/pipes/map-options.pipe';
 import { SubidorImagenes } from '@app/subidor-imagenes/subidor-imagenes';
+import { LoadingOverlay } from '@app/shared/loading-overlay/loading-overlay';
 
 import Swal from 'sweetalert2';
 
@@ -49,6 +52,7 @@ import Swal from 'sweetalert2';
     SelectCategoriaMarca,
     MapOptionsPipe,
     SubidorImagenes,
+    LoadingOverlay,
   ],
   templateUrl: './crear-producto.html',
 })
@@ -65,7 +69,6 @@ export class CrearProductoComponent implements OnInit {
   private marcaService = inject(MarcaService);
   private categoriaService = inject(CategoriaService);
   private productoService = inject(ProductosService);
-  private varianteService = inject(VarianteService);
   private toast = inject(ToastService);
 
   creandoMarca = signal(false);
@@ -134,10 +137,10 @@ export class CrearProductoComponent implements OnInit {
       stock: [null, [Validators.min(0), Validators.max(1000000)]],
       categoria_id: [null, Validators.required],
       marca_id: [null, Validators.required],
-      altura: [null, [Validators.min(0), Validators.max(10000)]],
-      ancho: [null, [Validators.min(0), Validators.max(10000)]],
-      profundidad: [null, [Validators.min(0), Validators.max(10000)]],
-      peso: [null, [Validators.min(0), Validators.max(10000)]],
+      altura: [null, [mayorQueCero, Validators.max(10000)]],
+      ancho: [null, [mayorQueCero, Validators.max(10000)]],
+      profundidad: [null, [mayorQueCero, Validators.max(10000)]],
+      peso: [null, [mayorQueCero, Validators.max(10000)]],
       plantillaId: [null],
       tipo: [TipoPaquete.SINERGICO]
     });
@@ -323,6 +326,10 @@ export class CrearProductoComponent implements OnInit {
     const tipoBackend = this.tipoMap[this.tipoProducto()];
     if (tipoBackend) formData.append('tipo', tipoBackend);
 
+    if (this.selectedTemplate()) {
+      formData.append('opcionesDisponibles', JSON.stringify(this.prepararAtributosParaBackend()));
+    }
+
     const slots = this.subidorImagenes()?.getSlots() || [];
     if (slots[0].file) formData.append('icono', slots[0].file);
     for (let i = 1; i < slots.length; i++) {
@@ -333,10 +340,20 @@ export class CrearProductoComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          const productoId = response.id_producto;
-          if (this.selectedTemplate() && productoId) {
-            this.generarVariantesDelProducto(productoId);
-          } else {
+           const productoId = response.id_producto;
+           if (this.selectedTemplate() && productoId) {
+             this.isLoading.set(false);
+             Swal.fire({
+               title: '¡Producto creado!',
+               html: `<p class="mb-4">El producto y sus variantes se crearon correctamente.</p><p class="text-sm text-gray-600"><strong>${response.variantes?.length || 0}</strong> variantes generadas.</p><p class="text-sm text-gray-600 mt-2">¿Querés configurar las variantes ahora?</p>`,
+               icon: 'success', showCancelButton: true,
+               confirmButtonColor: 'var(--brand-secondary)', cancelButtonColor: 'var(--text-muted)',
+               confirmButtonText: 'Sí, configurar', cancelButtonText: 'Más tarde'
+             }).then((result) => {
+               if (result.isConfirmed) this.navegarAGestionarVariantes(productoId);
+               else this.router.navigate(['/admin/administrar-productos']);
+             });
+           } else {
             this.isLoading.set(false);
             this.toast.success('Producto creado exitosamente 🚀');
             this.router.navigate(['/admin/administrar-productos']);
@@ -345,40 +362,6 @@ export class CrearProductoComponent implements OnInit {
         error: (err) => {
           this.isLoading.set(false);
           this.toast.error(err.error?.message || 'Error creando producto');
-        }
-      });
-  }
-
-  private generarVariantesDelProducto(productoId: number): void {
-    const atributosParaBackend = this.prepararAtributosParaBackend();
-    if (Object.keys(atributosParaBackend).length === 0) {
-      this.isLoading.set(false);
-      this.toast.error('No se encontraron atributos para generar variantes');
-      return;
-    }
-    this.varianteService.generarVariantes({ productoId, opcionesDisponibles: atributosParaBackend })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.isLoading.set(false);
-          Swal.fire({
-            title: '¡Producto creado!',
-            html: `<p class="mb-4">El producto se creó correctamente.</p><p class="text-sm text-gray-600"><strong>${response.variantes?.length || 0}</strong> variantes generadas.</p><p class="text-sm text-gray-600 mt-2">¿Querés configurar las variantes ahora?</p>`,
-            icon: 'success', showCancelButton: true,
-            confirmButtonColor: 'var(--brand-secondary)', cancelButtonColor: 'var(--text-muted)',
-            confirmButtonText: 'Sí, configurar', cancelButtonText: 'Más tarde'
-          }).then((result) => {
-            if (result.isConfirmed) this.navegarAGestionarVariantes(productoId);
-            else this.router.navigate(['/admin/administrar-productos']);
-          });
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          Swal.fire({
-            title: 'Producto creado',
-            html: `<p class="mb-2">El producto se creó pero hubo un error al generar variantes:</p><p class="text-sm"><strong>${err.error?.message || 'Error desconocido'}</strong></p>`,
-            icon: 'warning', confirmButtonColor: 'var(--brand-secondary)', confirmButtonText: 'Entendido'
-          }).then(() => this.router.navigate(['/admin/administrar-productos']));
         }
       });
   }
@@ -450,7 +433,7 @@ export class CrearProductoComponent implements OnInit {
     if (errors['required']) return `${fieldLabel} es requerido`;
     if (errors['minlength']) return `${fieldLabel} debe tener al menos ${errors['minlength'].requiredLength} caracteres`;
     if (errors['maxlength']) return `${fieldLabel} no puede superar los ${errors['maxlength'].requiredLength} caracteres`;
-    if (errors['min']) return `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
+    if (errors['min']) return errors['min'].min === 0 ? `${fieldLabel} debe ser mayor a 0` : `${fieldLabel} debe ser mayor o igual a ${errors['min'].min}`;
     if (errors['max']) return `${fieldLabel} debe ser menor o igual a ${errors['max'].max}`;
     return '';
   }

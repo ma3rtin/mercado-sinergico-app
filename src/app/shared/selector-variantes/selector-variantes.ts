@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed, effect } from '@angular/core';
+import { Component, inject, input, output, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Components
@@ -8,6 +8,9 @@ import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 // Interfaces
 import { Producto } from '@app/models/ProductosInterfaces/Producto';
 import { Caracteristica } from '@app/models/PlantillaInterfaces/Caracteristica';
+
+// Services
+import { VarianteService } from '@app/services/variantes/variante.service';
 
 
 /**
@@ -46,6 +49,9 @@ export class SelectorVariantesComponent {
   valido = output<boolean>();
   varianteSeleccionada = output<number | null>();
 
+  // 🔧 SERVICES
+  private readonly varianteService = inject(VarianteService);
+
   // 🎨 SIGNALS - Estado interno
   seleccionadas = signal<VariantesSeleccionadas>({});
   caracteristicaEnHover = signal<number | null>(null);
@@ -61,11 +67,18 @@ export class SelectorVariantesComponent {
   });
 
   /**
+   * Variantes activas y con stock disponible (filtradas con VarianteService)
+   */
+  variantesDisponibles = computed(() => {
+    const variantes = this.producto()?.variantes || [];
+    return this.varianteService.getVariantesDisponibles(variantes);
+  });
+
+  /**
    * Verifica si existen variantes activas armables
    */
   tieneVariantesFormables = computed(() => {
-    const variantes = this.producto()?.variantes || [];
-    return variantes.some(v => v.activo !== false);
+    return this.variantesDisponibles().length > 0;
   });
 
   /**
@@ -140,7 +153,7 @@ export class SelectorVariantesComponent {
 
   private encontrarVarianteId(): number | null {
     const seleccionadas = this.seleccionadas();
-    const variantes = this.producto()?.variantes || [];
+    const variantes = this.variantesDisponibles();
 
     console.log('--- ENCONTRAR VARIANTE ---');
     console.log('Seleccionadas:', seleccionadas);
@@ -165,10 +178,13 @@ export class SelectorVariantesComponent {
       const todas = this.todasSeleccionadas();
       const valida = this.varianteValida();
       const formables = this.tieneVariantesFormables();
+      const variantesDefinidas = (this.producto()?.variantes || []).length > 0;
 
       this.variantesChange.emit(seleccionadas);
       
-      const esValido = !formables || (todas && valida);
+      // Si el producto tiene variantes (aunque ninguna esté activa/formable),
+      // se exige una selección válida; si no tiene variantes, es válido directo.
+      const esValido = !variantesDefinidas || (formables && todas && valida);
       this.valido.emit(esValido);
 
       if (formables && todas && valida) {
@@ -203,12 +219,11 @@ export class SelectorVariantesComponent {
         [caracteristicaId]: opcionId
       };
 
-      // Validamos si la nueva combinación existe en alguna variante activa.
+      // Validamos si la nueva combinación existe en alguna variante activa y con stock.
       // Si no existe, limpiamos las otras selecciones para no bloquear al usuario.
-      const variantes = this.producto()?.variantes || [];
+      const variantes = this.variantesDisponibles();
       if (variantes.length > 0) {
         const existeAlgunaVariante = variantes.some(variante => {
-          if (variante.activo === false) return false;
           return Object.entries(next).every(([cId, oId]) =>
             variante.opciones.some(op => op.caracteristicaId === Number(cId) && op.opcionId === oId)
           );
@@ -247,17 +262,14 @@ export class SelectorVariantesComponent {
    */
   esOpcionCombinable(caracteristicaId: number, opcionId: number): boolean {
     const seleccionadas = this.seleccionadas();
-    const variantes = this.producto()?.variantes || [];
+    const variantes = this.variantesDisponibles();
     if (variantes.length === 0) return false;
 
     // Simular cómo quedaría la selección incluyendo la opción que estamos evaluando
     const seleccionSimulada = { ...seleccionadas, [caracteristicaId]: opcionId };
 
-    // Comprobar si existe AL MENOS UNA variante en BD que contenga todas estas opciones seleccionadas
+    // Comprobar si existe AL MENOS UNA variante activa con stock que contenga todas estas opciones seleccionadas
     return variantes.some(variante => {
-      // Ignoramos variantes desactivadas del todo
-      if (variante.activo === false) return false;
-
       return Object.entries(seleccionSimulada).every(([cId, oId]) => {
         // La variante debe poseer (caracteristicaId === cId AND opcionId === oId)
         return variante.opciones.some(op =>

@@ -6,6 +6,11 @@
     <app-back-button label="Volver a publicaciones" route="/admin/administrar-publicaciones" />
     }
 
+    @if (cargandoVista()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <app-loader mensaje="Cargando publicar paquete..." padding="py-0" />
+      </div>
+    } @else {
     <div class="space-y-6">
         <!-- 🏷️ TARJETA 0: NOMBRE DE LA PUBLICACIÓN -->
         <div class="bg-white rounded-lg shadow-sm p-6">
@@ -102,7 +107,15 @@
         <!-- 🖼️ TARJETA 2: IMAGEN Y ZONA -->
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Imagen y Alcance</h3>
-            
+
+            <!-- Nombre de la publicación -->
+            <div class="mb-6">
+                <app-input [ngModel]="nombre()" (ngModelChange)="onNombreChange($event)"
+                    [labelValue]="'Nombre de la publicación'" [requiredValue]="true"
+                    [placeholderValue]="'Ej: iPhone 14 Campaña CABA'"
+                    [helperTextValue]="'Es el nombre que verán los usuarios en el paquete'" />
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Imagen de la publicación -->
                 <div>
@@ -213,10 +226,18 @@
         <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4">
             @if (isDuplicate()) {
             <app-button variant="danger" label="Descartar duplicación"
-                [disabled]="cargando()" (buttonClick)="descartarDuplicacion()" />
+                [disabled]="guardando()" (buttonClick)="descartarDuplicacion()" />
             }
             <app-button variant="primary" [label]="isEditMode() ? 'Guardar cambios' : 'Publicar paquete'"
-                [loading]="cargando()" [disabled]="cargando()" (buttonClick)="publicarPaquete()" />
+                [loading]="guardando()" [disabled]="guardando()" (buttonClick)="publicarPaquete()" />
         </div>
     </div>
+    }
 </app-admin-create-wrapper>
+
+<app-loading-overlay
+  [visible]="guardando()"
+  [titulo]="isEditMode() ? 'Guardando cambios...' : 'Publicando paquete...'"
+  [mensajes]="['Procesando...', 'Guardando datos...', 'Validando información...']"
+  [duracionMs]="20000"
+/>
