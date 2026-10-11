@@ -7,5 +7,6 @@ export interface PaqueteRelacionado {
     faltanParaCerrar?: number;
     fechaCierre?: string;
     compradoresInvolucrados?: number;
+    zona: string;
     imagen: string;
 }

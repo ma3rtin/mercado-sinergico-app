@@ -5,8 +5,7 @@ import { ApiService } from '../api.service';
 export interface Localidad {
   id_localidad: number;
   nombre: string;
-  codigo_postal: number | null;
-  activa?: boolean;
+  codigo_postal: number;
 }
 
 @Injectable({ providedIn: 'root' })
