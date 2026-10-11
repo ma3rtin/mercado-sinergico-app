@@ -159,7 +159,6 @@ export class DetalleProductoSumarse implements OnInit {
     return 'CUPO_PAQUETE_LIMITADO';
   });
 
-  zonaDelPaquete = computed(() => this.paqueteSeleccionado()?.zona?.nombre || 'Sin zona');
   estadoDelPaquete = computed(() => this.paqueteSeleccionado()?.estado?.nombre || 'Sin estado');
 
   mostrarAyudaVariantes = computed(() =>

@@ -4,12 +4,11 @@ import { PaquetePublicado } from '@app/models/PaquetesInterfaces/PaquetePublicad
 import { IconComponent } from '@app/shared/icono/icono';
 import { TipoPaquete } from '@app/models/Enums';
 import { TipoPaqueteBadgeComponent } from '@app/shared/tipo-paquete-badge/tipo-paquete-badge';
-import { InfoTooltipComponent } from '@app/shared/info-tooltip/info-tooltip';
 
 @Component({
   selector: 'app-paquete-banner',
   standalone: true,
-  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent, InfoTooltipComponent],
+  imports: [CommonModule, IconComponent, TipoPaqueteBadgeComponent],
   templateUrl: './paquete-banner.html',
 })
 export class PaqueteBannerComponent {
@@ -45,10 +44,6 @@ export class PaqueteBannerComponent {
     return this.paquete()?.estado?.nombre || '';
   });
 
-  // Zona del paquete
-  zonaNombre = computed(() => {
-    return this.paquete()?.zona?.nombre || '';
-  });
 
   // Categoría del paquete
   categoriaNombre = computed(() => {
