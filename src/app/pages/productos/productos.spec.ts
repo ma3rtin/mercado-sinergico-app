@@ -46,7 +46,7 @@ describe('ProductosComponent', () => {
     id_paquete_publicado: 1,
     paqueteBaseId: 1,
     estadoId: 1,
-
+    zonaId: 1,
     fecha_inicio: new Date(),
     fecha_fin: new Date(),
     estado: { id_estado: 1, nombre: 'Activo' },
@@ -123,14 +123,14 @@ describe('ProductosComponent', () => {
       ordenamiento: '',
       rangoPrecio: { min: null, max: null },
       estados: [],
-
+      zonas: [],
     });
 
     const result = component.productosFiltrados();
     expect(result).toEqual([]);
   });
 
-  it('limpiarFiltros() elimina los filtros aunque el perfil tenga una zona histórica', () => {
+  it('limpiarFiltros() reaplica la zona del perfil del usuario si existe', () => {
     (mockUsuarioService.perfilUsuario as any).set({
       id: 1,
       email: 'test@test.com',
@@ -159,15 +159,13 @@ describe('ProductosComponent', () => {
       ordenamiento: '',
       rangoPrecio: { min: null, max: null },
       estados: [],
-
+      zonas: [999],
     });
 
     component.limpiarFiltros();
 
-    expect(component.filtrosActuales()).toBeNull();
-    component.productosOriginales.set([prodEnPaquete]);
-    component.paquetesActivos.set([mockPaqueteActivo]);
-    expect(component.productosFiltrados()).toEqual([prodEnPaquete]);
+    expect(component.filtrosActuales()).not.toBeNull();
+    expect(component.filtrosActuales()!.zonas).toEqual([1]);
   });
 
   it('limpiarFiltros() setea null si el perfil no tiene zona cargada', () => {
@@ -178,7 +176,7 @@ describe('ProductosComponent', () => {
       ordenamiento: '',
       rangoPrecio: { min: null, max: null },
       estados: [],
-
+      zonas: [],
     });
 
     component.limpiarFiltros();
