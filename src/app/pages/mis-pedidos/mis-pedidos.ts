@@ -17,6 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
+import { TipoPaquete } from '@app/models/Enums';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
@@ -460,6 +461,10 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  private esEnergico(pedido: Pedido): boolean {
+    return pedido.paquetePublicado?.tipo === TipoPaquete.ENERGICO;
+  }
+
   finalizarCompra(pedido: PedidoDelUsuario) {
     const pedidoId = pedido.id_pedido;
 
@@ -474,10 +479,7 @@ export class MisPedidosComponent implements OnInit {
       return;
     }
 
-    const tipoPaquete = String(pedido.paquetePublicado?.tipo || '').toUpperCase();
-    const esEnergico = tipoPaquete.includes('ENER');
-
-    if (esEnergico) {
+    if (this.esEnergico(pedido)) {
       this.pedidoService.confirmarReserva(pedidoId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
@@ -519,8 +521,7 @@ export class MisPedidosComponent implements OnInit {
     const pedidoId = pedido.id_pedido;
     if (!pedidoId) return;
 
-    const tipoPaquete = String(pedido.paquetePublicado?.tipo || '').toUpperCase();
-    const esEnergico = tipoPaquete.includes('ENER');
+    const esEnergico = this.esEnergico(pedido);
 
     const titulo = esEnergico ? '¿Cancelar reserva?' : '¿Solicitar reembolso?';
     const htmlMensaje = esEnergico

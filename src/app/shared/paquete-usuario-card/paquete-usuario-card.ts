@@ -156,8 +156,7 @@ export class PaqueteUsuarioCardComponent implements OnInit {
   }
 
   get esEnergico(): boolean {
-    const t = String(this.paquete?.tipo || '').toUpperCase();
-    return t.includes('ENER');
+    return this.paquete?.tipo === TipoPaquete.ENERGICO;
   }
 
   get puedeEditarCantidades(): boolean {
