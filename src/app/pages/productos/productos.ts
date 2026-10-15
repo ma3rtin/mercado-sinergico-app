@@ -396,8 +396,21 @@ export class ProductosComponent implements OnInit {
 
   // 🎯 APLICAR FILTROS
   aplicarFiltros(filtros: FiltrosAplicados): void {
+    // app-filtros reemite el estado que le llega por valoresActuales: si no
+    // cambió nada, navegar a la página 1 pisaría el page de un link compartido.
+    if (this.mismosFiltros(filtros, this.filtrosActuales())) return;
     this.filtrosActuales.set(filtros);
     this.actualizarUrl(1);
+  }
+
+  private mismosFiltros(a: FiltrosAplicados, b: FiltrosAplicados | null): boolean {
+    if (!b) return false;
+    const ids = (x: (string | number)[]) => [...x].map(String).sort().join(',');
+    return ids(a.categorias) === ids(b.categorias)
+      && ids(a.marcas) === ids(b.marcas)
+      && ids(a.zonas) === ids(b.zonas)
+      && a.rangoPrecio.min === b.rangoPrecio.min
+      && a.rangoPrecio.max === b.rangoPrecio.max;
   }
 
   // Al cambiar el orden desde el select

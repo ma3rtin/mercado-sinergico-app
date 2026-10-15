@@ -210,6 +210,31 @@ describe('ProductosComponent', () => {
     expect(component.filtrosActuales()?.zonas).toEqual([2]);
   });
 
+  it('el eco del panel con los filtros de la URL no vuelve a la página 1', () => {
+    component['isBrowser'] = true;
+    fixture.detectChanges();
+    queryParamsSubject.next({ page: '2', categorias: 'lacteos' });
+    mockRouter.navigate.mockClear();
+
+    // app-filtros reemite, tras el debounce, el estado que recibió por valoresActuales.
+    component.aplicarFiltros(structuredClone(component.filtrosActuales()!));
+
+    expect(mockRouter.navigate).not.toHaveBeenCalled();
+  });
+
+  it('un cambio real de filtros desde el panel vuelve a la página 1', () => {
+    component['isBrowser'] = true;
+    fixture.detectChanges();
+    queryParamsSubject.next({ page: '2', categorias: 'lacteos' });
+    mockRouter.navigate.mockClear();
+
+    component.aplicarFiltros({ ...component.filtrosActuales()!, categorias: [] });
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith([], expect.objectContaining({
+      queryParams: expect.objectContaining({ page: '1', categorias: null }),
+    }));
+  });
+
   it('cambiar "items por página" navega una sola vez', () => {
     component['isBrowser'] = true;
     fixture.detectChanges();
