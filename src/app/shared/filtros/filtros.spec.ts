@@ -106,7 +106,7 @@ describe('FiltrosComponent', () => {
     expect(limpiadoSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('valoresIniciales puebla el estado sin emitir filtrosAplicados de forma espuria antes de que el usuario interactúe', async () => {
+  it('valoresIniciales puebla el estado y emite la zona por defecto una sola vez, después del debounce', async () => {
     vi.useFakeTimers();
     fixture.componentRef.setInput('valoresIniciales', { zonas: [1] });
     fixture.detectChanges();
