@@ -269,6 +269,9 @@
             <div class="space-y-1">
               <p class="text-xs font-bold text-white/50 uppercase tracking-widest leading-none">Total estimado</p>
               <h2 class="text-2xl font-display font-bold leading-none">{{ formatPrice(pedido.total || pedido.subtotal) }}</h2>
+              @if (esEnergico) {
+                <p class="text-[10px] text-brand-cta font-medium">Pago contra entrega</p>
+              }
             </div>
             
             <div class="flex items-center gap-3">
@@ -278,10 +281,16 @@
                   <app-icon name="trash2" size="18" />
                 </button>
               }
+              @if (puedeReembolsar && esEnergico) {
+                <button (click)="onSolicitarReembolso(); closeModal()" 
+                  class="bg-error/20 text-error-light px-4 py-3 rounded-2xl font-bold text-xs border border-error/30 active:scale-95 transition-all">
+                  Cancelar reserva
+                </button>
+              }
               @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
                 <button (click)="onFinalizarCompra(); closeModal()" 
                   class="bg-brand-cta text-brand-secondary px-6 py-3 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition-all">
-                  Completar
+                  {{ labelBotonAccionMobile }}
                 </button>
               }
             </div>
@@ -420,11 +429,16 @@
             @if (pedido.estado?.nombre?.toLowerCase() === 'pendiente') {
               <app-button
                 variant="primary"
-                label="Completar compra"
+                [label]="labelBotonAccion"
                 [fullWidth]="true"
                 (buttonClick)="onFinalizarCompra()"
                 class="shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-transform">
               </app-button>
+              @if (esEnergico) {
+                <p class="text-[11px] text-text-secondary text-center -mt-1 font-medium">
+                  Abonás al recibir tu pedido (contra entrega).
+                </p>
+              }
             }
 
             @if (puedeReembolsar) {
@@ -433,7 +447,7 @@
                 [fullWidth]="true"
                 iconStart="refreshCcw"
                 (buttonClick)="onSolicitarReembolso()">
-                Solicitar reembolso
+                {{ labelBotonReembolso }}
               </app-button>
             }
 
