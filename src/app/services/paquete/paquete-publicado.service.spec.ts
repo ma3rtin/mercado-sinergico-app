@@ -118,7 +118,7 @@ describe('PaquetePublicadoService', () => {
           zonas: [4, 5],
           tiposPaquete: ['SINERGICO'],
           estados: ['por-cerrar'],
-          ordenamiento: 'recientes',
+          ordenamiento: 'mas-participantes',
         })
         .subscribe();
 
@@ -130,7 +130,7 @@ describe('PaquetePublicadoService', () => {
       expect(req.request.params.get('zonas')).toBe('4,5');
       expect(req.request.params.get('tiposPaquete')).toBe('SINERGICO');
       expect(req.request.params.get('estados')).toBe('por-cerrar');
-      expect(req.request.params.get('orden')).toBe('recientes');
+      expect(req.request.params.get('orden')).toBe('mas-participantes');
       req.flush([]);
     });
 
@@ -145,6 +145,16 @@ describe('PaquetePublicadoService', () => {
       expect(req.request.params.has('categorias')).toBe(false);
       expect(req.request.params.has('marcas')).toBe(false);
       expect(req.request.params.has('zonas')).toBe(false);
+      req.flush([]);
+    });
+
+    it('omite orden cuando no hay ordenamiento elegido', () => {
+      service.getPaquetesPaginados(1, 12, { ordenamiento: '' }).subscribe();
+
+      const req = httpMock.expectOne(
+        (r) => r.url === `${base}/paquetes-publicados`
+      );
+      expect(req.request.params.has('orden')).toBe(false);
       req.flush([]);
     });
 

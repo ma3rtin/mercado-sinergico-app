@@ -44,6 +44,14 @@ describe('obfuscator utilities', () => {
       expect(decodeId('not-a-base36-string-!!!')).toBe(0);
     });
 
+    it('should return 0 for a tampered code that never came from encodeId', () => {
+      // Alfanumérico válido, pero no es múltiplo de MAGIC_MULTIPLIER: antes se
+      // redondeaba al id vecino en vez de rechazarse.
+      const encoded = encodeId(45);
+      const alterado = encoded + '1';
+      expect(decodeId(alterado)).toBe(0);
+    });
+
     it('should return empty string when encoding invalid inputs', () => {
       expect(encodeId(NaN)).toBe('');
       expect(encodeId(0)).toBe('');

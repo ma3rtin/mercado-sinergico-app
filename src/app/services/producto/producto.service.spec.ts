@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ProductosService } from './producto.service';
-import { PaquetePublicadoService } from '../paquete/paquete-publicado.service';
 import { environment } from '@environments/environment';
 
 describe('ProductosService — parámetro de ordenamiento', () => {
@@ -28,18 +27,6 @@ describe('ProductosService — parámetro de ordenamiento', () => {
   });
 
   afterEach(() => httpMock.verify());
-
-  const ordenes = ['recientes', 'a-z', 'z-a', 'precio-asc', 'precio-desc', 'mas-stock'];
-
-  ordenes.forEach(orden => {
-    it(`manda orden=${orden} al backend`, () => {
-      service.getProductosPaginados(1, 12, { ...filtrosVacios, ordenamiento: orden }).subscribe();
-
-      const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
-      expect(req.request.params.get('orden')).toBe(orden);
-      req.flush([], { headers: { 'X-Total-Count': '0' } });
-    });
-  });
 
   it('omite el parámetro orden cuando no hay ordenamiento elegido', () => {
     service.getProductosPaginados(1, 12, filtrosVacios).subscribe();
@@ -67,35 +54,49 @@ describe('ProductosService — parámetro de ordenamiento', () => {
   });
 });
 
-describe('PaquetePublicadoService — parámetro de ordenamiento', () => {
-  let service: PaquetePublicadoService;
+describe('ProductosService — contrato con la API', () => {
+  let service: ProductosService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PaquetePublicadoService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [ProductosService, provideHttpClient(), provideHttpClientTesting()],
     });
-    service = TestBed.inject(PaquetePublicadoService);
+    service = TestBed.inject(ProductosService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => httpMock.verify());
 
-  ['recientes', 'a-z', 'z-a', 'mas-participantes'].forEach(orden => {
-    it(`manda orden=${orden} al backend`, () => {
-      service.getPaquetesPaginados(1, 12, { ordenamiento: orden }).subscribe();
+  it('parsea X-Total-Count como el total de la respuesta', () => {
+    let total: number | undefined;
+    service.getProductosPaginados(1, 12).subscribe((res) => (total = res.total));
 
-      const req = httpMock.expectOne(r => r.params.has('orden'));
-      expect(req.request.params.get('orden')).toBe(orden);
-      req.flush([], { headers: { 'X-Total-Count': '0' } });
-    });
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    req.flush([], { headers: { 'X-Total-Count': '37' } });
+
+    expect(total).toBe(37);
   });
 
-  it('omite orden cuando no hay ordenamiento elegido', () => {
-    service.getPaquetesPaginados(1, 12, { ordenamiento: '' }).subscribe();
+  it('el listado público no manda includeArchived', () => {
+    service.getProductosPaginados(1, 12).subscribe();
 
-    const req = httpMock.expectOne(r => r.params.get('page') === '1');
-    expect(req.request.params.has('orden')).toBe(false);
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    expect(req.request.params.has('includeArchived')).toBe(false);
     req.flush([], { headers: { 'X-Total-Count': '0' } });
+  });
+
+  it('normaliza id -> id_producto e imagen -> imagen_url, como los manda ProductoItemListaDTO', () => {
+    let productos: { id_producto?: number; imagen_url?: string }[] = [];
+    service.getProductosPaginados(1, 12).subscribe((res) => (productos = res.productos));
+
+    const req = httpMock.expectOne(r => r.url === `${environment.apiUrl}/productos`);
+    req.flush(
+      [{ id: 5, nombre: 'Producto', imagen: 'foto.jpg', precio: 100 }],
+      { headers: { 'X-Total-Count': '1' } }
+    );
+
+    expect(productos[0].id_producto).toBe(5);
+    expect(productos[0].imagen_url).toBe('foto.jpg');
   });
 });

@@ -54,12 +54,9 @@ export class ProductoCard {
   producto = input.required<Producto>();
   contexto = input<ProductoCardContexto>('productos');
   descuento = input<DescuentoProducto | null>(null);
-  mostrarDescripcion = input<boolean>(true);
-  longitudMaximaDescripcion = input<number>(120);
   tipoPaquete = input<string | null>(null);
   paqueteId = input<number | string | null>(null);
   navegacion = input<ProductoCardNavegacion>('detalle-seleccion');
-  tipoProducto = input<string | null>(null);
 
   // 📤 OUTPUTS
   cardClick = output<number>();
@@ -90,19 +87,6 @@ export class ProductoCard {
     return desc !== null && desc.porcentaje > 0;
   });
 
-  // Descripción truncada
-  descripcionTruncada = computed(() => {
-    const producto = this.producto();
-    if (!producto.descripcion || !this.mostrarDescripcion()) return '';
-
-    const maxLength = this.longitudMaximaDescripcion();
-    if (producto.descripcion.length <= maxLength) {
-      return producto.descripcion;
-    }
-
-    return producto.descripcion.substring(0, maxLength) + '...';
-  });
-
   // 🆕 CORREGIDO: Nombre de la categoría (maneja string u objeto)
   categoriaNombre = computed(() => {
     const categoria = this.producto().categoria;
@@ -122,12 +106,6 @@ export class ProductoCard {
   // Imagen URL con fallback
 imagenUrl = computed(() => {
   const producto = this.producto();
-
-  // Log para ver qué devuelve el backend
-  console.log('🖼️ Imagen del producto:', {
-    imagen_url: producto.imagen_url,
-    imagenes: producto.imagenes
-  });
 
   // Prioridad 1: imagen_url
   if (producto.imagen_url) return producto.imagen_url;
@@ -160,33 +138,6 @@ imagenUrl = computed(() => {
     return this.contexto() === 'productos' && (this.producto()?.cantPaquetes ?? 0) === 0;
   });
 
-  // Tiene stock disponible
-  tieneStock = computed(() => {
-    const stock = this.producto().stock;
-    return stock === null || stock === undefined || stock > 0;
-  });
-
-  // 🚀 COMPUTED: ¿DEBE MOSTRAR STOCK?
-  debeMostrarStock = computed(() => {
-    const tipo = this.tipoPaquete();
-    const stock = this.producto().stock;
-
-    if (!tipo) {
-      return stock !== null && stock !== undefined;
-    }
-
-    if (tipo === 'SINERGICO') {
-      return false;
-    }
-
-    if (tipo === 'ENERGICO') {
-      return stock !== null && stock !== undefined;
-    }
-
-    return stock !== null && stock !== undefined;
-  });
-
-
   constructor(private router: Router) {}
 
   // 🎯 MÉTODOS
@@ -199,20 +150,20 @@ imagenUrl = computed(() => {
       return;
     }
 
-    this.cardClick.emit(productoId);
-
-    // Producto sin paquetes activos: no hay detalle accionable, no navegar.
-    // (El detalle /producto/:slug sigue manejando el caso vacío por otras vías.)
+    // Producto sin paquetes activos: no hay detalle accionable, no navegar
+    // ni avisar. (El detalle /producto/:slug sigue manejando el caso vacío
+    // por otras vías.)
     if (this.sinPaquetes()) {
       return;
     }
+
+    this.cardClick.emit(productoId);
 
     const nav = this.navegacion();
 
     // ✅ TIPO 1: Ir a detalle-seleccion (usuario elige paquete)
     if (nav === 'detalle-seleccion') {
       const slugUrl = getProductSlugUrl(this.producto());
-      console.log('🧭 Navegando a detalle-seleccion:', slugUrl);
       this.router.navigate(['/producto', slugUrl]);
     }
     // ✅ TIPO 2: Ir a detalle-sumarse (usuario se suma a paquete)
@@ -223,11 +174,6 @@ imagenUrl = computed(() => {
         return;
       }
       const slugProducto = getProductSlugUrl(this.producto());
-      console.log('🧭 Navegando a detalle-sumarse:', {
-        paqueteId: paqId,
-        productoId: productoId,
-        url: `/paquete/${paqId}/producto/${slugProducto}`
-      });
       this.router.navigate(['/paquete', paqId, 'producto', slugProducto]);
     }
   }
@@ -250,41 +196,4 @@ imagenUrl = computed(() => {
     }
   }
 
-  // Obtener clase de stock
-  getStockClass(): string {
-    const stock = this.producto().stock;
-
-    if (stock === null || stock === undefined) {
-      return 'text-gray-500';
-    }
-
-    if (stock === 0) {
-      return 'text-error';
-    }
-
-    if (stock < 10) {
-      return 'text-warning';
-    }
-
-    return 'text-success';
-  }
-
-  // Obtener texto de stock
-  getStockTexto(): string {
-    const stock = this.producto().stock;
-
-    if (stock === null || stock === undefined) {
-      return 'Disponibilidad flexible';
-    }
-
-    if (stock === 0) {
-      return 'Agotado';
-    }
-
-    if (stock < 10) {
-      return `Pocas unidades (${stock})`;
-    }
-
-    return 'Disponible';
-  }
 }

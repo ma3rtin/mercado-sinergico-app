@@ -18,6 +18,7 @@ describe('FiltrosComponent', () => {
 
   beforeEach(async () => {
     emittedFilters = [];
+    vi.useFakeTimers();
 
     await TestBed.configureTestingModule({
       imports: [
@@ -34,7 +35,10 @@ describe('FiltrosComponent', () => {
     component.filtrosAplicados.subscribe(f => emittedFilters.push(f));
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Deja correr el debounce pendiente mientras el fixture sigue vivo: si se
+    // destruye antes, el emit tardío cae sobre un OutputRef ya destruido (NG0953).
+    await vi.runOnlyPendingTimersAsync();
     vi.useRealTimers();
     fixture.destroy();
   });
@@ -102,7 +106,7 @@ describe('FiltrosComponent', () => {
     expect(limpiadoSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('valoresIniciales puebla el estado sin emitir filtrosAplicados de forma espuria antes de que el usuario interactúe', async () => {
+  it('valoresIniciales puebla el estado y emite la zona por defecto una sola vez, después del debounce', async () => {
     vi.useFakeTimers();
     fixture.componentRef.setInput('valoresIniciales', { zonas: [1] });
     fixture.detectChanges();
@@ -111,6 +115,47 @@ describe('FiltrosComponent', () => {
     expect(component.zonasSeleccionadas()).toEqual([1]);
     expect(emittedFilters.length).toBe(1);
     expect(emittedFilters[0].zonas).toEqual([1]);
+  });
+
+  describe('valoresActuales', () => {
+    it('un nuevo valoresActuales reemplaza todo el estado, no sólo los campos presentes', () => {
+      fixture.componentRef.setInput('valoresActuales', {
+        categorias: [1],
+        marcas: [2],
+        zonas: [3],
+        rangoPrecio: { min: 100, max: 500 },
+      });
+      fixture.detectChanges();
+
+      expect(component.categoriasSeleccionadas()).toEqual([1]);
+      expect(component.marcasSeleccionadas()).toEqual([2]);
+      expect(component.zonasSeleccionadas()).toEqual([3]);
+      expect(component.precioMin()).toBe(100);
+      expect(component.precioMax()).toBe(500);
+
+      // La nueva entrada sólo trae zona: categoría, marca y precio anteriores
+      // tienen que desaparecer, no quedarse pegados del ciclo anterior.
+      fixture.componentRef.setInput('valoresActuales', { zonas: [3] });
+      fixture.detectChanges();
+
+      expect(component.categoriasSeleccionadas()).toEqual([]);
+      expect(component.marcasSeleccionadas()).toEqual([]);
+      expect(component.zonasSeleccionadas()).toEqual([3]);
+      expect(component.precioMin()).toBeNull();
+      expect(component.precioMax()).toBeNull();
+    });
+
+    it('un valoresActuales vacío limpia todo el estado anterior', () => {
+      fixture.componentRef.setInput('valoresActuales', { categorias: [1], marcas: [2] });
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput('valoresActuales', {});
+      fixture.detectChanges();
+
+      expect(component.categoriasSeleccionadas()).toEqual([]);
+      expect(component.marcasSeleccionadas()).toEqual([]);
+    });
+
   });
 
   it('rango de precio: cambiar min y max en el mismo ciclo de debounce emite un solo filtrosAplicados con ambos valores combinados', async () => {
@@ -177,6 +222,23 @@ describe('FiltrosComponent', () => {
       fixture.detectChanges();
       expect(component.puedeReiniciar()).toBe(false);
       expect(component.zonasSeleccionadas()).toEqual([7]);
+    });
+
+    it('con filtros que vienen de la URL (valoresActuales) está habilitado, y Reiniciar vuelve al valor por defecto', () => {
+      // El default es la zona del perfil; lo que "llega de la URL" trae además
+      // una categoría que el default no tiene.
+      fixture.componentRef.setInput('valoresIniciales', { zonas: [7] });
+      fixture.componentRef.setInput('valoresActuales', { zonas: [7], categorias: [1] });
+      fixture.detectChanges();
+
+      expect(component.puedeReiniciar()).toBe(true);
+
+      component.limpiarFiltros();
+      fixture.detectChanges();
+
+      expect(component.categoriasSeleccionadas()).toEqual([]);
+      expect(component.zonasSeleccionadas()).toEqual([7]);
+      expect(component.puedeReiniciar()).toBe(false);
     });
 
     it('ignora el orden de selección al comparar contra el estado inicial', () => {
