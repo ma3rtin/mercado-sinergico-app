@@ -37,8 +37,10 @@ export function encodeId(id: number): string {
 export function decodeId(encoded: string): number {
   if (!encoded || !/^[a-z0-9]+$/i.test(encoded)) return 0;
   const val = parseInt(encoded, 36);
-  if (isNaN(val)) return 0;
-  const decoded = Math.round(val / MAGIC_MULTIPLIER) - MAGIC_OFFSET;
+  // Todo lo que sale de encodeId es múltiplo de MAGIC_MULTIPLIER: un valor que
+  // no lo sea no vino de ahí, y redondearlo resolvería al id vecino.
+  if (isNaN(val) || val % MAGIC_MULTIPLIER !== 0) return 0;
+  const decoded = val / MAGIC_MULTIPLIER - MAGIC_OFFSET;
   return decoded > 0 ? decoded : 0;
 }
 

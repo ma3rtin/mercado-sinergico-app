@@ -1,9 +1,11 @@
 <!-- paquete-card.html -->
 <!-- Card con distinción de color lateral según tipo -->
 
-<article (click)="onCardClick()" class="group overflow-hidden bg-bg-surface rounded-2xl shadow-sm cursor-pointer
+<article (click)="onCardClick()" tabindex="0" role="button" [attr.aria-label]="paquete.nombre || paquete.paqueteBase?.nombre || 'Ver paquete'"
+         (keydown.enter)="onCardClick()" (keydown.space)="$event.preventDefault(); onCardClick()"
+         class="group overflow-hidden bg-bg-surface rounded-2xl shadow-sm cursor-pointer
          flex flex-col h-full w-full border-l-[5px]
-         hover:shadow-lg hover:scale-[1.02] relative hover:z-30" [ngClass]="getBorderColorClass()">
+         hover:shadow-lg hover:scale-[1.02] relative hover:z-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" [ngClass]="getBorderColorClass()">
 
   <!-- IMAGEN -->
   <div class="relative w-full bg-bg-app overflow-hidden rounded-tl-[11px] rounded-tr-2xl" 

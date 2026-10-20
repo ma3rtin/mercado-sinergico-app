@@ -118,7 +118,6 @@ export class ProductosService extends ApiService {
   getProductoDetalle(id: number): Observable<ProductoDetalleDTO> {
     return this.get<any>(`productos/${id}`).pipe(
       map(res => {
-        console.log('📦 RAW getProductoDetalle:', res);
         // El backend puede devolver { producto: {...} } o el objeto directo
         if (res?.producto) {
           return {

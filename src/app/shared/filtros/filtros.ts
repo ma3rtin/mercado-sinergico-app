@@ -78,7 +78,19 @@ export class FiltrosComponent {
   // 🎯 SIGNAL INPUTS
   config = input.required<ConfigFiltros>();
   titulo = input<string>('Filtros');
+  // Valor por defecto (ej: zona del perfil). Sólo se usa para "Reiniciar" y,
+  // cuando nadie pasa valoresActuales, para poblar el estado inicial.
   valoresIniciales = input<Partial<FiltrosAplicados>>();
+  // Estado actual (ej: el que sale de la URL). Cuando se pasa, reemplaza
+  // *todo* el estado interno en cada cambio; valoresIniciales deja de tocarlo.
+  valoresActuales = input<Partial<FiltrosAplicados>>();
+
+  // Catálogos ya cargados por el padre. Si se pasan, evitan que el filtro
+  // vuelva a pedirlos por su cuenta (ej: productos.ts ya los tiene para
+  // resolver los slugs de la URL).
+  categoriasCargadas = input<OpcionFiltro[]>();
+  marcasCargadas = input<OpcionFiltro[]>();
+  zonasCargadas = input<OpcionFiltro[]>();
 
   // 📤 OUTPUTS
   filtrosAplicados = output<FiltrosAplicados>();
@@ -227,6 +239,39 @@ export class FiltrosComponent {
     });
 
     effect(() => {
+      const categorias = this.categoriasCargadas();
+      if (categorias) this.categorias.set(categorias);
+    });
+
+    effect(() => {
+      const marcas = this.marcasCargadas();
+      if (marcas) this.marcas.set(marcas);
+    });
+
+    effect(() => {
+      const zonas = this.zonasCargadas();
+      if (zonas) this.zonas.set(zonas);
+    });
+
+    effect(() => {
+      const actuales = this.valoresActuales();
+
+      if (actuales) {
+        // Reemplaza todo el estado: un campo ausente en la URL significa
+        // "sin filtro", no "dejar lo que había" (si no, sobrevive selección vieja).
+        this.categoriasSeleccionadas.set(actuales.categorias ?? []);
+        this.marcasSeleccionadas.set(actuales.marcas ?? []);
+        this.zonasSeleccionadas.set(actuales.zonas ?? []);
+        this.tiposPaqueteSeleccionados.set(actuales.tiposPaquete ?? []);
+        this.estadosSeleccionados.set(actuales.estados ?? []);
+        this.ordenSeleccionado.set(actuales.ordenamiento ?? '');
+        this.precioMin.set(actuales.rangoPrecio?.min ?? null);
+        this.precioMax.set(actuales.rangoPrecio?.max ?? null);
+        return;
+      }
+
+      // Sin valoresActuales: comportamiento previo. Sólo puebla campos presentes,
+      // para consumidores que no sincronizan con la URL (ej. /paquetes).
       const init = this.valoresIniciales();
       if (init) {
         if (init.categorias) this.categoriasSeleccionadas.set(init.categorias);
@@ -266,7 +311,7 @@ export class FiltrosComponent {
     this.error.set(null);
 
     try {
-      if (cfg.obtenerCategorias && cfg.mostrarCategoria) {
+      if (this.categoriasCargadas() === undefined && cfg.obtenerCategorias && cfg.mostrarCategoria) {
         cfg.obtenerCategorias().subscribe({
           next: (categorias: OpcionFiltro[]) => {
             this.categorias.set(categorias);
@@ -277,7 +322,7 @@ export class FiltrosComponent {
         });
       }
 
-      if (cfg.obtenerMarcas && cfg.mostrarMarca) {
+      if (this.marcasCargadas() === undefined && cfg.obtenerMarcas && cfg.mostrarMarca) {
         cfg.obtenerMarcas().subscribe({
           next: (marcas: OpcionFiltro[]) => {
             this.marcas.set(marcas);
@@ -288,7 +333,7 @@ export class FiltrosComponent {
         });
       }
 
-      if (cfg.obtenerZonas && cfg.mostrarZona) {
+      if (this.zonasCargadas() === undefined && cfg.obtenerZonas && cfg.mostrarZona) {
         cfg.obtenerZonas().subscribe({
           next: (zonas: OpcionFiltro[]) => {
             this.zonas.set(zonas);
