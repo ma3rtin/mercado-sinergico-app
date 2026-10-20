@@ -211,6 +211,14 @@
                 [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 6 ? 'bg-success-light text-success border-success/30' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
                 Recibido
               </button>
+              <button (click)="filtrEstadoPedido.set(7)"
+                [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 7 ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                Reservado
+              </button>
+              <button (click)="filtrEstadoPedido.set(8)"
+                [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ' + (filtrEstadoPedido() === 8 ? 'bg-error-light text-error border-error-light' : 'bg-bg-surface text-text-secondary border-border-default hover:bg-bg-app')">
+                Cancelado
+              </button>
             </div>
           </div>
           }
@@ -318,7 +326,7 @@
                 </p>
                 <app-button variant="danger" [fullWidth]="true" size="sm" iconStart="x"
                   (buttonClick)="cancelarPaquete()">
-                  Cancelar y reembolsar
+                  {{ isEnergico() ? 'Cancelar paquete' : 'Cancelar y reembolsar' }}
                 </app-button>
               </div>
             </div>
@@ -359,7 +367,7 @@
                 </p>
                 <app-button variant="danger" [fullWidth]="true" size="md" iconStart="x"
                   (buttonClick)="cancelarPaquete()">
-                  Cancelar y reembolsar
+                  {{ isEnergico() ? 'Cancelar paquete' : 'Cancelar y reembolsar' }}
                 </app-button>
               </div>
             </div>

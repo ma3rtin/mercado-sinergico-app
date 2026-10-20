@@ -62,10 +62,10 @@ export class TipoPaqueteBadgeComponent {
   description = computed(() => {
     const t = this.tipoSafe();
     if (t === TipoPaquete.SINERGICO) {
-      return 'Comprá en conjunto con otros usuarios para obtener mejores precios por volumen.';
+      return 'Compra comunitaria por volumen. Pagás mediante Mercado Pago con reembolso automático si el paquete no completa su meta.';
     }
     if (t === TipoPaquete.ENERGICO) {
-      return 'Compra rápida individual con beneficios y envío prioritario.';
+      return 'Productos con stock físico. Reserva inmediata sin cobro digital anticipado; abonás contra entrega al recibir el pedido.';
     }
     return 'Paquete estándar.';
   });

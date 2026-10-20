@@ -17,6 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 // Models
 import { Pedido } from '@app/models/PedidosInterfaces/Pedido';
 import { ProductoEnPedido } from '@app/models/PedidosInterfaces/ProductoEnPedido';
+import { TipoPaquete } from '@app/models/Enums';
 
 // Services
 import { PedidoService } from '@app/services/pedido/pedido.service';
@@ -460,6 +461,10 @@ export class MisPedidosComponent implements OnInit {
     });
   }
 
+  private esEnergico(pedido: Pedido): boolean {
+    return pedido.paquetePublicado?.tipo === TipoPaquete.ENERGICO;
+  }
+
   finalizarCompra(pedido: PedidoDelUsuario) {
     const pedidoId = pedido.id_pedido;
 
@@ -471,6 +476,21 @@ export class MisPedidosComponent implements OnInit {
     const estadoActual = pedido.estado?.nombre?.toLowerCase();
     if (estadoActual !== 'pendiente') {
       this.toast.error('Este pedido ya fue procesado y no puede volver a pagarse.');
+      return;
+    }
+
+    if (this.esEnergico(pedido)) {
+      this.pedidoService.confirmarReserva(pedidoId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.toast.success('¡Reserva confirmada! Tus productos están asegurados. Pagás al recibir la entrega.', '¡Listo!');
+            this.cargarPedidos();
+          },
+          error: (err) => {
+            this.toast.error(this.extractErrorMsg(err, 'No se pudo confirmar la reserva. Intentá nuevamente.'));
+          }
+        });
       return;
     }
 
@@ -501,13 +521,25 @@ export class MisPedidosComponent implements OnInit {
     const pedidoId = pedido.id_pedido;
     if (!pedidoId) return;
 
+    const esEnergico = this.esEnergico(pedido);
+
+    const titulo = esEnergico ? '¿Cancelar reserva?' : '¿Solicitar reembolso?';
+    const htmlMensaje = esEnergico
+      ? `<p>¿Seguro que querés cancelar tu reserva en <strong>${pedido.paquetePublicado?.paqueteBase?.nombre ?? 'este paquete'}</strong>?</p>
+         <p class="text-sm text-gray-500 mt-2">Los productos reservados serán liberados para otros compradores. No se te cobrará ningún cargo.</p>`
+      : `<p>¿Seguro que querés pedir el reembolso de tu pedido en <strong>${pedido.paquetePublicado?.paqueteBase?.nombre ?? 'este paquete'}</strong>?</p>
+         <p class="text-sm text-gray-500 mt-2">Si se aprueba, se devolverá el dinero a tu cuenta de Mercado Pago.</p>`;
+    const btnTexto = esEnergico ? 'Sí, cancelar reserva' : 'Sí, pedir reembolso';
+    const toastSuccessMsg = esEnergico
+      ? 'Reserva cancelada correctamente.'
+      : 'Reembolso solicitado correctamente. Recibirás un email de confirmación.';
+
     Swal.fire({
-      title: '¿Solicitar reembolso?',
-      html: `<p>¿Seguro que querés pedir el reembolso de tu pedido en <strong>${pedido.paquetePublicado?.paqueteBase?.nombre ?? 'este paquete'}</strong>?</p>
-             <p class="text-sm text-gray-500 mt-2">Si se aprueba, se devolverá el dinero a tu cuenta de Mercado Pago.</p>`,
+      title: titulo,
+      html: htmlMensaje,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Sí, pedir reembolso',
+      confirmButtonText: btnTexto,
       confirmButtonColor: 'var(--error)',
       cancelButtonText: 'Cancelar'
     }).then(result => {
@@ -517,11 +549,14 @@ export class MisPedidosComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
-            this.toast.success('Reembolso solicitado correctamente. Recibirás un email de confirmación.', '¡Listo!');
+            this.toast.success(toastSuccessMsg, '¡Listo!');
             this.cargarPedidos();
           },
-          error: () => {
-            this.toast.error('No se pudo procesar el reembolso. Intentá más tarde.');
+          error: (err) => {
+            const defaultErr = esEnergico
+              ? 'No se pudo cancelar la reserva. Intentá más tarde.'
+              : 'No se pudo procesar el reembolso. Intentá más tarde.';
+            this.toast.error(this.extractErrorMsg(err, defaultErr));
           }
         });
     });
